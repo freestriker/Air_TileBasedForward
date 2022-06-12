@@ -16,6 +16,7 @@
     <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">10.0.19041.0</WindowsTargetPlatformVersion>
     <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0.19041.0</WindowsTargetPlatformVersion>
     <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
+    <ProjectName>AirEngine</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
@@ -60,8 +61,8 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ClCompile>
-      <PreprocessorDefinitions>_USE_GRAPHIC_DEBUG;%(PreprocessorDefinitions);RTTR_DLL</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(MY_VULKAN_PATH)\Include;$(MY_GLM_PATH)\;$(MY_GLFW_PATH)\include;..\ThirdParty\rttr\include;..\ThirdParty\assimp\include;..\ThirdParty\FreeImage\include;..\ThirdParty\NlohmannJson\include;..\Air_TileBasedForward\header;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_DEBUG;_USE_GRAPHIC_DEBUG;%(PreprocessorDefinitions);RTTR_DLL</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(MY_VULKAN_PATH)\Include;$(MY_GLM_PATH)\;$(MY_GLFW_PATH)\include;..\ThirdParty\rttr\include;..\ThirdParty\assimp\include;..\ThirdParty\FreeImage\include;..\ThirdParty\NlohmannJson\include;..\AirEngine\header;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -71,7 +72,7 @@
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(MY_VULKAN_PATH)\Lib;$(MY_GLFW_PATH)\lib-vc2022;..\ThirdParty\rttr\debug\lib;..\ThirdParty\assimp\debug\lib;..\ThirdParty\FreeImage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>vulkan-1.lib;glfw3.lib;rttr_core_d.lib;assimp-vc143-mtd.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -80,7 +81,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
     <ClCompile>
       <PreprocessorDefinitions>_USE_GRAPHIC_DEBUG;%(PreprocessorDefinitions);RTTR_DLL</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(MY_VULKAN_PATH)\Include;$(MY_GLM_PATH)\;$(MY_GLFW_PATH)\include;..\ThirdParty\rttr\include;..\ThirdParty\glm\include;..\ThirdParty\assimp\include;..\ThirdParty\FreeImage\include;..\ThirdParty\NlohmannJson\include;..\Air_TileBasedForward\header;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MY_VULKAN_PATH)\Include;$(MY_GLM_PATH)\;$(MY_GLFW_PATH)\include;..\ThirdParty\rttr\include;..\ThirdParty\glm\include;..\ThirdParty\assimp\include;..\ThirdParty\FreeImage\include;..\ThirdParty\NlohmannJson\include;..\AirEngine\header;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -99,6 +100,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="source\Core\IO\CoreObject\Thread.cpp" />
+    <ClCompile Include="source\Core\Logic\CoreObject\Thread.cpp" />
+    <ClCompile Include="source\Utils\Condition.cpp" />
+    <ClCompile Include="source\Utils\ThreadBase.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="header\Core\IO\CoreObject\Thread.h" />
+    <ClInclude Include="header\Core\Logic\CoreObject\Thread.h" />
+    <ClInclude Include="header\Utils\Condition.h" />
+    <ClInclude Include="header\Utils\ThreadBase.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

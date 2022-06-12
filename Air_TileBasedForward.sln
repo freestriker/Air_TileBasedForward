@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.2.32519.379
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Air_TileBasedForward", "Air_TileBasedForward\Air_TileBasedForward.vcxproj", "{3D4FFC49-EB11-4269-A898-1C2FE062CDF2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AirEngine", "AirEngine\AirEngine.vcxproj", "{3D4FFC49-EB11-4269-A898-1C2FE062CDF2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
