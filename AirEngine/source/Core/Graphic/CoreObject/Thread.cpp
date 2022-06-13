@@ -1,76 +1,71 @@
 #include "Core/Graphic/CoreObject/Thread.h"
+#include <QDebug>
 
-AirEngine::Core::Graphic::CoreObject::Thread::VulkanWindow* AirEngine::Core::Graphic::CoreObject::Thread::_window = nullptr;
-AirEngine::Core::Graphic::CoreObject::Thread::VulkanWindowRenderer* AirEngine::Core::Graphic::CoreObject::Thread::_windowRenderer = nullptr;
-QVulkanInstance* AirEngine::Core::Graphic::CoreObject::Thread::_vulkanInstance = nullptr;
+AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread AirEngine::Core::Graphic::CoreObject::Thread::_graphicThread = AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread();
 
-QVulkanWindowRenderer* AirEngine::Core::Graphic::CoreObject::Thread::VulkanWindow::createRenderer()
+AirEngine::Core::Graphic::CoreObject::Thread::Thread()
 {
-    _windowRenderer = new VulkanWindowRenderer(this);
-    return _windowRenderer;
 }
 
-AirEngine::Core::Graphic::CoreObject::Thread::VulkanWindowRenderer::VulkanWindowRenderer(QVulkanWindow* window)
+AirEngine::Core::Graphic::CoreObject::Thread::~Thread()
 {
-    window->setSampleCount(1);
 }
 
-void AirEngine::Core::Graphic::CoreObject::Thread::VulkanWindowRenderer::initResources()
-{
-    qDebug("AirEngine::Core::Graphic::CoreObject::Thread::VulkanWindowRenderer::initResources()");
-}
-
-void AirEngine::Core::Graphic::CoreObject::Thread::VulkanWindowRenderer::initSwapChainResources()
-{
-    qDebug("AirEngine::Core::Graphic::CoreObject::Thread::VulkanWindowRenderer::initSwapChainResources()");
-}
-
-void AirEngine::Core::Graphic::CoreObject::Thread::VulkanWindowRenderer::releaseSwapChainResources()
-{
-    qDebug("AirEngine::Core::Graphic::CoreObject::Thread::VulkanWindowRenderer::releaseSwapChainResources()");
-}
-
-void AirEngine::Core::Graphic::CoreObject::Thread::VulkanWindowRenderer::releaseResources()
-{
-    qDebug("AirEngine::Core::Graphic::CoreObject::Thread::VulkanWindowRenderer::releaseResources()");
-}
-
-void AirEngine::Core::Graphic::CoreObject::Thread::VulkanWindowRenderer::startNextFrame()
-{
-    qDebug("AirEngine::Core::Graphic::CoreObject::Thread::VulkanWindowRenderer::startNextFrame()");
-    _window->frameReady();
-    _window->requestUpdate();
-}
 void AirEngine::Core::Graphic::CoreObject::Thread::Init()
 {
-
+	_graphicThread.Init();
 }
+
 void AirEngine::Core::Graphic::CoreObject::Thread::Start()
 {
-    QLoggingCategory::setFilterRules(QStringLiteral("qt.vulkan=true"));
-
-    _vulkanInstance = new QVulkanInstance();
-
-    _vulkanInstance->setLayers(QByteArrayList()
-        << "VK_LAYER_GOOGLE_threading"
-        << "VK_LAYER_LUNARG_parameter_validation"
-        << "VK_LAYER_LUNARG_object_tracker"
-        << "VK_LAYER_LUNARG_core_validation"
-        << "VK_LAYER_LUNARG_image"
-        << "VK_LAYER_LUNARG_swapchain"
-        << "VK_LAYER_GOOGLE_unique_objects");
-
-    if (!_vulkanInstance->create())
-        qFatal("Failed to create Vulkan instance: %d", _vulkanInstance->errorCode());
-
-    _window = new VulkanWindow();
-    _window->setVulkanInstance(_vulkanInstance);
-
-    _window->resize(1024, 768);
-    _window->show();
-
+	_graphicThread.Start();
 }
+
 void AirEngine::Core::Graphic::CoreObject::Thread::End()
 {
+	_graphicThread.End();
+}
 
+void AirEngine::Core::Graphic::CoreObject::Thread::WaitForStartFinish()
+{
+	_graphicThread.WaitForStartFinish();
+}
+
+AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::GraphicThread()
+	: _stopped(true)
+{
+}
+
+AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::~GraphicThread()
+{
+}
+
+void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::Init()
+{
+	qDebug() << "AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::Init()";;
+}
+
+void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnStart()
+{
+	_stopped = false;
+	qDebug() << "AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnStart()";;
+}
+
+void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnThreadStart()
+{
+	qDebug() << "AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnThreadStart()";;
+}
+
+void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
+{
+	while (!_stopped)
+	{
+		qDebug() << "AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()";;
+		std::this_thread::yield();
+	}
+}
+
+void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnEnd()
+{
+	qDebug() << "AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnEnd()";;
 }

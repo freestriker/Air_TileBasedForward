@@ -1,7 +1,7 @@
 #pragma once
 #include <Utils/ThreadBase.h>
-#include <qvulkanwindow.h>
-#include "qloggingcategory.h"
+#include <mutex>
+#include <vector>
 
 namespace AirEngine
 {
@@ -11,33 +11,31 @@ namespace AirEngine
 		{
 			namespace CoreObject
 			{
-				class Thread final/* : public AirEngine::Utils::ThreadBase*/
+				class Thread final
 				{
-				public:
-					class VulkanWindow : public QVulkanWindow
+				private:
+					class GraphicThread final : public AirEngine::Utils::ThreadBase
 					{
 					public:
-						QVulkanWindowRenderer* createRenderer() override;
+						bool _stopped;
+
+						GraphicThread();
+						~GraphicThread();
+						void Init()override;
+						void OnStart() override;
+						void OnThreadStart() override;
+						void OnRun() override;
+						void OnEnd() override;
 					};
-                    class VulkanWindowRenderer : public QVulkanWindowRenderer
-                    {
-                    public:
-						VulkanWindowRenderer(QVulkanWindow* w);
-
-						void initResources() override;
-                        void initSwapChainResources() override;
-                        void releaseSwapChainResources() override;
-                        void releaseResources() override;
-
-                        void startNextFrame() override;
-
-                    };
-					static QVulkanInstance* _vulkanInstance;
-					static VulkanWindow* _window;
-					static VulkanWindowRenderer* _windowRenderer;
+				private:
+					static GraphicThread _graphicThread;
+					Thread();
+					~Thread();
+				public:
 					static void Init();
 					static void Start();
 					static void End();
+					static void WaitForStartFinish();
 				};
 			}
 		}
