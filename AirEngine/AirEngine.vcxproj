@@ -101,6 +101,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="source\Core\Graphic\CoreObject\Thread.cpp" />
+    <ClCompile Include="source\Core\Graphic\CoreObject\VulkanInstance.cpp" />
     <ClCompile Include="source\Core\Graphic\CoreObject\Window.cpp" />
     <ClCompile Include="source\Core\IO\CoreObject\Thread.cpp" />
     <ClCompile Include="source\Core\Logic\CoreObject\Thread.cpp" />
@@ -109,6 +110,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="header\Core\Graphic\CoreObject\Thread.h" />
+    <ClInclude Include="header\Core\Graphic\CoreObject\VulkanInstance.h" />
     <ClInclude Include="header\Core\Graphic\CoreObject\Window.h" />
     <ClInclude Include="header\Core\IO\CoreObject\Thread.h" />
     <ClInclude Include="header\Core\Logic\CoreObject\Thread.h" />

@@ -1,5 +1,10 @@
 #include "Core/Graphic/CoreObject/Window.h"
-
+#include <vulkan/vulkan_core.h>
+#include <string>
+#include <vector>
+#include "Core/Logic/CoreObject/Thread.h"
+#include "Core/IO/CoreObject/Thread.h"
+#include "Core/Graphic/CoreObject/Thread.h"
 AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow* AirEngine::Core::Graphic::CoreObject::Window::_window = nullptr;
 AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer* AirEngine::Core::Graphic::CoreObject::Window::_windowRenderer = nullptr;
 QVulkanInstance* AirEngine::Core::Graphic::CoreObject::Window::_vulkanInstance = nullptr;
@@ -18,6 +23,13 @@ AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::VulkanWindow
 void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::initResources()
 {
     qDebug("AirEngine::Core::Graphic::CoreObject::Thread::VulkanWindowRenderer::initResources()");
+    AirEngine::Core::Graphic::CoreObject::Thread::Init();
+    AirEngine::Core::Logic::CoreObject::Thread::Init();
+    AirEngine::Core::IO::CoreObject::Thread::Init();
+
+    AirEngine::Core::Graphic::CoreObject::Thread::Start();
+    AirEngine::Core::Logic::CoreObject::Thread::Start();
+    AirEngine::Core::IO::CoreObject::Thread::Start();
 }
 
 void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::initSwapChainResources()
@@ -60,13 +72,18 @@ void AirEngine::Core::Graphic::CoreObject::Window::Start()
         << "VK_LAYER_LUNARG_image"
         << "VK_LAYER_LUNARG_swapchain"
         << "VK_LAYER_GOOGLE_unique_objects");
-
     if (!_vulkanInstance->create())
         qFatal("Failed to create Vulkan instance: %d", _vulkanInstance->errorCode());
 
     _window = new VulkanWindow();
     _window->setVulkanInstance(_vulkanInstance);
-
+    auto queuePrioritieMapPtr = new std::map<uint32_t, std::vector<float>>();
+    _window->setQueueCreateInfoModifier([](const VkQueueFamilyProperties* properties, uint32_t queueFamilyCount, QList<VkDeviceQueueCreateInfo>& infos)->void
+    {
+        auto p = new std::vector<float>({0, 0, 0, 0});
+        infos[0].queueCount = 4;
+        infos[0].pQueuePriorities = p->data();
+    });
     _window->resize(1024, 768);
     _window->show();
 
