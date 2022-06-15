@@ -12,12 +12,18 @@ namespace AirEngine
 	{
 		namespace Graphic
 		{
+			namespace Manager
+			{
+				class MemoryManager;
+			}
 			namespace CoreObject
 			{
 				class Thread;
+				class VulkanInstance;
 				struct Queue
 				{
 					friend class Thread;
+					friend class VulkanInstance;
 					uint32_t queueFamilyIndex;
 					VkQueue queue;
 					std::mutex mutex;
@@ -35,7 +41,10 @@ namespace AirEngine
 					static VkPhysicalDevice _vkPhysicalDevice;
 					static QVulkanDeviceFunctions* _qDeviceFunctions;
 					static VkDevice _vkDevice;
+
+					static  Manager::MemoryManager* _memoryManager;
 					VulkanInstance();
+					static void Init();
 				public:
 					static const Queue* GetQueue(std::string name);
 					static QVulkanInstance* QVulkanInstance_();
@@ -43,6 +52,8 @@ namespace AirEngine
 					static VkPhysicalDevice VulkanPhysicalDevice_();
 					static QVulkanDeviceFunctions* VulkanDeviceFunctions_();
 					static VkDevice VulkanDevice_();
+
+					static Manager::MemoryManager& MemoryManager();
 				};
 			}
 		}
