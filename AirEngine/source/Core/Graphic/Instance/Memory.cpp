@@ -34,7 +34,7 @@ std::mutex* AirEngine::Core::Graphic::Instance::Memory::Mutex()
 
 VkDeviceSize AirEngine::Core::Graphic::Instance::Memory::Offset()
 {
-	return 0;
+	return _offset;
 }
 
 VkDeviceSize AirEngine::Core::Graphic::Instance::Memory::Size()

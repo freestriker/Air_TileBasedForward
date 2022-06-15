@@ -27,10 +27,6 @@ namespace AirEngine
 
 					Memory(uint32_t memoryTypeIndex, VkDeviceMemory memory, VkDeviceSize start, VkDeviceSize size, std::mutex* mutex, VkMemoryPropertyFlags property);
 					Memory(bool isExclusive, uint32_t memoryTypeIndex, VkDeviceMemory memory, VkDeviceSize start, VkDeviceSize size, std::mutex* mutex, VkMemoryPropertyFlags property);
-					Memory(const Memory&) = delete;
-					Memory& operator=(const Memory&) = delete;
-					Memory(Memory&&) = delete;
-					Memory& operator=(Memory&&) = delete;
 				public:
 					~Memory();
 					std::mutex* Mutex();

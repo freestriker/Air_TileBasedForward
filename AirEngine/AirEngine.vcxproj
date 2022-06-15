@@ -99,6 +99,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="header\Core\Graphic\Instance\Buffer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="source\Core\Graphic\CoreObject\Thread.cpp" />
     <ClCompile Include="source\Core\Graphic\CoreObject\VulkanInstance.cpp" />
@@ -115,6 +116,7 @@
     <ClInclude Include="header\Core\Graphic\CoreObject\Thread.h" />
     <ClInclude Include="header\Core\Graphic\CoreObject\VulkanInstance.h" />
     <ClInclude Include="header\Core\Graphic\CoreObject\Window.h" />
+    <ClInclude Include="header\Core\Graphic\Instance\Buffer.h" />
     <ClInclude Include="header\Core\Graphic\Instance\Memory.h" />
     <ClInclude Include="header\Core\Graphic\Manager\MemoryManager.h" />
     <ClInclude Include="header\Core\IO\CoreObject\Thread.h" />
