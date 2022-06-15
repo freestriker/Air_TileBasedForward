@@ -46,7 +46,7 @@ namespace AirEngine
 					VulkanInstance();
 					static void Init();
 				public:
-					static const Queue* GetQueue(std::string name);
+					static Queue* Queue_(std::string name);
 					static QVulkanInstance* QVulkanInstance_();
 					static VkInstance VulkanInstance_();
 					static VkPhysicalDevice VulkanPhysicalDevice_();

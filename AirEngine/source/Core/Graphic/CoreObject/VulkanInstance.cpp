@@ -11,7 +11,7 @@ VkDevice AirEngine::Core::Graphic::CoreObject::VulkanInstance::_vkDevice = VK_NU
 
 AirEngine::Core::Graphic::Manager::MemoryManager* AirEngine::Core::Graphic::CoreObject::VulkanInstance::_memoryManager = nullptr;
 
-const AirEngine::Core::Graphic::CoreObject::Queue* AirEngine::Core::Graphic::CoreObject::VulkanInstance::GetQueue(std::string name)
+AirEngine::Core::Graphic::CoreObject::Queue* AirEngine::Core::Graphic::CoreObject::VulkanInstance::Queue_(std::string name)
 {
     return _queues[name];
 }

@@ -101,6 +101,10 @@
   <ItemGroup>
     <ClCompile Include="header\Core\Graphic\Instance\Buffer.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="source\Core\Graphic\Command\CommandBuffer.cpp" />
+    <ClCompile Include="source\Core\Graphic\Command\CommandPool.cpp" />
+    <ClCompile Include="source\Core\Graphic\Command\Fence.cpp" />
+    <ClCompile Include="source\Core\Graphic\Command\Semaphore.cpp" />
     <ClCompile Include="source\Core\Graphic\CoreObject\Thread.cpp" />
     <ClCompile Include="source\Core\Graphic\CoreObject\VulkanInstance.cpp" />
     <ClCompile Include="source\Core\Graphic\CoreObject\Window.cpp" />
@@ -113,6 +117,10 @@
     <ClCompile Include="source\Utils\ThreadBase.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="header\Core\Graphic\Command\CommandBuffer.h" />
+    <ClInclude Include="header\Core\Graphic\Command\CommandPool.h" />
+    <ClInclude Include="header\Core\Graphic\Command\Fence.h" />
+    <ClInclude Include="header\Core\Graphic\Command\Semaphore.h" />
     <ClInclude Include="header\Core\Graphic\CoreObject\Thread.h" />
     <ClInclude Include="header\Core\Graphic\CoreObject\VulkanInstance.h" />
     <ClInclude Include="header\Core\Graphic\CoreObject\Window.h" />
