@@ -3,8 +3,19 @@
   <PropertyGroup>
     <ShowAllFiles>true</ShowAllFiles>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LocalDebuggerEnvironment>path=..\ThirdParty\rttr\debug\bin;..\ThirdParty\assimp\debug\bin;..\ThirdParty\FreeImage\bin;$(LocalDebuggerEnvironment);</LocalDebuggerEnvironment>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LocalDebuggerEnvironment>path=..\ThirdParty\rttr\release\bin;..\ThirdParty\assimp\release\bin;..\ThirdParty\FreeImage\bin;PATH=%PATH%;$(QtDllPath)
+$(LocalDebuggerEnvironment)
+    </LocalDebuggerEnvironment>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <QtLastBackgroundBuild>2022-06-12T12:55:07.6593462Z</QtLastBackgroundBuild>
+    <QtLastBackgroundBuild>2022-06-15T15:57:43.5345792Z</QtLastBackgroundBuild>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <QtLastBackgroundBuild>2022-06-12T12:55:08.0955040Z</QtLastBackgroundBuild>
