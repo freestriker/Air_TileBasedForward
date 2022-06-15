@@ -24,12 +24,15 @@ void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::initRes
 {
     qDebug("AirEngine::Core::Graphic::CoreObject::Thread::VulkanWindowRenderer::initResources()");
     AirEngine::Core::Graphic::CoreObject::Thread::Init();
-    AirEngine::Core::Logic::CoreObject::Thread::Init();
     AirEngine::Core::IO::CoreObject::Thread::Init();
+    AirEngine::Core::Logic::CoreObject::Thread::Init();
 
     AirEngine::Core::Graphic::CoreObject::Thread::Start();
-    AirEngine::Core::Logic::CoreObject::Thread::Start();
+    AirEngine::Core::Graphic::CoreObject::Thread::WaitForStartFinish();
     AirEngine::Core::IO::CoreObject::Thread::Start();
+    AirEngine::Core::IO::CoreObject::Thread::WaitForStartFinish();
+    AirEngine::Core::Logic::CoreObject::Thread::Start();
+    AirEngine::Core::Logic::CoreObject::Thread::WaitForStartFinish();
 }
 
 void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::initSwapChainResources()
