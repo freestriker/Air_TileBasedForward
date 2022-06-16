@@ -59,6 +59,11 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
   </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ClCompile>
       <PreprocessorDefinitions>_DEBUG;_USE_GRAPHIC_DEBUG;%(PreprocessorDefinitions);RTTR_DLL</PreprocessorDefinitions>
@@ -113,6 +118,7 @@
     <ClCompile Include="source\Core\Graphic\Manager\MemoryManager.cpp" />
     <ClCompile Include="source\Core\IO\Asset\AssetBase.cpp" />
     <ClCompile Include="source\Core\IO\CoreObject\Thread.cpp" />
+    <ClCompile Include="source\Core\IO\Manager\AssetManager.cpp" />
     <ClCompile Include="source\Core\Logic\CoreObject\Thread.cpp" />
     <ClCompile Include="source\Utils\Condition.cpp" />
     <ClCompile Include="source\Utils\Log.cpp" />
@@ -133,6 +139,7 @@
     <ClInclude Include="header\Core\Graphic\Manager\MemoryManager.h" />
     <ClInclude Include="header\Core\IO\Asset\AssetBase.h" />
     <ClInclude Include="header\Core\IO\CoreObject\Thread.h" />
+    <ClInclude Include="header\Core\IO\Manager\AssetManager.h" />
     <ClInclude Include="header\Core\Logic\CoreObject\Thread.h" />
     <ClInclude Include="header\Utils\Condition.h" />
     <ClInclude Include="header\Utils\Log.h" />

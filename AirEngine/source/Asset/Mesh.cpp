@@ -7,6 +7,12 @@
 #include "Core/Graphic/Command/Semaphore.h"
 #include <Utils/Log.h>
 #include "Utils/OrientedBoundingBox.h"
+#include <rttr/registration>
+
+RTTR_REGISTRATION
+{
+    rttr::registration::class_<AirEngine::Asset::Mesh>("AirEngine::Asset::Mesh");
+}
 
 void AirEngine::Asset::Mesh::OnLoad(Core::Graphic::Command::CommandBuffer* transferCommandBuffer)
 {
@@ -102,7 +108,7 @@ void AirEngine::Asset::Mesh::OnLoad(Core::Graphic::Command::CommandBuffer* trans
 }
 
 AirEngine::Asset::Mesh::Mesh()
-	: AssetBsse(true)
+	: AssetBase(true)
     , _orientedBoundingBox(nullptr)
     , _vertexBuffer(nullptr)
     , _indexBuffer(nullptr)
@@ -112,7 +118,7 @@ AirEngine::Asset::Mesh::Mesh()
 }
 
 AirEngine::Asset::Mesh::Mesh(Core::Graphic::Command::CommandBuffer* transferCommandBuffer, std::vector<VertexData> vertices, std::vector<uint32_t> indices)
-    : AssetBsse(false)
+    : AssetBase(false)
     , _orientedBoundingBox(nullptr)
     , _vertexBuffer(nullptr)
     , _indexBuffer(nullptr)

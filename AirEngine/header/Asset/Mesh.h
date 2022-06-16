@@ -2,6 +2,8 @@
 #include "Core/IO/Asset/AssetBase.h"
 #include <glm/glm.hpp>
 #include <vector>
+#include <rttr/type>
+
 namespace AirEngine
 {
 	namespace Utils
@@ -33,7 +35,7 @@ namespace AirEngine
 			glm::vec3 bitangent;
 		};
 
-		class Mesh final : public Core::IO::Asset::AssetBsse
+		class Mesh final : public Core::IO::Asset::AssetBase
 		{
 		private:
 			std::vector<VertexData> _vertices;
@@ -51,6 +53,8 @@ namespace AirEngine
 			std::vector<VertexData>& Vertices();
 			std::vector<uint32_t>& Indices();
 			Utils::OrientedBoundingBox& OrientedBoundingBox();
+
+			RTTR_ENABLE(AirEngine::Core::IO::Asset::AssetBase)
 		};
 	}
 }
