@@ -8,6 +8,8 @@ RTTR_REGISTRATION
 
 AirEngine::Core::IO::Asset::AssetBase::AssetBase(bool isLoaded)
 	: _isHeldByManager(isLoaded)
+	, _wrapper(nullptr)
+	, _path()
 {
 }
 

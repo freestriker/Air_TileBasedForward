@@ -20,6 +20,7 @@ namespace AirEngine
 			namespace Manager
 			{
 				class AssetManager;
+				class AssetWrapper;
 			}
 			namespace Asset
 			{
@@ -29,6 +30,7 @@ namespace AirEngine
 				private:
 					bool _isHeldByManager;
 					std::string _path;
+					Manager::AssetWrapper* _wrapper;
 				protected:
 					virtual void OnLoad(Graphic::Command::CommandBuffer* transferCommndBuffer) = 0;
 					AssetBase(bool isHeldByManager);

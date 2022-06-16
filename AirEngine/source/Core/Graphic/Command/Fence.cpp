@@ -1,5 +1,5 @@
 #include "Core/Graphic/Command/Fence.h"
-#include "Core/Graphic/CoreObject/VulkanInstance.h"
+#include "Core/Graphic/CoreObject/Instance.h"
 #include "Utils/Log.h"
 
 AirEngine::Core::Graphic::Command::Fence::Fence(VkFenceCreateFlags flag)
@@ -9,7 +9,7 @@ AirEngine::Core::Graphic::Command::Fence::Fence(VkFenceCreateFlags flag)
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = flag;
 
-    Utils::Log::Exception("Failed to create synchronization objects for a frame.", vkCreateFence(Graphic::CoreObject::VulkanInstance::VulkanDevice_(), &fenceInfo, nullptr, &_vkFence));
+    Utils::Log::Exception("Failed to create synchronization objects for a frame.", vkCreateFence(Graphic::CoreObject::Instance::VulkanDevice_(), &fenceInfo, nullptr, &_vkFence));
 }
 
 AirEngine::Core::Graphic::Command::Fence::Fence()
@@ -19,7 +19,7 @@ AirEngine::Core::Graphic::Command::Fence::Fence()
 
 AirEngine::Core::Graphic::Command::Fence::~Fence()
 {
-    vkDestroyFence(Graphic::CoreObject::VulkanInstance::VulkanDevice_(), _vkFence, nullptr);
+    vkDestroyFence(Graphic::CoreObject::Instance::VulkanDevice_(), _vkFence, nullptr);
 }
 
 VkFence AirEngine::Core::Graphic::Command::Fence::VkFence_()
@@ -29,10 +29,10 @@ VkFence AirEngine::Core::Graphic::Command::Fence::VkFence_()
 
 void AirEngine::Core::Graphic::Command::Fence::Reset()
 {
-    vkResetFences(Graphic::CoreObject::VulkanInstance::VulkanDevice_(), 1, &_vkFence);
+    vkResetFences(Graphic::CoreObject::Instance::VulkanDevice_(), 1, &_vkFence);
 }
 
 void AirEngine::Core::Graphic::Command::Fence::Wait()
 {
-    vkWaitForFences(Graphic::CoreObject::VulkanInstance::VulkanDevice_(), 1, &_vkFence, VK_TRUE, UINT64_MAX);
+    vkWaitForFences(Graphic::CoreObject::Instance::VulkanDevice_(), 1, &_vkFence, VK_TRUE, UINT64_MAX);
 }

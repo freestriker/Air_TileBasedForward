@@ -5,6 +5,9 @@
 #include <string>
 #include "Core/IO/CoreObject/Thread.h"
 #include "Core/IO/Asset/AssetBase.h"
+#include <functional>
+#include <string>
+#include <vector>
 
 namespace AirEngine
 {
@@ -14,23 +17,19 @@ namespace AirEngine
 		{
 			namespace Manager
 			{
+				struct AssetWrapper
+				{
+					std::string path;
+					Core::IO::Asset::AssetBase* asset;
+					uint32_t referenceCount;
+					std::mutex mutex;
+					bool isLoading;
+				};
+
 				class AssetManager final
 				{
 				private:
-					struct AssetWarp
-					{
-						std::string path;
-						Core::IO::Asset::AssetBase* asset;
-						uint32_t referenceCount;
-						std::mutex mutex;
-					};
-					struct AssetPool
-					{
-						rttr::type type;
-						std::mutex mutex;
-						std::map<std::string, AssetWarp*> assetWarps;
-					};
-					std::map<std::string, AssetPool*> _pools;
+					std::unordered_map<std::string, AssetWrapper*> _wrappers;
 					std::mutex _mutex;
 				public:
 					AssetManager();
@@ -41,81 +40,78 @@ namespace AirEngine
 					AssetManager& operator=(AssetManager&&) = delete;
 
 					template<typename TAsset>
-					TAsset* LoadAsset(std::string path);
+					std::future<TAsset*> LoadAsync(std::string path);
 					template<typename TAsset>
-					void UnloadAsset(TAsset*& asset);
+					TAsset* Load(std::string path);
+					void Unload(Asset::AssetBase*& asset);
+					void Unload(std::string path);
+					void Collect();
 				};
 
 				template<typename TAsset>
-				inline TAsset* AssetManager::LoadAsset(std::string path)
+				inline std::future<TAsset*> AssetManager::LoadAsync(std::string path)
 				{
-					rttr::type type = rttr::type::get<TAsset>();
-					std::string typeName = type.get_name().to_string();
+					std::unique_lock<std::mutex> managerLock(_mutex);
+
+					//Get target pool
+					AssetWrapper* targetWrapper = nullptr;
+					auto wrapperIter = _wrappers.find(path);
+					if (wrapperIter == std::end(_wrappers))
+					{
+						targetWrapper = new AssetWrapper();
+						targetWrapper->path = path;
+						targetWrapper->referenceCount = 0;
+						targetWrapper->asset = nullptr;
+						targetWrapper->isLoading = true;
+
+						_wrappers.emplace({ path, targetWrapper });
+					}
+					else
+					{
+						targetWrapper = wrapperIter->second;
+					}
+
 
 					{
-						//Get target pool
-						std::unique_lock<std::mutex> managerLock(_mutex);
-						auto poolIter = _pools.find(typeName);
-						AssetPool* targetPool = nullptr;
-						if (poolIter == std::end(_pools))
+						std::unique_lock<std::mutex> wrapperLock(targetWrapper->mutex);
+
+						//Check
+						targetWrapper->referenceCount++;
+						if (targetWrapper->asset)
 						{
-							targetPool = new AssetPool();
-							targetPool->type = type;
-							_pools.emplace({ typeName, targetPool });
+							return std::async([targetWrapper]()
+							{
+								while (targetWrapper->isLoading)
+								{
+									std::this_thread::yield();
+								}
+								return dynamic_cast<TAsset*>(targetWrapper->asset);
+							});
 						}
 						else
 						{
-							targetPool = poolIter->second;
-						}
+							Asset::AssetBase* asset = dynamic_cast<Asset::AssetBase*>(new TAsset());
+							targetWrapper->asset = asset;
+							asset->_wrapper = targetWrapper;
 
-						//Check pool
-						{
-							std::unique_lock<std::mutex> poolLock(targetPool->mutex);
-
-							auto assetIter = targetPool->assetWarps.find(path);
-							AssetWarp* targetWarp = nullptr;
-							if (assetIter == std::end(targetPool->assetWarps))
-							{
-								targetWarp = new AssetWarp();
-								targetWarp->path = path;
-								targetWarp->referenceCount = 0;
-								targetWarp->asset = nullptr;
-
-								targetPool->assetWarps.emplace({ path , targetWarp });
-							}
-							else
-							{
-								targetWarp = assetIter->second;
-							}
-
-							//load
-							{
-								std::unique_lock<std::mutex> warpLock(targetWarp->mutex);
-								TAsset*& targetAsset = targetWarp->asset;
-								targetWarp->referenceCount++;
-
-								if (targetAsset == nullptr)
+							std::future<Asset::AssetBase*> task = CoreObject::Thread::AddTask
+							(
+								[targetWrapper](Core::Graphic::Command::CommandBuffer* transferCommandBuffer)->TAsset*
 								{
-									targetAsset = new TAsset();
-									std::future<Asset::AssetBase*> task = CoreObject::Thread::AddTask([targetWarp](Core::Graphic::Command::CommandBuffer* transferCommandBuffer)->void {
-										std::unique_lock<std::mutex> warpLock(targetWarp->mutex);
-										Asset::AssetBase* assetBase = dynamic_cast<Asset::AssetBase*>(targetWarp);
-										assetBase->OnLoad(transferCommandBuffer);
-										return assetBase;
-									});
-									return dynamic_cast<TAsset*>(task.get());
+									Asset::AssetBase* assetBase = dynamic_cast<Asset::AssetBase*>(targetWrapper->asset);
+									assetBase->OnLoad(transferCommandBuffer);
+									targetWrapper->isLoading = false;
+									return assetBase;
 								}
-								else
-								{
-									return dynamic_cast<TAsset*>(targetAsset);
-								}
-							}
+							);
 						}
 					}
 				}
+
 				template<typename TAsset>
-				inline void AssetManager::UnloadAsset(TAsset*& asset)
+				inline TAsset* AssetManager::Load(std::string path)
 				{
+					return LoadAsync<TAsset>(path).get();
 				}
 			}
 		}

@@ -1,6 +1,6 @@
 #include "Core/Graphic/Command/CommandBuffer.h"
 #include "Core/Graphic/Command/CommandPool.h"
-#include "Core/Graphic/CoreObject/VulkanInstance.h"
+#include "Core/Graphic/CoreObject/Instance.h"
 #include "Utils/Log.h"
 #include "Core/Graphic/Instance/Buffer.h"
 #include "Core/Graphic/Command/Semaphore.h"
@@ -16,7 +16,7 @@ AirEngine::Core::Graphic::Command::CommandBuffer::CommandBuffer(std::string name
     fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-    Utils::Log::Exception("Failed to create synchronization objects for a command buffer.", vkCreateFence(Graphic::CoreObject::VulkanInstance::VulkanDevice_(), &fenceInfo, nullptr, &_vkFence));
+    Utils::Log::Exception("Failed to create synchronization objects for a command buffer.", vkCreateFence(Graphic::CoreObject::Instance::VulkanDevice_(), &fenceInfo, nullptr, &_vkFence));
 
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -24,18 +24,18 @@ AirEngine::Core::Graphic::Command::CommandBuffer::CommandBuffer(std::string name
     allocInfo.level = level;
     allocInfo.commandBufferCount = 1;
 
-    Utils::Log::Exception("Failed to allocate command buffers.", vkAllocateCommandBuffers(Graphic::CoreObject::VulkanInstance::VulkanDevice_(), &allocInfo, &_vkCommandBuffer));
+    Utils::Log::Exception("Failed to allocate command buffers.", vkAllocateCommandBuffers(Graphic::CoreObject::Instance::VulkanDevice_(), &allocInfo, &_vkCommandBuffer));
 
 }
 AirEngine::Core::Graphic::Command::CommandBuffer::~CommandBuffer()
 {
-    vkFreeCommandBuffers(Graphic::CoreObject::VulkanInstance::VulkanDevice_(), _parentCommandPool->_vkCommandPool, 1, &_vkCommandBuffer);
-    vkDestroyFence(Graphic::CoreObject::VulkanInstance::VulkanDevice_(), _vkFence, nullptr);
+    vkFreeCommandBuffers(Graphic::CoreObject::Instance::VulkanDevice_(), _parentCommandPool->_vkCommandPool, 1, &_vkCommandBuffer);
+    vkDestroyFence(Graphic::CoreObject::Instance::VulkanDevice_(), _vkFence, nullptr);
 }
 
 void AirEngine::Core::Graphic::Command::CommandBuffer::Reset()
 {
-    vkResetFences(Graphic::CoreObject::VulkanInstance::VulkanDevice_(), 1, &_vkFence);
+    vkResetFences(Graphic::CoreObject::Instance::VulkanDevice_(), 1, &_vkFence);
     vkResetCommandBuffer(_vkCommandBuffer, VkCommandBufferResetFlagBits::VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
 }
 
@@ -94,9 +94,9 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::Submit(std::vector<Comman
     submitInfo.pSignalSemaphores = signal.data();
 
     {
-        std::unique_lock<std::mutex> lock(CoreObject::VulkanInstance::Queue_(_parentCommandPool->_queueName)->mutex);
+        std::unique_lock<std::mutex> lock(CoreObject::Instance::Queue_(_parentCommandPool->_queueName)->mutex);
 
-        vkQueueSubmit(CoreObject::VulkanInstance::Queue_(_parentCommandPool->_queueName)->queue, 1, &submitInfo, _vkFence);
+        vkQueueSubmit(CoreObject::Instance::Queue_(_parentCommandPool->_queueName)->queue, 1, &submitInfo, _vkFence);
     }
 }
 
@@ -118,9 +118,9 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::Submit(std::vector<Comman
     submitInfo.pSignalSemaphores = signal.data();
 
     {
-        std::unique_lock<std::mutex> lock(CoreObject::VulkanInstance::Queue_(_parentCommandPool->_queueName)->mutex);
+        std::unique_lock<std::mutex> lock(CoreObject::Instance::Queue_(_parentCommandPool->_queueName)->mutex);
 
-        vkQueueSubmit(CoreObject::VulkanInstance::Queue_(_parentCommandPool->_queueName)->queue, 1, &submitInfo, _vkFence);
+        vkQueueSubmit(CoreObject::Instance::Queue_(_parentCommandPool->_queueName)->queue, 1, &submitInfo, _vkFence);
     }
 }
 
@@ -137,13 +137,13 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::Submit()
     submitInfo.pSignalSemaphores = nullptr;
 
     {
-        std::unique_lock<std::mutex> lock(CoreObject::VulkanInstance::Queue_(_parentCommandPool->_queueName)->mutex);
+        std::unique_lock<std::mutex> lock(CoreObject::Instance::Queue_(_parentCommandPool->_queueName)->mutex);
 
-        vkQueueSubmit(CoreObject::VulkanInstance::Queue_(_parentCommandPool->_queueName)->queue, 1, &submitInfo, _vkFence);
+        vkQueueSubmit(CoreObject::Instance::Queue_(_parentCommandPool->_queueName)->queue, 1, &submitInfo, _vkFence);
     }
 }
 
 void AirEngine::Core::Graphic::Command::CommandBuffer::WaitForFinish()
 {
-    vkWaitForFences(Graphic::CoreObject::VulkanInstance::VulkanDevice_(), 1, &_vkFence, VK_TRUE, UINT64_MAX);
+    vkWaitForFences(Graphic::CoreObject::Instance::VulkanDevice_(), 1, &_vkFence, VK_TRUE, UINT64_MAX);
 }

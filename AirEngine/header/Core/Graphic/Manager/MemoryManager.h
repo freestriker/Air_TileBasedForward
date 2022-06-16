@@ -12,7 +12,7 @@ namespace AirEngine
 			namespace CoreObject
 			{
 				class Thread;
-				class VulkanInstance;
+				class Instance;
 			}
 			namespace Instance
 			{
@@ -22,7 +22,7 @@ namespace AirEngine
 			{
 				class MemoryManager
 				{
-					friend class CoreObject::VulkanInstance;
+					friend class CoreObject::Instance;
 				private:
 					struct MemoryChunkUsage
 					{

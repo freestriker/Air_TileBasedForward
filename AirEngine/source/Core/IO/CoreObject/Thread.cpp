@@ -2,6 +2,8 @@
 #include <QDebug>
 #include "Core/Graphic/Command/CommandPool.h"
 #include "Core/Graphic/Command/CommandBuffer.h"
+#include "Core/IO/CoreObject/Instance.h"
+#include "Core/IO/Manager/AssetManager.h"
 
 AirEngine::Core::IO::CoreObject::Thread::IOThread AirEngine::Core::IO::CoreObject::Thread::_ioThread = AirEngine::Core::IO::CoreObject::Thread::IOThread();
 std::array<AirEngine::Core::IO::CoreObject::Thread::SubIOThread, 4> AirEngine::Core::IO::CoreObject::Thread::_subIOThreads = std::array<AirEngine::Core::IO::CoreObject::Thread::SubIOThread, 4>();
@@ -76,6 +78,7 @@ AirEngine::Core::IO::CoreObject::Thread::IOThread::~IOThread()
 void AirEngine::Core::IO::CoreObject::Thread::IOThread::Init()
 {
 	qDebug() << "AirEngine::Core::IO::CoreObject::Thread::IOThread::Init()";
+	Instance::Init();
 }
 
 void AirEngine::Core::IO::CoreObject::Thread::IOThread::OnStart()
@@ -93,9 +96,10 @@ void AirEngine::Core::IO::CoreObject::Thread::IOThread::OnRun()
 	while (!_stopped)
 	{
 		qDebug() << "AirEngine::Core::IO::CoreObject::Thread::IOThread::OnRun()";
-		std::this_thread::yield();
+		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+		Instance::AssetManager().Collect();
 	}
-	//clear assets
+	Instance::AssetManager().Collect();
 }
 
 void AirEngine::Core::IO::CoreObject::Thread::IOThread::OnEnd()

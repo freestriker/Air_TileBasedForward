@@ -19,11 +19,11 @@ namespace AirEngine
 			namespace CoreObject
 			{
 				class Thread;
-				class VulkanInstance;
+				class Instance;
 				struct Queue
 				{
 					friend class Thread;
-					friend class VulkanInstance;
+					friend class Instance;
 					uint32_t queueFamilyIndex;
 					VkQueue queue;
 					std::mutex mutex;
@@ -31,7 +31,7 @@ namespace AirEngine
 				private:
 					Queue(std::string name, uint32_t queueFamilyIndex, VkQueue queue);
 				};
-				class VulkanInstance final
+				class Instance final
 				{
 					friend class Thread;
 				private:
@@ -43,7 +43,7 @@ namespace AirEngine
 					static VkDevice _vkDevice;
 
 					static  Manager::MemoryManager* _memoryManager;
-					VulkanInstance();
+					Instance();
 					static void Init();
 				public:
 					static Queue* Queue_(std::string name);

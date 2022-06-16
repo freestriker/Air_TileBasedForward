@@ -58,9 +58,9 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnThreadStart()
 
 void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 {
+	qDebug() << "AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()";;
 	while (!_stopped)
 	{
-		qDebug() << "AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()";;
 		std::this_thread::yield();
 	}
 }

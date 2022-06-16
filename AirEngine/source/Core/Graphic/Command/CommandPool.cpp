@@ -1,6 +1,6 @@
 #include "Core/Graphic/Command/CommandPool.h"
 #include "Core/Graphic/Command/CommandBuffer.h"
-#include "Core/Graphic/CoreObject/VulkanInstance.h"
+#include "Core/Graphic/CoreObject/Instance.h"
 #include "Utils/Log.h"
 
 AirEngine::Core::Graphic::Command::CommandPool::CommandPool(std::string queueName, VkCommandPoolCreateFlags flag)
@@ -10,9 +10,9 @@ AirEngine::Core::Graphic::Command::CommandPool::CommandPool(std::string queueNam
     VkCommandPoolCreateInfo poolInfo{};
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
     poolInfo.flags = flag;
-    poolInfo.queueFamilyIndex = Graphic::CoreObject::VulkanInstance::Queue_(std::string(queueName))->queueFamilyIndex;
+    poolInfo.queueFamilyIndex = Graphic::CoreObject::Instance::Queue_(std::string(queueName))->queueFamilyIndex;
 
-    Utils::Log::Exception("Failed to create command pool.", vkCreateCommandPool(Graphic::CoreObject::VulkanInstance::VulkanDevice_(), &poolInfo, nullptr, &_vkCommandPool));
+    Utils::Log::Exception("Failed to create command pool.", vkCreateCommandPool(Graphic::CoreObject::Instance::VulkanDevice_(), &poolInfo, nullptr, &_vkCommandPool));
 }
 
 AirEngine::Core::Graphic::Command::CommandPool::~CommandPool()
@@ -21,7 +21,7 @@ AirEngine::Core::Graphic::Command::CommandPool::~CommandPool()
     {
         delete commandBuffer.second;
     }
-    vkDestroyCommandPool(Graphic::CoreObject::VulkanInstance::VulkanDevice_(), _vkCommandPool, nullptr);
+    vkDestroyCommandPool(Graphic::CoreObject::Instance::VulkanDevice_(), _vkCommandPool, nullptr);
 }
 
 VkCommandPool AirEngine::Core::Graphic::Command::CommandPool::VkCommandPool_()
@@ -60,5 +60,5 @@ void AirEngine::Core::Graphic::Command::CommandPool::Reset()
         delete commandBuffer.second;
     }
     _commandBuffers.clear();
-    vkResetCommandPool(Graphic::CoreObject::VulkanInstance::VulkanDevice_(), _vkCommandPool, VkCommandPoolResetFlagBits::VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
+    vkResetCommandPool(Graphic::CoreObject::Instance::VulkanDevice_(), _vkCommandPool, VkCommandPoolResetFlagBits::VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
 }

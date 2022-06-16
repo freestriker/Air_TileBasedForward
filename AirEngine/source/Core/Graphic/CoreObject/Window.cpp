@@ -52,7 +52,7 @@ void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::release
 
 void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::startNextFrame()
 {
-    qDebug("AirEngine::Core::Graphic::CoreObject::Thread::VulkanWindowRenderer::startNextFrame()");
+    //qDebug("AirEngine::Core::Graphic::CoreObject::Thread::VulkanWindowRenderer::startNextFrame()");
     _window->frameReady();
     _window->requestUpdate();
 }
