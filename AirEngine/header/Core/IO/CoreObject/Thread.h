@@ -28,8 +28,6 @@ namespace AirEngine
 					class IOThread final : public AirEngine::Utils::ThreadBase
 					{
 					public:
-						bool _stopped;
-						bool _canAddTask;
 						IOThread();
 						~IOThread();
 						void Init()override;
@@ -37,12 +35,6 @@ namespace AirEngine
 						void OnThreadStart() override;
 						void OnRun() override;
 						void OnEnd() override;
-
-						std::queue<std::function<void(Graphic::Command::CommandBuffer*)>> tasks;
-						std::mutex taskMutex;
-						std::condition_variable taskVariable;
-						template<typename F, typename... Args>
-						auto AddTask(F&& f, Args&&... args)->std::future<typename std::invoke_result<F, Graphic::Command::CommandBuffer*, Args...>::type>;
 					};
 					class SubIOThread final: public Utils::ThreadBase
 					{
@@ -61,6 +53,13 @@ namespace AirEngine
 					};
 
 				private:
+					static bool _stopped;
+					static bool _canAddTask;
+
+					static std::queue<std::function<void(Graphic::Command::CommandBuffer*)>> tasks;
+					static std::mutex taskMutex;
+					static std::condition_variable taskVariable;
+
 					static IOThread _ioThread;
 					static std::array<SubIOThread, 4> _subIOThreads;
 					Thread();
@@ -76,7 +75,7 @@ namespace AirEngine
 				};
 
 				template<typename F, typename ...Args>
-				inline auto Thread::IOThread::AddTask(F&& f, Args && ...args) -> std::future<typename std::invoke_result<F, Graphic::Command::CommandBuffer*, Args ...>::type>
+				inline auto Thread::AddTask(F&& f, Args && ...args) -> std::future<typename std::invoke_result<F, Graphic::Command::CommandBuffer*, Args ...>::type>
 				{
 					using return_type = typename std::invoke_result<F, Graphic::Command::CommandBuffer*, Args...>::type;
 
@@ -95,12 +94,6 @@ namespace AirEngine
 					}
 					taskVariable.notify_one();
 					return res;
-				}
-
-				template<typename F, typename ...Args>
-				inline auto Thread::AddTask(F&& f, Args && ...args) -> std::future<typename std::invoke_result<F, Graphic::Command::CommandBuffer*, Args ...>::type>
-				{
-					return _ioThread.AddTask(f, args);
 				}
 			}
 		}

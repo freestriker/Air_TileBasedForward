@@ -6,6 +6,13 @@
 AirEngine::Core::IO::CoreObject::Thread::IOThread AirEngine::Core::IO::CoreObject::Thread::_ioThread = AirEngine::Core::IO::CoreObject::Thread::IOThread();
 std::array<AirEngine::Core::IO::CoreObject::Thread::SubIOThread, 4> AirEngine::Core::IO::CoreObject::Thread::_subIOThreads = std::array<AirEngine::Core::IO::CoreObject::Thread::SubIOThread, 4>();
 
+bool AirEngine::Core::IO::CoreObject::Thread::_stopped = true;
+bool AirEngine::Core::IO::CoreObject::Thread::_canAddTask = false;
+
+std::mutex AirEngine::Core::IO::CoreObject::Thread::taskMutex = std::mutex();
+std::condition_variable AirEngine::Core::IO::CoreObject::Thread::taskVariable = std::condition_variable();
+std::queue<std::function<void(AirEngine::Core::Graphic::Command::CommandBuffer*)>> AirEngine::Core::IO::CoreObject::Thread::tasks = std::queue<std::function<void(AirEngine::Core::Graphic::Command::CommandBuffer*)>>();
+
 AirEngine::Core::IO::CoreObject::Thread::Thread()
 {
 }
@@ -16,7 +23,11 @@ AirEngine::Core::IO::CoreObject::Thread::~Thread()
 
 void AirEngine::Core::IO::CoreObject::Thread::Init()
 {
+	_stopped = true;
+	_canAddTask = false;
+
 	_ioThread.Init();
+
 	for (auto& subThread : _subIOThreads)
 	{
 		subThread.Init();
@@ -25,39 +36,36 @@ void AirEngine::Core::IO::CoreObject::Thread::Init()
 
 void AirEngine::Core::IO::CoreObject::Thread::Start()
 {
+	_stopped = false;
 	_ioThread.Start();
 	_ioThread.WaitForStartFinish();
 
+	_canAddTask = true;
 	for (auto& subThread : _subIOThreads)
 	{
 		subThread.Start();
+		subThread.WaitForStartFinish();
 	}
 }
 
 void AirEngine::Core::IO::CoreObject::Thread::WaitForStartFinish()
 {
-	for (auto& subThread : _subIOThreads)
-	{
-		subThread.WaitForStartFinish();
-	}
+
 }
 
 void AirEngine::Core::IO::CoreObject::Thread::End()
 {
-	_ioThread._canAddTask = false;
+	_canAddTask = false;
 	for (auto& subThread : _subIOThreads)
 	{
 		subThread.End();
 	}
+
+	_stopped = true;
 	_ioThread.End();
 }
 
 AirEngine::Core::IO::CoreObject::Thread::IOThread::IOThread()
-	: _stopped(true)
-	, _canAddTask(false)
-	, tasks()
-	, taskMutex()
-	, taskVariable()
 {
 }
 
@@ -67,15 +75,11 @@ AirEngine::Core::IO::CoreObject::Thread::IOThread::~IOThread()
 
 void AirEngine::Core::IO::CoreObject::Thread::IOThread::Init()
 {
-	_stopped = true;
-	_canAddTask = false;
 	qDebug() << "AirEngine::Core::IO::CoreObject::Thread::IOThread::Init()";
 }
 
 void AirEngine::Core::IO::CoreObject::Thread::IOThread::OnStart()
 {
-	_stopped = false;
-	_canAddTask = true;
 	qDebug() << "AirEngine::Core::IO::CoreObject::Thread::IOThread::OnStart()";
 }
 
@@ -96,7 +100,6 @@ void AirEngine::Core::IO::CoreObject::Thread::IOThread::OnRun()
 
 void AirEngine::Core::IO::CoreObject::Thread::IOThread::OnEnd()
 {
-	_stopped = true;
 	qDebug() << "AirEngine::Core::IO::CoreObject::Thread::IOThread::OnEnd()";
 }
 
@@ -131,14 +134,14 @@ void AirEngine::Core::IO::CoreObject::Thread::SubIOThread::OnRun()
 		std::function<void(Graphic::Command::CommandBuffer* const)> task;
 
 		{
-			std::unique_lock<std::mutex> lock(_ioThread.taskMutex);
-			_ioThread.taskVariable.wait(lock, [this] { return !_ioThread._canAddTask || !_ioThread.tasks.empty(); });
-			if (!_ioThread._canAddTask && _ioThread.tasks.empty())
+			std::unique_lock<std::mutex> lock(taskMutex);
+			taskVariable.wait(lock, [this] { return !_canAddTask || !tasks.empty(); });
+			if (!_canAddTask && tasks.empty())
 			{
 				return;
 			}
-			task = std::move(_ioThread.tasks.front());
-			_ioThread.tasks.pop();
+			task = std::move(tasks.front());
+			tasks.pop();
 		}
 
 		task(_transferCommandBuffer);
