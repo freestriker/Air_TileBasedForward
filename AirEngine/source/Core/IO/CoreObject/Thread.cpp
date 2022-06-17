@@ -78,11 +78,11 @@ AirEngine::Core::IO::CoreObject::Thread::IOThread::~IOThread()
 void AirEngine::Core::IO::CoreObject::Thread::IOThread::Init()
 {
 	qDebug() << "AirEngine::Core::IO::CoreObject::Thread::IOThread::Init()";
-	Instance::Init();
 }
 
 void AirEngine::Core::IO::CoreObject::Thread::IOThread::OnStart()
 {
+	Instance::Init();
 	qDebug() << "AirEngine::Core::IO::CoreObject::Thread::IOThread::OnStart()";
 }
 

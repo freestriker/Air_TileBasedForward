@@ -40,7 +40,7 @@ namespace AirEngine
 					AssetManager& operator=(AssetManager&&) = delete;
 
 					template<typename TAsset>
-					std::future<TAsset*> LoadAsync(std::string path);
+					std::future< TAsset*> LoadAsync(std::string path);
 					template<typename TAsset>
 					TAsset* Load(std::string path);
 					void Unload(Asset::AssetBase*& asset);
@@ -49,67 +49,69 @@ namespace AirEngine
 				};
 
 				template<typename TAsset>
-				inline std::future<TAsset*> AssetManager::LoadAsync(std::string path)
+				std::future< TAsset*> AssetManager::LoadAsync(std::string path)
 				{
-					std::unique_lock<std::mutex> managerLock(_mutex);
-
-					//Get target pool
-					AssetWrapper* targetWrapper = nullptr;
-					auto wrapperIter = _wrappers.find(path);
-					if (wrapperIter == std::end(_wrappers))
 					{
-						targetWrapper = new AssetWrapper();
-						targetWrapper->path = path;
-						targetWrapper->referenceCount = 0;
-						targetWrapper->asset = nullptr;
-						targetWrapper->isLoading = true;
+						std::unique_lock<std::mutex> managerLock(_mutex);
 
-						_wrappers.emplace({ path, targetWrapper });
-					}
-					else
-					{
-						targetWrapper = wrapperIter->second;
-					}
-
-
-					{
-						std::unique_lock<std::mutex> wrapperLock(targetWrapper->mutex);
-
-						//Check
-						targetWrapper->referenceCount++;
-						if (targetWrapper->asset)
+						//Get target pool
+						AssetWrapper* targetWrapper = nullptr;
+						auto wrapperIter = _wrappers.find(path);
+						if (wrapperIter == std::end(_wrappers))
 						{
-							return std::async([targetWrapper]()
-							{
-								while (targetWrapper->isLoading)
-								{
-									std::this_thread::yield();
-								}
-								return dynamic_cast<TAsset*>(targetWrapper->asset);
-							});
+							targetWrapper = new AssetWrapper();
+							targetWrapper->path = path;
+							targetWrapper->referenceCount = 0;
+							targetWrapper->asset = nullptr;
+							targetWrapper->isLoading = true;
+
+							_wrappers.emplace(path, targetWrapper);
 						}
 						else
 						{
-							Asset::AssetBase* asset = dynamic_cast<Asset::AssetBase*>(new TAsset());
-							targetWrapper->asset = asset;
-							asset->_wrapper = targetWrapper;
+							targetWrapper = wrapperIter->second;
+						}
 
-							std::future<Asset::AssetBase*> task = CoreObject::Thread::AddTask
-							(
-								[targetWrapper](Core::Graphic::Command::CommandBuffer* transferCommandBuffer)->TAsset*
+
+						{
+							std::unique_lock<std::mutex> wrapperLock(targetWrapper->mutex);
+
+							//Check
+							targetWrapper->referenceCount++;
+							if (targetWrapper->asset)
+							{
+								return std::async([targetWrapper]()
 								{
-									Asset::AssetBase* assetBase = dynamic_cast<Asset::AssetBase*>(targetWrapper->asset);
-									assetBase->OnLoad(transferCommandBuffer);
-									targetWrapper->isLoading = false;
-									return assetBase;
-								}
-							);
+									while (targetWrapper->isLoading)
+									{
+										std::this_thread::yield();
+									}
+									return dynamic_cast<TAsset*>(targetWrapper->asset);
+								});
+							}
+							else
+							{
+								Asset::AssetBase* asset = dynamic_cast<Asset::AssetBase*>(new TAsset());
+								targetWrapper->asset = asset;
+								asset->_wrapper = targetWrapper;
+								asset->_path = path;
+
+								return CoreObject::Thread::AddTask
+								(
+									[targetWrapper](Core::Graphic::Command::CommandBuffer* transferCommandBuffer)->TAsset*
+									{
+										targetWrapper->asset->OnLoad(transferCommandBuffer);
+										targetWrapper->isLoading = false;
+										return dynamic_cast<TAsset*>(targetWrapper->asset);
+									}
+								);
+							}
 						}
 					}
-				}
 
+				}
 				template<typename TAsset>
-				inline TAsset* AssetManager::Load(std::string path)
+				TAsset* AssetManager::Load(std::string path)
 				{
 					return LoadAsync<TAsset>(path).get();
 				}

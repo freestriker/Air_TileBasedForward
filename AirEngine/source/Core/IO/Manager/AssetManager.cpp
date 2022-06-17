@@ -53,6 +53,10 @@ void AirEngine::Core::IO::Manager::AssetManager::Collect()
 					iter = _wrappers.erase(iter);
 				}
 			}
+			else
+			{
+				iter++;
+			}
 		}
 	}
 	for (const auto& wrapper : collectedWrappers)

@@ -53,7 +53,7 @@ void AirEngine::Core::Graphic::Instance::Buffer::WriteData(std::function<void(vo
 
 VkBuffer AirEngine::Core::Graphic::Instance::Buffer::VkBuffer_()
 {
-	return VkBuffer();
+	return _vkBuffer;
 }
 
 AirEngine::Core::Graphic::Instance::Memory* AirEngine::Core::Graphic::Instance::Buffer::Memory()
@@ -63,12 +63,12 @@ AirEngine::Core::Graphic::Instance::Memory* AirEngine::Core::Graphic::Instance::
 
 size_t AirEngine::Core::Graphic::Instance::Buffer::Size()
 {
-	return size_t();
+	return _size;
 }
 
 size_t AirEngine::Core::Graphic::Instance::Buffer::Offset()
 {
-	return size_t();
+	return 0;
 }
 
 AirEngine::Core::Graphic::Instance::Buffer::~Buffer()

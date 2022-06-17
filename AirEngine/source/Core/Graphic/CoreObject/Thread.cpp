@@ -47,11 +47,11 @@ AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::~GraphicThread()
 void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::Init()
 {
 	qDebug() << "AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::Init()";
-	Instance::Init();
 }
 
 void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnStart()
 {
+	Instance::Init();
 	_stopped = false;
 	qDebug() << "AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnStart()";
 }
