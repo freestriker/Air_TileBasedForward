@@ -1,0 +1,10 @@
+{
+    "addressMode": 0,
+    "anisotropy": 0.0,
+    "borderColor": 3,
+    "format": 50,
+    "imagePath": "..\\Asset\\Texture\\DefaultTexture2D.png",
+    "magFilter": 1,
+    "minFilter": 1,
+    "sampleCount": 1
+}

@@ -1,0 +1,17 @@
+{
+    "addressMode": 0,
+    "anisotropy": 0.0,
+    "borderColor": 3,
+    "faceTexturePaths": [
+        "..\\Asset\\Texture\\DefaultTextureCube_Right.png",
+        "..\\Asset\\Texture\\DefaultTextureCube_Left.png",
+        "..\\Asset\\Texture\\DefaultTextureCube_Front.png",
+        "..\\Asset\\Texture\\DefaultTextureCube_Back.png",
+        "..\\Asset\\Texture\\DefaultTextureCube_Top.png",
+        "..\\Asset\\Texture\\DefaultTextureCube_Bottom.png"
+    ],
+    "filter": 1,
+    "format": 50,
+    "mipmapMode": 1,
+    "sampleCount": 1
+}
