@@ -104,7 +104,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="header\Core\Graphic\Instance\Buffer.cpp" />
+    <ClCompile Include="source\Asset\Texture2D.cpp" />
+    <ClCompile Include="source\Core\Graphic\Command\ImageMemoryBarrier.cpp" />
+    <ClCompile Include="source\Core\Graphic\Instance\Buffer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="source\Asset\Mesh.cpp" />
     <ClCompile Include="source\Core\Graphic\Command\CommandBuffer.cpp" />
@@ -114,6 +116,8 @@
     <ClCompile Include="source\Core\Graphic\CoreObject\Thread.cpp" />
     <ClCompile Include="source\Core\Graphic\CoreObject\Instance.cpp" />
     <ClCompile Include="source\Core\Graphic\CoreObject\Window.cpp" />
+    <ClCompile Include="source\Core\Graphic\Instance\Image.cpp" />
+    <ClCompile Include="source\Core\Graphic\Instance\ImageSampler.cpp" />
     <ClCompile Include="source\Core\Graphic\Instance\Memory.cpp" />
     <ClCompile Include="source\Core\Graphic\Manager\MemoryManager.cpp" />
     <ClCompile Include="source\Core\IO\Asset\AssetBase.cpp" />
@@ -128,14 +132,18 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="header\Asset\Mesh.h" />
+    <ClInclude Include="header\Asset\Texture2D.h" />
     <ClInclude Include="header\Core\Graphic\Command\CommandBuffer.h" />
     <ClInclude Include="header\Core\Graphic\Command\CommandPool.h" />
     <ClInclude Include="header\Core\Graphic\Command\Fence.h" />
+    <ClInclude Include="header\Core\Graphic\Command\ImageMemoryBarrier.h" />
     <ClInclude Include="header\Core\Graphic\Command\Semaphore.h" />
     <ClInclude Include="header\Core\Graphic\CoreObject\Thread.h" />
     <ClInclude Include="header\Core\Graphic\CoreObject\Instance.h" />
     <ClInclude Include="header\Core\Graphic\CoreObject\Window.h" />
     <ClInclude Include="header\Core\Graphic\Instance\Buffer.h" />
+    <ClInclude Include="header\Core\Graphic\Instance\Image.h" />
+    <ClInclude Include="header\Core\Graphic\Instance\ImageSampler.h" />
     <ClInclude Include="header\Core\Graphic\Instance\Memory.h" />
     <ClInclude Include="header\Core\Graphic\Manager\MemoryManager.h" />
     <ClInclude Include="header\Core\IO\Asset\AssetBase.h" />

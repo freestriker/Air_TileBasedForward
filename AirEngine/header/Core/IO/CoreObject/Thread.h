@@ -88,7 +88,7 @@ namespace AirEngine
 						std::unique_lock<std::mutex> lock(taskMutex);
 
 						// don't allow enqueueing after stopping the pool
-						Utils::Log::Exception("Can not add new io task when loadthread stopped.", _canAddTask);
+						Utils::Log::Exception("Can not add new io task when loadthread stopped.", !_canAddTask);
 
 						tasks.emplace([task](Graphic::Command::CommandBuffer* const transferCommandBuffer) { (*task)(transferCommandBuffer); });
 					}

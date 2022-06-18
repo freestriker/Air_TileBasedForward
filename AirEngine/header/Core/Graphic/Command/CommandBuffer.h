@@ -12,11 +12,13 @@ namespace AirEngine
 			namespace Instance
 			{
 				class Buffer;
+				class Image;
 			}
 			namespace Command
 			{
 				class CommandPool;
 				class Semaphore;
+				class ImageMemoryBarrier;
 				class CommandBuffer final
 				{
 					friend class CommandPool;
@@ -44,6 +46,9 @@ namespace AirEngine
 				public:
 					void Reset();
 					void BeginRecord(VkCommandBufferUsageFlags flag);
+					void AddPipelineBarrier(VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, std::vector <ImageMemoryBarrier*> imageMemoryBarriers);
+					void AddPipelineBarrier(VkDependencyFlags dependencyFlag, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, std::vector<ImageMemoryBarrier*> imageMemoryBarriers);
+					void CopyBufferToImage(Instance::Buffer* srcBuffer, Instance::Image* dstImage, VkImageLayout dstImageLayout);
 					void CopyBuffer(Instance::Buffer* srcBuffer, Instance::Buffer* dstBuffer);
 					void CopyBuffer(Instance::Buffer* srcBuffer, VkDeviceSize srcOffset, Instance::Buffer* dstBuffer, VkDeviceSize dstOffset, VkDeviceSize size);
 					void EndRecord();

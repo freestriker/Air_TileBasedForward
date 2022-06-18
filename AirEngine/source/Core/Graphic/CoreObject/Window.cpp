@@ -67,11 +67,11 @@ void AirEngine::Core::Graphic::CoreObject::Window::Start()
     _vulkanInstance = new QVulkanInstance();
 
     _vulkanInstance->setLayers(QByteArrayList()
+        << "VK_LAYER_RENDERDOC_Capture"
         << "VK_LAYER_GOOGLE_threading"
         << "VK_LAYER_LUNARG_parameter_validation"
         << "VK_LAYER_LUNARG_object_tracker"
         << "VK_LAYER_LUNARG_core_validation"
-        << "VK_LAYER_RENDERDOC_Capture"
         << "VK_LAYER_LUNARG_image"
         << "VK_LAYER_LUNARG_swapchain"
         << "VK_LAYER_GOOGLE_unique_objects");

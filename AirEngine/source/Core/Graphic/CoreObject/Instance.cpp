@@ -60,10 +60,15 @@ void AirEngine::Core::Graphic::CoreObject::Instance::Init()
 	_qDeviceFunctions = Window::_vulkanInstance->deviceFunctions(_vkDevice);
 
 	VkQueue queue = VK_NULL_HANDLE;
+	_qDeviceFunctions->vkGetDeviceQueue(_vkDevice, 0, 0, &queue);
+	_queues["PresentQueue"] = new Queue("PresentQueue", 0, queue);
+
 	_qDeviceFunctions->vkGetDeviceQueue(_vkDevice, 0, 1, &queue);
 	_queues["GraphicQueue"] = new Queue("GraphicQueue", 0, queue);
+
 	_qDeviceFunctions->vkGetDeviceQueue(_vkDevice, 0, 2, &queue);
 	_queues["TransferQueue"] = new Queue("TransferQueue", 0, queue);
+
 	_qDeviceFunctions->vkGetDeviceQueue(_vkDevice, 0, 3, &queue);
 	_queues["ComputeQueue"] = new Queue("ComputeQueue", 0, queue);
 
