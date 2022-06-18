@@ -2,7 +2,7 @@
     "addressMode": 0,
     "anisotropy": 0.0,
     "borderColor": 3,
-    "faceTexturePaths": [
+    "paths": [
         "..\\Asset\\Texture\\DefaultTextureCube_Right.png",
         "..\\Asset\\Texture\\DefaultTextureCube_Left.png",
         "..\\Asset\\Texture\\DefaultTextureCube_Front.png",

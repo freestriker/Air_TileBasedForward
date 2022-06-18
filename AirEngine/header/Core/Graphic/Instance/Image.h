@@ -29,7 +29,8 @@ namespace AirEngine
 						VkExtent2D extent,
 						VkFormat format,
 						VkImageUsageFlags imageUsage,
-						VkMemoryPropertyFlags memoryProperty
+						VkMemoryPropertyFlags memoryProperty,
+						VkImageAspectFlags aspect
 					);
 					static Image* Create2DImage(
 						VkExtent2D extent,

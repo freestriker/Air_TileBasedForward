@@ -105,7 +105,7 @@ size_t AirEngine::Core::Graphic::Instance::Image::PerLayerSize()
 	return _perLayerSize;
 }
 
-AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::Image::CreateCubeImage(VkExtent2D extent, VkFormat format, VkImageUsageFlags imageUsage, VkMemoryPropertyFlags memoryProperty)
+AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::Image::CreateCubeImage(VkExtent2D extent, VkFormat format, VkImageUsageFlags imageUsage, VkMemoryPropertyFlags memoryProperty, VkImageAspectFlags aspect)
 {
 	VkImageCreateInfo imageInfo{};
 	imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -135,7 +135,7 @@ AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::I
 	viewInfo.image = newVkImage;
 	viewInfo.viewType = VkImageViewType::VK_IMAGE_VIEW_TYPE_CUBE;
 	viewInfo.format = format;
-	viewInfo.subresourceRange.aspectMask = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
+	viewInfo.subresourceRange.aspectMask = aspect;
 	viewInfo.subresourceRange.baseMipLevel = 0;
 	viewInfo.subresourceRange.levelCount = 1;
 	viewInfo.subresourceRange.baseArrayLayer = 0;
@@ -154,7 +154,7 @@ AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::I
 	newImage->_vkSampleCount = VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT;
 	newImage->_vkMemoryProperty = static_cast<VkMemoryPropertyFlagBits>(memoryProperty);
 	newImage->_vkImageViewType = VkImageViewType::VK_IMAGE_VIEW_TYPE_CUBE;
-	newImage->_vkImageAspect = VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT;
+	newImage->_vkImageAspect = aspect;
 	newImage->_vkImage = newVkImage;
 	newImage->_vkImageView = newImageView;
 	newImage->_memory = newMemory;

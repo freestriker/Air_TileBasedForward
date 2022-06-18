@@ -105,6 +105,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="source\Asset\Texture2D.cpp" />
+    <ClCompile Include="source\Asset\TextureCube.cpp" />
     <ClCompile Include="source\Core\Graphic\Command\ImageMemoryBarrier.cpp" />
     <ClCompile Include="source\Core\Graphic\Instance\Buffer.cpp" />
     <ClCompile Include="main.cpp" />
@@ -133,6 +134,7 @@
   <ItemGroup>
     <ClInclude Include="header\Asset\Mesh.h" />
     <ClInclude Include="header\Asset\Texture2D.h" />
+    <ClInclude Include="header\Asset\TextureCube.h" />
     <ClInclude Include="header\Core\Graphic\Command\CommandBuffer.h" />
     <ClInclude Include="header\Core\Graphic\Command\CommandPool.h" />
     <ClInclude Include="header\Core\Graphic\Command\Fence.h" />

@@ -15,7 +15,7 @@ void AirEngine::Asset::Texture2D::OnLoad(Core::Graphic::Command::CommandBuffer* 
 	//Load settings
 	{
 		std::ifstream input_file(Path());
-		Utils::Log::Exception("Failed to open shader file: " + Path() + " .", !input_file.is_open());
+		Utils::Log::Exception("Failed to open texture2d file: " + Path() + " .", !input_file.is_open());
 		std::string text = std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
 		nlohmann::json j = nlohmann::json::parse(text);
 		_settings = j.get<Texture2DSettings>();

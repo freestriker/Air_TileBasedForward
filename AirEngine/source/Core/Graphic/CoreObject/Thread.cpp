@@ -67,7 +67,7 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 	{
 		qDebug() << "AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()";
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
-		//Instance::MemoryManager().Collect();
+		Instance::MemoryManager().Collect();
 	}
 	Instance::MemoryManager().Collect();
 }
