@@ -26,6 +26,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt_defaults.props')">
@@ -104,6 +105,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Core\Graphic\Shader.cpp" />
     <ClCompile Include="source\Asset\Texture2D.cpp" />
     <ClCompile Include="source\Asset\TextureCube.cpp" />
     <ClCompile Include="source\Core\Graphic\Command\ImageMemoryBarrier.cpp" />
@@ -129,6 +131,7 @@
     <ClCompile Include="source\Utils\Condition.cpp" />
     <ClCompile Include="source\Utils\Log.cpp" />
     <ClCompile Include="source\Utils\OrientedBoundingBox.cpp" />
+    <ClCompile Include="source\Utils\SpirvReflect.cpp" />
     <ClCompile Include="source\Utils\ThreadBase.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -148,6 +151,7 @@
     <ClInclude Include="header\Core\Graphic\Instance\ImageSampler.h" />
     <ClInclude Include="header\Core\Graphic\Instance\Memory.h" />
     <ClInclude Include="header\Core\Graphic\Manager\MemoryManager.h" />
+    <ClInclude Include="header\Core\Graphic\Shader.h" />
     <ClInclude Include="header\Core\IO\Asset\AssetBase.h" />
     <ClInclude Include="header\Core\IO\CoreObject\Instance.h" />
     <ClInclude Include="header\Core\IO\CoreObject\Thread.h" />
@@ -156,6 +160,7 @@
     <ClInclude Include="header\Utils\Condition.h" />
     <ClInclude Include="header\Utils\Log.h" />
     <ClInclude Include="header\Utils\OrientedBoundingBox.h" />
+    <ClInclude Include="header\Utils\SpirvReflect.h" />
     <ClInclude Include="header\Utils\ThreadBase.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
