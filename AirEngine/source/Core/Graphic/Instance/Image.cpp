@@ -27,8 +27,8 @@ AirEngine::Core::Graphic::Instance::Image::Image()
 
 AirEngine::Core::Graphic::Instance::Image::~Image()
 {
-	vkDestroyImageView(Core::Graphic::CoreObject::Instance::VulkanDevice_(), _vkImageView, nullptr);
-	vkDestroyImage(Core::Graphic::CoreObject::Instance::VulkanDevice_(), _vkImage, nullptr);
+	vkDestroyImageView(Core::Graphic::CoreObject::Instance::VkDevice_(), _vkImageView, nullptr);
+	vkDestroyImage(Core::Graphic::CoreObject::Instance::VkDevice_(), _vkImage, nullptr);
 	Core::Graphic::CoreObject::Instance::MemoryManager().ReleaseMemory(*_memory);
 	delete _memory;
 }
@@ -122,13 +122,13 @@ AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::I
 	imageInfo.flags = VkImageCreateFlagBits::VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
 
 	VkImage newVkImage = VK_NULL_HANDLE;
-	Utils::Log::Exception("Failed to create image.", vkCreateImage(CoreObject::Instance::VulkanDevice_(), &imageInfo, nullptr, &newVkImage));
+	Utils::Log::Exception("Failed to create image.", vkCreateImage(CoreObject::Instance::VkDevice_(), &imageInfo, nullptr, &newVkImage));
 
 	VkMemoryRequirements memRequirements;
-	vkGetImageMemoryRequirements(CoreObject::Instance::VulkanDevice_(), newVkImage, &memRequirements);
+	vkGetImageMemoryRequirements(CoreObject::Instance::VkDevice_(), newVkImage, &memRequirements);
 
 	auto newMemory = new Instance::Memory(CoreObject::Instance::MemoryManager().AcquireMemory(memRequirements, memoryProperty));
-	vkBindImageMemory(CoreObject::Instance::VulkanDevice_(), newVkImage, newMemory->VkDeviceMemory_(), newMemory->Offset());
+	vkBindImageMemory(CoreObject::Instance::VkDevice_(), newVkImage, newMemory->VkDeviceMemory_(), newMemory->Offset());
 
 	VkImageViewCreateInfo viewInfo{};
 	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -142,7 +142,7 @@ AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::I
 	viewInfo.subresourceRange.layerCount = 6;
 
 	VkImageView newImageView = VK_NULL_HANDLE;
-	Utils::Log::Exception("Failed to create image view.", vkCreateImageView(CoreObject::Instance::VulkanDevice_(), &viewInfo, nullptr, &newImageView));
+	Utils::Log::Exception("Failed to create image view.", vkCreateImageView(CoreObject::Instance::VkDevice_(), &viewInfo, nullptr, &newImageView));
 
 	Graphic::Instance::Image* newImage = new Graphic::Instance::Image();
 	newImage->_vkImageType = VkImageType::VK_IMAGE_TYPE_2D;
@@ -181,13 +181,13 @@ AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::I
 	imageInfo.flags = 0;
 
 	VkImage newVkImage = VK_NULL_HANDLE;
-	Utils::Log::Exception("Failed to create image.", vkCreateImage(CoreObject::Instance::VulkanDevice_(), &imageInfo, nullptr, &newVkImage));
+	Utils::Log::Exception("Failed to create image.", vkCreateImage(CoreObject::Instance::VkDevice_(), &imageInfo, nullptr, &newVkImage));
 
 	VkMemoryRequirements memRequirements;
-	vkGetImageMemoryRequirements(CoreObject::Instance::VulkanDevice_(), newVkImage, &memRequirements);
+	vkGetImageMemoryRequirements(CoreObject::Instance::VkDevice_(), newVkImage, &memRequirements);
 
 	auto newMemory = new Instance::Memory(CoreObject::Instance::MemoryManager().AcquireMemory(memRequirements, memoryProperty));
-	vkBindImageMemory(CoreObject::Instance::VulkanDevice_(), newVkImage, newMemory->VkDeviceMemory_(), newMemory->Offset());
+	vkBindImageMemory(CoreObject::Instance::VkDevice_(), newVkImage, newMemory->VkDeviceMemory_(), newMemory->Offset());
 
 	VkImageViewCreateInfo viewInfo{};
 	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -201,7 +201,7 @@ AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::I
 	viewInfo.subresourceRange.layerCount = 1;
 
 	VkImageView newImageView = VK_NULL_HANDLE;
-	Utils::Log::Exception("Failed to create image view.", vkCreateImageView(CoreObject::Instance::VulkanDevice_(), &viewInfo, nullptr, &newImageView));
+	Utils::Log::Exception("Failed to create image view.", vkCreateImageView(CoreObject::Instance::VkDevice_(), &viewInfo, nullptr, &newImageView));
 
 	Graphic::Instance::Image* newImage = new Graphic::Instance::Image();
 	newImage->_vkImageType = VkImageType::VK_IMAGE_TYPE_2D;

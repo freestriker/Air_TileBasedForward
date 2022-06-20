@@ -16,16 +16,16 @@ AirEngine::Core::Graphic::Instance::Buffer::Buffer(size_t size, VkBufferUsageFla
 	bufferInfo.usage = usage;
 	bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-	AirEngine::Utils::Log::Exception("Failed to create buffer.", vkCreateBuffer(Graphic::CoreObject::Instance::VulkanDevice_(), &bufferInfo, nullptr, &_vkBuffer));
+	AirEngine::Utils::Log::Exception("Failed to create buffer.", vkCreateBuffer(Graphic::CoreObject::Instance::VkDevice_(), &bufferInfo, nullptr, &_vkBuffer));
 
 	VkMemoryRequirements memRequirements;
-	vkGetBufferMemoryRequirements(Graphic::CoreObject::Instance::VulkanDevice_(), _vkBuffer, &memRequirements);
+	vkGetBufferMemoryRequirements(Graphic::CoreObject::Instance::VkDevice_(), _vkBuffer, &memRequirements);
 
 	_memory = new Graphic::Instance::Memory(Graphic::CoreObject::Instance::MemoryManager().AcquireMemory(memRequirements, properties));
 
 	{
 		std::unique_lock<std::mutex> lock(*_memory->Mutex());
-		vkBindBufferMemory(Graphic::CoreObject::Instance::VulkanDevice_(), _vkBuffer, _memory->VkDeviceMemory_(), _memory->Offset());
+		vkBindBufferMemory(Graphic::CoreObject::Instance::VkDevice_(), _vkBuffer, _memory->VkDeviceMemory_(), _memory->Offset());
 	}
 }
 
@@ -34,9 +34,9 @@ void AirEngine::Core::Graphic::Instance::Buffer::WriteData(const void* data, siz
 	std::unique_lock<std::mutex> lock(*_memory->Mutex());
 	{
 		void* transferData;
-		vkMapMemory(Graphic::CoreObject::Instance::VulkanDevice_(), _memory->VkDeviceMemory_(), _memory->Offset(), _memory->Size(), 0, &transferData);
+		vkMapMemory(Graphic::CoreObject::Instance::VkDevice_(), _memory->VkDeviceMemory_(), _memory->Offset(), _memory->Size(), 0, &transferData);
 		memcpy(transferData, data, dataSize);
-		vkUnmapMemory(Graphic::CoreObject::Instance::VulkanDevice_(), _memory->VkDeviceMemory_());
+		vkUnmapMemory(Graphic::CoreObject::Instance::VkDevice_(), _memory->VkDeviceMemory_());
 	}
 }
 
@@ -45,9 +45,9 @@ void AirEngine::Core::Graphic::Instance::Buffer::WriteData(std::function<void(vo
 	std::unique_lock<std::mutex> lock(*_memory->Mutex());
 	{
 		void* transferData;
-		vkMapMemory(Graphic::CoreObject::Instance::VulkanDevice_(), _memory->VkDeviceMemory_(), _memory->Offset(), _memory->Size(), 0, &transferData);
+		vkMapMemory(Graphic::CoreObject::Instance::VkDevice_(), _memory->VkDeviceMemory_(), _memory->Offset(), _memory->Size(), 0, &transferData);
 		writeFunction(transferData);
-		vkUnmapMemory(Graphic::CoreObject::Instance::VulkanDevice_(), _memory->VkDeviceMemory_());
+		vkUnmapMemory(Graphic::CoreObject::Instance::VkDevice_(), _memory->VkDeviceMemory_());
 	}
 }
 
@@ -73,7 +73,7 @@ size_t AirEngine::Core::Graphic::Instance::Buffer::Offset()
 
 AirEngine::Core::Graphic::Instance::Buffer::~Buffer()
 {
-	vkDestroyBuffer(Graphic::CoreObject::Instance::VulkanDevice_(), _vkBuffer, nullptr);
+	vkDestroyBuffer(Graphic::CoreObject::Instance::VkDevice_(), _vkBuffer, nullptr);
 	Graphic::CoreObject::Instance::MemoryManager().ReleaseMemory(*_memory);
 
 	delete _memory;

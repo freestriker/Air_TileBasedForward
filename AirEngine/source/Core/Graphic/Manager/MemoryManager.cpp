@@ -27,19 +27,19 @@ AirEngine::Core::Graphic::Manager::MemoryManager::MemoryChunk::MemoryChunk(uint3
 	allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
 	allocInfo.allocationSize = size;
 	allocInfo.memoryTypeIndex = typeIndex;
-	Utils::Log::Exception("Failed to allocate memory chunk.", vkAllocateMemory(Graphic::CoreObject::Instance::VulkanDevice_(), &allocInfo, nullptr, &memory));
+	Utils::Log::Exception("Failed to allocate memory chunk.", vkAllocateMemory(Graphic::CoreObject::Instance::VkDevice_(), &allocInfo, nullptr, &memory));
 }
 
 AirEngine::Core::Graphic::Manager::MemoryManager::MemoryChunk::~MemoryChunk()
 {
-	vkFreeMemory(Graphic::CoreObject::Instance::VulkanDevice_(), memory, nullptr);
+	vkFreeMemory(Graphic::CoreObject::Instance::VkDevice_(), memory, nullptr);
 }
 
 AirEngine::Core::Graphic::Manager::MemoryManager::MemoryManager(VkDeviceSize defaultSize)
 	: _defaultSize(defaultSize)
 {
 	VkPhysicalDeviceMemoryProperties memProperties;
-	vkGetPhysicalDeviceMemoryProperties(Graphic::CoreObject::Instance::VulkanPhysicalDevice_(), &memProperties);
+	vkGetPhysicalDeviceMemoryProperties(Graphic::CoreObject::Instance::VkPhysicalDevice_(), &memProperties);
 
 	_pools.resize(memProperties.memoryTypeCount);
 	for (size_t i = 0; i < _pools.size(); i++)
@@ -69,7 +69,7 @@ AirEngine::Core::Graphic::Instance::Memory AirEngine::Core::Graphic::Manager::Me
 				allocInfo.memoryTypeIndex = pool->memoryTypeIndex;
 
 				VkDeviceMemory newMemory = VK_NULL_HANDLE;
-				Utils::Log::Exception("Failed to allocate exculsive memory.", vkAllocateMemory(Graphic::CoreObject::Instance::VulkanDevice_(), &allocInfo, nullptr, &newMemory));
+				Utils::Log::Exception("Failed to allocate exculsive memory.", vkAllocateMemory(Graphic::CoreObject::Instance::VkDevice_(), &allocInfo, nullptr, &newMemory));
 				std::mutex* newMutex = new std::mutex();
 
 				return Instance::Memory(true, pool->memoryTypeIndex, newMemory, 0, newSize, newMutex, properties);
@@ -147,7 +147,7 @@ AirEngine::Core::Graphic::Instance::Memory AirEngine::Core::Graphic::Manager::Me
 			allocInfo.memoryTypeIndex = pool->memoryTypeIndex;
 
 			VkDeviceMemory newMemory = VK_NULL_HANDLE;
-			Utils::Log::Exception("Failed to allocate exculsive memory.", vkAllocateMemory(Graphic::CoreObject::Instance::VulkanDevice_(), &allocInfo, nullptr, &newMemory));
+			Utils::Log::Exception("Failed to allocate exculsive memory.", vkAllocateMemory(Graphic::CoreObject::Instance::VkDevice_(), &allocInfo, nullptr, &newMemory));
 			std::mutex* newMutex = new std::mutex();
 
 			return Instance::Memory(true, pool->memoryTypeIndex, newMemory, 0, newSize, newMutex, properties);
@@ -161,7 +161,7 @@ void AirEngine::Core::Graphic::Manager::MemoryManager::ReleaseMemory(Instance::M
 {
 	if (memory._isExclusive)
 	{
-		vkFreeMemory(Graphic::CoreObject::Instance::VulkanDevice_(), memory._vkMemory, nullptr);
+		vkFreeMemory(Graphic::CoreObject::Instance::VkDevice_(), memory._vkMemory, nullptr);
 		delete memory._mutex;
 		return;
 	}

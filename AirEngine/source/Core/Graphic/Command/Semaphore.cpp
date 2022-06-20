@@ -12,11 +12,11 @@ AirEngine::Core::Graphic::Command::Semaphore::Semaphore()
 {
 	VkSemaphoreCreateInfo semaphoreInfo{};
 	semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-	Utils::Log::Exception("Failed to create semaphore.", vkCreateSemaphore(Graphic::CoreObject::Instance::VulkanDevice_(), &semaphoreInfo, nullptr, &_vkSemaphore));
+	Utils::Log::Exception("Failed to create semaphore.", vkCreateSemaphore(Graphic::CoreObject::Instance::VkDevice_(), &semaphoreInfo, nullptr, &_vkSemaphore));
 }
 
 AirEngine::Core::Graphic::Command::Semaphore::~Semaphore()
 {
-	vkDestroySemaphore(Graphic::CoreObject::Instance::VulkanDevice_(), _vkSemaphore, nullptr);
+	vkDestroySemaphore(Graphic::CoreObject::Instance::VkDevice_(), _vkSemaphore, nullptr);
 	_vkSemaphore = VK_NULL_HANDLE;
 }

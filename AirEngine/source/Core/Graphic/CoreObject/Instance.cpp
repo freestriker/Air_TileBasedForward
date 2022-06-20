@@ -1,6 +1,7 @@
 #include "Core/Graphic/CoreObject/Instance.h"
 #include "Core/Graphic/Manager/MemoryManager.h"
 #include "Core/Graphic/CoreObject/Window.h"
+#include "Core/Graphic/Manager/RenderPassManager.h"
 
 std::map<std::string, AirEngine::Core::Graphic::CoreObject::Queue*> AirEngine::Core::Graphic::CoreObject::Instance::_queues = std::map<std::string, AirEngine::Core::Graphic::CoreObject::Queue*>();
 QVulkanInstance* AirEngine::Core::Graphic::CoreObject::Instance::_qVulkanInstance = nullptr;
@@ -10,6 +11,7 @@ QVulkanDeviceFunctions* AirEngine::Core::Graphic::CoreObject::Instance::_qDevice
 VkDevice AirEngine::Core::Graphic::CoreObject::Instance::_vkDevice = VK_NULL_HANDLE;
 
 AirEngine::Core::Graphic::Manager::MemoryManager* AirEngine::Core::Graphic::CoreObject::Instance::_memoryManager = nullptr;
+AirEngine::Core::Graphic::Manager::RenderPassManager* AirEngine::Core::Graphic::CoreObject::Instance::_renderPassManager = nullptr;
 
 AirEngine::Core::Graphic::CoreObject::Queue* AirEngine::Core::Graphic::CoreObject::Instance::Queue_(std::string name)
 {
@@ -21,22 +23,22 @@ QVulkanInstance* AirEngine::Core::Graphic::CoreObject::Instance::QVulkanInstance
     return _qVulkanInstance;
 }
 
-VkInstance AirEngine::Core::Graphic::CoreObject::Instance::VulkanInstance_()
+VkInstance AirEngine::Core::Graphic::CoreObject::Instance::VkInstance_()
 {
     return _vkInstance;
 }
 
-VkPhysicalDevice AirEngine::Core::Graphic::CoreObject::Instance::VulkanPhysicalDevice_()
+VkPhysicalDevice AirEngine::Core::Graphic::CoreObject::Instance::VkPhysicalDevice_()
 {
     return _vkPhysicalDevice;
 }
 
-QVulkanDeviceFunctions* AirEngine::Core::Graphic::CoreObject::Instance::VulkanDeviceFunctions_()
+QVulkanDeviceFunctions* AirEngine::Core::Graphic::CoreObject::Instance::QVulkanDeviceFunctions_()
 {
     return _qDeviceFunctions;
 }
 
-VkDevice AirEngine::Core::Graphic::CoreObject::Instance::VulkanDevice_()
+VkDevice AirEngine::Core::Graphic::CoreObject::Instance::VkDevice_()
 {
     return _vkDevice;
 }
@@ -44,6 +46,11 @@ VkDevice AirEngine::Core::Graphic::CoreObject::Instance::VulkanDevice_()
 AirEngine::Core::Graphic::Manager::MemoryManager& AirEngine::Core::Graphic::CoreObject::Instance::MemoryManager()
 {
     return *_memoryManager;
+}
+
+AirEngine::Core::Graphic::Manager::RenderPassManager& AirEngine::Core::Graphic::CoreObject::Instance::RenderPassManager()
+{
+	return *_renderPassManager;
 }
 
 AirEngine::Core::Graphic::CoreObject::Instance::Instance()
@@ -73,6 +80,7 @@ void AirEngine::Core::Graphic::CoreObject::Instance::Init()
 	_queues["ComputeQueue"] = new Queue("ComputeQueue", 0, queue);
 
 	_memoryManager = new AirEngine::Core::Graphic::Manager::MemoryManager(32 * 1024 * 1024);
+	_renderPassManager = new AirEngine::Core::Graphic::Manager::RenderPassManager();
 }
 
 AirEngine::Core::Graphic::CoreObject::Queue::Queue(std::string name, uint32_t queueFamilyIndex, VkQueue queue)

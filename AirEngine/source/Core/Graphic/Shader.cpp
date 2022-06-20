@@ -3,7 +3,9 @@
 #include <fstream>
 #include <set>
 #include "Core/Graphic/CoreObject/Instance.h"
-#include <Utils/Log.h>
+#include "Core/Graphic/Manager/RenderPassManager.h"
+#include "Utils/Log.h"
+#include "Core/Graphic/RenderPass/RenderPassBase.h"
 
 void AirEngine::Core::Graphic::Shader::_ParseShaderData(_PipelineData& pipelineData)
 {
@@ -56,7 +58,7 @@ void AirEngine::Core::Graphic::Shader::_CreateShaderModules(_PipelineData& pipel
 			createInfo.pCode = reinterpret_cast<const uint32_t*>(spirvPair.second.data());
 
 			VkShaderModule shaderModule;
-			Utils::Log::Exception("Failed to create shader module.", vkCreateShaderModule(CoreObject::Instance::VulkanDevice_(), &createInfo, nullptr, &shaderModule));
+			Utils::Log::Exception("Failed to create shader module.", vkCreateShaderModule(CoreObject::Instance::VkDevice_(), &createInfo, nullptr, &shaderModule));
 
 			pipelineData.shaderModuleWrappers.emplace_back(_ShaderModuleWrapper{ static_cast<VkShaderStageFlagBits>(reflectModule.shader_stage), shaderModule , reflectModule });
 		}
@@ -189,14 +191,14 @@ void AirEngine::Core::Graphic::Shader::_CheckAttachmentOutputState(_PipelineData
 	result = spvReflectEnumerateOutputVariables(&fragmentShaderWrapper.reflectModule, &ioutputCount, output_vars.data());
 	Utils::Log::Exception("Failed to enumerate shader output variables.", result);
 
-	//auto& colorAttachments = Core::Device::RenderPassManager().RenderPass(_shaderSettings.renderPass)->ColorAttachmentMap(_shaderSettings.subpass);
-	//for (size_t i_var = 0; i_var < output_vars.size(); ++i_var)
-	//{
-	//	const SpvReflectInterfaceVariable& refl_var = *(output_vars[i_var]);
-	//	if (refl_var.decoration_flags & SPV_REFLECT_DECORATION_BUILT_IN) continue;
+	auto colorAttachments = Graphic::CoreObject::Instance::RenderPassManager().RenderPass(_shaderSettings.renderPass).ColorAttachmentMap(_shaderSettings.subpass);
+	for (size_t i_var = 0; i_var < output_vars.size(); ++i_var)
+	{
+		const SpvReflectInterfaceVariable& refl_var = *(output_vars[i_var]);
+		if (refl_var.decoration_flags & SPV_REFLECT_DECORATION_BUILT_IN) continue;
 
-	//	Utils::Log::Exception("Failed to find right output attachment.", colorAttachments[refl_var.name] != refl_var.location);
-	//}
+		Utils::Log::Exception("Failed to find right output attachment.", colorAttachments[refl_var.name] != refl_var.location);
+	}
 }
 
 void AirEngine::Core::Graphic::Shader::_PopulatePipelineSettings(_PipelineData& pipelineData)
@@ -356,7 +358,7 @@ void AirEngine::Core::Graphic::Shader::_CreateDescriptorLayouts(_PipelineData& p
 		layoutInfo.bindingCount = static_cast<uint32_t>(bindings.size());
 		layoutInfo.pBindings = bindings.data();
 
-		Utils::Log::Exception("Failed to create descriptor set layout.", vkCreateDescriptorSetLayout(CoreObject::Instance::VulkanDevice_(), &layoutInfo, nullptr, &slotDescriptor.vkDescriptorSetLayout));
+		Utils::Log::Exception("Failed to create descriptor set layout.", vkCreateDescriptorSetLayout(CoreObject::Instance::VkDevice_(), &layoutInfo, nullptr, &slotDescriptor.vkDescriptorSetLayout));
 
 		{
 
@@ -408,7 +410,7 @@ void AirEngine::Core::Graphic::Shader::_CreatePipeline(_PipelineData& pipelineDa
 	pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(pipelineData.descriptorSetLayouts.size());
 	pipelineLayoutInfo.pSetLayouts = pipelineData.descriptorSetLayouts.data();
 
-	Utils::Log::Exception("Failed to create pipeline layout.", vkCreatePipelineLayout(CoreObject::Instance::VulkanDevice_(), &pipelineLayoutInfo, nullptr, &_vkPipelineLayout));
+	Utils::Log::Exception("Failed to create pipeline layout.", vkCreatePipelineLayout(CoreObject::Instance::VkDevice_(), &pipelineLayoutInfo, nullptr, &_vkPipelineLayout));
 
 	VkGraphicsPipelineCreateInfo pipelineInfo{};
 	pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
@@ -422,19 +424,19 @@ void AirEngine::Core::Graphic::Shader::_CreatePipeline(_PipelineData& pipelineDa
 	pipelineInfo.pDepthStencilState = &pipelineData.depthStencil;
 	pipelineInfo.pColorBlendState = &pipelineData.colorBlending;
 	pipelineInfo.layout = _vkPipelineLayout;
-	//pipelineInfo.renderPass = Core::Device::RenderPassManager().RenderPass(_shaderSettings.renderPass)->VkRenderPass_();
-	//pipelineInfo.subpass = Core::Device::RenderPassManager().RenderPass(_shaderSettings.renderPass)->SubPassIndex(_shaderSettings.subpass);
+	pipelineInfo.renderPass = Graphic::CoreObject::Instance::RenderPassManager().RenderPass(_shaderSettings.renderPass).VkRenderPass_();
+	pipelineInfo.subpass = Graphic::CoreObject::Instance::RenderPassManager().RenderPass(_shaderSettings.renderPass).SubPassIndex(_shaderSettings.subpass);
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 	pipelineInfo.pDynamicState = &pipelineDynamicStateCreateInfo;
 
-	Utils::Log::Exception("Failed to create pipeline.", vkCreateGraphicsPipelines(CoreObject::Instance::VulkanDevice_(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &_vkPipeline));
+	Utils::Log::Exception("Failed to create pipeline.", vkCreateGraphicsPipelines(CoreObject::Instance::VkDevice_(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &_vkPipeline));
 }
 
 void AirEngine::Core::Graphic::Shader::_DestroyData(_PipelineData& pipelineData)
 {
 	for (auto& warp : pipelineData.shaderModuleWrappers)
 	{
-		vkDestroyShaderModule(CoreObject::Instance::VulkanDevice_(), warp.shaderModule, nullptr);
+		vkDestroyShaderModule(CoreObject::Instance::VkDevice_(), warp.shaderModule, nullptr);
 		spvReflectDestroyShaderModule(&warp.reflectModule);
 	}
 }
@@ -490,11 +492,11 @@ AirEngine::Core::Graphic::Shader::Shader()
 
 AirEngine::Core::Graphic::Shader::~Shader()
 {
-	vkDestroyPipeline(CoreObject::Instance::VulkanDevice_(), _vkPipeline, nullptr);
-	vkDestroyPipelineLayout(CoreObject::Instance::VulkanDevice_(), _vkPipelineLayout, nullptr);
+	vkDestroyPipeline(CoreObject::Instance::VkDevice_(), _vkPipeline, nullptr);
+	vkDestroyPipelineLayout(CoreObject::Instance::VkDevice_(), _vkPipelineLayout, nullptr);
 
 	for (const auto& slotDescriptorPair : _slotDescriptors)
 	{
-		vkDestroyDescriptorSetLayout(CoreObject::Instance::VulkanDevice_(), slotDescriptorPair.second.vkDescriptorSetLayout, nullptr);
+		vkDestroyDescriptorSetLayout(CoreObject::Instance::VkDevice_(), slotDescriptorPair.second.vkDescriptorSetLayout, nullptr);
 	}
 }

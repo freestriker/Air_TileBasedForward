@@ -32,7 +32,7 @@ AirEngine::Core::Graphic::Instance::ImageSampler::ImageSampler(VkFilter magFilte
 	samplerInfo.maxLod = 0.0f;
 	samplerInfo.mipLodBias = 0.0f;
 
-	Utils::Log::Exception("Failed to create sampler.", vkCreateSampler(Core::Graphic::CoreObject::Instance::VulkanDevice_(), &samplerInfo, nullptr, &_vkSampler));
+	Utils::Log::Exception("Failed to create sampler.", vkCreateSampler(Core::Graphic::CoreObject::Instance::VkDevice_(), &samplerInfo, nullptr, &_vkSampler));
 
 }
 
@@ -43,7 +43,7 @@ AirEngine::Core::Graphic::Instance::ImageSampler::ImageSampler(VkFilter filter, 
 
 AirEngine::Core::Graphic::Instance::ImageSampler::~ImageSampler()
 {
-	vkDestroySampler(Core::Graphic::CoreObject::Instance::VulkanDevice_(), _vkSampler, nullptr);
+	vkDestroySampler(Core::Graphic::CoreObject::Instance::VkDevice_(), _vkSampler, nullptr);
 }
 
 VkSampler AirEngine::Core::Graphic::Instance::ImageSampler::VkSampler_()

@@ -105,6 +105,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Core\Graphic\Instance\FrameBuffer.cpp" />
+    <ClCompile Include="source\Core\Graphic\Manager\RenderPassManager.cpp" />
+    <ClCompile Include="source\Core\Graphic\RenderPass\RenderPassBase.cpp" />
     <ClCompile Include="source\Core\Graphic\Shader.cpp" />
     <ClCompile Include="source\Asset\Texture2D.cpp" />
     <ClCompile Include="source\Asset\TextureCube.cpp" />
@@ -147,10 +150,13 @@
     <ClInclude Include="header\Core\Graphic\CoreObject\Instance.h" />
     <ClInclude Include="header\Core\Graphic\CoreObject\Window.h" />
     <ClInclude Include="header\Core\Graphic\Instance\Buffer.h" />
+    <ClInclude Include="header\Core\Graphic\Instance\FrameBuffer.h" />
     <ClInclude Include="header\Core\Graphic\Instance\Image.h" />
     <ClInclude Include="header\Core\Graphic\Instance\ImageSampler.h" />
     <ClInclude Include="header\Core\Graphic\Instance\Memory.h" />
     <ClInclude Include="header\Core\Graphic\Manager\MemoryManager.h" />
+    <ClInclude Include="header\Core\Graphic\Manager\RenderPassManager.h" />
+    <ClInclude Include="header\Core\Graphic\RenderPass\RenderPassBase.h" />
     <ClInclude Include="header\Core\Graphic\Shader.h" />
     <ClInclude Include="header\Core\IO\Asset\AssetBase.h" />
     <ClInclude Include="header\Core\IO\CoreObject\Instance.h" />
