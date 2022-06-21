@@ -131,7 +131,13 @@
     <ClCompile Include="source\Core\IO\CoreObject\Instance.cpp" />
     <ClCompile Include="source\Core\IO\Manager\AssetManager.cpp" />
     <ClCompile Include="source\Core\Logic\CoreObject\Thread.cpp" />
+    <ClCompile Include="source\Core\Logic\Object\Component.cpp" />
+    <ClCompile Include="source\Core\Logic\Object\GameObject.cpp" />
+    <ClCompile Include="source\Core\Logic\Object\Object.cpp" />
+    <ClCompile Include="source\Core\Logic\Object\Transform.cpp" />
+    <ClCompile Include="source\Utils\ChildBrotherTree.cpp" />
     <ClCompile Include="source\Utils\Condition.cpp" />
+    <ClCompile Include="source\Utils\CrossLinkableNode.cpp" />
     <ClCompile Include="source\Utils\Log.cpp" />
     <ClCompile Include="source\Utils\OrientedBoundingBox.cpp" />
     <ClCompile Include="source\Utils\SpirvReflect.cpp" />
@@ -163,7 +169,13 @@
     <ClInclude Include="header\Core\IO\CoreObject\Thread.h" />
     <ClInclude Include="header\Core\IO\Manager\AssetManager.h" />
     <ClInclude Include="header\Core\Logic\CoreObject\Thread.h" />
+    <ClInclude Include="header\Core\Logic\Object\Component.h" />
+    <ClInclude Include="header\Core\Logic\Object\GameObject.h" />
+    <ClInclude Include="header\Core\Logic\Object\Object.h" />
+    <ClInclude Include="header\Core\Logic\Object\Transform.h" />
+    <ClInclude Include="header\Utils\ChildBrotherTree.h" />
     <ClInclude Include="header\Utils\Condition.h" />
+    <ClInclude Include="header\Utils\CrossLinkableNode.h" />
     <ClInclude Include="header\Utils\Log.h" />
     <ClInclude Include="header\Utils\OrientedBoundingBox.h" />
     <ClInclude Include="header\Utils\SpirvReflect.h" />
