@@ -29,11 +29,34 @@ AirEngine::Core::Logic::Object::Component::Component(ComponentType type)
 	, Object()
 	, Utils::CrossLinkableNode()
 	, _gameObject(nullptr)
+	, _active(true)
+	, _neverStarted(true)
+	, _neverAwaked(true)
 {
 }
 
 AirEngine::Core::Logic::Object::Component::~Component()
 {
+}
+
+void AirEngine::Core::Logic::Object::Component::Awake()
+{
+	_neverStarted = true;
+	if (_neverAwaked)
+	{
+		_neverAwaked = false;
+		OnAwake();
+	}
+}
+
+void AirEngine::Core::Logic::Object::Component::Update()
+{
+	if (_neverStarted)
+	{
+		_neverStarted = false;
+		OnStart();
+	}
+	OnUpdate();
 }
 
 void AirEngine::Core::Logic::Object::Component::OnAwake()

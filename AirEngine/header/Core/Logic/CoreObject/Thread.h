@@ -2,6 +2,7 @@
 #include <Utils/ThreadBase.h>
 #include <mutex>
 #include <vector>
+#include <Core/Logic/Object/Component.h>
 
 namespace AirEngine
 {
@@ -16,6 +17,12 @@ namespace AirEngine
 				private:
 					class LogicThread final : public AirEngine::Utils::ThreadBase
 					{
+					private:
+						void IterateByDynamicBfs(Object::Component::ComponentType targetComponentType);
+						void IterateByStaticBfs(Object::Component::ComponentType targetComponentType);
+						void IterateByStaticBfs(Object::Component::ComponentType targetComponentType, std::vector<Object::Component*>& targetComponents);
+						void IterateByStaticBfs(std::vector<Object::Component::ComponentType> targetComponentTypes);
+						void IterateByStaticBfs(std::vector<Object::Component::ComponentType> targetComponentTypes, std::vector < std::vector<Object::Component*>>& targetComponents);
 					public:
 						bool _stopped;
 

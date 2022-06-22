@@ -33,6 +33,8 @@ namespace AirEngine
 					};
 				private:
 					bool _active;
+					bool _neverStarted;
+					bool _neverAwaked;
 					Component(const Component&) = delete;
 					Component& operator=(const Component&) = delete;
 					Component(Component&&) = delete;
@@ -45,6 +47,8 @@ namespace AirEngine
 					Component();
 					Component(ComponentType type);
 					virtual ~Component();
+					void Awake();
+					void Update();
 					virtual void OnAwake();
 					virtual void OnStart();
 					virtual void OnUpdate();

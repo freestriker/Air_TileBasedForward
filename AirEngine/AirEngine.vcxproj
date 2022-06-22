@@ -130,6 +130,7 @@
     <ClCompile Include="source\Core\IO\CoreObject\Thread.cpp" />
     <ClCompile Include="source\Core\IO\CoreObject\Instance.cpp" />
     <ClCompile Include="source\Core\IO\Manager\AssetManager.cpp" />
+    <ClCompile Include="source\Core\Logic\CoreObject\Instance.cpp" />
     <ClCompile Include="source\Core\Logic\CoreObject\Thread.cpp" />
     <ClCompile Include="source\Core\Logic\Object\Component.cpp" />
     <ClCompile Include="source\Core\Logic\Object\GameObject.cpp" />
@@ -142,6 +143,7 @@
     <ClCompile Include="source\Utils\OrientedBoundingBox.cpp" />
     <ClCompile Include="source\Utils\SpirvReflect.cpp" />
     <ClCompile Include="source\Utils\ThreadBase.cpp" />
+    <ClCompile Include="source\Utils\Time.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="header\Asset\Mesh.h" />
@@ -168,6 +170,7 @@
     <ClInclude Include="header\Core\IO\CoreObject\Instance.h" />
     <ClInclude Include="header\Core\IO\CoreObject\Thread.h" />
     <ClInclude Include="header\Core\IO\Manager\AssetManager.h" />
+    <ClInclude Include="header\Core\Logic\CoreObject\Instance.h" />
     <ClInclude Include="header\Core\Logic\CoreObject\Thread.h" />
     <ClInclude Include="header\Core\Logic\Object\Component.h" />
     <ClInclude Include="header\Core\Logic\Object\GameObject.h" />
@@ -180,6 +183,7 @@
     <ClInclude Include="header\Utils\OrientedBoundingBox.h" />
     <ClInclude Include="header\Utils\SpirvReflect.h" />
     <ClInclude Include="header\Utils\ThreadBase.h" />
+    <ClInclude Include="header\Utils\Time.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
