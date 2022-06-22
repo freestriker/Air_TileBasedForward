@@ -2,6 +2,7 @@
 #include <typeinfo>
 #include <string>
 #include <rttr/type>
+#include <rttr/registration>
 
 namespace AirEngine
 {
