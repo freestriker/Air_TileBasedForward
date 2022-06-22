@@ -31,7 +31,7 @@ namespace AirEngine
 			inline T* Child();
 			inline void AddChild(T* child);
 			inline void AddBrother(T* brother);
-			inline T* RemoveSelf();
+			inline typename T* RemoveSelf();
 			inline ChildBrotherTree<T>::Iterator ChildIterator();
 			inline ChildBrotherTree<T>::Iterator BrotherIterator();
 		};
@@ -92,7 +92,7 @@ namespace AirEngine
 			}
 		}
 		template<typename T>
-		inline T* ChildBrotherTree<T>::RemoveSelf()
+		inline typename T* ChildBrotherTree<T>::RemoveSelf()
 		{
 			ChildBrotherTree<T>* result = nullptr;
 			if (_parent)
