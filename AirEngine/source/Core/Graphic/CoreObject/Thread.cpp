@@ -4,6 +4,7 @@
 #include <vulkan/vulkan_core.h>
 #include "Core/Graphic/CoreObject/Instance.h"
 #include "Core/Graphic/Manager/MemoryManager.h"
+#include "Core/Graphic/Manager/DescriptorSetManager.h"
 
 AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread AirEngine::Core::Graphic::CoreObject::Thread::_graphicThread = AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread();
 
@@ -68,8 +69,10 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 		qDebug() << "AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()";
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 		Instance::MemoryManager().Collect();
+		Instance::DescriptorSetManager().Collect();
 	}
 	Instance::MemoryManager().Collect();
+	Instance::DescriptorSetManager().Collect();
 }
 
 void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnEnd()

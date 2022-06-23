@@ -105,7 +105,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Camera\CameraBase.cpp" />
+    <ClCompile Include="source\Camera\OrthographicCamera.cpp" />
+    <ClCompile Include="source\Camera\PerspectiveCamera.cpp" />
+    <ClCompile Include="source\Core\Graphic\Instance\DescriptorSet.cpp" />
     <ClCompile Include="source\Core\Graphic\Instance\FrameBuffer.cpp" />
+    <ClCompile Include="source\Core\Graphic\Manager\DescriptorSetManager.cpp" />
     <ClCompile Include="source\Core\Graphic\Manager\RenderPassManager.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\RenderPassBase.cpp" />
     <ClCompile Include="source\Core\Graphic\Shader.cpp" />
@@ -149,6 +154,8 @@
     <ClInclude Include="header\Asset\Mesh.h" />
     <ClInclude Include="header\Asset\Texture2D.h" />
     <ClInclude Include="header\Asset\TextureCube.h" />
+    <ClInclude Include="header\Camera\CameraBase.h" />
+    <ClInclude Include="header\Camera\OrthographicCamera.h" />
     <ClInclude Include="header\Core\Graphic\Command\CommandBuffer.h" />
     <ClInclude Include="header\Core\Graphic\Command\CommandPool.h" />
     <ClInclude Include="header\Core\Graphic\Command\Fence.h" />
@@ -158,10 +165,12 @@
     <ClInclude Include="header\Core\Graphic\CoreObject\Instance.h" />
     <ClInclude Include="header\Core\Graphic\CoreObject\Window.h" />
     <ClInclude Include="header\Core\Graphic\Instance\Buffer.h" />
+    <ClInclude Include="header\Core\Graphic\Instance\DescriptorSet.h" />
     <ClInclude Include="header\Core\Graphic\Instance\FrameBuffer.h" />
     <ClInclude Include="header\Core\Graphic\Instance\Image.h" />
     <ClInclude Include="header\Core\Graphic\Instance\ImageSampler.h" />
     <ClInclude Include="header\Core\Graphic\Instance\Memory.h" />
+    <ClInclude Include="header\Core\Graphic\Manager\DescriptorSetManager.h" />
     <ClInclude Include="header\Core\Graphic\Manager\MemoryManager.h" />
     <ClInclude Include="header\Core\Graphic\Manager\RenderPassManager.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\RenderPassBase.h" />
@@ -184,6 +193,7 @@
     <ClInclude Include="header\Utils\SpirvReflect.h" />
     <ClInclude Include="header\Utils\ThreadBase.h" />
     <ClInclude Include="header\Utils\Time.h" />
+    <ClInclude Include="header\Camera\PerspectiveCamera.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

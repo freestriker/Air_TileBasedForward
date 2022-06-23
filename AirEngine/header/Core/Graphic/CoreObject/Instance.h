@@ -16,6 +16,7 @@ namespace AirEngine
 			{
 				class MemoryManager;
 				class RenderPassManager;
+				class DescriptorSetManager;
 			}
 			namespace CoreObject
 			{
@@ -43,8 +44,9 @@ namespace AirEngine
 					static QVulkanDeviceFunctions* _qDeviceFunctions;
 					static VkDevice _vkDevice;
 
-					static  Manager::MemoryManager* _memoryManager;
-					static  Manager::RenderPassManager* _renderPassManager;
+					static Manager::MemoryManager* _memoryManager;
+					static Manager::RenderPassManager* _renderPassManager;
+					static Manager::DescriptorSetManager* _descriptorSetManager;
 					Instance();
 					static void Init();
 				public:
@@ -57,6 +59,7 @@ namespace AirEngine
 
 					static Manager::MemoryManager& MemoryManager();
 					static Manager::RenderPassManager& RenderPassManager();
+					static Manager::DescriptorSetManager& DescriptorSetManager();
 				};
 			}
 		}
