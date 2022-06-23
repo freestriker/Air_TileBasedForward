@@ -19,7 +19,9 @@ namespace AirEngine
 					virtual ~Object();
 					rttr::type Type();
 					virtual std::string ToString();
-
+				protected:
+					virtual void OnDestroy();
+					virtual void OnAwake();
 					RTTR_ENABLE()
 				};
 			}

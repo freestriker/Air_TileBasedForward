@@ -1,6 +1,7 @@
 #pragma once
 #include <vulkan/vulkan_core.h>
 #include <functional>
+#include "Core/Logic/Object/Object.h"
 
 namespace AirEngine
 {
@@ -12,7 +13,7 @@ namespace AirEngine
 			namespace Instance
 			{
 				class Memory;
-				class Buffer
+				class Buffer final: public Core::Logic::Object::Object
 				{
 				private:
 					VkBuffer _vkBuffer;

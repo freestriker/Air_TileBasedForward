@@ -23,3 +23,11 @@ std::string AirEngine::Core::Logic::Object::Object::ToString()
 {
 	return Type().get_name().to_string();
 }
+
+void AirEngine::Core::Logic::Object::Object::OnDestroy()
+{
+}
+
+void AirEngine::Core::Logic::Object::Object::OnAwake()
+{
+}

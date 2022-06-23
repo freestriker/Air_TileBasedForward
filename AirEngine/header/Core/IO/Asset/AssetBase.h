@@ -3,6 +3,7 @@
 #include <string>
 #include <rttr/registration>
 #include <rttr/type>
+#include "Core/Logic/Object/Object.h"
 
 namespace AirEngine
 {
@@ -24,7 +25,7 @@ namespace AirEngine
 			}
 			namespace Asset
 			{
-				class AssetBase
+				class AssetBase: public Core::Logic::Object::Object
 				{
 					friend class Manager::AssetManager;
 				private:
