@@ -6,8 +6,13 @@
 #include <map>
 #include <string>
 #include <qvulkanwindow.h>
+
 namespace AirEngine
 {
+	namespace Utils
+	{
+		class Condition;
+	}
 	namespace Core
 	{
 		namespace Graphic
@@ -47,6 +52,12 @@ namespace AirEngine
 					static Manager::MemoryManager* _memoryManager;
 					static Manager::RenderPassManager* _renderPassManager;
 					static Manager::DescriptorSetManager* _descriptorSetManager;
+
+					static Utils::Condition* _startPresentCondition;
+					static Utils::Condition* _endPresentCondition;
+					static Utils::Condition* _startRenderCondition;
+					static Utils::Condition* _endRenderCondition;
+
 					Instance();
 					static void Init();
 				public:
@@ -60,6 +71,11 @@ namespace AirEngine
 					static Manager::MemoryManager& MemoryManager();
 					static Manager::RenderPassManager& RenderPassManager();
 					static Manager::DescriptorSetManager& DescriptorSetManager();
+
+					static Utils::Condition& StartPresentCondition();
+					static Utils::Condition& EndPresentCondition();
+					static Utils::Condition& StartRenderCondition();
+					static Utils::Condition& EndRenderCondition();
 				};
 			}
 		}

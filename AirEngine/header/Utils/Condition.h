@@ -22,6 +22,7 @@ namespace AirEngine
 			~Condition();
 			void Wait();
 			void Awake();
+			bool IsReady();
 		};
 	}
 }

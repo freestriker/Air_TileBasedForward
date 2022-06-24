@@ -5,6 +5,10 @@
 #include "Core/Logic/CoreObject/Thread.h"
 #include "Core/IO/CoreObject/Thread.h"
 #include "Core/Graphic/CoreObject/Thread.h"
+#include "Utils/Log.h"
+#include "Utils/Condition.h"
+#include "Core/Graphic/CoreObject/Instance.h"
+
 AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow* AirEngine::Core::Graphic::CoreObject::Window::_window = nullptr;
 AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer* AirEngine::Core::Graphic::CoreObject::Window::_windowRenderer = nullptr;
 QVulkanInstance* AirEngine::Core::Graphic::CoreObject::Window::_vulkanInstance = nullptr;
@@ -52,7 +56,12 @@ void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::release
 
 void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::startNextFrame()
 {
-    //qDebug("AirEngine::Core::Graphic::CoreObject::Thread::VulkanWindowRenderer::startNextFrame()");
+    Utils::Log::Message("Instance::StartPresentCondition().Awake()");
+    Instance::StartPresentCondition().Awake();
+    Instance::EndPresentCondition().Wait();
+    Utils::Log::Message("Instance::EndPresentCondition().Wait()");
+
+    Utils::Log::Message("FrameReady()");
     _window->frameReady();
     _window->requestUpdate();
 }

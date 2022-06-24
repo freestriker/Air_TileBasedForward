@@ -6,6 +6,10 @@
 #include "Asset/Mesh.h"
 #include "Asset/Texture2D.h"
 #include "Asset/TextureCube.h"
+#include "Utils/Log.h"
+#include "Utils/Condition.h"
+#include "Core/Graphic/CoreObject/Instance.h"
+#include "Core/Logic/CoreObject/Instance.h"
 
 AirEngine::Core::Logic::CoreObject::Thread::LogicThread AirEngine::Core::Logic::CoreObject::Thread::_logicThread = AirEngine::Core::Logic::CoreObject::Thread::LogicThread();
 
@@ -404,6 +408,18 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	IO::CoreObject::Instance::AssetManager().Load<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");
 	while (!_stopped)
 	{
+		//Iterate basic
+		//Utils::Log::Message("Iterate basic");
+
+		if (Instance::NeedIterateRenderer())
+		{
+			//Iterate renderer
+			Utils::Log::Message("Iterate renderer");
+			Utils::Log::Message("Instance::StartRenderCondition().Awake()");
+			Graphic::CoreObject::Instance::StartRenderCondition().Awake();
+			Graphic::CoreObject::Instance::EndRenderCondition().Wait();
+			Utils::Log::Message("Instance::EndRenderCondition().Wait()");
+		}
 		std::this_thread::yield();
 	}
 }

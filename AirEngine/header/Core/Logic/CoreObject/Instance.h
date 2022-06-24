@@ -4,59 +4,69 @@
 #include <Utils/Condition.h>
 #include "Utils/Time.h"
 
-namespace AirEngine::Core::Logic
+namespace AirEngine
 {
-	namespace Object
+	namespace Utils
 	{
-		class GameObject;
-		class Component;
+		class Condition;
 	}
-	namespace CoreObject
+	namespace Core::Logic
 	{
-		class Thread;
-		class Instance final
+		namespace Object
 		{
-			friend class Thread;
-			friend class Logic::Object::GameObject;
-		public:
-			class RootGameObject final
+			class GameObject;
+			class Component;
+		}
+		namespace CoreObject
+		{
+			class Thread;
+			class Instance final
 			{
-				friend class Instance;
 				friend class Thread;
-			private:
-				Object::GameObject _gameObject;
-				RootGameObject();
-				~RootGameObject();
+				friend class Logic::Object::GameObject;
 			public:
-				inline void AddChild(Object::GameObject* child);
-				inline void RemoveChild(Object::GameObject* child);
-				inline Object::GameObject* Child();
-			};
-			class Time
-			{
-				friend class Instance;
-				friend class Thread;
+				class RootGameObject final
+				{
+					friend class Instance;
+					friend class Thread;
+				private:
+					Object::GameObject _gameObject;
+					RootGameObject();
+					~RootGameObject();
+				public:
+					inline void AddChild(Object::GameObject* child);
+					inline void RemoveChild(Object::GameObject* child);
+					inline Object::GameObject* Child();
+				};
+				class Time
+				{
+					friend class Instance;
+					friend class Thread;
+				private:
+					Utils::Time _time;
+					Time();
+					~Time();
+					inline void Launch();
+					inline void Refresh();
+				public:
+					inline double DeltaDuration();
+					inline double LaunchDuration();
+				};
+				static RootGameObject rootObject;
+				static Time time;
+				static void Exit();
+				static void WaitExit();
+				static bool NeedIterateRenderer();
+				static void SetNeedIterateRenderer(bool needIterateRenderer);
 			private:
-				Utils::Time _time;
-				Time();
-				~Time();
-				inline void Launch();
-				inline void Refresh();
-			public:
-				inline double DeltaDuration();
-				inline double LaunchDuration();
+				static Utils::Condition* _exitCondition;
+				static bool _needIterateRenderer;
+				static std::unordered_set< Object::GameObject*> _validGameObjectInIteration;
+				static std::unordered_set< Object::Component*> _validComponentInIteration;
+				Instance();
+				~Instance();
 			};
-			static RootGameObject rootObject;
-			static Time time;
-			static void Exit();
-			static void WaitExit();
-		private:
-			static Utils::Condition* _exitCondition;
-			static std::unordered_set< Object::GameObject*> _validGameObjectInIteration;
-			static std::unordered_set< Object::Component*> _validComponentInIteration;
-			Instance();
-			~Instance();
-		};
+		}
 	}
 }
 

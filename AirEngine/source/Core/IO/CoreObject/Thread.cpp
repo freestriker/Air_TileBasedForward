@@ -95,7 +95,6 @@ void AirEngine::Core::IO::CoreObject::Thread::IOThread::OnRun()
 {
 	while (!_stopped)
 	{
-		qDebug() << "AirEngine::Core::IO::CoreObject::Thread::IOThread::OnRun()";
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 		Instance::AssetManager().Collect();
 	}

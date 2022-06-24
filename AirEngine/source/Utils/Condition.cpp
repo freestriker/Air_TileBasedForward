@@ -31,3 +31,8 @@ void AirEngine::Utils::Condition::Awake()
 	_ready = true;
 	_conditionVariable.notify_all();
 }
+
+bool AirEngine::Utils::Condition::IsReady()
+{
+	return _ready;
+}
