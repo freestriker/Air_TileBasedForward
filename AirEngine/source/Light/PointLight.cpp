@@ -10,9 +10,11 @@ AirEngine::Light::LightBase::LightData AirEngine::Light::PointLight::GetLightDat
 	LightData lightDate{};
 	lightDate.type = 2;
 	lightDate.intensity = intensity;
-	lightDate.range = minRange;
-	lightDate.extraParamter = { maxRange, 0, 0, 0 };
+	lightDate.minRange = minRange;
+	lightDate.minRange = maxRange;
+	lightDate.extraParamter = { 0, 0, 0, 0 };
 	lightDate.position = GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, 0, 1);
+	lightDate.direction = { 0, 0, 0 };
 	lightDate.color = color;
 	return lightDate;
 }

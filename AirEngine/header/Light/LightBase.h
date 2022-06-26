@@ -13,16 +13,19 @@ namespace AirEngine
 			{
 				alignas(4) int type;
 				alignas(4) float intensity;
-				alignas(4) float range;
+				alignas(4) float minRange;
+				alignas(4) float maxRange;
 				alignas(16) glm::vec4 extraParamter;
 				alignas(16) glm::vec3 position;
+				alignas(16) glm::vec3 direction;
 				alignas(16) glm::vec4 color;
 			};
 			enum class LightType
 			{
 				DIRECTIONAL = 1,
 				POINT = 2,
-				SKY_BOX = 3
+				SKY_BOX = 3,
+				SPOT = 4
 			};
 			virtual LightData GetLightData() = 0;
 			glm::vec4 color;

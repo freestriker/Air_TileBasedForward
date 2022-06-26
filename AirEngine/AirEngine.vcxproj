@@ -146,6 +146,7 @@
     <ClCompile Include="source\Light\LightBase.cpp" />
     <ClCompile Include="source\Light\PointLight.cpp" />
     <ClCompile Include="source\Light\SkyBox.cpp" />
+    <ClCompile Include="source\Light\SpotLight.cpp" />
     <ClCompile Include="source\Utils\ChildBrotherTree.cpp" />
     <ClCompile Include="source\Utils\Condition.cpp" />
     <ClCompile Include="source\Utils\CrossLinkableNode.cpp" />
@@ -195,6 +196,7 @@
     <ClInclude Include="header\Light\LightBase.h" />
     <ClInclude Include="header\Light\PointLight.h" />
     <ClInclude Include="header\Light\SkyBox.h" />
+    <ClInclude Include="header\Light\SpotLight.h" />
     <ClInclude Include="header\Utils\ChildBrotherTree.h" />
     <ClInclude Include="header\Utils\Condition.h" />
     <ClInclude Include="header\Utils\CrossLinkableNode.h" />

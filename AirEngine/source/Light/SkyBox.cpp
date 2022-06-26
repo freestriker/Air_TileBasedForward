@@ -5,9 +5,11 @@ AirEngine::Light::LightBase::LightData AirEngine::Light::SkyBox::GetLightData()
 	LightData lightDate{};
 	lightDate.type = 3;
 	lightDate.intensity = intensity;
-	lightDate.range = 0;
+	lightDate.minRange = 0;
+	lightDate.maxRange = 0;
 	lightDate.extraParamter = glm::vec4(0);
 	lightDate.position = glm::vec3(0);
+	lightDate.direction = { 0, 0, 0 };
 	lightDate.color = color;
 	return lightDate;
 }

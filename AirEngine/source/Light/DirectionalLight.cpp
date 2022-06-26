@@ -10,9 +10,11 @@ AirEngine::Light::LightBase::LightData AirEngine::Light::DirectionalLight::GetLi
 	LightData lightDate{};
 	lightDate.type = 1;
 	lightDate.intensity = intensity;
-	lightDate.range = 0;
+	lightDate.minRange = 0;
+	lightDate.maxRange = 0;
 	lightDate.extraParamter = { 0, 0, 0, 0 };
-	lightDate.position = glm::normalize(glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, -1, 0)));
+	lightDate.position = glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, 0, 1));
+	lightDate.direction = glm::normalize(glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, -1, 0)));
 	lightDate.color = color;
 	return lightDate;
 }
