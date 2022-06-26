@@ -27,6 +27,10 @@ namespace AirEngine
 		{
 			class Thread;
 		}
+		namespace Manager
+		{
+			class RenderPassObject;
+		}
 	}
 	namespace Camera
 	{
@@ -52,33 +56,33 @@ namespace AirEngine
 				alignas(16)	glm::vec4 clipPlanes[6];
 			};
 		public:
+			const CameraType cameraType;
+			std::vector<std::string> renderPassNames;
+			std::map<std::string, Core::Graphic::Instance::Image*> attachments;
 			float nearFlat;
 			float farFlat;
 			float aspectRatio;
-			const CameraType cameraType;
-			std::map<std::string, Core::Graphic::Instance::Image*> attachments;
 		protected:
 		private:
 			Core::Graphic::Instance::Buffer* _buffer;
 			CameraData _cameraData;
-			glm::mat4 _modelMatrix;
 			glm::mat4 _projectionMatrix;
+			Core::Graphic::Manager::RenderPassObject* _renderPassObject;
 
 		public:
 			glm::mat4 ViewMatrix();
-			const glm::mat4* ModelMatrix();
 			const glm::mat4* ProjectionMatrix();
 			const glm::vec4* ClipPlanes();
 			void RefreshCameraData();
 			Core::Graphic::Instance::Buffer* CameraDataBuffer();
+			void RefreshRenderPassObject();
 		protected:
-			CameraBase(CameraType cameraType);
+			CameraBase(CameraType cameraType, std::vector<std::string> renderPassNames, std::map<std::string, Core::Graphic::Instance::Image*> attachments);
 			virtual ~CameraBase();
 			virtual void OnSetParameter(glm::vec4& parameter) = 0;
 			virtual void OnSetClipPlanes(glm::vec4* clipPlanes) = 0;
 			virtual void OnSetProjectionMatrix(glm::mat4& matrix) = 0;
 		private:
-			void OnUpdate() override;
 
 			RTTR_ENABLE(Core::Logic::Object::Component)
 		};

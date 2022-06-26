@@ -94,7 +94,7 @@ namespace AirEngine
 					std::map<std::string, Command::Semaphore*> _customSemaphores;
 
 					virtual void OnPopulateRenderPassSettings(RenderPassSettings& creator) = 0;
-					virtual void OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, void*>& renderDistanceTable) = 0;
+					virtual void OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, void*>& renderDistanceTable, std::map<std::string, Instance::Image*> attachemnts) = 0;
 					virtual void OnSubmit() = 0;
 					virtual void OnClear() = 0;
 				public:

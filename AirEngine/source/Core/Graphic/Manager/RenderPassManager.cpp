@@ -39,7 +39,7 @@ AirEngine::Core::Graphic::RenderPass::RenderPassBase& AirEngine::Core::Graphic::
     return *_renderPasss[name];
 }
 
-AirEngine::Core::Graphic::Manager::RenderPassObject* AirEngine::Core::Graphic::Manager::RenderPassManager::GetRenderPassObject(std::vector<std::string> renderPassNames, std::map<std::string, Instance::Image*> attachments)
+AirEngine::Core::Graphic::Manager::RenderPassObject* AirEngine::Core::Graphic::Manager::RenderPassManager::GetRenderPassObject(std::vector<std::string> renderPassNames, std::map<std::string, Instance::Image*> availableAttachments)
 {
     std::unique_lock<std::mutex> lock(_managerMutex);
 
@@ -58,7 +58,7 @@ AirEngine::Core::Graphic::Manager::RenderPassObject* AirEngine::Core::Graphic::M
     );
     for (size_t i = 0; i < passes.size(); i++)
     {
-        frameBuffers[i] = new Instance::FrameBuffer(passes[i], attachments);
+        frameBuffers[i] = new Instance::FrameBuffer(passes[i], availableAttachments);
         indexMap.emplace(renderPassNames[i], i);
     }
 
@@ -73,14 +73,17 @@ AirEngine::Core::Graphic::Manager::RenderPassObject* AirEngine::Core::Graphic::M
 
 void AirEngine::Core::Graphic::Manager::RenderPassManager::DestroyRenderPassObject(RenderPassObject*& renderPassObject)
 {
-    std::unique_lock<std::mutex> lock(_managerMutex);
-    for (const auto& frameBuffer : renderPassObject->_frameBuffers)
+    if (renderPassObject)
     {
-        delete frameBuffer;
+        std::unique_lock<std::mutex> lock(_managerMutex);
+        for (const auto& frameBuffer : renderPassObject->_frameBuffers)
+        {
+            delete frameBuffer;
+        }
+        _objects.erase(renderPassObject);
+        delete renderPassObject;
+        renderPassObject = nullptr;
     }
-    _objects.erase(renderPassObject);
-    delete renderPassObject;
-    renderPassObject = nullptr;
 }
 
 AirEngine::Core::Graphic::Manager::RenderPassObject::RenderPassObject()

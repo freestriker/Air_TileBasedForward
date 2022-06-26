@@ -58,7 +58,7 @@ namespace AirEngine
 					void AddRenderPass(RenderPass::RenderPassBase* renderPass);
 					void RemoveRenderPass(std::string name);
 					RenderPass::RenderPassBase& RenderPass(std::string name);
-					RenderPassObject* GetRenderPassObject(std::vector<std::string> renderPasses, std::map<std::string, Instance::Image*> attachments);
+					RenderPassObject* GetRenderPassObject(std::vector<std::string> renderPasses, std::map<std::string, Instance::Image*> availableAttachments);
 					void DestroyRenderPassObject(RenderPassObject*& renderPassObject);
 				};
 

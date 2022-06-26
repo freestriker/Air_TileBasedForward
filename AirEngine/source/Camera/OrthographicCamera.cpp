@@ -36,8 +36,8 @@ void AirEngine::Camera::OrthographicCamera::OnSetProjectionMatrix(glm::mat4& mat
 	);
 }
 
-AirEngine::Camera::OrthographicCamera::OrthographicCamera()
-	: CameraBase(CameraType::ORTHOGRAPHIC)
+AirEngine::Camera::OrthographicCamera::OrthographicCamera(std::vector<std::string> renderPassNames, std::map<std::string, Core::Graphic::Instance::Image*> attachments)
+	: CameraBase(CameraType::ORTHOGRAPHIC, renderPassNames, attachments)
 	, size(2.25f)
 {
 }
