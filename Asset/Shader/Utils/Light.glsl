@@ -10,7 +10,7 @@ struct Light
     int type;
     float intensity;
     float range;
-    float extraData;
+    vec4 extraData;
     vec3 position;
     vec4 color;
 };
@@ -59,7 +59,7 @@ vec3 DiffusePointLighting(Light light, vec3 worldNormal, vec3 worldPosition)
     float d = distance(light.position, worldPosition);
     float k1 = light.range / max(light.range, d);
     float attenuation = k1 * k1;
-    float win = pow(max(1 - pow(d / light.extraData, 4), 0), 2);
+    float win = pow(max(1 - pow(d / light.extraData.x, 4), 0), 2);
     vec4 color = light.intensity * attenuation * win * light.color * max(0, dot(worldNormal, -lightDirection));
     return color.xyz;
 }
