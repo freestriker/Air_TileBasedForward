@@ -33,10 +33,11 @@ namespace AirEngine
 				class RenderPassObject final
 				{
 					friend class RenderPassManager;
-				private:
+				public:
 					std::vector<RenderPass::RenderPassBase*> _passes;
 					std::vector<Instance::FrameBuffer*> _frameBuffers;
 					std::map<std::string, size_t> _indexMap;
+					VkExtent2D _extent;
 					RenderPassObject();
 					~RenderPassObject();
 					RenderPassObject(const RenderPassObject&) = delete;

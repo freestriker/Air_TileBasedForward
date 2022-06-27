@@ -10,6 +10,7 @@
 #include "Utils/Condition.h"
 #include "Core/Graphic/CoreObject/Instance.h"
 #include "Core/Logic/CoreObject/Instance.h"
+#include "Camera/PerspectiveCamera.h"
 
 AirEngine::Core::Logic::CoreObject::Thread::LogicThread AirEngine::Core::Logic::CoreObject::Thread::_logicThread = AirEngine::Core::Logic::CoreObject::Thread::LogicThread();
 
@@ -406,6 +407,14 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	IO::CoreObject::Instance::AssetManager().Load<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");
 	IO::CoreObject::Instance::AssetManager().Load<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");
 	IO::CoreObject::Instance::AssetManager().Load<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");
+
+	////Camera
+	//Object::GameObject* cameraGo = new Logic::Object::GameObject("Camera");
+	//CoreObject::Instance::rootObject.AddChild(cameraGo);
+	//cameraGo->AddComponent(new Camera::PerspectiveCamera());
+	//cameraGo->AddComponent(new Test::CameraMoveBehaviour());
+
+
 	while (!_stopped)
 	{
 		//Iterate basic

@@ -5,14 +5,28 @@
 
 namespace AirEngine
 {
+	namespace Asset
+	{
+		class Mesh;
+	}
 	namespace Core
 	{
 		namespace Graphic
 		{
+			class Shader;
+			class Material;
+			namespace RenderPass
+			{
+				class RenderPassBase;
+			}
 			namespace Instance
 			{
 				class Buffer;
 				class Image;
+			}
+			namespace Manager
+			{
+				class RenderPassObject;
 			}
 			namespace Command
 			{
@@ -56,6 +70,11 @@ namespace AirEngine
 					void Submit(std::vector<Command::Semaphore*> signalSemaphores);
 					void Submit();
 					void WaitForFinish();
+					void BeginRenderPass(Graphic::RenderPass::RenderPassBase* renderPass, Graphic::Manager::RenderPassObject* renderPassObject, std::vector<VkClearValue> clearValues);
+					void EndRenderPass();
+					void BindMesh(Asset::Mesh* mesh);
+					void BindMaterial(Material* material);
+					void Draw();
 				};
 			}
 		}

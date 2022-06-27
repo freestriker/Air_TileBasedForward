@@ -6,6 +6,10 @@
 
 namespace AirEngine
 {
+	namespace Renderer
+	{
+		class Renderer;
+	}
 	namespace Core
 	{
 		namespace Graphic
@@ -23,6 +27,7 @@ namespace AirEngine
 			namespace Manager
 			{
 				class RenderPassManager;
+				class RenderPassObject;
 			}
 			namespace RenderPass
 			{
@@ -94,7 +99,7 @@ namespace AirEngine
 					std::map<std::string, Command::Semaphore*> _customSemaphores;
 
 					virtual void OnPopulateRenderPassSettings(RenderPassSettings& creator) = 0;
-					virtual void OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, void*>& renderDistanceTable, std::map<std::string, Instance::Image*> attachemnts) = 0;
+					virtual void OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Manager::RenderPassObject* renderPassObject) = 0;
 					virtual void OnSubmit() = 0;
 					virtual void OnClear() = 0;
 				public:

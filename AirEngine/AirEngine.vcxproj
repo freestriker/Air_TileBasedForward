@@ -114,6 +114,7 @@
     <ClCompile Include="source\Core\Graphic\Manager\DescriptorSetManager.cpp" />
     <ClCompile Include="source\Core\Graphic\Manager\RenderPassManager.cpp" />
     <ClCompile Include="source\Core\Graphic\Material.cpp" />
+    <ClCompile Include="source\Core\Graphic\RenderPass\OpaqueRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\RenderPassBase.cpp" />
     <ClCompile Include="source\Core\Graphic\Shader.cpp" />
     <ClCompile Include="source\Asset\Texture2D.cpp" />
@@ -183,6 +184,7 @@
     <ClInclude Include="header\Core\Graphic\Manager\MemoryManager.h" />
     <ClInclude Include="header\Core\Graphic\Manager\RenderPassManager.h" />
     <ClInclude Include="header\Core\Graphic\Material.h" />
+    <ClInclude Include="header\Core\Graphic\RenderPass\OpaqueRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\RenderPassBase.h" />
     <ClInclude Include="header\Core\Graphic\Shader.h" />
     <ClInclude Include="header\Core\IO\Asset\AssetBase.h" />

@@ -5,6 +5,7 @@
 #include "Core/Graphic/Instance/FrameBuffer.h"
 #include <map>
 #include <string>
+#include "Core/Graphic/Instance/Image.h"
 
 AirEngine::Core::Graphic::Manager::RenderPassManager::RenderPassManager()
     : _managerMutex()
@@ -62,6 +63,13 @@ AirEngine::Core::Graphic::Manager::RenderPassObject* AirEngine::Core::Graphic::M
         indexMap.emplace(renderPassNames[i], i);
     }
 
+    VkExtent2D extent{0, 0};
+    for (auto& attachment : availableAttachments)
+    {
+        extent.width = extent.width >= attachment.second->VkExtent3D_().width ? extent.width : attachment.second->VkExtent3D_().width;
+        extent.height = extent.height >= attachment.second->VkExtent3D_().height ? extent.height : attachment.second->VkExtent3D_().height;
+    }
+
     RenderPassObject* object = new RenderPassObject();
     object->_passes = passes;
     object->_frameBuffers = frameBuffers;
@@ -90,6 +98,7 @@ AirEngine::Core::Graphic::Manager::RenderPassObject::RenderPassObject()
     : _passes()
     , _frameBuffers()
     , _indexMap()
+    , _extent()
 {
 }
 
