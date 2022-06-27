@@ -5,6 +5,7 @@ RTTR_REGISTRATION
 }
 
 AirEngine::Behaviour::Behaviour::Behaviour()
+	: Component(ComponentType::BEHAVIOUR)
 {
 }
 

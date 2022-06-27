@@ -9,7 +9,7 @@ namespace AirEngine
 		{
 		public:
 			Behaviour();
-			~Behaviour();
+			virtual ~Behaviour();
 			virtual void OnAwake()override;
 			virtual void OnStart()override;
 			virtual void OnUpdate()override;

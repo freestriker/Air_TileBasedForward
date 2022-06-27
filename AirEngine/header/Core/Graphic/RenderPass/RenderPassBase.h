@@ -96,6 +96,10 @@ namespace AirEngine
 				protected:
 					RenderPassBase(std::string name, uint32_t renderIndex);
 					virtual ~RenderPassBase();
+					RenderPassBase(const RenderPassBase&) = delete;
+					RenderPassBase& operator=(const RenderPassBase&) = delete;
+					RenderPassBase(RenderPassBase&&) = delete;
+					RenderPassBase& operator=(RenderPassBase&&) = delete;
 					std::map<std::string, Command::Semaphore*> _customSemaphores;
 
 					virtual void OnPopulateRenderPassSettings(RenderPassSettings& creator) = 0;

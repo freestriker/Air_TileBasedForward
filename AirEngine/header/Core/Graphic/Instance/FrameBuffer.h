@@ -22,7 +22,7 @@ namespace AirEngine
 					VkFramebuffer _vkFrameBuffer;
 					std::map<std::string, Image*> _attachments;
 				public:
-					FrameBuffer(RenderPass::RenderPassBase* renderPass, std::map<std::string, Image*> availableAttachments);
+					FrameBuffer(RenderPass::RenderPassBase* renderPass, std::map<std::string, Image*> availableAttachments, VkExtent2D extent);
 					~FrameBuffer();
 					VkFramebuffer VkFramebuffer_();
 					Image* Attachment(std::string name);

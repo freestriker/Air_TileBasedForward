@@ -57,17 +57,18 @@ AirEngine::Core::Graphic::Manager::RenderPassObject* AirEngine::Core::Graphic::M
             return a->RenderIndex() < b->RenderIndex();
         }
     );
-    for (size_t i = 0; i < passes.size(); i++)
-    {
-        frameBuffers[i] = new Instance::FrameBuffer(passes[i], availableAttachments);
-        indexMap.emplace(renderPassNames[i], i);
-    }
 
-    VkExtent2D extent{0, 0};
+    VkExtent2D extent{ 0, 0 };
     for (auto& attachment : availableAttachments)
     {
         extent.width = extent.width >= attachment.second->VkExtent3D_().width ? extent.width : attachment.second->VkExtent3D_().width;
         extent.height = extent.height >= attachment.second->VkExtent3D_().height ? extent.height : attachment.second->VkExtent3D_().height;
+    }
+
+    for (size_t i = 0; i < passes.size(); i++)
+    {
+        frameBuffers[i] = new Instance::FrameBuffer(passes[i], availableAttachments, extent);
+        indexMap.emplace(renderPassNames[i], i);
     }
 
     RenderPassObject* object = new RenderPassObject();

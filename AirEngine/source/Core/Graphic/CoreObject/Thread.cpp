@@ -9,6 +9,11 @@
 #include "Utils/Condition.h"
 #include "Core/Graphic/CoreObject/Instance.h"
 #include "Core/Logic/CoreObject/Instance.h"
+#include "Core/Graphic/Manager/RenderPassManager.h"
+#include "Core/Graphic/CoreObject/Instance.h"
+#include "Core/Graphic/RenderPass/BackgroundRenderPass.h"
+#include "Core/Graphic/RenderPass/OpaqueRenderPass.h"
+#include "Core/Graphic/RenderPass/TransparentRenderPass.h"
 
 AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread AirEngine::Core::Graphic::CoreObject::Thread::_graphicThread = AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread();
 
@@ -64,6 +69,9 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnStart()
 void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnThreadStart()
 {
 	qDebug() << "AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnThreadStart()";
+	CoreObject::Instance::RenderPassManager().AddRenderPass(new RenderPass::BackgroundRenderPass());
+	CoreObject::Instance::RenderPassManager().AddRenderPass(new RenderPass::OpaqueRenderPass());
+	CoreObject::Instance::RenderPassManager().AddRenderPass(new RenderPass::TransparentRenderPass());
 }
 
 void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()

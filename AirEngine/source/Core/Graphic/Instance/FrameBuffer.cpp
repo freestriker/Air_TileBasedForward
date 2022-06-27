@@ -5,7 +5,7 @@
 #include "Utils/Log.h"
 #include "Core/Graphic/CoreObject/Instance.h"
 
-AirEngine::Core::Graphic::Instance::FrameBuffer::FrameBuffer(RenderPass::RenderPassBase* renderPass, std::map<std::string, Image*> availableAttachments)
+AirEngine::Core::Graphic::Instance::FrameBuffer::FrameBuffer(RenderPass::RenderPassBase* renderPass, std::map<std::string, Image*> availableAttachments, VkExtent2D extent)
     : _vkFrameBuffer(VK_NULL_HANDLE)
     , _attachments()
 {
@@ -26,8 +26,8 @@ AirEngine::Core::Graphic::Instance::FrameBuffer::FrameBuffer(RenderPass::RenderP
     framebufferInfo.renderPass = renderPass->VkRenderPass_();
     framebufferInfo.attachmentCount = static_cast<uint32_t>(views.size());
     framebufferInfo.pAttachments = views.data();
-    framebufferInfo.width = _attachments[0]->VkExtent3D_().width;
-    framebufferInfo.height = _attachments[0]->VkExtent3D_().height;
+    framebufferInfo.width = extent.width;
+    framebufferInfo.height = extent.height;
     framebufferInfo.layers = 1;
 
     VkFramebuffer newVkFrameBuffer = VK_NULL_HANDLE;
