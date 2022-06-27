@@ -216,9 +216,9 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::BeginRenderPass(Graphic::
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = renderPass->VkRenderPass_();
-    renderPassInfo.framebuffer = renderPassObject->_frameBuffers[renderPassObject->_indexMap[renderPass->Name()]]->VkFramebuffer_();
+    renderPassInfo.framebuffer = renderPassObject->FrameBuffer(renderPass->Name())->VkFramebuffer_();
     renderPassInfo.renderArea.offset = { 0, 0 };
-    renderPassInfo.renderArea.extent = renderPassObject->_extent;
+    renderPassInfo.renderArea.extent = renderPassObject->Extent();
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
     renderPassInfo.pClearValues = clearValues.data();
 
@@ -249,4 +249,27 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::BindMaterial(Material* ma
 void AirEngine::Core::Graphic::Command::CommandBuffer::Draw()
 {
     vkCmdDrawIndexed(_vkCommandBuffer, _commandData.indexCount, 1, 0, 0, 0);
+}
+
+void AirEngine::Core::Graphic::Command::CommandBuffer::Blit(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Image* dstImage, VkImageLayout dstImageLayout, VkFilter filter)
+{
+    auto src = srcImage->VkExtent3D_();
+    auto dst = dstImage->VkExtent3D_();
+    auto layerCount = std::min(srcImage->LayerCount(), dstImage->LayerCount());
+    auto srcSubresources = srcImage->VkImageSubresourceLayers_();
+    auto dstSubresources = dstImage->VkImageSubresourceLayers_();
+    std::vector< VkImageBlit> infos = std::vector< VkImageBlit>(layerCount);
+    for (uint32_t i = 0; i < layerCount; i++)
+    {
+        auto& blit = infos[i];
+
+        blit.srcSubresource = srcSubresources[i];
+        blit.srcOffsets[0] = { 0, 0, 0 };
+        blit.srcOffsets[1] = *reinterpret_cast<VkOffset3D*>(&src);
+        blit.dstSubresource = dstSubresources[i];
+        blit.dstOffsets[0] = { 0, 0, 0 };
+        blit.dstOffsets[1] = *reinterpret_cast<VkOffset3D*>(&dst);
+    }
+
+    vkCmdBlitImage(_vkCommandBuffer, srcImage->VkImage_(), srcImageLayout, dstImage->VkImage_(), dstImageLayout, static_cast<uint32_t>(layerCount), infos.data(), filter);
 }

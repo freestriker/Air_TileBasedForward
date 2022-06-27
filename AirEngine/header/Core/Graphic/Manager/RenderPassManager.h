@@ -34,6 +34,9 @@ namespace AirEngine
 				{
 					friend class RenderPassManager;
 				public:
+					Instance::FrameBuffer* FrameBuffer(std::string name);
+					VkExtent2D Extent();
+				private:
 					std::vector<RenderPass::RenderPassBase*> _passes;
 					std::vector<Instance::FrameBuffer*> _frameBuffers;
 					std::map<std::string, size_t> _indexMap;

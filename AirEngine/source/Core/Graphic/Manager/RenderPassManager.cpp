@@ -94,6 +94,16 @@ void AirEngine::Core::Graphic::Manager::RenderPassManager::DestroyRenderPassObje
     }
 }
 
+AirEngine::Core::Graphic::Instance::FrameBuffer* AirEngine::Core::Graphic::Manager::RenderPassObject::FrameBuffer(std::string name)
+{
+    return _frameBuffers[_indexMap[name]];
+}
+
+VkExtent2D AirEngine::Core::Graphic::Manager::RenderPassObject::Extent()
+{
+    return _extent;
+}
+
 AirEngine::Core::Graphic::Manager::RenderPassObject::RenderPassObject()
     : _passes()
     , _frameBuffers()

@@ -75,6 +75,7 @@ namespace AirEngine
 					void BindMesh(Asset::Mesh* mesh);
 					void BindMaterial(Material* material);
 					void Draw();
+					void Blit(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Image* dstImage, VkImageLayout dstImageLayout, VkFilter filter);
 				};
 			}
 		}

@@ -46,8 +46,6 @@ namespace AirEngine
 			private:
 				Shader* _shader;
 				std::map<std::string, Slot> _slots;
-				void RefreshSlotData(std::vector<std::string> slotNames);
-				void SetSlotData(std::string name, std::vector<uint32_t> bindingIndex, std::vector< Graphic::Instance::DescriptorSet::DescriptorSetWriteData> data);
 				void OnDestroy()override;
 			public:
 				Material(Shader* shader);
@@ -57,6 +55,8 @@ namespace AirEngine
 				Material(Material&&) = delete;
 				Material& operator=(Material&&) = delete;
 
+				void RefreshSlotData(std::vector<std::string> slotNames);
+				void SetSlotData(std::string name, std::vector<uint32_t> bindingIndex, std::vector< Graphic::Instance::DescriptorSet::DescriptorSetWriteData> data);
 				Asset::TextureCube* GetTextureCube(std::string name);
 				void SetTextureCube(std::string name, Asset::TextureCube* textureCube);
 				Asset::Texture2D* GetTexture2D(std::string name);

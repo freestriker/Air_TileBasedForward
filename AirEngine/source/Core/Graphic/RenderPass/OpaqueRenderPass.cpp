@@ -59,7 +59,7 @@ void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnPopulateCommandBu
 	{
 		Command::ImageMemoryBarrier depthAttachmentAcquireBarrier = Command::ImageMemoryBarrier
 		(
-			renderPassObject->_frameBuffers[renderPassObject->_indexMap[Name()]]->Attachment("DepthAttachment"),
+			renderPassObject->FrameBuffer(Name())->Attachment("DepthAttachment"),
 			VK_IMAGE_LAYOUT_UNDEFINED,
 			VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
 			0,
@@ -74,7 +74,7 @@ void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnPopulateCommandBu
 	{
 		Command::ImageMemoryBarrier colorAttachmentAcquireBarrier = Command::ImageMemoryBarrier
 		(
-			renderPassObject->_frameBuffers[renderPassObject->_indexMap[Name()]]->Attachment("ColorAttachment"),
+			renderPassObject->FrameBuffer(Name())->Attachment("ColorAttachment"),
 			VK_IMAGE_LAYOUT_UNDEFINED,
 			VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
 			0,
