@@ -105,6 +105,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Behaviour\Behaviour.cpp" />
     <ClCompile Include="source\Camera\CameraBase.cpp" />
     <ClCompile Include="source\Camera\OrthographicCamera.cpp" />
     <ClCompile Include="source\Camera\PerspectiveCamera.cpp" />
@@ -147,6 +148,7 @@
     <ClCompile Include="source\Light\PointLight.cpp" />
     <ClCompile Include="source\Light\SkyBox.cpp" />
     <ClCompile Include="source\Light\SpotLight.cpp" />
+    <ClCompile Include="source\Renderer\Renderer.cpp" />
     <ClCompile Include="source\Utils\ChildBrotherTree.cpp" />
     <ClCompile Include="source\Utils\Condition.cpp" />
     <ClCompile Include="source\Utils\CrossLinkableNode.cpp" />
@@ -160,6 +162,7 @@
     <ClInclude Include="header\Asset\Mesh.h" />
     <ClInclude Include="header\Asset\Texture2D.h" />
     <ClInclude Include="header\Asset\TextureCube.h" />
+    <ClInclude Include="header\Behaviour\Behaviour.h" />
     <ClInclude Include="header\Camera\CameraBase.h" />
     <ClInclude Include="header\Camera\OrthographicCamera.h" />
     <ClInclude Include="header\Core\Graphic\Command\CommandBuffer.h" />
@@ -197,6 +200,7 @@
     <ClInclude Include="header\Light\PointLight.h" />
     <ClInclude Include="header\Light\SkyBox.h" />
     <ClInclude Include="header\Light\SpotLight.h" />
+    <ClInclude Include="header\Renderer\Renderer.h" />
     <ClInclude Include="header\Utils\ChildBrotherTree.h" />
     <ClInclude Include="header\Utils\Condition.h" />
     <ClInclude Include="header\Utils\CrossLinkableNode.h" />

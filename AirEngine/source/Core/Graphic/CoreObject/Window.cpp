@@ -11,7 +11,7 @@
 
 AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow* AirEngine::Core::Graphic::CoreObject::Window::_window = nullptr;
 AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer* AirEngine::Core::Graphic::CoreObject::Window::_windowRenderer = nullptr;
-QVulkanInstance* AirEngine::Core::Graphic::CoreObject::Window::_vulkanInstance = nullptr;
+QVulkanInstance* AirEngine::Core::Graphic::CoreObject::Window::_qVulkanInstance = nullptr;
 
 QVulkanWindowRenderer* AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow::createRenderer()
 {
@@ -56,6 +56,7 @@ void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::release
 
 void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::startNextFrame()
 {
+    Utils::Log::Message("------------------------------------------------------------------");
     Utils::Log::Message("Instance::StartPresentCondition().Awake()");
     Instance::StartPresentCondition().Awake();
     Instance::EndPresentCondition().Wait();
@@ -64,6 +65,7 @@ void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::startNe
     Utils::Log::Message("FrameReady()");
     _window->frameReady();
     _window->requestUpdate();
+    Utils::Log::Message("------------------------------------------------------------------");
 }
 void AirEngine::Core::Graphic::CoreObject::Window::Init()
 {
@@ -73,9 +75,9 @@ void AirEngine::Core::Graphic::CoreObject::Window::Start()
 {
     QLoggingCategory::setFilterRules(QStringLiteral("qt.vulkan=true"));
 
-    _vulkanInstance = new QVulkanInstance();
+    _qVulkanInstance = new QVulkanInstance();
 
-    _vulkanInstance->setLayers(QByteArrayList()
+    _qVulkanInstance->setLayers(QByteArrayList()
         << "VK_LAYER_RENDERDOC_Capture"
         << "VK_LAYER_GOOGLE_threading"
         << "VK_LAYER_LUNARG_parameter_validation"
@@ -84,11 +86,11 @@ void AirEngine::Core::Graphic::CoreObject::Window::Start()
         << "VK_LAYER_LUNARG_image"
         << "VK_LAYER_LUNARG_swapchain"
         << "VK_LAYER_GOOGLE_unique_objects");
-    if (!_vulkanInstance->create())
-        qFatal("Failed to create Vulkan instance: %d", _vulkanInstance->errorCode());
+    if (!_qVulkanInstance->create())
+        qFatal("Failed to create Vulkan instance: %d", _qVulkanInstance->errorCode());
 
     _window = new VulkanWindow();
-    _window->setVulkanInstance(_vulkanInstance);
+    _window->setVulkanInstance(_qVulkanInstance);
     auto queuePrioritieMapPtr = new std::map<uint32_t, std::vector<float>>();
     _window->setQueueCreateInfoModifier([](const VkQueueFamilyProperties* properties, uint32_t queueFamilyCount, QList<VkDeviceQueueCreateInfo>& infos)->void
     {

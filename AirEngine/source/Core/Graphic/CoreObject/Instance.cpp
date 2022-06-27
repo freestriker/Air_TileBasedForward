@@ -97,7 +97,7 @@ void AirEngine::Core::Graphic::CoreObject::Instance::Init()
 	_vkInstance = Window::_window->vulkanInstance()->vkInstance();
 	_vkPhysicalDevice = Window::_window->physicalDevice();
 	_vkDevice = Window::_window->device();
-	_qDeviceFunctions = Window::_vulkanInstance->deviceFunctions(_vkDevice);
+	_qDeviceFunctions = Window::_qVulkanInstance->deviceFunctions(_vkDevice);
 
 	VkQueue queue = VK_NULL_HANDLE;
 	_qDeviceFunctions->vkGetDeviceQueue(_vkDevice, 0, 0, &queue);

@@ -32,7 +32,7 @@ namespace AirEngine
                         void startNextFrame() override;
 
                     };
-					static QVulkanInstance* _vulkanInstance;
+					static QVulkanInstance* _qVulkanInstance;
 					static VulkanWindow* _window;
 					static VulkanWindowRenderer* _windowRenderer;
 					static void Init();
