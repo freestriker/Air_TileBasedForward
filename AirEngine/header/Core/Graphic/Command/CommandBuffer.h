@@ -72,9 +72,8 @@ namespace AirEngine
 					void WaitForFinish();
 					void BeginRenderPass(Graphic::RenderPass::RenderPassBase* renderPass, Graphic::Manager::RenderPassObject* renderPassObject, std::vector<VkClearValue> clearValues);
 					void EndRenderPass();
-					void BindMesh(Asset::Mesh* mesh);
 					void BindMaterial(Material* material);
-					void Draw();
+					void DrawMesh(Asset::Mesh* mesh);
 					void Blit(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Image* dstImage, VkImageLayout dstImageLayout, VkFilter filter);
 				};
 			}

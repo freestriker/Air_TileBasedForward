@@ -230,13 +230,13 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::EndRenderPass()
     vkCmdEndRenderPass(_vkCommandBuffer);
 }
 
-void AirEngine::Core::Graphic::Command::CommandBuffer::BindMesh(Asset::Mesh* mesh)
+void AirEngine::Core::Graphic::Command::CommandBuffer::DrawMesh(Asset::Mesh* mesh)
 {
     VkBuffer vertexBuffers[] = { mesh->VertexBuffer().VkBuffer_() };
     VkDeviceSize offsets[] = { 0 };
     vkCmdBindVertexBuffers(_vkCommandBuffer, 0, 1, vertexBuffers, offsets);
-    _commandData.indexCount = static_cast<uint32_t>(mesh->Indices().size());
     vkCmdBindIndexBuffer(_vkCommandBuffer, mesh->IndexBuffer().VkBuffer_(), 0, VK_INDEX_TYPE_UINT32);
+    vkCmdDrawIndexed(_vkCommandBuffer, static_cast<uint32_t>(mesh->Indices().size()), 1, 0, 0, 0);
 }
 
 void AirEngine::Core::Graphic::Command::CommandBuffer::BindMaterial(Material* material)
@@ -244,11 +244,6 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::BindMaterial(Material* ma
     vkCmdBindPipeline(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->Shader()->VkPipeline_());
     auto sets = material->VkDescriptorSets();
     vkCmdBindDescriptorSets(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->PipelineLayout(), 0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
-}
-
-void AirEngine::Core::Graphic::Command::CommandBuffer::Draw()
-{
-    vkCmdDrawIndexed(_vkCommandBuffer, _commandData.indexCount, 1, 0, 0, 0);
 }
 
 void AirEngine::Core::Graphic::Command::CommandBuffer::Blit(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Image* dstImage, VkImageLayout dstImageLayout, VkFilter filter)

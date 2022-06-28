@@ -152,7 +152,13 @@
     <ClCompile Include="source\Light\SkyBox.cpp" />
     <ClCompile Include="source\Light\SpotLight.cpp" />
     <ClCompile Include="source\Renderer\Renderer.cpp" />
+    <ClCompile Include="source\Test\BackgroundRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\CameraMoveBehaviour.cpp" />
+    <ClCompile Include="source\Test\GlassRendererBehaviour.cpp" />
+    <ClCompile Include="source\Test\MirrorRendererBehaviour.cpp" />
+    <ClCompile Include="source\Test\OpaqueRendererBehaviour.cpp" />
+    <ClCompile Include="source\Test\SelfRotateBehaviour.cpp" />
+    <ClCompile Include="source\Test\TransparentRendererBehaviour.cpp" />
     <ClCompile Include="source\Utils\ChildBrotherTree.cpp" />
     <ClCompile Include="source\Utils\Condition.cpp" />
     <ClCompile Include="source\Utils\CrossLinkableNode.cpp" />
@@ -208,7 +214,13 @@
     <ClInclude Include="header\Light\SkyBox.h" />
     <ClInclude Include="header\Light\SpotLight.h" />
     <ClInclude Include="header\Renderer\Renderer.h" />
+    <ClInclude Include="header\Test\BackgroundRendererBehaviour.h" />
     <ClInclude Include="header\Test\CameraMoveBehaviour.h" />
+    <ClInclude Include="header\Test\GlassRendererBehaviour.h" />
+    <ClInclude Include="header\Test\MirrorRendererBehaviour.h" />
+    <ClInclude Include="header\Test\OpaqueRendererBehaviour.h" />
+    <ClInclude Include="header\Test\SelfRotateBehaviour.h" />
+    <ClInclude Include="header\Test\TransparentRendererBehaviour.h" />
     <ClInclude Include="header\Utils\ChildBrotherTree.h" />
     <ClInclude Include="header\Utils\Condition.h" />
     <ClInclude Include="header\Utils\CrossLinkableNode.h" />

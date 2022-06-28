@@ -84,9 +84,8 @@ void AirEngine::Core::Graphic::RenderPass::TransparentRenderPass::OnPopulateComm
 	{
 		auto& renderer = iter->second;
 
-		_renderCommandBuffer->BindMesh(renderer->mesh);
 		_renderCommandBuffer->BindMaterial(renderer->material);
-		_renderCommandBuffer->Draw();
+		_renderCommandBuffer->DrawMesh(renderer->mesh);
 
 		_renderCommandBuffer->AddPipelineBarrier(
 			VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,

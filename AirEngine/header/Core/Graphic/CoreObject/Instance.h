@@ -15,6 +15,13 @@ namespace AirEngine
 	}
 	namespace Core
 	{
+		namespace Logic
+		{
+			namespace Object
+			{
+				class Component;
+			}
+		}
 		namespace Graphic
 		{
 			namespace Manager
@@ -58,6 +65,10 @@ namespace AirEngine
 					static Utils::Condition* _startRenderCondition;
 					static Utils::Condition* _endRenderCondition;
 
+					static std::vector<Logic::Object::Component*> _lights;
+					static std::vector<Logic::Object::Component*> _cameras;
+					static std::vector<Logic::Object::Component*> _renderers;
+
 					Instance();
 					static void Init();
 				public:
@@ -76,6 +87,13 @@ namespace AirEngine
 					static Utils::Condition& EndPresentCondition();
 					static Utils::Condition& StartRenderCondition();
 					static Utils::Condition& EndRenderCondition();
+
+					static void AddLight(std::vector<Logic::Object::Component*>& lights);
+					static void AddCamera(std::vector<Logic::Object::Component*>& cameras);
+					static void AddRenderer(std::vector<Logic::Object::Component*>& renderers);
+					static void ClearLight();
+					static void ClearCamera();
+					static void ClearRenderer();
 				};
 			}
 		}

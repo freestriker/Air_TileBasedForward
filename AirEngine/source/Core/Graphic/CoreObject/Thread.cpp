@@ -14,6 +14,7 @@
 #include "Core/Graphic/RenderPass/BackgroundRenderPass.h"
 #include "Core/Graphic/RenderPass/OpaqueRenderPass.h"
 #include "Core/Graphic/RenderPass/TransparentRenderPass.h"
+#include "Core/Graphic/Shader.h"
 
 AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread AirEngine::Core::Graphic::CoreObject::Thread::_graphicThread = AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread();
 
@@ -72,6 +73,12 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnThreadStart(
 	CoreObject::Instance::RenderPassManager().AddRenderPass(new RenderPass::BackgroundRenderPass());
 	CoreObject::Instance::RenderPassManager().AddRenderPass(new RenderPass::OpaqueRenderPass());
 	CoreObject::Instance::RenderPassManager().AddRenderPass(new RenderPass::TransparentRenderPass());
+
+	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::UNIFORM_BUFFER, { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER }, 10);
+	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::TEXTURE_CUBE, { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER }, 10);
+	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::TEXTURE2D, { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER }, 10);
+	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::TEXTURE2D_WITH_INFO, { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER }, 10);
+
 }
 
 void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()

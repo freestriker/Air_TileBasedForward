@@ -13,6 +13,17 @@
 #include "Camera/PerspectiveCamera.h"
 #include "Test/CameraMoveBehaviour.h"
 #include "Core/Graphic/Instance/Image.h"
+#include "Light/DirectionalLight.h"
+#include "Light/PointLight.h"
+#include "Light/SkyBox.h"
+#include "Test/SelfRotateBehaviour.h"
+#include "Test/BackgroundRendererBehaviour.h"
+#include "Test/GlassRendererBehaviour.h"
+#include "Test/MirrorRendererBehaviour.h"
+#include "Test/OpaqueRendererBehaviour.h"
+#include "Test/TransparentRendererBehaviour.h"
+#include "Renderer/Renderer.h"
+#include "Core/Graphic/CoreObject/Instance.h"
 
 AirEngine::Core::Logic::CoreObject::Thread::LogicThread AirEngine::Core::Logic::CoreObject::Thread::_logicThread = AirEngine::Core::Logic::CoreObject::Thread::LogicThread();
 
@@ -122,6 +133,8 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::IterateByDynamicBf
 		std::swap(nextGenGameObjectHeads, curGenGameObjectHeads);
 	}
 
+	validGameObjectInIteration.clear();
+	validComponentInIteration.clear();
 	Utils::Log::Message("Core::Thread::LogicThread iterate " + std::to_string(static_cast<int>(targetComponentType)) + " by dynamic BFS.");
 }
 
@@ -422,20 +435,131 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	));
 	cameraGo->AddComponent(new Test::CameraMoveBehaviour());
 
+	//Renderers
+	Logic::Object::GameObject* renderers = new Logic::Object::GameObject("Renderers");
+	CoreObject::Instance::rootObject.AddChild(renderers);
+
+	Logic::Object::GameObject* backgroundRendererGo = new Logic::Object::GameObject("BackgroundRenderer");
+	renderers->AddChild(backgroundRendererGo);
+	backgroundRendererGo->AddComponent(new Renderer::Renderer());
+	backgroundRendererGo->AddComponent(new Test::BackgroundRendererBehaviour());
+
+	Logic::Object::GameObject* opaqueRendererGo = new Logic::Object::GameObject("meshRenderer");
+	renderers->AddChild(opaqueRendererGo);
+	opaqueRendererGo->AddComponent(new Renderer::Renderer());
+	opaqueRendererGo->AddComponent(new Test::OpaqueRendererBehaviour());
+
+	Logic::Object::GameObject* glassMeshRendererGo = new Logic::Object::GameObject("GlassMeshRenderer");
+	renderers->AddChild(glassMeshRendererGo);
+	glassMeshRendererGo->AddComponent(new Renderer::Renderer());
+	glassMeshRendererGo->AddComponent(new Test::GlassRendererBehaviour());
+	glassMeshRendererGo->transform.SetTranslation(glm::vec3(3, 0, 0));
+
+	Logic::Object::GameObject* mirrorMeshRendererGo = new Logic::Object::GameObject("MirrorMeshRenderer");
+	renderers->AddChild(mirrorMeshRendererGo);
+	mirrorMeshRendererGo->AddComponent(new Renderer::Renderer());
+	mirrorMeshRendererGo->AddComponent(new Test::MirrorRendererBehaviour());
+	mirrorMeshRendererGo->transform.SetTranslation(glm::vec3(-3, 0, 0));
+
+	Logic::Object::GameObject* culledRendererGo = new Logic::Object::GameObject("MeshRendererCulled");
+	renderers->AddChild(culledRendererGo);
+	culledRendererGo->AddComponent(new Renderer::Renderer());
+	culledRendererGo->AddComponent(new Test::OpaqueRendererBehaviour());
+	culledRendererGo->transform.SetTranslation(glm::vec3(2000, 2000, 2000));
+
+	//Lights
+	Logic::Object::GameObject* lights = new Logic::Object::GameObject("Lights");
+	CoreObject::Instance::rootObject.AddChild(lights);
+
+	Logic::Object::GameObject* directionalLightGo = new Logic::Object::GameObject("DirectionalLight");
+	lights->AddChild(directionalLightGo);
+	directionalLightGo->transform.SetEulerRotation(glm::vec3(-30, 70, 0));
+	auto directionalLight = new Light::DirectionalLight();
+	directionalLight->color = { 1, 239.0 / 255, 213.0 / 255, 1 };
+	directionalLight->intensity = 0.4f;
+	directionalLightGo->AddComponent(directionalLight);
+
+	Logic::Object::GameObject* skyBoxGo = new Logic::Object::GameObject("SkyBox");
+	lights->AddChild(skyBoxGo);
+	auto skyBox = new Light::SkyBox();
+	skyBox->color = { 1, 1, 1, 1 };
+	skyBox->intensity = 0.4f;
+	skyBox->skyBoxTextureCube = IO::CoreObject::Instance::AssetManager().Load<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");
+	skyBoxGo->AddComponent(skyBox);
+
+	float sr6 = std::pow(6.0f, 0.5f);
+	float sr2 = std::pow(2.0f, 0.5f);
+
+	Logic::Object::GameObject* nearPointLights = new Logic::Object::GameObject("NearPointLights");
+	lights->AddChild(nearPointLights);
+	nearPointLights->AddComponent(new Test::SelfRotateBehaviour(60));
+	{
+		Logic::Object::GameObject* pointLightGo = new Logic::Object::GameObject("NearPointLight 1");
+		nearPointLights->AddChild(pointLightGo);
+		pointLightGo->transform.SetTranslation({ 0, 0, 2 });
+		auto pointLight = new Light::PointLight();
+		pointLight->color = { 1, 1, 0, 1 };
+		pointLight->minRange = 1;
+		pointLight->maxRange = 4;
+		pointLightGo->AddComponent(pointLight);
+	}
+	{
+		Logic::Object::GameObject* pointLightGo = new Logic::Object::GameObject("NearPointLight 2");
+		nearPointLights->AddChild(pointLightGo);
+		pointLightGo->transform.SetTranslation({ -sr6 * 2 / 3, -sr2 * 2 / 3, -2.0 / 3 });
+		auto pointLight = new Light::PointLight();
+		pointLight->color = { 1, 0, 0, 1 };
+		pointLight->minRange = 1;
+		pointLight->maxRange = 4;
+		pointLightGo->AddComponent(pointLight);
+	}
+	{
+		Logic::Object::GameObject* pointLightGo = new Logic::Object::GameObject("NearPointLight 3");
+		nearPointLights->AddChild(pointLightGo);
+		pointLightGo->transform.SetTranslation({ sr6 * 2 / 3, -sr2 * 2 / 3, -2.0 / 3 });
+		auto pointLight = new Light::PointLight();
+		pointLight->color = { 0, 1, 0, 1 };
+		pointLight->minRange = 1;
+		pointLight->maxRange = 4;
+		pointLightGo->AddComponent(pointLight);
+	}
+	{
+		Logic::Object::GameObject* pointLightGo = new Logic::Object::GameObject("NearPointLight 4");
+		nearPointLights->AddChild(pointLightGo);
+		pointLightGo->transform.SetTranslation({ 0, sr2 * 2 * 2 / 3, -2.0 / 3 });
+		auto pointLight = new Light::PointLight();
+		pointLight->color = { 0, 0, 1, 1 };
+		pointLight->minRange = 1;
+		pointLight->maxRange = 4;
+		pointLightGo->AddComponent(pointLight);
+	}
 
 	while (!_stopped)
 	{
-		//Iterate basic
-		//Utils::Log::Message("Iterate basic");
+		Instance::time.Refresh();
+
+		IterateByDynamicBfs(Object::Component::ComponentType::BEHAVIOUR);
+		auto cameras = std::vector<Object::Component*>();
 
 		if (Instance::NeedIterateRenderer())
 		{
 			//Iterate renderer
 			Utils::Log::Message("Iterate renderer");
+			auto targetComponents = std::vector<std::vector<Object::Component*>>();
+			IterateByStaticBfs({ Object::Component::ComponentType::LIGHT, Object::Component::ComponentType::CAMERA, Object::Component::ComponentType::RENDERER }, targetComponents);
+
+			Graphic::CoreObject::Instance::AddLight(targetComponents[0]);
+			Graphic::CoreObject::Instance::AddCamera(targetComponents[1]);
+			Graphic::CoreObject::Instance::AddRenderer(targetComponents[2]);
+
 			Utils::Log::Message("Instance::StartRenderCondition().Awake()");
 			Graphic::CoreObject::Instance::StartRenderCondition().Awake();
 			Graphic::CoreObject::Instance::EndRenderCondition().Wait();
 			Utils::Log::Message("Instance::EndRenderCondition().Wait()");
+
+			Graphic::CoreObject::Instance::ClearLight();
+			Graphic::CoreObject::Instance::ClearCamera();
+			Graphic::CoreObject::Instance::ClearRenderer();
 		}
 		std::this_thread::yield();
 	}

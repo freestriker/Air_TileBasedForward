@@ -2,6 +2,9 @@
 #include "Core/Logic/Object/GameObject.h"
 #include <rttr/registration>
 #include "Core/Logic/Object/Transform.h"
+#include "Renderer/Renderer.h"
+#include "Behaviour/Behaviour.h"
+#include "Camera/CameraBase.h"
 
 RTTR_REGISTRATION
 {
@@ -12,9 +15,9 @@ const std::map<rttr::type, AirEngine::Core::Logic::Object::Component::ComponentT
 std::map<rttr::type, AirEngine::Core::Logic::Object::Component::ComponentType>
 ({
 	{rttr::type::get<Transform>(), AirEngine::Core::Logic::Object::Component::ComponentType::TRANSFORM},
-	//{rttr::type::get<Logic::Component::Behaviour::Behaviour>(), Logic::Component::Component::ComponentType::BEHAVIOUR},
-	//{rttr::type::get<Logic::Component::Camera::Camera>(), Logic::Component::Component::ComponentType::CAMERA},
-	//{rttr::type::get<Logic::Component::Renderer::Renderer>(), Logic::Component::Component::ComponentType::RENDERER},
+	{rttr::type::get<Behaviour::Behaviour>(), Component::ComponentType::BEHAVIOUR},
+	{rttr::type::get<Camera::CameraBase>(), Component::ComponentType::CAMERA},
+	{rttr::type::get<Renderer::Renderer>(), Component::ComponentType::RENDERER},
 });
 
 const rttr::type AirEngine::Core::Logic::Object::Component::COMPONENT_TYPE = rttr::type::get< AirEngine::Core::Logic::Object::Component>();

@@ -100,8 +100,7 @@ void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnPopulateCommandBu
 		auto& renderer = rendererDistencePair.second;
 
 		_renderCommandBuffer->BindMaterial(renderer->material);
-		_renderCommandBuffer->BindMesh(renderer->mesh);
-		_renderCommandBuffer->Draw();
+		_renderCommandBuffer->DrawMesh(renderer->mesh);
 	}
 	_renderCommandBuffer->EndRenderPass();
 	_renderCommandBuffer->EndRecord();

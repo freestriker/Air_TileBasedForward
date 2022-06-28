@@ -3,6 +3,7 @@
 #include <rttr/registration>
 #include "Utils/Log.h"
 #include "Utils/ChildBrotherTree.h"
+#include "Core/Logic/CoreObject/Instance.h"
 
 RTTR_REGISTRATION
 {
@@ -57,10 +58,10 @@ void AirEngine::Core::Logic::Object::GameObject::RemoveComponent(AirEngine::Core
 		_typeSqueueComponentsHeadMap.erase(targetComponent->_type);
 	}
 
-	//if (Logic::Core::Instance::_validComponentInIteration.count(targetComponent))
-	//{
-	//	Logic::Core::Instance::_validComponentInIteration.erase(targetComponent);
-	//}
+	if (Logic::CoreObject::Instance::_validComponentInIteration.count(targetComponent))
+	{
+		Logic::CoreObject::Instance::_validComponentInIteration.erase(targetComponent);
+	}
 }
 
 AirEngine::Core::Logic::Object::Component* AirEngine::Core::Logic::Object::GameObject::RemoveComponent(std::string targetTypeName)
@@ -284,8 +285,8 @@ void AirEngine::Core::Logic::Object::GameObject::RemoveChild(AirEngine::Core::Lo
 void AirEngine::Core::Logic::Object::GameObject::RemoveSelf()
 {
 	static_cast<Utils::ChildBrotherTree<Transform>*>(&transform)->RemoveSelf();
-	//if (Logic::Core::Instance::_validGameObjectInIteration.count(this))
-	//{
-	//	Logic::Core::Instance::_validGameObjectInIteration.erase(this);
-	//}
+	if (Logic::CoreObject::Instance::_validGameObjectInIteration.count(this))
+	{
+		Logic::CoreObject::Instance::_validGameObjectInIteration.erase(this);
+	}
 }

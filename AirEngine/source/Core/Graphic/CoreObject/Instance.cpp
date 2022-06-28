@@ -21,6 +21,10 @@ AirEngine::Utils::Condition* AirEngine::Core::Graphic::CoreObject::Instance::_en
 AirEngine::Utils::Condition* AirEngine::Core::Graphic::CoreObject::Instance::_startRenderCondition = nullptr;
 AirEngine::Utils::Condition* AirEngine::Core::Graphic::CoreObject::Instance::_endRenderCondition = nullptr;
 
+std::vector<AirEngine::Core::Logic::Object::Component*> AirEngine::Core::Graphic::CoreObject::Instance::_lights = std::vector<AirEngine::Core::Logic::Object::Component*>();
+std::vector<AirEngine::Core::Logic::Object::Component*> AirEngine::Core::Graphic::CoreObject::Instance::_cameras = std::vector<AirEngine::Core::Logic::Object::Component*>();
+std::vector<AirEngine::Core::Logic::Object::Component*> AirEngine::Core::Graphic::CoreObject::Instance::_renderers = std::vector<AirEngine::Core::Logic::Object::Component*>();
+
 AirEngine::Core::Graphic::CoreObject::Queue* AirEngine::Core::Graphic::CoreObject::Instance::Queue_(std::string name)
 {
     return _queues[name];
@@ -84,6 +88,36 @@ AirEngine::Utils::Condition& AirEngine::Core::Graphic::CoreObject::Instance::Sta
 AirEngine::Utils::Condition& AirEngine::Core::Graphic::CoreObject::Instance::EndRenderCondition()
 {
 	return *_endRenderCondition;
+}
+
+void AirEngine::Core::Graphic::CoreObject::Instance::AddLight(std::vector<Logic::Object::Component*>& lights)
+{
+	_lights.insert(_lights.end(), lights.begin(), lights.end());
+}
+
+void AirEngine::Core::Graphic::CoreObject::Instance::AddCamera(std::vector<Logic::Object::Component*>& cameras)
+{
+	_cameras.insert(_cameras.end(), cameras.begin(), cameras.end());
+}
+
+void AirEngine::Core::Graphic::CoreObject::Instance::AddRenderer(std::vector<Logic::Object::Component*>& renderers)
+{
+	_renderers.insert(_renderers.end(), renderers.begin(), renderers.end());
+}
+
+void AirEngine::Core::Graphic::CoreObject::Instance::ClearLight()
+{
+	_lights.clear();
+}
+
+void AirEngine::Core::Graphic::CoreObject::Instance::ClearCamera()
+{
+	_cameras.clear();
+}
+
+void AirEngine::Core::Graphic::CoreObject::Instance::ClearRenderer()
+{
+	_renderers.clear();
 }
 
 AirEngine::Core::Graphic::CoreObject::Instance::Instance()

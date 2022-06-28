@@ -58,6 +58,7 @@ namespace AirEngine
 					void SetActive(bool active);
 					Logic::Object::GameObject* GameObject();
 					ComponentType GetComponentType();
+
 					RTTR_ENABLE(Logic::Object::Object)
 				};
 			}
