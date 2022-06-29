@@ -62,15 +62,15 @@ AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Camera::CameraBase::Camer
 
 void AirEngine::Camera::CameraBase::RefreshRenderPassObject()
 {
-	Core::Graphic::CoreObject::Instance::RenderPassManager().DestroyRenderPassObject(_renderPassObject);
-	_renderPassObject = Core::Graphic::CoreObject::Instance::RenderPassManager().GetRenderPassObject(renderPassNames, attachments);
+	Core::Graphic::CoreObject::Instance::RenderPassManager().DestroyRenderPassObject(_renderPassTarget);
+	_renderPassTarget = Core::Graphic::CoreObject::Instance::RenderPassManager().GetRenderPassObject(renderPassNames, attachments);
 }
 
 AirEngine::Camera::CameraBase::CameraBase(CameraType cameraType, std::vector<std::string> renderPassNames, std::map<std::string, Core::Graphic::Instance::Image*> attachments)
 	: Component(ComponentType::CAMERA)
 	, attachments(attachments)
 	, renderPassNames(renderPassNames)
-	, _renderPassObject(nullptr)
+	, _renderPassTarget(nullptr)
 	, cameraType(cameraType)
 	, nearFlat(3.0f)
 	, farFlat(100.0f)

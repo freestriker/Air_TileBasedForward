@@ -40,7 +40,7 @@ AirEngine::Core::Graphic::RenderPass::RenderPassBase& AirEngine::Core::Graphic::
     return *_renderPasss[name];
 }
 
-AirEngine::Core::Graphic::Manager::RenderPassObject* AirEngine::Core::Graphic::Manager::RenderPassManager::GetRenderPassObject(std::vector<std::string> renderPassNames, std::map<std::string, Instance::Image*> availableAttachments)
+AirEngine::Core::Graphic::Manager::RenderPassTarget* AirEngine::Core::Graphic::Manager::RenderPassManager::GetRenderPassObject(std::vector<std::string> renderPassNames, std::map<std::string, Instance::Image*> availableAttachments)
 {
     std::unique_lock<std::mutex> lock(_managerMutex);
 
@@ -71,7 +71,7 @@ AirEngine::Core::Graphic::Manager::RenderPassObject* AirEngine::Core::Graphic::M
         indexMap.emplace(renderPassNames[i], i);
     }
 
-    RenderPassObject* object = new RenderPassObject();
+    RenderPassTarget* object = new RenderPassTarget();
     object->_passes = passes;
     object->_frameBuffers = frameBuffers;
     object->_indexMap = indexMap;
@@ -80,7 +80,7 @@ AirEngine::Core::Graphic::Manager::RenderPassObject* AirEngine::Core::Graphic::M
     return object;
 }
 
-void AirEngine::Core::Graphic::Manager::RenderPassManager::DestroyRenderPassObject(RenderPassObject*& renderPassObject)
+void AirEngine::Core::Graphic::Manager::RenderPassManager::DestroyRenderPassObject(RenderPassTarget*& renderPassObject)
 {
     if (renderPassObject)
     {
@@ -95,17 +95,17 @@ void AirEngine::Core::Graphic::Manager::RenderPassManager::DestroyRenderPassObje
     }
 }
 
-AirEngine::Core::Graphic::Instance::FrameBuffer* AirEngine::Core::Graphic::Manager::RenderPassObject::FrameBuffer(std::string name)
+AirEngine::Core::Graphic::Instance::FrameBuffer* AirEngine::Core::Graphic::Manager::RenderPassTarget::FrameBuffer(std::string name)
 {
     return _frameBuffers[_indexMap[name]];
 }
 
-VkExtent2D AirEngine::Core::Graphic::Manager::RenderPassObject::Extent()
+VkExtent2D AirEngine::Core::Graphic::Manager::RenderPassTarget::Extent()
 {
     return _extent;
 }
 
-AirEngine::Core::Graphic::Manager::RenderPassObject::RenderPassObject()
+AirEngine::Core::Graphic::Manager::RenderPassTarget::RenderPassTarget()
     : _passes()
     , _frameBuffers()
     , _indexMap()
@@ -113,6 +113,6 @@ AirEngine::Core::Graphic::Manager::RenderPassObject::RenderPassObject()
 {
 }
 
-AirEngine::Core::Graphic::Manager::RenderPassObject::~RenderPassObject()
+AirEngine::Core::Graphic::Manager::RenderPassTarget::~RenderPassTarget()
 {
 }

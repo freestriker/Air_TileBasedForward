@@ -55,7 +55,7 @@ void AirEngine::Core::Graphic::RenderPass::TransparentRenderPass::OnPopulateRend
 	);
 }
 
-void AirEngine::Core::Graphic::RenderPass::TransparentRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Manager::RenderPassObject* renderPassObject)
+void AirEngine::Core::Graphic::RenderPass::TransparentRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Manager::RenderPassTarget* renderPassObject)
 {
 	_renderCommandPool = commandPool;
 

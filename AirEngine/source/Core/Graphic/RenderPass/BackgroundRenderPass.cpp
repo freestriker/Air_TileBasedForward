@@ -40,7 +40,7 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateRende
 	);
 }
 
-void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Manager::RenderPassObject* renderPassObject)
+void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Manager::RenderPassTarget* renderPassObject)
 {
 	_temporaryImage = Graphic::Instance::Image::Create2DImage(
 		renderPassObject->Extent()

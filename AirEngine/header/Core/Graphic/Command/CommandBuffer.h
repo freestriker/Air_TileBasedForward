@@ -26,7 +26,7 @@ namespace AirEngine
 			}
 			namespace Manager
 			{
-				class RenderPassObject;
+				class RenderPassTarget;
 			}
 			namespace Command
 			{
@@ -70,7 +70,7 @@ namespace AirEngine
 					void Submit(std::vector<Command::Semaphore*> signalSemaphores);
 					void Submit();
 					void WaitForFinish();
-					void BeginRenderPass(Graphic::RenderPass::RenderPassBase* renderPass, Graphic::Manager::RenderPassObject* renderPassObject, std::vector<VkClearValue> clearValues);
+					void BeginRenderPass(Graphic::RenderPass::RenderPassBase* renderPass, Graphic::Manager::RenderPassTarget* renderPassObject, std::vector<VkClearValue> clearValues);
 					void EndRenderPass();
 					void BindMaterial(Material* material);
 					void DrawMesh(Asset::Mesh* mesh);

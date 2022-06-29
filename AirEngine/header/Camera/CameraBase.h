@@ -29,7 +29,7 @@ namespace AirEngine
 		}
 		namespace Manager
 		{
-			class RenderPassObject;
+			class RenderPassTarget;
 		}
 	}
 	namespace Camera
@@ -67,7 +67,7 @@ namespace AirEngine
 			Core::Graphic::Instance::Buffer* _buffer;
 			CameraData _cameraData;
 			glm::mat4 _projectionMatrix;
-			Core::Graphic::Manager::RenderPassObject* _renderPassObject;
+			Core::Graphic::Manager::RenderPassTarget* _renderPassTarget;
 
 		public:
 			glm::mat4 ViewMatrix();

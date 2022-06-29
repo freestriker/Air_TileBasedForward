@@ -162,6 +162,7 @@
     <ClCompile Include="source\Utils\ChildBrotherTree.cpp" />
     <ClCompile Include="source\Utils\Condition.cpp" />
     <ClCompile Include="source\Utils\CrossLinkableNode.cpp" />
+    <ClCompile Include="source\Utils\IntersectionChecker.cpp" />
     <ClCompile Include="source\Utils\Log.cpp" />
     <ClCompile Include="source\Utils\OrientedBoundingBox.cpp" />
     <ClCompile Include="source\Utils\SpirvReflect.cpp" />
@@ -224,6 +225,7 @@
     <ClInclude Include="header\Utils\ChildBrotherTree.h" />
     <ClInclude Include="header\Utils\Condition.h" />
     <ClInclude Include="header\Utils\CrossLinkableNode.h" />
+    <ClInclude Include="header\Utils\IntersectionChecker.h" />
     <ClInclude Include="header\Utils\Log.h" />
     <ClInclude Include="header\Utils\OrientedBoundingBox.h" />
     <ClInclude Include="header\Utils\SpirvReflect.h" />

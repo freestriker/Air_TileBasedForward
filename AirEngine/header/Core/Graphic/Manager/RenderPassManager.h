@@ -30,7 +30,7 @@ namespace AirEngine
 			namespace Manager
 			{
 				class RenderPassManager;
-				class RenderPassObject final
+				class RenderPassTarget final
 				{
 					friend class RenderPassManager;
 				public:
@@ -41,12 +41,12 @@ namespace AirEngine
 					std::vector<Instance::FrameBuffer*> _frameBuffers;
 					std::map<std::string, size_t> _indexMap;
 					VkExtent2D _extent;
-					RenderPassObject();
-					~RenderPassObject();
-					RenderPassObject(const RenderPassObject&) = delete;
-					RenderPassObject& operator=(const RenderPassObject&) = delete;
-					RenderPassObject(RenderPassObject&&) = delete;
-					RenderPassObject& operator=(RenderPassObject&&) = delete;
+					RenderPassTarget();
+					~RenderPassTarget();
+					RenderPassTarget(const RenderPassTarget&) = delete;
+					RenderPassTarget& operator=(const RenderPassTarget&) = delete;
+					RenderPassTarget(RenderPassTarget&&) = delete;
+					RenderPassTarget& operator=(RenderPassTarget&&) = delete;
 				};
 				class RenderPassManager
 				{
@@ -55,15 +55,15 @@ namespace AirEngine
 				private:
 					std::mutex _managerMutex;
 					std::map<std::string, RenderPass::RenderPassBase*> _renderPasss;
-					std::set<RenderPassObject*> _objects;
+					std::set<RenderPassTarget*> _objects;
 					RenderPassManager();
 					~RenderPassManager();
 				public:
 					void AddRenderPass(RenderPass::RenderPassBase* renderPass);
 					void RemoveRenderPass(std::string name);
 					RenderPass::RenderPassBase& RenderPass(std::string name);
-					RenderPassObject* GetRenderPassObject(std::vector<std::string> renderPasses, std::map<std::string, Instance::Image*> availableAttachments);
-					void DestroyRenderPassObject(RenderPassObject*& renderPassObject);
+					RenderPassTarget* GetRenderPassObject(std::vector<std::string> renderPasses, std::map<std::string, Instance::Image*> availableAttachments);
+					void DestroyRenderPassObject(RenderPassTarget*& renderPassObject);
 				};
 
 			}
