@@ -20,6 +20,7 @@
 #include "Core/Graphic/Command/CommandPool.h"
 #include "Core/Graphic/Command/CommandBuffer.h"
 #include "Core/IO/CoreObject/Instance.h"
+#include "Core/Graphic/Manager/LightManager.h"
 
 AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread AirEngine::Core::Graphic::CoreObject::Thread::_graphicThread = AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread();
 std::array<AirEngine::Core::Graphic::CoreObject::Thread::SubGraphicThread, 4> AirEngine::Core::Graphic::CoreObject::Thread::_subGraphicThreads = std::array<AirEngine::Core::Graphic::CoreObject::Thread::SubGraphicThread, 4>();
@@ -100,7 +101,6 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::Init()
 void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnStart()
 {
 	Instance::Init();
-	_stopped = false;
 	qDebug() << "AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnStart()";
 }
 
@@ -137,6 +137,16 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 		std::map<std::string, std::future<Graphic::Command::CommandBuffer*>> commandBufferTaskMap = std::map<std::string, std::future<Graphic::Command::CommandBuffer*>>();
 		std::map<std::string, std::multimap<float, Renderer::Renderer*>> rendererDistenceMaps = std::map<std::string, std::multimap<float, Renderer::Renderer*>>();
 
+		//Lights
+		auto lightCopyTask = AddTask(
+			[](Command::CommandPool* graphicCommandPool, Command::CommandPool* computeCommandPool)->void 
+			{
+				CoreObject::Instance::LightManager().SetLightData(CoreObject::Instance::_lights);
+				auto commandBuffer = graphicCommandPool->CreateCommandBuffer("LightCopyCommandBuffer", VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+				CoreObject::Instance::LightManager().CopyLightData(commandBuffer);
+				graphicCommandPool->DestoryCommandBuffer(commandBuffer);
+			}
+		);
 
 
 		Logic::CoreObject::Instance::SetNeedIterateRenderer(false);

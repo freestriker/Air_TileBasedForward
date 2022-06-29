@@ -4,6 +4,7 @@
 #include "Core/Graphic/Manager/RenderPassManager.h"
 #include "Core/Graphic/Manager/DescriptorSetManager.h"
 #include "Utils/Condition.h"
+#include "Core/Graphic/Manager/LightManager.h"
 
 std::map<std::string, AirEngine::Core::Graphic::CoreObject::Queue*> AirEngine::Core::Graphic::CoreObject::Instance::_queues = std::map<std::string, AirEngine::Core::Graphic::CoreObject::Queue*>();
 QVulkanInstance* AirEngine::Core::Graphic::CoreObject::Instance::_qVulkanInstance = nullptr;
@@ -15,6 +16,7 @@ VkDevice AirEngine::Core::Graphic::CoreObject::Instance::_vkDevice = VK_NULL_HAN
 AirEngine::Core::Graphic::Manager::MemoryManager* AirEngine::Core::Graphic::CoreObject::Instance::_memoryManager = nullptr;
 AirEngine::Core::Graphic::Manager::RenderPassManager* AirEngine::Core::Graphic::CoreObject::Instance::_renderPassManager = nullptr;
 AirEngine::Core::Graphic::Manager::DescriptorSetManager* AirEngine::Core::Graphic::CoreObject::Instance::_descriptorSetManager = nullptr;
+AirEngine::Core::Graphic::Manager::LightManager* AirEngine::Core::Graphic::CoreObject::Instance::_lightManager = nullptr;
 
 AirEngine::Utils::Condition* AirEngine::Core::Graphic::CoreObject::Instance::_startPresentCondition = nullptr;
 AirEngine::Utils::Condition* AirEngine::Core::Graphic::CoreObject::Instance::_endPresentCondition = nullptr;
@@ -68,6 +70,11 @@ AirEngine::Core::Graphic::Manager::RenderPassManager& AirEngine::Core::Graphic::
 AirEngine::Core::Graphic::Manager::DescriptorSetManager& AirEngine::Core::Graphic::CoreObject::Instance::DescriptorSetManager()
 {
 	return *_descriptorSetManager;
+}
+
+AirEngine::Core::Graphic::Manager::LightManager& AirEngine::Core::Graphic::CoreObject::Instance::LightManager()
+{
+	return *_lightManager;
 }
 
 AirEngine::Utils::Condition& AirEngine::Core::Graphic::CoreObject::Instance::StartPresentCondition()
@@ -149,6 +156,7 @@ void AirEngine::Core::Graphic::CoreObject::Instance::Init()
 	_memoryManager = new AirEngine::Core::Graphic::Manager::MemoryManager(32 * 1024 * 1024);
 	_renderPassManager = new AirEngine::Core::Graphic::Manager::RenderPassManager();
 	_descriptorSetManager = new AirEngine::Core::Graphic::Manager::DescriptorSetManager();
+	_lightManager = new AirEngine::Core::Graphic::Manager::LightManager();
 
 	_startPresentCondition = new Utils::Condition();
 	_endPresentCondition = new Utils::Condition();

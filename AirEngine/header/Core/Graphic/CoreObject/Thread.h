@@ -87,7 +87,7 @@ namespace AirEngine
 					static void End();
 
 					template<typename F, typename... Args>
-					static auto AddTaskP(F&& f, Args&&... args)->std::future<typename std::invoke_result<F, Command::CommandPool*, Command::CommandPool*, Args...>::type>;
+					static auto AddTask(F&& f, Args&&... args)->std::future<typename std::invoke_result<F, Command::CommandPool*, Command::CommandPool*, Args...>::type>;
 
 				};
 			}
@@ -96,7 +96,7 @@ namespace AirEngine
 }
 
 template<typename F, typename... Args>
-inline auto AirEngine::Core::Graphic::CoreObject::Thread::AddTaskP(F&& f, Args&&... args)->std::future<typename std::invoke_result<F, Command::CommandPool*, Command::CommandPool*, Args...>::type>
+inline auto AirEngine::Core::Graphic::CoreObject::Thread::AddTask(F&& f, Args&&... args)->std::future<typename std::invoke_result<F, Command::CommandPool*, Command::CommandPool*, Args...>::type>
 {
 	using return_type = typename std::invoke_result<F, Graphic::Command::CommandPool*, Graphic::Command::CommandPool*, Args...>::type;
 

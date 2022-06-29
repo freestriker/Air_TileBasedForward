@@ -112,6 +112,7 @@
     <ClCompile Include="source\Core\Graphic\Instance\DescriptorSet.cpp" />
     <ClCompile Include="source\Core\Graphic\Instance\FrameBuffer.cpp" />
     <ClCompile Include="source\Core\Graphic\Manager\DescriptorSetManager.cpp" />
+    <ClCompile Include="source\Core\Graphic\Manager\LightManager.cpp" />
     <ClCompile Include="source\Core\Graphic\Manager\RenderPassManager.cpp" />
     <ClCompile Include="source\Core\Graphic\Material.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\BackgroundRenderPass.cpp" />
@@ -191,6 +192,7 @@
     <ClInclude Include="header\Core\Graphic\Instance\ImageSampler.h" />
     <ClInclude Include="header\Core\Graphic\Instance\Memory.h" />
     <ClInclude Include="header\Core\Graphic\Manager\DescriptorSetManager.h" />
+    <ClInclude Include="header\Core\Graphic\Manager\LightManager.h" />
     <ClInclude Include="header\Core\Graphic\Manager\MemoryManager.h" />
     <ClInclude Include="header\Core\Graphic\Manager\RenderPassManager.h" />
     <ClInclude Include="header\Core\Graphic\Material.h" />
