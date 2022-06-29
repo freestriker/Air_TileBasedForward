@@ -30,8 +30,7 @@ AirEngine::Core::Graphic::Instance::FrameBuffer::FrameBuffer(RenderPass::RenderP
     framebufferInfo.height = extent.height;
     framebufferInfo.layers = 1;
 
-    VkFramebuffer newVkFrameBuffer = VK_NULL_HANDLE;
-    Utils::Log::Exception("Failed to create framebuffer.", vkCreateFramebuffer(CoreObject::Instance::VkDevice_(), &framebufferInfo, nullptr, &newVkFrameBuffer));
+    Utils::Log::Exception("Failed to create framebuffer.", vkCreateFramebuffer(CoreObject::Instance::VkDevice_(), &framebufferInfo, nullptr, &_vkFrameBuffer));
 
 }
 AirEngine::Core::Graphic::Instance::FrameBuffer::~FrameBuffer()

@@ -102,6 +102,7 @@ void AirEngine::Core::Graphic::RenderPass::TransparentRenderPass::OnSubmit()
 {
 	auto opaqueSemaphore = CoreObject::Instance::RenderPassManager().RenderPass("BackgroundRenderPass").Semaphore();
 	_renderCommandBuffer->Submit({ opaqueSemaphore }, { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT }, { Semaphore() });
+	_renderCommandBuffer->WaitForFinish();
 }
 
 void AirEngine::Core::Graphic::RenderPass::TransparentRenderPass::OnClear()

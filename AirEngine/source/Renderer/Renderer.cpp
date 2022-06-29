@@ -9,7 +9,7 @@ RTTR_REGISTRATION
     registration::class_<AirEngine::Renderer::Renderer>("AirEngine::Renderer::Renderer");
 }
 
-void AirEngine::Renderer::Renderer::SetMatrixData(glm::mat4& viewMatrix, glm::mat4& projectionMatrix)
+void AirEngine::Renderer::Renderer::SetMatrixData(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix)
 {
 	MatrixData data = { _gameObject->transform.ModelMatrix() , viewMatrix , projectionMatrix, glm::transpose(glm::inverse(_gameObject->transform.ModelMatrix())) };
 	_matrixBuffer->WriteData(&data, sizeof(MatrixData));

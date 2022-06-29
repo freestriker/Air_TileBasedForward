@@ -21,6 +21,11 @@
 #include "Core/Graphic/Command/CommandBuffer.h"
 #include "Core/IO/CoreObject/Instance.h"
 #include "Core/Graphic/Manager/LightManager.h"
+#include "Camera/CameraBase.h"
+#include "Renderer/Renderer.h"
+#include "Asset/Mesh.h"
+#include "Utils/OrientedBoundingBox.h"
+#include "Core/Graphic/Material.h"
 
 AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread AirEngine::Core::Graphic::CoreObject::Thread::_graphicThread = AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread();
 std::array<AirEngine::Core::Graphic::CoreObject::Thread::SubGraphicThread, 4> AirEngine::Core::Graphic::CoreObject::Thread::_subGraphicThreads = std::array<AirEngine::Core::Graphic::CoreObject::Thread::SubGraphicThread, 4>();
@@ -38,6 +43,15 @@ AirEngine::Core::Graphic::CoreObject::Thread::Thread()
 
 AirEngine::Core::Graphic::CoreObject::Thread::~Thread()
 {
+}
+
+void AirEngine::Core::Graphic::CoreObject::Thread::ClearCommandPools()
+{
+	for (auto& subThread : _subGraphicThreads)
+	{
+		subThread.ResetCommandPool();
+	}
+
 }
 
 void AirEngine::Core::Graphic::CoreObject::Thread::Init()
@@ -134,9 +148,6 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 		//Render
 		Utils::Log::Message("Render()");
 
-		std::map<std::string, std::future<Graphic::Command::CommandBuffer*>> commandBufferTaskMap = std::map<std::string, std::future<Graphic::Command::CommandBuffer*>>();
-		std::map<std::string, std::multimap<float, Renderer::Renderer*>> rendererDistenceMaps = std::map<std::string, std::multimap<float, Renderer::Renderer*>>();
-
 		//Lights
 		auto lightCopyTask = AddTask(
 			[](Command::CommandPool* graphicCommandPool, Command::CommandPool* computeCommandPool)->void 
@@ -147,6 +158,90 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 				graphicCommandPool->DestoryCommandBuffer(commandBuffer);
 			}
 		);
+		lightCopyTask.wait();
+
+		//Camera
+		for (auto& component : Instance::_cameras)
+		{
+			auto camera = dynamic_cast<Camera::CameraBase*>(component);
+
+			camera->RefreshCameraData();
+
+			auto viewMatrix = camera->ViewMatrix();
+			auto projectionMatrix = camera->ProjectionMatrix();
+			auto vpMatrix = *projectionMatrix * viewMatrix;
+
+
+			//Classify renderers
+			std::map<std::string, std::multimap<float, Renderer::Renderer*>> rendererDistenceMaps = std::map<std::string, std::multimap<float, Renderer::Renderer*>>();
+
+			auto clipPlanes = camera->ClipPlanes();
+			intersectionChecker.SetIntersectPlanes(clipPlanes, 6);
+			for (auto& rendererComponent : Instance::_renderers)
+			{
+				auto renderer = dynamic_cast<Renderer::Renderer*>(rendererComponent);
+
+				if (!(renderer->material && renderer->mesh)) continue;
+
+				glm::mat4 modelMatrix = renderer->GameObject()->transform.ModelMatrix();
+				glm::mat4 mvMatrix = viewMatrix * modelMatrix;
+				glm::mat4 mvpMatrix = *projectionMatrix * viewMatrix * modelMatrix;
+
+				//Frustum Culling
+				auto obbCenter = renderer->mesh->OrientedBoundingBox().Center();
+				auto obbMvCenter = mvMatrix * glm::vec4(obbCenter, 1.0f);
+				auto obbBoundry = renderer->mesh->OrientedBoundingBox().BoundryVertexes();
+				if (!renderer->enableFrustumCulling || intersectionChecker.Check(obbBoundry.data(), obbBoundry.size(), mvMatrix))
+				{
+					renderer->SetMatrixData(viewMatrix, *projectionMatrix);
+					renderer->material->SetUniformBuffer("cameraData", camera->CameraDataBuffer());
+					renderer->material->SetTextureCube("skyBoxTexture", Instance::LightManager().SkyBoxTexture());
+					renderer->material->SetUniformBuffer("skyBox", Instance::LightManager().SkyBoxBuffer());
+					renderer->material->SetUniformBuffer("mainLight", Instance::LightManager().MainLightBuffer());
+					renderer->material->SetUniformBuffer("importantLight", Instance::LightManager().ImportantLightsBuffer());
+					renderer->material->SetUniformBuffer("unimportantLight", Instance::LightManager().UnimportantLightsBuffer());
+
+					rendererDistenceMaps[renderer->material->Shader()->Settings()->renderPass].insert({ obbMvCenter.z, renderer });
+				}
+				else
+				{
+					Utils::Log::Message("AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread cull GameObject called " + renderer->GameObject()->name + ".");
+				}
+			}
+
+			std::map<std::string, std::future<void>> renderTasks = std::map<std::string, std::future<void>>();
+			//Add build command buffer task
+			for (const auto& renderPass : *camera->_renderPassTarget->RenderPasses())
+			{
+				auto rendererDistanceMap = &rendererDistenceMaps[renderPass->Name()];
+				auto renderPassTarget = camera->_renderPassTarget;
+
+				renderTasks[renderPass->Name()] = AddTask(
+					[renderPass, rendererDistanceMap, renderPassTarget](Command::CommandPool* graphicCommandPool, Command::CommandPool* computeCommandPool)
+					{
+						renderPass->OnPopulateCommandBuffer(graphicCommandPool, *rendererDistanceMap, renderPassTarget);
+					}
+				);
+			}
+
+			std::this_thread::yield();
+
+			//Submit command buffers
+			for (const auto& renderPass : *camera->_renderPassTarget->RenderPasses())
+			{
+				renderTasks[renderPass->Name()].wait();
+				renderPass->OnSubmit();
+			}
+
+			//Clear command buffers
+			for (const auto& renderPass : *camera->_renderPassTarget->RenderPasses())
+			{
+				renderPass->OnClear();
+			}
+
+			//Clear
+			ClearCommandPools();
+		}
 
 
 		Logic::CoreObject::Instance::SetNeedIterateRenderer(false);
@@ -159,6 +254,8 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 
 		Instance::MemoryManager().Collect();
 		Instance::DescriptorSetManager().Collect();
+
+		
 	}
 	Instance::MemoryManager().Collect();
 	Instance::DescriptorSetManager().Collect();

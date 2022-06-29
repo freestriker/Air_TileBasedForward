@@ -14,6 +14,11 @@ namespace AirEngine
 	{
 		namespace Graphic
 		{
+			namespace CoreObject
+			{
+				class Instance;
+				class Thread;
+			}
 			namespace Instance
 			{
 				class Image;
@@ -34,6 +39,8 @@ namespace AirEngine
 				class RenderPassBase
 				{
 					friend class Manager::RenderPassManager;
+					friend class CoreObject::Instance;
+					friend class CoreObject::Thread;
 				public:
 					class RenderPassSettings final
 					{

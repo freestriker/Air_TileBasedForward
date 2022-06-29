@@ -36,7 +36,7 @@ namespace AirEngine
 			bool enableFrustumCulling;
 			Asset::Mesh* mesh;
 			Core::Graphic::Material* material;
-			void SetMatrixData(glm::mat4& viewMatrix, glm::mat4& projectionMatrix);
+			void SetMatrixData(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
 			Renderer();
 			virtual ~Renderer();
 			Renderer(const Renderer&) = delete;

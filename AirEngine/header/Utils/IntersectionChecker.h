@@ -11,9 +11,9 @@ namespace AirRenderer
 		private:
 			std::vector<glm::vec4> _intersectPlanes;
 		public:
-			void SetIntersectPlanes(glm::vec4* planes, size_t planeCount);
-			bool Check(glm::vec3* vertexes, size_t vertexCount);
-			bool Check(glm::vec3* vertexes, size_t vertexCount, glm::mat4 matrix);
+			void SetIntersectPlanes(const glm::vec4* planes, size_t planeCount);
+			bool Check(const glm::vec3* vertexes, size_t vertexCount);
+			bool Check(const glm::vec3* vertexes, size_t vertexCount, glm::mat4 matrix);
 
 			IntersectionChecker();
 			~IntersectionChecker();

@@ -80,6 +80,7 @@ namespace AirEngine
 					Thread& operator=(const Thread&) = delete;
 					Thread(Thread&&) = delete;
 					Thread& operator=(Thread&&) = delete;
+					static void ClearCommandPools();
 				public:
 					static void Init();
 					static void Start();

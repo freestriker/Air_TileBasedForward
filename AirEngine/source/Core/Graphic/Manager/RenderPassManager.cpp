@@ -75,6 +75,7 @@ AirEngine::Core::Graphic::Manager::RenderPassTarget* AirEngine::Core::Graphic::M
     object->_passes = passes;
     object->_frameBuffers = frameBuffers;
     object->_indexMap = indexMap;
+    object->_extent = extent;
 
     _objects.emplace(object);
     return object;
@@ -103,6 +104,11 @@ AirEngine::Core::Graphic::Instance::FrameBuffer* AirEngine::Core::Graphic::Manag
 VkExtent2D AirEngine::Core::Graphic::Manager::RenderPassTarget::Extent()
 {
     return _extent;
+}
+
+std::vector<AirEngine::Core::Graphic::RenderPass::RenderPassBase*>* AirEngine::Core::Graphic::Manager::RenderPassTarget::RenderPasses()
+{
+    return &_passes;
 }
 
 AirEngine::Core::Graphic::Manager::RenderPassTarget::RenderPassTarget()
