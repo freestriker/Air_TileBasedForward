@@ -490,14 +490,14 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	directionalLightGo->transform.SetEulerRotation(glm::vec3(-30, 70, 0));
 	auto directionalLight = new Light::DirectionalLight();
 	directionalLight->color = { 1, 239.0 / 255, 213.0 / 255, 1 };
-	directionalLight->intensity = 0.4f;
+	directionalLight->intensity = 0.8f;
 	directionalLightGo->AddComponent(directionalLight);
 
 	Logic::Object::GameObject* skyBoxGo = new Logic::Object::GameObject("SkyBox");
 	lights->AddChild(skyBoxGo);
 	auto skyBox = new Light::SkyBox();
 	skyBox->color = { 1, 1, 1, 1 };
-	skyBox->intensity = 0.4f;
+	skyBox->intensity = 0.8f;
 	skyBox->skyBoxTextureCube = IO::CoreObject::Instance::AssetManager().Load<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");
 	skyBoxGo->AddComponent(skyBox);
 
@@ -513,7 +513,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		pointLightGo->transform.SetTranslation({ 0, 0, 2 });
 		auto pointLight = new Light::PointLight();
 		pointLight->color = { 1, 1, 0, 1 };
-		pointLight->minRange = 1;
+		pointLight->minRange = 0.01;
 		pointLight->maxRange = 4;
 		pointLightGo->AddComponent(pointLight);
 	}
@@ -523,7 +523,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		pointLightGo->transform.SetTranslation({ -sr6 * 2 / 3, -sr2 * 2 / 3, -2.0 / 3 });
 		auto pointLight = new Light::PointLight();
 		pointLight->color = { 1, 0, 0, 1 };
-		pointLight->minRange = 1;
+		pointLight->minRange = 0.01;
 		pointLight->maxRange = 4;
 		pointLightGo->AddComponent(pointLight);
 	}
@@ -533,7 +533,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		pointLightGo->transform.SetTranslation({ sr6 * 2 / 3, -sr2 * 2 / 3, -2.0 / 3 });
 		auto pointLight = new Light::PointLight();
 		pointLight->color = { 0, 1, 0, 1 };
-		pointLight->minRange = 1;
+		pointLight->minRange = 0.01;
 		pointLight->maxRange = 4;
 		pointLightGo->AddComponent(pointLight);
 	}
@@ -543,7 +543,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		pointLightGo->transform.SetTranslation({ 0, sr2 * 2 * 2 / 3, -2.0 / 3 });
 		auto pointLight = new Light::PointLight();
 		pointLight->color = { 0, 0, 1, 1 };
-		pointLight->minRange = 1;
+		pointLight->minRange = 0.01;
 		pointLight->maxRange = 4;
 		pointLightGo->AddComponent(pointLight);
 	}

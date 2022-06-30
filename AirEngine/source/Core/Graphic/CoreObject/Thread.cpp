@@ -250,7 +250,6 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 		Utils::Log::Message("Instance::EndRenderCondition().Awake()");
 		Instance::EndRenderCondition().Awake();
 
-
 		//Copy
 		auto mainCamera = Camera::CameraBase::mainCamera;
 		auto qfi1 = Window::VulkanWindow_()->graphicsQueueFamilyIndex();

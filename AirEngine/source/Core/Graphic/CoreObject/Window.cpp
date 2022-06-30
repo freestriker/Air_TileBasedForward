@@ -106,6 +106,7 @@ void AirEngine::Core::Graphic::CoreObject::Window::Start()
         qFatal("Failed to create Vulkan instance: %d", _qVulkanInstance->errorCode());
 
     _window = new VulkanWindow();
+    _window->setPreferredColorFormats({VkFormat::VK_FORMAT_B8G8R8A8_SRGB});
     _window->setVulkanInstance(_qVulkanInstance);
     auto queuePrioritieMapPtr = new std::map<uint32_t, std::vector<float>>();
     _window->setQueueCreateInfoModifier([](const VkQueueFamilyProperties* properties, uint32_t queueFamilyCount, QList<VkDeviceQueueCreateInfo>& infos)->void

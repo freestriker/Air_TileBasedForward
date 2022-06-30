@@ -35,6 +35,7 @@ namespace AirEngine
 					friend class RenderPassManager;
 				public:
 					Instance::FrameBuffer* FrameBuffer(std::string name);
+					Instance::Image* Attachment(std::string name);
 					VkExtent2D Extent();
 					std::vector<RenderPass::RenderPassBase*>* RenderPasses();
 				private:
@@ -42,6 +43,7 @@ namespace AirEngine
 					std::vector<Instance::FrameBuffer*> _frameBuffers;
 					std::map<std::string, size_t> _indexMap;
 					VkExtent2D _extent;
+					std::map<std::string, Instance::Image*> _attachments;
 					RenderPassTarget();
 					~RenderPassTarget();
 					RenderPassTarget(const RenderPassTarget&) = delete;

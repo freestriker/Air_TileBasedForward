@@ -68,7 +68,16 @@ AirEngine::Core::Graphic::Manager::RenderPassTarget* AirEngine::Core::Graphic::M
     for (size_t i = 0; i < passes.size(); i++)
     {
         frameBuffers[i] = new Instance::FrameBuffer(passes[i], availableAttachments, extent);
-        indexMap.emplace(renderPassNames[i], i);
+        indexMap.emplace(passes[i]->Name(), i);
+    }
+
+    std::map<std::string, Instance::Image*> attachments = std::map<std::string, Instance::Image*>();
+    for (const auto& frameBuffer : frameBuffers)
+    {
+        for (const auto& attachmentPair : frameBuffer->_attachments)
+        {
+            attachments[attachmentPair.first] = attachmentPair.second;
+        }
     }
 
     RenderPassTarget* object = new RenderPassTarget();
@@ -76,6 +85,7 @@ AirEngine::Core::Graphic::Manager::RenderPassTarget* AirEngine::Core::Graphic::M
     object->_frameBuffers = frameBuffers;
     object->_indexMap = indexMap;
     object->_extent = extent;
+    object->_attachments = std::move(attachments);
 
     _objects.emplace(object);
     return object;
@@ -101,6 +111,11 @@ AirEngine::Core::Graphic::Instance::FrameBuffer* AirEngine::Core::Graphic::Manag
     return _frameBuffers[_indexMap[name]];
 }
 
+AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Manager::RenderPassTarget::Attachment(std::string name)
+{
+    return _attachments[name];
+}
+
 VkExtent2D AirEngine::Core::Graphic::Manager::RenderPassTarget::Extent()
 {
     return _extent;
@@ -116,6 +131,7 @@ AirEngine::Core::Graphic::Manager::RenderPassTarget::RenderPassTarget()
     , _frameBuffers()
     , _indexMap()
     , _extent()
+    , _attachments()
 {
 }
 

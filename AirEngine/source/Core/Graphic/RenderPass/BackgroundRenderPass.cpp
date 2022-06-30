@@ -74,7 +74,7 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateComma
 		{
 			Command::ImageMemoryBarrier depthAttachmentLayoutBarrier = Command::ImageMemoryBarrier
 			(
-				renderPassObject->FrameBuffer(Name())->Attachment("DepthAttachment"),
+				renderPassObject->Attachment("DepthAttachment"),
 				VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
 				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 				VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
@@ -100,7 +100,7 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateComma
 		{
 			_renderCommandBuffer->Blit
 			(
-				renderPassObject->FrameBuffer(Name())->Attachment("DepthAttachment"),
+				renderPassObject->Attachment("DepthAttachment"),
 				VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 				_temporaryImage,
 				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -112,7 +112,7 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateComma
 		{
 			Command::ImageMemoryBarrier depthAttachmentLayoutBarrier = Command::ImageMemoryBarrier
 			(
-				renderPassObject->FrameBuffer(Name())->Attachment("DepthAttachment"),
+				renderPassObject->Attachment("DepthAttachment"),
 				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 				VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
 				VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT,
