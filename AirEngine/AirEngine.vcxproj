@@ -1,0 +1,244 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{3D4FFC49-EB11-4269-A898-1C2FE062CDF2}</ProjectGuid>
+    <Keyword>QtVS_v304</Keyword>
+    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">10.0.19041.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0.19041.0</WindowsTargetPlatformVersion>
+    <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
+    <ProjectName>AirEngine</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt_defaults.props')">
+    <Import Project="$(QtMsBuild)\qt_defaults.props" />
+  </ImportGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
+    <QtInstall>6.2.4_msvc2019_64</QtInstall>
+    <QtModules>quick</QtModules>
+    <QtBuildConfig>debug</QtBuildConfig>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
+    <QtInstall>6.2.4_msvc2019_64</QtInstall>
+    <QtModules>quick</QtModules>
+    <QtBuildConfig>release</QtBuildConfig>
+  </PropertyGroup>
+  <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
+    <Message Importance="High" Text="QtMsBuild: could not locate qt.targets, qt.props; project may not build correctly." />
+  </Target>
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(QtMsBuild)\Qt.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(QtMsBuild)\Qt.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
+    <ClCompile>
+      <PreprocessorDefinitions>_DEBUG;_USE_GRAPHIC_DEBUG;%(PreprocessorDefinitions);RTTR_DLL</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(MY_VULKAN_PATH)\Include;$(MY_GLM_PATH)\;$(MY_GLFW_PATH)\include;..\ThirdParty\rttr\include;..\ThirdParty\assimp\include;..\ThirdParty\FreeImage\include;..\ThirdParty\NlohmannJson\include;..\AirEngine\header;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(MY_VULKAN_PATH)\Lib;$(MY_GLFW_PATH)\lib-vc2022;..\ThirdParty\rttr\debug\lib;..\ThirdParty\assimp\debug\lib;..\ThirdParty\FreeImage\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;rttr_core_d.lib;assimp-vc143-mtd.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
+    <ClCompile>
+      <PreprocessorDefinitions>_USE_GRAPHIC_DEBUG;%(PreprocessorDefinitions);RTTR_DLL</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(MY_VULKAN_PATH)\Include;$(MY_GLM_PATH)\;$(MY_GLFW_PATH)\include;..\ThirdParty\rttr\include;..\ThirdParty\glm\include;..\ThirdParty\assimp\include;..\ThirdParty\FreeImage\include;..\ThirdParty\NlohmannJson\include;..\AirEngine\header;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
+      <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <DebugInformationFormat>None</DebugInformationFormat>
+      <Optimization>MaxSpeed</Optimization>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(MY_VULKAN_PATH)\Lib;$(MY_GLFW_PATH)\lib-vc2022;..\ThirdParty\rttr\release\lib;..\ThirdParty\assimp\release\lib;..\ThirdParty\FreeImage\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;rttr_core.lib;assimp-vc143-mt.lib;FreeImage.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="source\Behaviour\Behaviour.cpp" />
+    <ClCompile Include="source\Camera\CameraBase.cpp" />
+    <ClCompile Include="source\Camera\OrthographicCamera.cpp" />
+    <ClCompile Include="source\Camera\PerspectiveCamera.cpp" />
+    <ClCompile Include="source\Core\Graphic\Instance\DescriptorSet.cpp" />
+    <ClCompile Include="source\Core\Graphic\Instance\FrameBuffer.cpp" />
+    <ClCompile Include="source\Core\Graphic\Manager\DescriptorSetManager.cpp" />
+    <ClCompile Include="source\Core\Graphic\Manager\LightManager.cpp" />
+    <ClCompile Include="source\Core\Graphic\Manager\RenderPassManager.cpp" />
+    <ClCompile Include="source\Core\Graphic\Material.cpp" />
+    <ClCompile Include="source\Core\Graphic\RenderPass\BackgroundRenderPass.cpp" />
+    <ClCompile Include="source\Core\Graphic\RenderPass\OpaqueRenderPass.cpp" />
+    <ClCompile Include="source\Core\Graphic\RenderPass\RenderPassBase.cpp" />
+    <ClCompile Include="source\Core\Graphic\RenderPass\TransparentRenderPass.cpp" />
+    <ClCompile Include="source\Core\Graphic\Shader.cpp" />
+    <ClCompile Include="source\Asset\Texture2D.cpp" />
+    <ClCompile Include="source\Asset\TextureCube.cpp" />
+    <ClCompile Include="source\Core\Graphic\Command\ImageMemoryBarrier.cpp" />
+    <ClCompile Include="source\Core\Graphic\Instance\Buffer.cpp" />
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="source\Asset\Mesh.cpp" />
+    <ClCompile Include="source\Core\Graphic\Command\CommandBuffer.cpp" />
+    <ClCompile Include="source\Core\Graphic\Command\CommandPool.cpp" />
+    <ClCompile Include="source\Core\Graphic\Command\Fence.cpp" />
+    <ClCompile Include="source\Core\Graphic\Command\Semaphore.cpp" />
+    <ClCompile Include="source\Core\Graphic\CoreObject\Thread.cpp" />
+    <ClCompile Include="source\Core\Graphic\CoreObject\Instance.cpp" />
+    <ClCompile Include="source\Core\Graphic\CoreObject\Window.cpp" />
+    <ClCompile Include="source\Core\Graphic\Instance\Image.cpp" />
+    <ClCompile Include="source\Core\Graphic\Instance\ImageSampler.cpp" />
+    <ClCompile Include="source\Core\Graphic\Instance\Memory.cpp" />
+    <ClCompile Include="source\Core\Graphic\Manager\MemoryManager.cpp" />
+    <ClCompile Include="source\Core\IO\Asset\AssetBase.cpp" />
+    <ClCompile Include="source\Core\IO\CoreObject\Thread.cpp" />
+    <ClCompile Include="source\Core\IO\CoreObject\Instance.cpp" />
+    <ClCompile Include="source\Core\IO\Manager\AssetManager.cpp" />
+    <ClCompile Include="source\Core\Logic\CoreObject\Instance.cpp" />
+    <ClCompile Include="source\Core\Logic\CoreObject\Thread.cpp" />
+    <ClCompile Include="source\Core\Logic\Object\Component.cpp" />
+    <ClCompile Include="source\Core\Logic\Object\GameObject.cpp" />
+    <ClCompile Include="source\Core\Logic\Object\Object.cpp" />
+    <ClCompile Include="source\Core\Logic\Object\Transform.cpp" />
+    <ClCompile Include="source\Light\DirectionalLight.cpp" />
+    <ClCompile Include="source\Light\LightBase.cpp" />
+    <ClCompile Include="source\Light\PointLight.cpp" />
+    <ClCompile Include="source\Light\SkyBox.cpp" />
+    <ClCompile Include="source\Light\SpotLight.cpp" />
+    <ClCompile Include="source\Renderer\Renderer.cpp" />
+    <ClCompile Include="source\Test\BackgroundRendererBehaviour.cpp" />
+    <ClCompile Include="source\Test\CameraMoveBehaviour.cpp" />
+    <ClCompile Include="source\Test\GlassRendererBehaviour.cpp" />
+    <ClCompile Include="source\Test\MirrorRendererBehaviour.cpp" />
+    <ClCompile Include="source\Test\OpaqueRendererBehaviour.cpp" />
+    <ClCompile Include="source\Test\SelfRotateBehaviour.cpp" />
+    <ClCompile Include="source\Test\TransparentRendererBehaviour.cpp" />
+    <ClCompile Include="source\Utils\ChildBrotherTree.cpp" />
+    <ClCompile Include="source\Utils\Condition.cpp" />
+    <ClCompile Include="source\Utils\CrossLinkableNode.cpp" />
+    <ClCompile Include="source\Utils\IntersectionChecker.cpp" />
+    <ClCompile Include="source\Utils\Log.cpp" />
+    <ClCompile Include="source\Utils\OrientedBoundingBox.cpp" />
+    <ClCompile Include="source\Utils\SpirvReflect.cpp" />
+    <ClCompile Include="source\Utils\ThreadBase.cpp" />
+    <ClCompile Include="source\Utils\Time.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="header\Asset\Mesh.h" />
+    <ClInclude Include="header\Asset\Texture2D.h" />
+    <ClInclude Include="header\Asset\TextureCube.h" />
+    <ClInclude Include="header\Behaviour\Behaviour.h" />
+    <ClInclude Include="header\Camera\CameraBase.h" />
+    <ClInclude Include="header\Camera\OrthographicCamera.h" />
+    <ClInclude Include="header\Core\Graphic\Command\CommandBuffer.h" />
+    <ClInclude Include="header\Core\Graphic\Command\CommandPool.h" />
+    <ClInclude Include="header\Core\Graphic\Command\Fence.h" />
+    <ClInclude Include="header\Core\Graphic\Command\ImageMemoryBarrier.h" />
+    <ClInclude Include="header\Core\Graphic\Command\Semaphore.h" />
+    <ClInclude Include="header\Core\Graphic\CoreObject\Thread.h" />
+    <ClInclude Include="header\Core\Graphic\CoreObject\Instance.h" />
+    <ClInclude Include="header\Core\Graphic\CoreObject\Window.h" />
+    <ClInclude Include="header\Core\Graphic\Instance\Buffer.h" />
+    <ClInclude Include="header\Core\Graphic\Instance\DescriptorSet.h" />
+    <ClInclude Include="header\Core\Graphic\Instance\FrameBuffer.h" />
+    <ClInclude Include="header\Core\Graphic\Instance\Image.h" />
+    <ClInclude Include="header\Core\Graphic\Instance\ImageSampler.h" />
+    <ClInclude Include="header\Core\Graphic\Instance\Memory.h" />
+    <ClInclude Include="header\Core\Graphic\Manager\DescriptorSetManager.h" />
+    <ClInclude Include="header\Core\Graphic\Manager\LightManager.h" />
+    <ClInclude Include="header\Core\Graphic\Manager\MemoryManager.h" />
+    <ClInclude Include="header\Core\Graphic\Manager\RenderPassManager.h" />
+    <ClInclude Include="header\Core\Graphic\Material.h" />
+    <ClInclude Include="header\Core\Graphic\RenderPass\BackgroundRenderPass.h" />
+    <ClInclude Include="header\Core\Graphic\RenderPass\OpaqueRenderPass.h" />
+    <ClInclude Include="header\Core\Graphic\RenderPass\RenderPassBase.h" />
+    <ClInclude Include="header\Core\Graphic\RenderPass\TransparentRenderPass.h" />
+    <ClInclude Include="header\Core\Graphic\Shader.h" />
+    <ClInclude Include="header\Core\IO\Asset\AssetBase.h" />
+    <ClInclude Include="header\Core\IO\CoreObject\Instance.h" />
+    <ClInclude Include="header\Core\IO\CoreObject\Thread.h" />
+    <ClInclude Include="header\Core\IO\Manager\AssetManager.h" />
+    <ClInclude Include="header\Core\Logic\CoreObject\Instance.h" />
+    <ClInclude Include="header\Core\Logic\CoreObject\Thread.h" />
+    <ClInclude Include="header\Core\Logic\Object\Component.h" />
+    <ClInclude Include="header\Core\Logic\Object\GameObject.h" />
+    <ClInclude Include="header\Core\Logic\Object\Object.h" />
+    <ClInclude Include="header\Core\Logic\Object\Transform.h" />
+    <ClInclude Include="header\Light\DirectionalLight.h" />
+    <ClInclude Include="header\Light\LightBase.h" />
+    <ClInclude Include="header\Light\PointLight.h" />
+    <ClInclude Include="header\Light\SkyBox.h" />
+    <ClInclude Include="header\Light\SpotLight.h" />
+    <ClInclude Include="header\Renderer\Renderer.h" />
+    <ClInclude Include="header\Test\BackgroundRendererBehaviour.h" />
+    <ClInclude Include="header\Test\CameraMoveBehaviour.h" />
+    <ClInclude Include="header\Test\GlassRendererBehaviour.h" />
+    <ClInclude Include="header\Test\MirrorRendererBehaviour.h" />
+    <ClInclude Include="header\Test\OpaqueRendererBehaviour.h" />
+    <ClInclude Include="header\Test\SelfRotateBehaviour.h" />
+    <ClInclude Include="header\Test\TransparentRendererBehaviour.h" />
+    <ClInclude Include="header\Utils\ChildBrotherTree.h" />
+    <ClInclude Include="header\Utils\Condition.h" />
+    <ClInclude Include="header\Utils\CrossLinkableNode.h" />
+    <ClInclude Include="header\Utils\IntersectionChecker.h" />
+    <ClInclude Include="header\Utils\Log.h" />
+    <ClInclude Include="header\Utils\OrientedBoundingBox.h" />
+    <ClInclude Include="header\Utils\SpirvReflect.h" />
+    <ClInclude Include="header\Utils\ThreadBase.h" />
+    <ClInclude Include="header\Utils\Time.h" />
+    <ClInclude Include="header\Camera\PerspectiveCamera.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
+    <Import Project="$(QtMsBuild)\qt.targets" />
+  </ImportGroup>
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
