@@ -39,7 +39,9 @@ namespace AirEngine
 				private:
 					struct CommandData
 					{
-						uint32_t indexCount;
+						uint32_t indexCount{};
+						VkViewport viewport{};
+						VkRect2D scissor{};
 					};
 					CommandPool* _parentCommandPool;
 					VkCommandBuffer _vkCommandBuffer;
@@ -75,6 +77,7 @@ namespace AirEngine
 					void BindMaterial(Material* material);
 					void DrawMesh(Asset::Mesh* mesh);
 					void Blit(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Image* dstImage, VkImageLayout dstImageLayout, VkFilter filter);
+					void Blit(Instance::Image* srcImage, VkImageLayout srcImageLayout, VkImage dstImage, VkImageLayout dstImageLayout, VkOffset3D offset1, VkOffset3D offset2, VkFilter filter);
 				};
 			}
 		}

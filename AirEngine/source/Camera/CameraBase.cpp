@@ -13,6 +13,8 @@
 #include "Core/Graphic/CoreObject/Instance.h"
 #include "Core/Graphic/Manager/RenderPassManager.h"
 
+AirEngine::Camera::CameraBase* AirEngine::Camera::CameraBase::mainCamera = nullptr;
+
 RTTR_REGISTRATION
 {
 	using namespace rttr;

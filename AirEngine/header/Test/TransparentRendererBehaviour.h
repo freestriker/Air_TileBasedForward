@@ -22,7 +22,6 @@ namespace AirEngine
 			Core::Graphic::Shader* shader;
 			Asset::Texture2D* diffuseTexture2D;
 			Core::Graphic::Material* material;
-			float rotationSpeed;
 		public:
 			TransparentRendererBehaviour();
 			~TransparentRendererBehaviour();

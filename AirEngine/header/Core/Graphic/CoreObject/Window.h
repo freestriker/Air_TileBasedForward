@@ -35,6 +35,10 @@ namespace AirEngine
 					static QVulkanInstance* _qVulkanInstance;
 					static VulkanWindow* _window;
 					static VulkanWindowRenderer* _windowRenderer;
+					static QVulkanInstance* QVulkanInstance_();
+					static VulkanWindow* VulkanWindow_();
+					static VulkanWindowRenderer* VulkanWindowRenderer_();
+					static VkExtent2D Extent();
 					static void Init();
 					static void Start();
 					static void End();

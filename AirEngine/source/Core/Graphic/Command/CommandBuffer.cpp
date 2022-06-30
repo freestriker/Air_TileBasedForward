@@ -222,7 +222,19 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::BeginRenderPass(Graphic::
     renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
     renderPassInfo.pClearValues = clearValues.data();
 
+    _commandData.viewport.x = 0.0f;
+    _commandData.viewport.y = 0.0f;
+    _commandData.viewport.width = renderPassObject->Extent().width;
+    _commandData.viewport.height = renderPassObject->Extent().height;
+    _commandData.viewport.minDepth = 0.0f;
+    _commandData.viewport.maxDepth = 1.0f;
+
+    _commandData.scissor.offset = { 0, 0 };
+    _commandData.scissor.extent = renderPassObject->Extent();
+
     vkCmdBeginRenderPass(_vkCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdSetViewport(_vkCommandBuffer, 0, 1, &_commandData.viewport);
+    vkCmdSetScissor(_vkCommandBuffer, 0, 1, &_commandData.scissor);
 }
 
 void AirEngine::Core::Graphic::Command::CommandBuffer::EndRenderPass()
@@ -267,4 +279,25 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::Blit(Instance::Image* src
     }
 
     vkCmdBlitImage(_vkCommandBuffer, srcImage->VkImage_(), srcImageLayout, dstImage->VkImage_(), dstImageLayout, static_cast<uint32_t>(layerCount), infos.data(), filter);
+}
+
+void AirEngine::Core::Graphic::Command::CommandBuffer::Blit(Instance::Image* srcImage, VkImageLayout srcImageLayout, VkImage dstImage, VkImageLayout dstImageLayout, VkOffset3D offset1, VkOffset3D offset2, VkFilter filter)
+{
+    auto src = srcImage->VkExtent3D_();
+    auto layerCount = srcImage->LayerCount();
+    auto srcSubresources = srcImage->VkImageSubresourceLayers_();
+    std::vector< VkImageBlit> infos = std::vector< VkImageBlit>(layerCount);
+    for (uint32_t i = 0; i < layerCount; i++)
+    {
+        auto& blit = infos[i];
+
+        blit.srcSubresource = srcSubresources[i];
+        blit.srcOffsets[0] = { 0, 0, 0 };
+        blit.srcOffsets[1] = *reinterpret_cast<VkOffset3D*>(&src);
+        blit.dstSubresource = srcSubresources[i];
+        blit.dstOffsets[0] = offset1;
+        blit.dstOffsets[1] = offset2;
+    }
+
+    vkCmdBlitImage(_vkCommandBuffer, srcImage->VkImage_(), srcImageLayout, dstImage, dstImageLayout, static_cast<uint32_t>(layerCount), infos.data(), filter);
 }

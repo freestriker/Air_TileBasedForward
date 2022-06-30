@@ -67,6 +67,22 @@ void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::startNe
     _window->requestUpdate();
     Utils::Log::Message("------------------------------------------------------------------");
 }
+QVulkanInstance* AirEngine::Core::Graphic::CoreObject::Window::QVulkanInstance_()
+{
+    return _qVulkanInstance;
+}
+AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow* AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow_()
+{
+    return _window;
+}
+AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer* AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer_()
+{
+    return _windowRenderer;
+}
+VkExtent2D AirEngine::Core::Graphic::CoreObject::Window::Extent()
+{
+    return { static_cast<uint32_t>(_window->size().width()), static_cast<uint32_t>(_window->size().height()) };
+}
 void AirEngine::Core::Graphic::CoreObject::Window::Init()
 {
 

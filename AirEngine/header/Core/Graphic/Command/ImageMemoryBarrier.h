@@ -18,6 +18,7 @@ namespace AirEngine
 					std::vector<VkImageMemoryBarrier> _vkImageMemoryBarriers;
 				public:
 					ImageMemoryBarrier(Instance::Image* image, VkImageLayout oldLayout, VkImageLayout newLayout, VkAccessFlags srcAccessFlags, VkAccessFlags dstAccessFlags);
+					ImageMemoryBarrier(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, VkAccessFlags srcAccessFlags, VkAccessFlags dstAccessFlags, std::vector<VkImageSubresourceRange> subresourceRanges);
 					~ImageMemoryBarrier();
 					const std::vector<VkImageMemoryBarrier>& VkImageMemoryBarriers();
 				};

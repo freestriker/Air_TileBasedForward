@@ -56,6 +56,7 @@ namespace AirEngine
 				alignas(16)	glm::vec4 clipPlanes[6];
 			};
 		public:
+			static CameraBase* mainCamera;
 			const CameraType cameraType;
 			std::vector<std::string> renderPassNames;
 			std::map<std::string, Core::Graphic::Instance::Image*> attachments;

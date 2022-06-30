@@ -20,7 +20,6 @@ AirEngine::Test::TransparentRendererBehaviour::TransparentRendererBehaviour()
 	, shader(nullptr)
 	, diffuseTexture2D(nullptr)
 	, material(nullptr)
-	, rotationSpeed(0.5235987755982988f)
 {
 }
 
@@ -56,12 +55,6 @@ void AirEngine::Test::TransparentRendererBehaviour::OnUpdate()
 		meshRenderer->mesh = mesh;
 		Utils::Log::Message("Finish load.");
 	}
-
-	auto rotation = GameObject()->transform.Rotation();
-	rotation.x = std::fmod(rotation.x + rotationSpeed * 0.3f * static_cast<float>(Core::Logic::CoreObject::Instance::time.DeltaDuration()), 6.283185307179586f);
-	rotation.y = std::fmod(rotation.y + rotationSpeed * 0.6f * static_cast<float>(Core::Logic::CoreObject::Instance::time.DeltaDuration()), 6.283185307179586f);
-	rotation.z = std::fmod(rotation.z + rotationSpeed * static_cast<float>(Core::Logic::CoreObject::Instance::time.DeltaDuration()), 6.283185307179586f);
-	GameObject()->transform.SetRotation(rotation);
 }
 
 void AirEngine::Test::TransparentRendererBehaviour::OnDestroy()
