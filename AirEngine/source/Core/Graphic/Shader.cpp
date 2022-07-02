@@ -389,11 +389,11 @@ void AirEngine::Core::Graphic::Shader::_CreateDescriptorLayouts(_PipelineData& p
 			}
 			else if (binding.descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE && slotDescriptor.slotType == ShaderSlotType::STORGE_IMAGE2D && setBindingPair.second.size() == 1)
 			{
-				slotDescriptor.slotType = ShaderSlotType::TEXTURE2D;
+				slotDescriptor.slotType = ShaderSlotType::STORGE_IMAGE2D;
 			}
 			else if (binding.descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE && slotDescriptor.slotType == ShaderSlotType::STORGE_IMAGE2D && setBindingPair.second.size() == 2 && setBindingPair.second[1].descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
 			{
-				slotDescriptor.slotType = ShaderSlotType::TEXTURE2D_WITH_INFO;
+				slotDescriptor.slotType = ShaderSlotType::STORGE_IMAGE2D_WITH_INFO;
 			}
 			else if (binding.descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER && slotDescriptor.slotType == ShaderSlotType::TEXTURE_CUBE && setBindingPair.second.size() == 1)
 			{
@@ -503,6 +503,8 @@ void AirEngine::Core::Graphic::Shader::OnLoad(Core::Graphic::Command::CommandBuf
 
 		_CreateDescriptorLayouts(pipelineData);
 		_PopulateDescriptorLayouts(pipelineData);
+
+		_CreateComputePipeline(pipelineData);
 	}
 	else
 	{

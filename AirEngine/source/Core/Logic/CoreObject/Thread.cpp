@@ -389,6 +389,9 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 {
 	qDebug() << "AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()";
 
+	auto testShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Shader>("..\\Asset\\Shader\\TestShader.shader");
+
+
 	//Camera
 	Object::GameObject* cameraGo = new Logic::Object::GameObject("Camera");
 	CoreObject::Instance::rootObject.AddChild(cameraGo);
