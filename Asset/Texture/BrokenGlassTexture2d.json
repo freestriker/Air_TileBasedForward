@@ -3,6 +3,8 @@
     "anisotropy": 0.0,
     "borderColor": 3,
     "format": 50,
+    "usage": 4,
+    "useSampler": true,
     "imagePath": "..\\Asset\\Texture\\BrokenGlassTesture2D.png",
     "magFilter": 1,
     "minFilter": 1,
