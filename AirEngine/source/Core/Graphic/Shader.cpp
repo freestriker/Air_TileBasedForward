@@ -201,7 +201,7 @@ void AirEngine::Core::Graphic::Shader::_CheckAttachmentOutputState(_PipelineData
 	}
 }
 
-void AirEngine::Core::Graphic::Shader::_PopulatePipelineSettings(_PipelineData& pipelineData)
+void AirEngine::Core::Graphic::Shader::_PopulateGraphicPipelineSettings(_PipelineData& pipelineData)
 {
 	pipelineData.inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 	pipelineData.inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
@@ -318,9 +318,17 @@ void AirEngine::Core::Graphic::Shader::_CreateDescriptorLayouts(_PipelineData& p
 						{
 							newSlotLayout.slotType = ShaderSlotType::UNIFORM_BUFFER;
 						}
+						else if (refl_binding.descriptor_type == SpvReflectDescriptorType::SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_BUFFER)
+						{
+							newSlotLayout.slotType = ShaderSlotType::STORGE_BUFFER;
+						}
 						else if (refl_binding.descriptor_type == SpvReflectDescriptorType::SPV_REFLECT_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER && refl_binding.image.dim == SpvDim::SpvDim2D)
 						{
 							newSlotLayout.slotType = ShaderSlotType::TEXTURE2D;
+						}
+						else if (refl_binding.descriptor_type == SpvReflectDescriptorType::SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_IMAGE && refl_binding.image.dim == SpvDim::SpvDim2D)
+						{
+							newSlotLayout.slotType = ShaderSlotType::STORGE_IMAGE2D;
 						}
 						else if (refl_binding.descriptor_type == SpvReflectDescriptorType::SPV_REFLECT_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER && refl_binding.image.dim == SpvDim::SpvDimCube)
 						{
@@ -367,6 +375,10 @@ void AirEngine::Core::Graphic::Shader::_CreateDescriptorLayouts(_PipelineData& p
 			{
 				slotDescriptor.slotType = ShaderSlotType::UNIFORM_BUFFER;
 			}
+			else if (binding.descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER && setBindingPair.second.size() == 1)
+			{
+				slotDescriptor.slotType = ShaderSlotType::STORGE_BUFFER;
+			}
 			else if (binding.descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER && slotDescriptor.slotType == ShaderSlotType::TEXTURE2D && setBindingPair.second.size() == 1)
 			{
 				slotDescriptor.slotType = ShaderSlotType::TEXTURE2D;
@@ -375,9 +387,21 @@ void AirEngine::Core::Graphic::Shader::_CreateDescriptorLayouts(_PipelineData& p
 			{
 				slotDescriptor.slotType = ShaderSlotType::TEXTURE2D_WITH_INFO;
 			}
+			else if (binding.descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE && slotDescriptor.slotType == ShaderSlotType::STORGE_IMAGE2D && setBindingPair.second.size() == 1)
+			{
+				slotDescriptor.slotType = ShaderSlotType::TEXTURE2D;
+			}
+			else if (binding.descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE && slotDescriptor.slotType == ShaderSlotType::STORGE_IMAGE2D && setBindingPair.second.size() == 2 && setBindingPair.second[1].descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+			{
+				slotDescriptor.slotType = ShaderSlotType::TEXTURE2D_WITH_INFO;
+			}
 			else if (binding.descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER && slotDescriptor.slotType == ShaderSlotType::TEXTURE_CUBE && setBindingPair.second.size() == 1)
 			{
 				slotDescriptor.slotType = ShaderSlotType::TEXTURE_CUBE;
+			}
+			else
+			{
+				Utils::Log::Exception("Failed to parse descriptor type.");
 			}
 		}
 		_slotDescriptors.emplace(slotDescriptor.name, slotDescriptor);
@@ -393,7 +417,7 @@ void AirEngine::Core::Graphic::Shader::_PopulateDescriptorLayouts(_PipelineData&
 	}
 }
 
-void AirEngine::Core::Graphic::Shader::_CreatePipeline(_PipelineData& pipelineData)
+void AirEngine::Core::Graphic::Shader::_CreateGraphicPipeline(_PipelineData& pipelineData)
 {
 	std::vector<VkDynamicState> dynamicStateEnables = {
 		VK_DYNAMIC_STATE_VIEWPORT, 				//设置动态状态  视口矩阵
@@ -432,6 +456,27 @@ void AirEngine::Core::Graphic::Shader::_CreatePipeline(_PipelineData& pipelineDa
 	Utils::Log::Exception("Failed to create pipeline.", vkCreateGraphicsPipelines(CoreObject::Instance::VkDevice_(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &_vkPipeline));
 }
 
+void AirEngine::Core::Graphic::Shader::_CreateComputePipeline(_PipelineData& pipelineData)
+{
+	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
+	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+	pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(pipelineData.descriptorSetLayouts.size());
+	pipelineLayoutInfo.pSetLayouts = pipelineData.descriptorSetLayouts.data();
+
+	Utils::Log::Exception("Failed to create pipeline layout.", vkCreatePipelineLayout(CoreObject::Instance::VkDevice_(), &pipelineLayoutInfo, nullptr, &_vkPipelineLayout));
+
+	VkComputePipelineCreateInfo pipelineInfo{};
+	pipelineInfo.sType = VkStructureType::VK_STRUCTURE_TYPE_COMPUTE_PIPELINE_CREATE_INFO;
+	pipelineInfo.pNext = nullptr;
+	pipelineInfo.flags = 0;
+	pipelineInfo.stage = pipelineData.stageInfos[0];
+	pipelineInfo.layout = _vkPipelineLayout;
+	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
+	pipelineInfo.basePipelineIndex = 0;
+
+	Utils::Log::Exception("Failed to create pipeline.", vkCreateComputePipelines(CoreObject::Instance::VkDevice_(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &_vkPipeline));
+}
+
 void AirEngine::Core::Graphic::Shader::_DestroyData(_PipelineData& pipelineData)
 {
 	for (auto& warp : pipelineData.shaderModuleWrappers)
@@ -451,12 +496,27 @@ void AirEngine::Core::Graphic::Shader::OnLoad(Core::Graphic::Command::CommandBuf
 	_CreateShaderModules(pipelineData);
 
 	_PopulateShaderStages(pipelineData);
-	_PopulateVertexInputState(pipelineData);
-	_CheckAttachmentOutputState(pipelineData);
-	_PopulatePipelineSettings(pipelineData);
-	_CreateDescriptorLayouts(pipelineData);
-	_PopulateDescriptorLayouts(pipelineData);
-	_CreatePipeline(pipelineData);
+
+	if (pipelineData.stageInfos.size() == 1 && pipelineData.stageInfos[0].stage == VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT)
+	{
+		_shaderType = ShaderType::COMPUTE;
+
+		_CreateDescriptorLayouts(pipelineData);
+		_PopulateDescriptorLayouts(pipelineData);
+	}
+	else
+	{
+		_shaderType = ShaderType::GRAPHIC;
+
+		_PopulateVertexInputState(pipelineData);
+		_CheckAttachmentOutputState(pipelineData);
+
+		_CreateDescriptorLayouts(pipelineData);
+		_PopulateDescriptorLayouts(pipelineData);
+
+		_PopulateGraphicPipelineSettings(pipelineData);
+		_CreateGraphicPipeline(pipelineData);
+	}
 
 	_DestroyData(pipelineData);
 }
@@ -479,6 +539,11 @@ VkPipelineLayout AirEngine::Core::Graphic::Shader::VkPipelineLayout_()
 const AirEngine::Core::Graphic::Shader::ShaderSettings* AirEngine::Core::Graphic::Shader::Settings()
 {
 	return &_shaderSettings;
+}
+
+AirEngine::Core::Graphic::Shader::ShaderType AirEngine::Core::Graphic::Shader::ShaderType_()
+{
+	return _shaderType;
 }
 
 AirEngine::Core::Graphic::Shader::Shader()
