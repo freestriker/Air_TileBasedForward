@@ -66,7 +66,7 @@ void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnPopulateCommandBu
 			VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
 		);
 
-		_renderCommandBuffer->AddPipelineBarrier(
+		_renderCommandBuffer->AddPipelineImageBarrier(
 			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
 			{ &depthAttachmentAcquireBarrier }
 		);
@@ -81,7 +81,7 @@ void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnPopulateCommandBu
 			VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
 		);
 
-		_renderCommandBuffer->AddPipelineBarrier(
+		_renderCommandBuffer->AddPipelineImageBarrier(
 			VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 			{ &colorAttachmentAcquireBarrier }
 		);

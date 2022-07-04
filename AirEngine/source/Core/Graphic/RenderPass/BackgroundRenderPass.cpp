@@ -90,7 +90,7 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateComma
 				VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT
 			);
 
-			_renderCommandBuffer->AddPipelineBarrier(
+			_renderCommandBuffer->AddPipelineImageBarrier(
 				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
 				{ &depthAttachmentLayoutBarrier, &temporaryImageLayoutBarrier }
 			);
@@ -128,11 +128,11 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateComma
 				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
 			);
 
-			_renderCommandBuffer->AddPipelineBarrier(
+			_renderCommandBuffer->AddPipelineImageBarrier(
 				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
 				{ &depthAttachmentLayoutBarrier }
 			);
-			_renderCommandBuffer->AddPipelineBarrier(
+			_renderCommandBuffer->AddPipelineImageBarrier(
 				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
 				{ &temporaryImageLayoutBarrier }
 			);

@@ -387,7 +387,7 @@ void AirEngine::Core::Graphic::Shader::_CreateDescriptorLayouts(_PipelineData& p
 			{
 				slotDescriptor.slotType = ShaderSlotType::STORAGE_BUFFER;
 			}
-			if (binding.descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER && setBindingPair.second.size() == 1)
+			else if (binding.descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER && setBindingPair.second.size() == 1)
 			{
 				slotDescriptor.slotType = ShaderSlotType::STORAGE_TEXEL_BUFFER;
 			}

@@ -109,6 +109,7 @@
     <ClCompile Include="source\Camera\CameraBase.cpp" />
     <ClCompile Include="source\Camera\OrthographicCamera.cpp" />
     <ClCompile Include="source\Camera\PerspectiveCamera.cpp" />
+    <ClCompile Include="source\Core\Graphic\Command\BufferMemoryBarrier.cpp" />
     <ClCompile Include="source\Core\Graphic\Instance\DescriptorSet.cpp" />
     <ClCompile Include="source\Core\Graphic\Instance\FrameBuffer.cpp" />
     <ClCompile Include="source\Core\Graphic\Manager\DescriptorSetManager.cpp" />
@@ -118,6 +119,7 @@
     <ClCompile Include="source\Core\Graphic\RenderPass\BackgroundRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\OpaqueRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\RenderPassBase.cpp" />
+    <ClCompile Include="source\Core\Graphic\RenderPass\TBFOpaqueRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\TransparentRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\Shader.cpp" />
     <ClCompile Include="source\Asset\Texture2D.cpp" />
@@ -177,6 +179,7 @@
     <ClInclude Include="header\Behaviour\Behaviour.h" />
     <ClInclude Include="header\Camera\CameraBase.h" />
     <ClInclude Include="header\Camera\OrthographicCamera.h" />
+    <ClInclude Include="header\Core\Graphic\Command\BufferMemoryBarrier.h" />
     <ClInclude Include="header\Core\Graphic\Command\CommandBuffer.h" />
     <ClInclude Include="header\Core\Graphic\Command\CommandPool.h" />
     <ClInclude Include="header\Core\Graphic\Command\Fence.h" />
@@ -199,6 +202,7 @@
     <ClInclude Include="header\Core\Graphic\RenderPass\BackgroundRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\OpaqueRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\RenderPassBase.h" />
+    <ClInclude Include="header\Core\Graphic\RenderPass\TBFOpaqueRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\TransparentRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\Shader.h" />
     <ClInclude Include="header\Core\IO\Asset\AssetBase.h" />

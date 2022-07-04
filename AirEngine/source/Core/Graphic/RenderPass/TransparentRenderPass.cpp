@@ -87,7 +87,7 @@ void AirEngine::Core::Graphic::RenderPass::TransparentRenderPass::OnPopulateComm
 		_renderCommandBuffer->BindMaterial(renderer->material);
 		_renderCommandBuffer->DrawMesh(renderer->mesh);
 
-		_renderCommandBuffer->AddPipelineBarrier(
+		_renderCommandBuffer->AddPipelineImageBarrier(
 			VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
 			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 			{ &drawBarrier }
