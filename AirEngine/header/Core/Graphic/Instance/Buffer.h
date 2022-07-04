@@ -17,9 +17,11 @@ namespace AirEngine
 				{
 				private:
 					VkBuffer _vkBuffer;
+					VkBufferView _vkBufferView;
 					Memory* _memory;
 					size_t _size;
 					VkBufferUsageFlags _usage;
+					VkFormat _format;
 
 					Buffer(const Buffer& source) = delete;
 					Buffer& operator=(const Buffer&) = delete;
@@ -27,9 +29,12 @@ namespace AirEngine
 					Buffer& operator=(Buffer&&) = delete;
 				public:
 					Buffer(size_t size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties);
+					Buffer(size_t size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkFormat format);
 					void WriteData(const void* data, size_t dataSize);
 					void WriteData(std::function<void(void*)> writeFunction);
 					VkBuffer VkBuffer_();
+					VkBufferView VkBufferView_();
+					VkFormat BufferViewFormat();
 					Memory* Memory();
 					size_t Size();
 					size_t Offset();

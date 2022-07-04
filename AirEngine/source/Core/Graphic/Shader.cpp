@@ -320,7 +320,15 @@ void AirEngine::Core::Graphic::Shader::_CreateDescriptorLayouts(_PipelineData& p
 						}
 						else if (refl_binding.descriptor_type == SpvReflectDescriptorType::SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_BUFFER)
 						{
-							newSlotLayout.slotType = ShaderSlotType::STORGE_BUFFER;
+							newSlotLayout.slotType = ShaderSlotType::STORAGE_BUFFER;
+						}
+						else if (refl_binding.descriptor_type == SpvReflectDescriptorType::SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER)
+						{
+							newSlotLayout.slotType = ShaderSlotType::UNIFORM_TEXEL_BUFFER;
+						}
+						else if (refl_binding.descriptor_type == SpvReflectDescriptorType::SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER)
+						{
+							newSlotLayout.slotType = ShaderSlotType::STORAGE_TEXEL_BUFFER;
 						}
 						else if (refl_binding.descriptor_type == SpvReflectDescriptorType::SPV_REFLECT_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER && refl_binding.image.dim == SpvDim::SpvDim2D)
 						{
@@ -328,7 +336,7 @@ void AirEngine::Core::Graphic::Shader::_CreateDescriptorLayouts(_PipelineData& p
 						}
 						else if (refl_binding.descriptor_type == SpvReflectDescriptorType::SPV_REFLECT_DESCRIPTOR_TYPE_STORAGE_IMAGE && refl_binding.image.dim == SpvDim::SpvDim2D)
 						{
-							newSlotLayout.slotType = ShaderSlotType::STORGE_IMAGE2D;
+							newSlotLayout.slotType = ShaderSlotType::STORAGE_TEXTURE2D;
 						}
 						else if (refl_binding.descriptor_type == SpvReflectDescriptorType::SPV_REFLECT_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER && refl_binding.image.dim == SpvDim::SpvDimCube)
 						{
@@ -377,7 +385,15 @@ void AirEngine::Core::Graphic::Shader::_CreateDescriptorLayouts(_PipelineData& p
 			}
 			else if (binding.descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER && setBindingPair.second.size() == 1)
 			{
-				slotDescriptor.slotType = ShaderSlotType::STORGE_BUFFER;
+				slotDescriptor.slotType = ShaderSlotType::STORAGE_BUFFER;
+			}
+			if (binding.descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER && setBindingPair.second.size() == 1)
+			{
+				slotDescriptor.slotType = ShaderSlotType::STORAGE_TEXEL_BUFFER;
+			}
+			else if (binding.descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER && setBindingPair.second.size() == 1)
+			{
+				slotDescriptor.slotType = ShaderSlotType::UNIFORM_TEXEL_BUFFER;
 			}
 			else if (binding.descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER && slotDescriptor.slotType == ShaderSlotType::TEXTURE2D && setBindingPair.second.size() == 1)
 			{
@@ -387,13 +403,13 @@ void AirEngine::Core::Graphic::Shader::_CreateDescriptorLayouts(_PipelineData& p
 			{
 				slotDescriptor.slotType = ShaderSlotType::TEXTURE2D_WITH_INFO;
 			}
-			else if (binding.descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE && slotDescriptor.slotType == ShaderSlotType::STORGE_IMAGE2D && setBindingPair.second.size() == 1)
+			else if (binding.descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE && slotDescriptor.slotType == ShaderSlotType::STORAGE_TEXTURE2D && setBindingPair.second.size() == 1)
 			{
-				slotDescriptor.slotType = ShaderSlotType::STORGE_IMAGE2D;
+				slotDescriptor.slotType = ShaderSlotType::STORAGE_TEXTURE2D;
 			}
-			else if (binding.descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE && slotDescriptor.slotType == ShaderSlotType::STORGE_IMAGE2D && setBindingPair.second.size() == 2 && setBindingPair.second[1].descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
+			else if (binding.descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE && slotDescriptor.slotType == ShaderSlotType::STORAGE_TEXTURE2D && setBindingPair.second.size() == 2 && setBindingPair.second[1].descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
 			{
-				slotDescriptor.slotType = ShaderSlotType::STORGE_IMAGE2D_WITH_INFO;
+				slotDescriptor.slotType = ShaderSlotType::STORAGE_TEXTURE2D_WITH_INFO;
 			}
 			else if (binding.descriptorType == VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER && slotDescriptor.slotType == ShaderSlotType::TEXTURE_CUBE && setBindingPair.second.size() == 1)
 			{

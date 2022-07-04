@@ -72,13 +72,53 @@ void AirEngine::Core::Graphic::Material::SetTexture2D(std::string name, Asset::T
 			{ 0, 1 },
 			{
 				{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, texture2d->ImageSampler()->VkSampler_(), texture2d->Image()->VkImageView_(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL},
-				{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, texture2d->InfoBuffer()->VkBuffer_(), 0, texture2d->InfoBuffer()->Size()}
+				{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, texture2d->InfoBuffer()->VkBuffer_(), texture2d->InfoBuffer()->Offset(), texture2d->InfoBuffer()->Size()}
 			}
 			);
 	}
 	else
 	{
 		Utils::Log::Exception("Failed to set texture2d.");
+	}
+}
+
+AirEngine::Asset::Texture2D* AirEngine::Core::Graphic::Material::GetStorageTexture2D(std::string name)
+{
+	if (_slots.count(name) && (_slots[name].slotType == ShaderSlotType::STORAGE_TEXTURE2D || _slots[name].slotType == ShaderSlotType::STORAGE_TEXTURE2D_WITH_INFO))
+	{
+		return static_cast<Asset::Texture2D*>(_slots[name].asset);
+	}
+	else
+	{
+		Utils::Log::Exception("Failed to get storge texture2d.");
+		return nullptr;
+	}
+}
+
+void AirEngine::Core::Graphic::Material::SetStorgeTexture2D(std::string name, Asset::Texture2D* texture2d)
+{
+	if (_slots.count(name) && _slots[name].slotType == ShaderSlotType::STORAGE_TEXTURE2D)
+	{
+		_slots[name].asset = texture2d;
+		_slots[name].descriptorSet->UpdateBindingData(
+			{ 0 },
+			{ {VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, texture2d->ImageSampler()->VkSampler_(), texture2d->Image()->VkImageView_(), VK_IMAGE_LAYOUT_GENERAL} }
+		);
+	}
+	else if (_slots.count(name) && _slots[name].slotType == ShaderSlotType::STORAGE_TEXTURE2D_WITH_INFO)
+	{
+		_slots[name].asset = texture2d;
+		_slots[name].descriptorSet->UpdateBindingData(
+			{ 0, 1 },
+			{
+				{VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, texture2d->ImageSampler()->VkSampler_(), texture2d->Image()->VkImageView_(), VK_IMAGE_LAYOUT_GENERAL},
+				{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, texture2d->InfoBuffer()->VkBuffer_(), texture2d->InfoBuffer()->Offset(), texture2d->InfoBuffer()->Size()}
+			}
+			);
+	}
+	else
+	{
+		Utils::Log::Exception("Failed to set storage texture2d.");
 	}
 }
 
@@ -103,13 +143,106 @@ void AirEngine::Core::Graphic::Material::SetUniformBuffer(std::string name, Inst
 		_slots[name].descriptorSet->UpdateBindingData(
 			{ 0 },
 			{
-				{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, buffer->VkBuffer_(), 0, buffer->Size()}
+				{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, buffer->VkBuffer_(), buffer->Offset(), buffer->Size()}
 			}
 			);
 	}
 	else
 	{
 		Utils::Log::Exception("Failed to set uniform buffer.");
+	}
+}
+
+AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Material::GetStorageBuffer(std::string name)
+{
+	if (_slots.count(name) && _slots[name].slotType == ShaderSlotType::STORAGE_BUFFER)
+	{
+		return static_cast<Graphic::Instance::Buffer*>(_slots[name].asset);
+	}
+	else
+	{
+		Utils::Log::Exception("Failed to get storage buffer.");
+		return nullptr;
+	}
+}
+
+void AirEngine::Core::Graphic::Material::SetStorageBuffer(std::string name, Instance::Buffer* buffer)
+{
+	if (_slots.count(name) && _slots[name].slotType == ShaderSlotType::STORAGE_BUFFER)
+	{
+		_slots[name].asset = buffer;
+		_slots[name].descriptorSet->UpdateBindingData(
+			{ 0 },
+			{
+				{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, buffer->VkBuffer_(), buffer->Offset(), buffer->Size()}
+			}
+			);
+	}
+	else
+	{
+		Utils::Log::Exception("Failed to set storage buffer.");
+	}
+}
+
+AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Material::GetUniformTexelBuffer(std::string name)
+{
+	if (_slots.count(name) && _slots[name].slotType == ShaderSlotType::UNIFORM_TEXEL_BUFFER)
+	{
+		return static_cast<Graphic::Instance::Buffer*>(_slots[name].asset);
+	}
+	else
+	{
+		Utils::Log::Exception("Failed to get uniform texel buffer.");
+		return nullptr;
+	}
+}
+
+void AirEngine::Core::Graphic::Material::SetUniformTexelBuffer(std::string name, Instance::Buffer* buffer)
+{
+	if (_slots.count(name) && _slots[name].slotType == ShaderSlotType::UNIFORM_TEXEL_BUFFER)
+	{
+		_slots[name].asset = buffer;
+		_slots[name].descriptorSet->UpdateBindingData(
+			{ 0 },
+			{
+				{VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, buffer->VkBuffer_(), buffer->VkBufferView_(), buffer->Offset(), buffer->Size()}
+			}
+			);
+	}
+	else
+	{
+		Utils::Log::Exception("Failed to set uniform texel buffer.");
+	}
+}
+
+AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Material::GetStorgeTexelBuffer(std::string name)
+{
+	if (_slots.count(name) && _slots[name].slotType == ShaderSlotType::STORAGE_TEXEL_BUFFER)
+	{
+		return static_cast<Graphic::Instance::Buffer*>(_slots[name].asset);
+	}
+	else
+	{
+		Utils::Log::Exception("Failed to get storage texel buffer.");
+		return nullptr;
+	}
+}
+
+void AirEngine::Core::Graphic::Material::SetStorgeTexelBuffer(std::string name, Instance::Buffer* buffer)
+{
+	if (_slots.count(name) && _slots[name].slotType == ShaderSlotType::STORAGE_TEXEL_BUFFER)
+	{
+		_slots[name].asset = buffer;
+		_slots[name].descriptorSet->UpdateBindingData(
+			{ 0 },
+			{
+				{VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, buffer->VkBuffer_(), buffer->VkBufferView_(), buffer->Offset(), buffer->Size()}
+			}
+			);
+	}
+	else
+	{
+		Utils::Log::Exception("Failed to set storage texel buffer.");
 	}
 }
 
@@ -144,9 +277,28 @@ void AirEngine::Core::Graphic::Material::RefreshSlotData(std::vector<std::string
 			case ShaderSlotType::UNIFORM_BUFFER:
 			{
 				Instance::Buffer* ub = static_cast<Instance::Buffer*>(slot.asset);
-				slot.descriptorSet->UpdateBindingData({ 0 }, { Graphic::Instance::DescriptorSet::DescriptorSetWriteData(VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, ub->VkBuffer_(), 0, ub->Size()) });
+				slot.descriptorSet->UpdateBindingData({ 0 }, { Graphic::Instance::DescriptorSet::DescriptorSetWriteData(VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, ub->VkBuffer_(), ub->Offset(), ub->Size()) });
 				break;
 			}
+			case ShaderSlotType::STORAGE_BUFFER:
+			{
+				Instance::Buffer* ub = static_cast<Instance::Buffer*>(slot.asset);
+				slot.descriptorSet->UpdateBindingData({ 0 }, { Graphic::Instance::DescriptorSet::DescriptorSetWriteData(VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, ub->VkBuffer_(), ub->Offset(), ub->Size()) });
+				break;
+			}
+			case ShaderSlotType::UNIFORM_TEXEL_BUFFER:
+			{
+				Instance::Buffer* ub = static_cast<Instance::Buffer*>(slot.asset);
+				slot.descriptorSet->UpdateBindingData({ 0 }, { Graphic::Instance::DescriptorSet::DescriptorSetWriteData(VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER, ub->VkBuffer_(), ub->VkBufferView_(), ub->Offset(), ub->Size()) });
+				break;
+			}
+			case ShaderSlotType::STORAGE_TEXEL_BUFFER:
+			{
+				Instance::Buffer* ub = static_cast<Instance::Buffer*>(slot.asset);
+				slot.descriptorSet->UpdateBindingData({ 0 }, { Graphic::Instance::DescriptorSet::DescriptorSetWriteData(VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER, ub->VkBuffer_(), ub->VkBufferView_(), ub->Offset(), ub->Size()) });
+				break;
+			}
+
 			case ShaderSlotType::TEXTURE2D:
 			{
 				Asset::Texture2D* t = static_cast<Asset::Texture2D*>(slot.asset);
@@ -158,11 +310,28 @@ void AirEngine::Core::Graphic::Material::RefreshSlotData(std::vector<std::string
 				Asset::Texture2D* t = static_cast<Asset::Texture2D*>(slot.asset);
 				slot.descriptorSet->UpdateBindingData({ 0, 1 }, {
 					Graphic::Instance::DescriptorSet::DescriptorSetWriteData(VkDescriptorType::VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, t->ImageSampler()->VkSampler_(), t->Image()->VkImageView_(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL),
-					Graphic::Instance::DescriptorSet::DescriptorSetWriteData(VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, t->InfoBuffer()->VkBuffer_(), 0, t->InfoBuffer()->Size())
+					Graphic::Instance::DescriptorSet::DescriptorSetWriteData(VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, t->InfoBuffer()->VkBuffer_(), t->InfoBuffer()->Offset(), t->InfoBuffer()->Size())
 					});
 
 				break;
 			}
+			case ShaderSlotType::STORAGE_TEXTURE2D:
+			{
+				Asset::Texture2D* t = static_cast<Asset::Texture2D*>(slot.asset);
+				slot.descriptorSet->UpdateBindingData({ 0 }, { Graphic::Instance::DescriptorSet::DescriptorSetWriteData(VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, t->ImageSampler()->VkSampler_(), t->Image()->VkImageView_(), VK_IMAGE_LAYOUT_GENERAL) });
+				break;
+			}
+			case ShaderSlotType::STORAGE_TEXTURE2D_WITH_INFO:
+			{
+				Asset::Texture2D* t = static_cast<Asset::Texture2D*>(slot.asset);
+				slot.descriptorSet->UpdateBindingData({ 0, 1 }, {
+					Graphic::Instance::DescriptorSet::DescriptorSetWriteData(VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, t->ImageSampler()->VkSampler_(), t->Image()->VkImageView_(), VK_IMAGE_LAYOUT_GENERAL),
+					Graphic::Instance::DescriptorSet::DescriptorSetWriteData(VkDescriptorType::VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, t->InfoBuffer()->VkBuffer_(), t->InfoBuffer()->Offset(), t->InfoBuffer()->Size())
+					});
+
+				break;
+			}
+
 		}
 	}
 }

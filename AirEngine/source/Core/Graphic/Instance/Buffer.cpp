@@ -9,6 +9,8 @@ AirEngine::Core::Graphic::Instance::Buffer::Buffer(size_t size, VkBufferUsageFla
 	, _memory(nullptr)
 	, _size(size)
 	, _usage(usage)
+	, _vkBufferView(VK_NULL_HANDLE)
+	, _format()
 {
 	VkBufferCreateInfo bufferInfo{};
 	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
@@ -27,6 +29,44 @@ AirEngine::Core::Graphic::Instance::Buffer::Buffer(size_t size, VkBufferUsageFla
 		std::unique_lock<std::mutex> lock(*_memory->Mutex());
 		vkBindBufferMemory(Graphic::CoreObject::Instance::VkDevice_(), _vkBuffer, _memory->VkDeviceMemory_(), _memory->Offset());
 	}
+}
+
+AirEngine::Core::Graphic::Instance::Buffer::Buffer(size_t size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkFormat format)
+	: _vkBuffer(VK_NULL_HANDLE)
+	, _memory(nullptr)
+	, _size(size)
+	, _usage(usage)
+	, _vkBufferView(VK_NULL_HANDLE)
+	, _format(format)
+{
+	VkBufferCreateInfo bufferInfo{};
+	bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+	bufferInfo.size = static_cast<VkDeviceSize>(size);
+	bufferInfo.usage = usage;
+	bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+	AirEngine::Utils::Log::Exception("Failed to create buffer.", vkCreateBuffer(Graphic::CoreObject::Instance::VkDevice_(), &bufferInfo, nullptr, &_vkBuffer));
+
+	VkMemoryRequirements memRequirements;
+	vkGetBufferMemoryRequirements(Graphic::CoreObject::Instance::VkDevice_(), _vkBuffer, &memRequirements);
+
+	_memory = new Graphic::Instance::Memory(Graphic::CoreObject::Instance::MemoryManager().AcquireMemory(memRequirements, properties));
+
+	{
+		std::unique_lock<std::mutex> lock(*_memory->Mutex());
+		vkBindBufferMemory(Graphic::CoreObject::Instance::VkDevice_(), _vkBuffer, _memory->VkDeviceMemory_(), _memory->Offset());
+	}
+
+	VkBufferViewCreateInfo viewInfo{};
+	viewInfo.sType = VkStructureType::VK_STRUCTURE_TYPE_BUFFER_VIEW_CREATE_INFO;
+	viewInfo.pNext = nullptr;
+	viewInfo.flags = 0;
+	viewInfo.buffer = _vkBuffer;
+	viewInfo.format = format;
+	viewInfo.offset = 0;
+	viewInfo.range = _size;
+
+	AirEngine::Utils::Log::Exception("Failed to create buffer view.", vkCreateBufferView(Graphic::CoreObject::Instance::VkDevice_(), &viewInfo, nullptr, &_vkBufferView));
 }
 
 void AirEngine::Core::Graphic::Instance::Buffer::WriteData(const void* data, size_t dataSize)
@@ -54,6 +94,16 @@ void AirEngine::Core::Graphic::Instance::Buffer::WriteData(std::function<void(vo
 VkBuffer AirEngine::Core::Graphic::Instance::Buffer::VkBuffer_()
 {
 	return _vkBuffer;
+}
+
+VkBufferView AirEngine::Core::Graphic::Instance::Buffer::VkBufferView_()
+{
+	return _vkBufferView;
+}
+
+VkFormat AirEngine::Core::Graphic::Instance::Buffer::BufferViewFormat()
+{
+	return _format;
 }
 
 AirEngine::Core::Graphic::Instance::Memory* AirEngine::Core::Graphic::Instance::Buffer::Memory()

@@ -17,11 +17,13 @@ namespace AirEngine
 			enum class ShaderSlotType
 			{
 				UNIFORM_BUFFER,
-				STORGE_BUFFER,
+				STORAGE_BUFFER,
+				UNIFORM_TEXEL_BUFFER,
+				STORAGE_TEXEL_BUFFER,
 				TEXTURE2D,
 				TEXTURE2D_WITH_INFO,
-				STORGE_IMAGE2D,
-				STORGE_IMAGE2D_WITH_INFO,
+				STORAGE_TEXTURE2D,
+				STORAGE_TEXTURE2D_WITH_INFO,
 				TEXTURE_CUBE
 			};
 			class Shader final: public IO::Asset::AssetBase

@@ -61,8 +61,16 @@ namespace AirEngine
 				void SetTextureCube(std::string name, Asset::TextureCube* textureCube);
 				Asset::Texture2D* GetTexture2D(std::string name);
 				void SetTexture2D(std::string name, Asset::Texture2D* texture2d);
+				Asset::Texture2D* GetStorageTexture2D(std::string name);
+				void SetStorgeTexture2D(std::string name, Asset::Texture2D* texture2d);
 				Instance::Buffer* GetUniformBuffer(std::string name);
 				void SetUniformBuffer(std::string name, Instance::Buffer* buffer);
+				Instance::Buffer* GetStorageBuffer(std::string name);
+				void SetStorageBuffer(std::string name, Instance::Buffer* buffer);
+				Instance::Buffer* GetUniformTexelBuffer(std::string name);
+				void SetUniformTexelBuffer(std::string name, Instance::Buffer* buffer);
+				Instance::Buffer* GetStorgeTexelBuffer(std::string name);
+				void SetStorgeTexelBuffer(std::string name, Instance::Buffer* buffer);
 				VkPipelineLayout PipelineLayout();
 				std::vector<VkDescriptorSet> VkDescriptorSets();
 				Shader* Shader();
