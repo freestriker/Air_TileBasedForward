@@ -4,7 +4,7 @@
 #define INVALID_LIGHT 0
 #define DIRECTIONL_LIGHT 1
 #define POINT_LIGHT 2
-#define SKYBOX_LIGHT 2
+#define SKYBOX_LIGHT 3
 #define SPOT_LIGHT 4
 
 #define PI 3.1415926535
