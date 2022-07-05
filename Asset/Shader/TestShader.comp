@@ -5,9 +5,12 @@
 #include "Common.glsl"
 #include "Camera.glsl"
 #include "Light.glsl"
+#include "Collision.glsl"
 
+const uint LIGHT_LIST_SIZE = 64;
 const uint TILE_WIDTH = 32;
 const uint LOCAL_GROUP_WIDTH = 8;
+const uint LOCAL_GROUP_STEP = LOCAL_GROUP_WIDTH * LOCAL_GROUP_WIDTH;
 const uint ITERATER_END_1D = TILE_WIDTH / LOCAL_GROUP_WIDTH;
 const uint ITERATER_END =  ITERATER_END_1D * ITERATER_END_1D;
 
@@ -17,8 +20,20 @@ layout (set = START_SET + 1, binding = 0) uniform DepthImageInfo
 {
 	uvec2 size;
 }depthImageInfo;
-// layout (set = 1, binding = 0, rgba8) uniform image2D resultImage;
-// layout (set = 2, binding = 0) uniform textureBuffer testTexelBuffer;
+layout (set = START_SET + 2, binding = 0) uniform LightBoundingBoxInfo
+{
+	int count;
+	vec3[][8] boundingBoxes;
+}lightBoundingBoxInfo;
+struct LightIndexList
+{
+	int size;
+	int[LIGHT_LIST_SIZE] indexes;
+};
+layout (set = START_SET + 3, binding = 0) buffer LightIndexLists
+{
+	LightIndexList[] lists;
+}lightIndexLists;
 
 uint Iterater = 0;
 
@@ -27,8 +42,13 @@ uvec2 localGroupOffset = gl_LocalInvocationID.xy;
 #define iterationOffset (uvec2(Iterater / ITERATER_END_1D, Iterater % ITERATER_END_1D) * LOCAL_GROUP_WIDTH)
 #define pixelOffset (globalGroupOffset + localGroupOffset + iterationOffset)
 
+#define globalGroupID (gl_WorkGroupID.xy)
+#define globalGroupSize (gl_NumWorkGroups.xy)
+#define globalGroup1DID (globalGroupID.y * globalGroupSize.x + globalGroupID.x)
+
 shared float minNdcDepth;
 shared float maxNdcDepth;
+shared vec4[6] frustumPlanes;
 
 void main()
 {	
@@ -74,7 +94,20 @@ void main()
 		farVSPositions[1] = PositionNdcToView(vec3(NSPositions[1], maxNdcDepth));
 		farVSPositions[2] = PositionNdcToView(vec3(NSPositions[2], maxNdcDepth));
 		farVSPositions[3] = PositionNdcToView(vec3(NSPositions[3], maxNdcDepth));
-}
+
+		///left
+		frustumPlanes[0] = BuildPlane(nearVSPositions[0], nearVSPositions[1], farVSPositions[1]);
+		///right
+		frustumPlanes[1] = BuildPlane(nearVSPositions[3], farVSPositions[3], farVSPositions[2]);
+		///bottom
+		frustumPlanes[2] = BuildPlane(nearVSPositions[1], nearVSPositions[2], farVSPositions[2]);
+		///top
+		frustumPlanes[3] = BuildPlane(nearVSPositions[0], farVSPositions[0], farVSPositions[3]);
+		///near
+		frustumPlanes[4] = BuildPlane(nearVSPositions[0], nearVSPositions[3], nearVSPositions[2]);
+		///far
+		frustumPlanes[5] = BuildPlane(farVSPositions[3], farVSPositions[0], farVSPositions[1]);
+	}
 	barrier();
 
 }

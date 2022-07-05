@@ -1,6 +1,15 @@
 #ifndef _COLLISION_GLSL_
 #define _COLLISION_GLSL_
 
+vec4 BuildPlane(vec3 pos0, vec3 pos1, vec3 pos2)
+{
+    vec3 d0 = pos1 - pos0;
+    vec3 d1 = pos2 - pos1;
+    vec3 normal = normalize(cross(d0, d1));
+    float p = -dot(normal, pos0);
+    return vec4(normal, p);
+}
+
 bool ObbPlaneIntersection(vec3[8] vertexes, vec4[6] planes)
 {
     for(int i = 0; i < 6; i++)
