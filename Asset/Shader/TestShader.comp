@@ -1,44 +1,80 @@
 #version 450
+#extension GL_GOOGLE_include_directive: enable
+#extension GL_EXT_shader_atomic_float2: enable
 
-layout (local_size_x = 16, local_size_y = 16) in;
-layout (set = 0, binding = 0, rgba8) uniform readonly image2D inputImage;
-layout (set = 1, binding = 0, rgba8) uniform image2D resultImage;
+#include "Common.glsl"
+#include "Camera.glsl"
+#include "Light.glsl"
 
-float conv(in float[9] kernel, in float[9] data, in float denom, in float offset) 
+const uint TILE_WIDTH = 32;
+const uint LOCAL_GROUP_WIDTH = 8;
+const uint ITERATER_END_1D = TILE_WIDTH / LOCAL_GROUP_WIDTH;
+const uint ITERATER_END =  ITERATER_END_1D * ITERATER_END_1D;
+
+layout (local_size_x = LOCAL_GROUP_WIDTH, local_size_y = LOCAL_GROUP_WIDTH) in;
+layout (set = START_SET + 0, binding = 0, rgba8) uniform readonly image2D inputDepthImage;
+layout (set = START_SET + 1, binding = 0) uniform DepthImageInfo
 {
-   float res = 0.0;
-   for (int i=0; i<9; ++i) 
-   {
-      res += kernel[i] * data[i];
-   }
-   return clamp(res/denom + offset, 0.0, 1.0);
-}
+	uvec2 size;
+}depthImageInfo;
+// layout (set = 1, binding = 0, rgba8) uniform image2D resultImage;
+// layout (set = 2, binding = 0) uniform textureBuffer testTexelBuffer;
 
-struct ImageData 
-{
-	float avg[9];
-} imageData;	
+uint Iterater = 0;
+
+uvec2 globalGroupOffset = gl_WorkGroupID.xy * TILE_WIDTH;
+uvec2 localGroupOffset = gl_LocalInvocationID.xy;
+#define iterationOffset (uvec2(Iterater / ITERATER_END_1D, Iterater % ITERATER_END_1D) * LOCAL_GROUP_WIDTH)
+#define pixelOffset (globalGroupOffset + localGroupOffset + iterationOffset)
+
+shared float minNdcDepth;
+shared float maxNdcDepth;
 
 void main()
 {	
-	// Fetch neighbouring texels
-	int n = -1;
-	for (int i=-1; i<2; ++i) 
-	{   
-		for(int j=-1; j<2; ++j) 
-		{    
-			n++;    
-			vec3 rgb = imageLoad(inputImage, ivec2(gl_GlobalInvocationID.x + i, gl_GlobalInvocationID.y + j)).rgb;
-			imageData.avg[n] = (rgb.r + rgb.g + rgb.b) / 3.0;
-		}
+	///Init max min depth
+	if(localGroupOffset == uvec2(0, 0))
+	{
+		minNdcDepth = 1;
+		maxNdcDepth = 0;
 	}
+	barrier();
 
-	float[9] kernel;
-	kernel[0] = -1.0/8.0; kernel[1] = -1.0/8.0; kernel[2] = -1.0/8.0;
-	kernel[3] = -1.0/8.0; kernel[4] =  1.0;     kernel[5] = -1.0/8.0;
-	kernel[6] = -1.0/8.0; kernel[7] = -1.0/8.0; kernel[8] = -1.0/8.0;
-									
-	vec4 res = vec4(vec3(conv(kernel, imageData.avg, 0.1, 0.0)), 1.0);
+	///Find max min depth
+	for(Iterater = 0; Iterater < ITERATER_END; Iterater++)
+	{
+		uvec2 po = pixelOffset;
+		if(po.x >= depthImageInfo.size.x || po.y >= depthImageInfo.size.y) continue;
+		float pixelNdcDepth = imageLoad(inputDepthImage, ivec2(po)).r;
+		atomicMax(maxNdcDepth, pixelNdcDepth);
+		atomicMin(minNdcDepth, pixelNdcDepth);
+	}
+	barrier();
 
-	imageStore(resultImage, ivec2(gl_GlobalInvocationID.xy), res);
+	///Build ggo bounding box
+	if(localGroupOffset == uvec2(0, 0))
+	{
+		uint boundingBoxPixelWidth = depthImageInfo.size.x - globalGroupOffset.x > TILE_WIDTH ? TILE_WIDTH : depthImageInfo.size.x % TILE_WIDTH;
+		uint boundingBoxPixelHeight = depthImageInfo.size.y - globalGroupOffset.y > TILE_WIDTH ? TILE_WIDTH : depthImageInfo.size.y % TILE_WIDTH;
+	
+		vec2[4] NSPositions;
+		NSPositions[0] = PositionImageToNdc(globalGroupOffset / depthImageInfo.size);
+		NSPositions[1] = PositionImageToNdc((globalGroupOffset + uvec2(0, boundingBoxPixelHeight)) / depthImageInfo.size);
+		NSPositions[2] = PositionImageToNdc((globalGroupOffset + uvec2(boundingBoxPixelWidth, boundingBoxPixelHeight)) / depthImageInfo.size);
+		NSPositions[3] = PositionImageToNdc((globalGroupOffset + uvec2(boundingBoxPixelWidth, 0)) / depthImageInfo.size);
+
+		vec3[4] nearVSPositions;
+		nearVSPositions[0] = PositionNdcToView(vec3(NSPositions[0], minNdcDepth));
+		nearVSPositions[1] = PositionNdcToView(vec3(NSPositions[1], minNdcDepth));
+		nearVSPositions[2] = PositionNdcToView(vec3(NSPositions[2], minNdcDepth));
+		nearVSPositions[3] = PositionNdcToView(vec3(NSPositions[3], minNdcDepth));
+		
+		vec3[4] farVSPositions;
+		farVSPositions[0] = PositionNdcToView(vec3(NSPositions[0], maxNdcDepth));
+		farVSPositions[1] = PositionNdcToView(vec3(NSPositions[1], maxNdcDepth));
+		farVSPositions[2] = PositionNdcToView(vec3(NSPositions[2], maxNdcDepth));
+		farVSPositions[3] = PositionNdcToView(vec3(NSPositions[3], maxNdcDepth));
+}
+	barrier();
+
 }

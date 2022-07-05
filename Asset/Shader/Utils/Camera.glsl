@@ -110,6 +110,13 @@ vec3 PositionScreenToNearFlatWorld(vec2 screenPosition)
     return cameraData.position + normalize(cameraData.forward) * cameraData.nearFlat + normalize(cameraData.right) * x + normalize(-up) * y;
 }
 
+vec2 PositionImageToNdc(vec2 imagePosition)
+{
+    float x = (2 * imagePosition.x  - 1);
+    float y = (1 - 2 * imagePosition.y);
+    return clamp(vec2(x, y), -1, 1);
+}
+
 vec3 OrthographicCameraWorldView()
 {
     return normalize(cameraData.forward);
