@@ -7,64 +7,72 @@
 #include "Light.glsl"
 #include "Collision.glsl"
 
-const uint LIGHT_LIST_SIZE = 64;
-const uint TILE_WIDTH = 32;
-const uint LOCAL_GROUP_WIDTH = 8;
-const uint LOCAL_GROUP_STEP = LOCAL_GROUP_WIDTH * LOCAL_GROUP_WIDTH;
-const uint ITERATER_END_1D = TILE_WIDTH / LOCAL_GROUP_WIDTH;
-const uint ITERATER_END =  ITERATER_END_1D * ITERATER_END_1D;
+const int MAX_LIGHT_COUNT = 1024;
+const int MAX_LIGHT_INDEX_LIST_SIZE = 64;
+const int TILE_WIDTH = 32;
+const int LOCAL_GROUP_WIDTH = 8;
+const int LOCAL_GROUP_STEP = LOCAL_GROUP_WIDTH * LOCAL_GROUP_WIDTH;
+const int ITERATER_END_1D = TILE_WIDTH / LOCAL_GROUP_WIDTH;
+const int ITERATER_END =  ITERATER_END_1D * ITERATER_END_1D;
 
-layout (local_size_x = LOCAL_GROUP_WIDTH, local_size_y = LOCAL_GROUP_WIDTH) in;
-layout (set = START_SET + 0, binding = 0, rgba8) uniform readonly image2D inputDepthImage;
-layout (set = START_SET + 1, binding = 0) uniform DepthImageInfo
+struct LightOBBInfo
 {
-	uvec2 size;
-}depthImageInfo;
-layout (set = START_SET + 2, binding = 0) uniform LightBoundingBoxInfo
-{
-	int count;
-	vec3[][8] boundingBoxes;
-}lightBoundingBoxInfo;
+	vec3[8] box;
+	mat4 modelMatrix;
+};
+
 struct LightIndexList
 {
 	int size;
-	int[LIGHT_LIST_SIZE] indexes;
+	int[MAX_LIGHT_INDEX_LIST_SIZE] indexes;
 };
-layout (set = START_SET + 3, binding = 0) buffer LightIndexLists
+
+layout (local_size_x = LOCAL_GROUP_WIDTH, local_size_y = LOCAL_GROUP_WIDTH) in;
+layout (set = START_SET + 0, binding = 0, r32f) uniform readonly image2D inputDepthImage;
+layout (set = START_SET + 1, binding = 0) uniform LightOBBInfoList
+{
+	int size;
+	LightOBBInfo[MAX_LIGHT_COUNT] infos;
+}lightOBBInfoList;
+layout (set = START_SET + 2, binding = 0) buffer LightIndexLists
 {
 	LightIndexList[] lists;
 }lightIndexLists;
 
 uint Iterater = 0;
 
-uvec2 globalGroupOffset = gl_WorkGroupID.xy * TILE_WIDTH;
-uvec2 localGroupOffset = gl_LocalInvocationID.xy;
-#define iterationOffset (uvec2(Iterater / ITERATER_END_1D, Iterater % ITERATER_END_1D) * LOCAL_GROUP_WIDTH)
+vec2 globalGroupOffset = ivec2(gl_WorkGroupID.xy * TILE_WIDTH);
+vec2 localGroupOffset = ivec2(gl_LocalInvocationID.xy);
+#define iterationOffset (ivec2(Iterater / ITERATER_END_1D, Iterater % ITERATER_END_1D) * LOCAL_GROUP_WIDTH)
 #define pixelOffset (globalGroupOffset + localGroupOffset + iterationOffset)
 
-#define globalGroupID (gl_WorkGroupID.xy)
-#define globalGroupSize (gl_NumWorkGroups.xy)
+#define globalGroupID (ivec2(gl_WorkGroupID.xy))
+#define globalGroupSize (ivec2(gl_NumWorkGroups.xy))
 #define globalGroup1DID (globalGroupID.y * globalGroupSize.x + globalGroupID.x)
+
+#define depthImageSize (imageSize(inputDepthImage))
 
 shared float minNdcDepth;
 shared float maxNdcDepth;
 shared vec4[6] frustumPlanes;
-
+shared int lightIndexListSize;
 void main()
 {	
-	///Init max min depth
+	///Init shared
 	if(localGroupOffset == uvec2(0, 0))
 	{
 		minNdcDepth = 1;
 		maxNdcDepth = 0;
+
+		lightIndexListSize = 0;
 	}
 	barrier();
 
 	///Find max min depth
 	for(Iterater = 0; Iterater < ITERATER_END; Iterater++)
 	{
-		uvec2 po = pixelOffset;
-		if(po.x >= depthImageInfo.size.x || po.y >= depthImageInfo.size.y) continue;
+		vec2 po = pixelOffset;
+		if(po.x >= depthImageSize.x || po.y >= depthImageSize.y) continue;
 		float pixelNdcDepth = imageLoad(inputDepthImage, ivec2(po)).r;
 		atomicMax(maxNdcDepth, pixelNdcDepth);
 		atomicMin(minNdcDepth, pixelNdcDepth);
@@ -74,14 +82,14 @@ void main()
 	///Build ggo bounding box
 	if(localGroupOffset == uvec2(0, 0))
 	{
-		uint boundingBoxPixelWidth = depthImageInfo.size.x - globalGroupOffset.x > TILE_WIDTH ? TILE_WIDTH : depthImageInfo.size.x % TILE_WIDTH;
-		uint boundingBoxPixelHeight = depthImageInfo.size.y - globalGroupOffset.y > TILE_WIDTH ? TILE_WIDTH : depthImageInfo.size.y % TILE_WIDTH;
+		uint boundingBoxPixelWidth = depthImageSize.x - globalGroupOffset.x >= TILE_WIDTH ? TILE_WIDTH : depthImageSize.x % TILE_WIDTH;
+		uint boundingBoxPixelHeight = depthImageSize.y - globalGroupOffset.y >= TILE_WIDTH ? TILE_WIDTH : depthImageSize.y % TILE_WIDTH;
 	
 		vec2[4] NSPositions;
-		NSPositions[0] = PositionImageToNdc(globalGroupOffset / depthImageInfo.size);
-		NSPositions[1] = PositionImageToNdc((globalGroupOffset + uvec2(0, boundingBoxPixelHeight)) / depthImageInfo.size);
-		NSPositions[2] = PositionImageToNdc((globalGroupOffset + uvec2(boundingBoxPixelWidth, boundingBoxPixelHeight)) / depthImageInfo.size);
-		NSPositions[3] = PositionImageToNdc((globalGroupOffset + uvec2(boundingBoxPixelWidth, 0)) / depthImageInfo.size);
+		NSPositions[0] = PositionScreenToNdc(globalGroupOffset / depthImageSize);
+		NSPositions[1] = PositionScreenToNdc((globalGroupOffset + ivec2(0, boundingBoxPixelHeight)) / depthImageSize);
+		NSPositions[2] = PositionScreenToNdc((globalGroupOffset + ivec2(boundingBoxPixelWidth, boundingBoxPixelHeight)) / depthImageSize);
+		NSPositions[3] = PositionScreenToNdc((globalGroupOffset + ivec2(boundingBoxPixelWidth, 0)) / depthImageSize);
 
 		vec3[4] nearVSPositions;
 		nearVSPositions[0] = PositionNdcToView(vec3(NSPositions[0], minNdcDepth));
@@ -110,4 +118,22 @@ void main()
 	}
 	barrier();
 
+	///Intersection test
+	for(int i = 0; i < lightOBBInfoList.size; i += LOCAL_GROUP_STEP)
+	{
+		bool intersected = ObbPlaneMatrixIntersection(lightOBBInfoList.infos[i].box, frustumPlanes, matrixData.view * lightOBBInfoList.infos[i].modelMatrix);
+		if(intersected)
+		{
+			int storeIndex = atomicAdd(lightIndexListSize, 1);
+			if(storeIndex >= MAX_LIGHT_INDEX_LIST_SIZE) break;
+			lightIndexLists.lists[globalGroup1DID].indexes[storeIndex] = i;
+		}
+	}
+	barrier();
+
+	///Set size
+	if(localGroupOffset == uvec2(0, 0))
+	{
+		lightIndexLists.lists[globalGroup1DID].size = lightIndexListSize;
+	}
 }
