@@ -1,151 +1,158 @@
+#ifdef CAMERA_INFO_SET_INDEX
+
 #ifndef _CAMERA_GLSL_
 #define _CAMERA_GLSL_
 
 #define ORTHOGRAPHIC_CAMERA 1
 #define PERSPECTIVE_CAMERA 2
 
-layout(set = 1, binding = 0) uniform CameraData{
+layout(set = CAMERA_INFO_SET_INDEX, binding = 0) uniform CameraInfo{
     int type;
     float nearFlat;
     float farFlat;
     float aspectRatio;
     vec3 position;
+    vec2 halfSize;
     vec4 parameter;
     vec3 forward;
     vec3 right;
     vec4 clipPlanes[6];
-} cameraData;
+} cameraInfo;
 
 ///NDC Z -> View space Z
-float OrthographicCameraDepthNdcToView(float ndcDepth)
+float OrthographicCameraDepthN2V(float ndcDepth)
 {
-    return ndcDepth * (cameraData.nearFlat - cameraData.farFlat) - cameraData.nearFlat;
+    return ndcDepth * (cameraInfo.nearFlat - cameraInfo.farFlat) - cameraInfo.nearFlat;
 }
 
-float PerspectiveCameraDepthNdcToView(float ndcDepth)
+float PerspectiveCameraDepthN2V(float ndcDepth)
 {
-    return cameraData.nearFlat * cameraData.farFlat / (ndcDepth * (cameraData.farFlat - cameraData.nearFlat) - cameraData.farFlat);
+    return cameraInfo.nearFlat * cameraInfo.farFlat / (ndcDepth * (cameraInfo.farFlat - cameraInfo.nearFlat) - cameraInfo.farFlat);
 }
 
-float DepthNdcToView(float ndcDepth)
+float DepthN2V(float ndcDepth)
 {
-    switch(cameraData.type)
+    switch(cameraInfo.type)
     {
         case ORTHOGRAPHIC_CAMERA:
         {
-            return OrthographicCameraDepthNdcToView(ndcDepth);
+            return OrthographicCameraDepthN2V(ndcDepth);
         }
         case PERSPECTIVE_CAMERA:
         {
-            return PerspectiveCameraDepthNdcToView(ndcDepth);
+            return PerspectiveCameraDepthN2V(ndcDepth);
         }
     }
     return 0;
 }
 
 ///NDC Z -> NDC linear Z
-float OrthographicCameraDepthNdcToLinear(float ndcDepth)
+float OrthographicCameraDepthN2LN(float ndcDepth)
 {
     return ndcDepth;
 }
 
-float PerspectiveCameraDepthNdcToLinear(float ndcDepth)
+float PerspectiveCameraDepthN2LN(float ndcDepth)
 {
-    return cameraData.nearFlat * ndcDepth / (ndcDepth * (cameraData.nearFlat - cameraData.farFlat) + cameraData.farFlat);
+    return cameraInfo.nearFlat * ndcDepth / (ndcDepth * (cameraInfo.nearFlat - cameraInfo.farFlat) + cameraInfo.farFlat);
 }
 
-float DepthNdcToLinear(float ndcDepth)
+float DepthN2LN(float ndcDepth)
 {
-    switch(cameraData.type)
+    switch(cameraInfo.type)
     {
         case ORTHOGRAPHIC_CAMERA:
         {
-            return OrthographicCameraDepthNdcToLinear(ndcDepth);
+            return OrthographicCameraDepthN2LN(ndcDepth);
         }
         case PERSPECTIVE_CAMERA:
         {
-            return PerspectiveCameraDepthNdcToLinear(ndcDepth);
+            return PerspectiveCameraDepthN2LN(ndcDepth);
         }
     }
     return 0;
 }
 
 ///NDC Position -> View space Position
-vec3 OrthographicCameraPositionNdcToView(vec3 ndcPosition)
+vec3 OrthographicCameraPositionN2V(vec3 ndcPosition)
 {
-    vec3 nearFlatPosition = vec3(ndcPosition.xy * cameraData.parameter.yz, -cameraData.nearFlat);
-    vec3 farFlatPosition = vec3(ndcPosition.xy * cameraData.parameter.yz, -cameraData.farFlat);
+    vec3 nearFlatPosition = vec3(ndcPosition.xy * cameraInfo.halfSize, -cameraInfo.nearFlat);
+    vec3 farFlatPosition = vec3(ndcPosition.xy * cameraInfo.halfSize, -cameraInfo.farFlat);
     float linearDepth = ndcPosition.z;
     return nearFlatPosition * (1 - linearDepth) + farFlatPosition * linearDepth;
 }
 
-vec3 PerspectiveCameraPositionNdcToView(vec3 ndcPosition)
+vec3 PerspectiveCameraPositionN2V(vec3 ndcPosition)
 {
-    vec3 nearFlatPosition = vec3(ndcPosition.xy * cameraData.parameter.yz, -cameraData.nearFlat);
-    vec3 farFlatPosition = vec3(ndcPosition.xy * cameraData.parameter.yz * cameraData.farFlat / cameraData.nearFlat, -cameraData.farFlat);
-    float linearDepth = cameraData.nearFlat * ndcPosition.z / (ndcPosition.z * (cameraData.nearFlat - cameraData.farFlat) + cameraData.farFlat);
+    vec3 nearFlatPosition = vec3(ndcPosition.xy * cameraInfo.halfSize, -cameraInfo.nearFlat);
+    vec3 farFlatPosition = vec3(ndcPosition.xy * cameraInfo.halfSize * cameraInfo.farFlat / cameraInfo.nearFlat, -cameraInfo.farFlat);
+    float linearDepth = cameraInfo.nearFlat * ndcPosition.z / (ndcPosition.z * (cameraInfo.nearFlat - cameraInfo.farFlat) + cameraInfo.farFlat);
     return nearFlatPosition * (1 - linearDepth) + farFlatPosition * linearDepth;
 }
-vec3 PositionNdcToView(vec3 ndcPosition)
+vec3 PositionN2V(vec3 ndcPosition)
 {
-    switch(cameraData.type)
+    switch(cameraInfo.type)
     {
         case ORTHOGRAPHIC_CAMERA:
         {
-            return OrthographicCameraPositionNdcToView(ndcPosition);
+            return OrthographicCameraPositionN2V(ndcPosition);
         }
         case PERSPECTIVE_CAMERA:
         {
-            return PerspectiveCameraPositionNdcToView(ndcPosition);
+            return PerspectiveCameraPositionN2V(ndcPosition);
         }
     }
     return vec3(0, 0, 0);
 }
 
-vec3 PositionScreenToNearFlatWorld(vec2 screenPosition)
-{
-    float x = cameraData.parameter.y * (2 * screenPosition.x - 1);
-    float y = cameraData.parameter.z * (1 - 2 * screenPosition.y);
-    vec3 up = cross(cameraData.right, cameraData.forward);
-    return cameraData.position + normalize(cameraData.forward) * cameraData.nearFlat + normalize(cameraData.right) * x + normalize(-up) * y;
-}
-
-vec2 PositionScreenToNdc(vec2 imagePosition)
+vec2 PositionS2N(vec2 imagePosition)
 {
     float x = (2 * imagePosition.x  - 1);
     float y = (1 - 2 * imagePosition.y);
     return clamp(vec2(x, y), -1, 1);
 }
 
-vec3 OrthographicCameraWorldView()
+vec3 PositionS2NFW(vec2 screenPosition)
 {
-    return normalize(cameraData.forward);
+    vec2 ndcPos = PositionS2N(screenPosition);
+    float x = cameraInfo.halfSize.x * ndcPos.x;
+    float y = cameraInfo.halfSize.y * ndcPos.y;
+    vec3 up = cross(cameraInfo.right, cameraInfo.forward);
+    //return cameraInfo.position + normalize(cameraInfo.forward) * cameraInfo.nearFlat + normalize(cameraInfo.right) * x + normalize(-up) * y;
+    return cameraInfo.position + normalize(cameraInfo.forward) * cameraInfo.nearFlat + normalize(cameraInfo.right) * x + normalize(up) * y;
 }
 
-vec3 PerspectiveCameraWorldView(vec3 worldPosition)
+
+vec3 OrthographicCameraWViewDirection()
 {
-    return normalize(worldPosition - cameraData.position);
+    return normalize(cameraInfo.forward);
 }
 
-vec3 CameraWorldView(vec3 worldPosition)
+vec3 PerspectiveCameraWViewDirection(vec3 worldPosition)
 {
-    switch(cameraData.type)
+    return normalize(worldPosition - cameraInfo.position);
+}
+
+vec3 CameraWViewDirection(vec3 worldPosition)
+{
+    switch(cameraInfo.type)
     {
         case ORTHOGRAPHIC_CAMERA:
         {
-            return OrthographicCameraWorldView();
+            return OrthographicCameraWViewDirection();
         }
         case PERSPECTIVE_CAMERA:
         {
-            return PerspectiveCameraWorldView(worldPosition);
+            return PerspectiveCameraWViewDirection(worldPosition);
         }
     }
     return vec3(0, 0, -1);
 }
 
-vec3 CameraWorldViewToPosition(vec3 worldPosition)
+vec3 PositionViewedDirection(vec3 worldPosition)
 {
-    return normalize(worldPosition - cameraData.position);
+    return normalize(worldPosition - cameraInfo.position);
 }
 
-#endif
+#endif ///#ifndef _CAMERA_GLSL_
+#endif ///#ifdef CAMERA_INFO_SET_INDEX
