@@ -8,9 +8,9 @@ struct ObjectInfo
     vec3[8] boundingBox;
 };
 
-vec4 PositionO2W(in vec3 position, in ObjectInfo objectInfo)
+vec3 PositionO2W(in vec3 position, in ObjectInfo objectInfo)
 {
-    return objectInfo.model * vec4(position, 1);
+    return (objectInfo.model * vec4(position, 1)).xyz;
 }
 
 vec3 DirectionO2W(in vec3 direction, in ObjectInfo objectInfo)
@@ -29,14 +29,14 @@ mat3 TBNMatrix(in vec3 tangent, in vec3 bitangent, in vec3 normal)
 }
 
 #ifdef _CAMERA_GLSL_
-vec4 PositionO2P(in vec3 position, in ObjectInfo objectInfo)
+vec4 PositionO2P(in vec3 position, in ObjectInfo objectInfo, in CameraInfo cameraInfo)
 {
     return cameraInfo.projection * cameraInfo.view * objectInfo.model * vec4(position, 1);
 }
 
-vec4 PositionO2V(in vec3 position, in ObjectInfo objectInfo)
+vec3 PositionO2V(in vec3 position, in ObjectInfo objectInfo, in CameraInfo cameraInfo)
 {
-    return cameraInfo.view * objectInfo.model * vec4(position, 1);
+    return (cameraInfo.view * objectInfo.model * vec4(position, 1)).xyz;
 }
 #endif ///#ifdef _CAMERA_GLSL_
 

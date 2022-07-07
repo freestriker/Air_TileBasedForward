@@ -1,7 +1,7 @@
 {
   "renderPass": "TransparentRenderPass",
   "subpass": "DrawSubpass",
-  "shaderPaths": ["..\\Asset\\Shader\\DefaultTransparentShaderFrag.spv", "..\\Asset\\Shader\\DefaultTransparentShaderVert.spv"],
+  "shaderPaths": ["..\\Asset\\Shader\\Spv\\TransparentShaderFrag.spv", "..\\Asset\\Shader\\Spv\\TransparentShaderVert.spv"],
   "cullMode": 0,
   "depthTestEnable": 1,
   "depthWriteEnable": 0,

@@ -16,6 +16,8 @@ struct CameraInfo
     vec3 forward;
     vec3 right;
     vec4 clipPlanes[6];
+    mat4 projection;
+    mat4 view;
 };
 
 ///NDC Z -> View space Z

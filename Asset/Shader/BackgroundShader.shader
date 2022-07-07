@@ -8,7 +8,7 @@
   "cullMode": 0,
   "dstAlphaBlendFactor": 0,
   "dstColorBlendFactor": 7,
-  "shaderPaths": ["..\\Asset\\Shader\\DefaultBackgroundShaderFrag.spv", "..\\Asset\\Shader\\DefaultBackgroundShaderVert.spv"],
+  "shaderPaths": ["..\\Asset\\Shader\\Spv\\BackgroundShader.vert.spv", "..\\Asset\\Shader\\Spv\\BackgroundShader.frag.spv"],
   "srcAlphaBlendFactor": 1,
   "srcColorBlendFactor": 6,
   "depthTestEnable": 0,
