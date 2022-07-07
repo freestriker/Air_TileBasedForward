@@ -8,7 +8,7 @@
   "cullMode": 2,
   "dstAlphaBlendFactor": 0,
   "dstColorBlendFactor": 7,
-  "shaderPaths": ["..\\Asset\\Shader\\GlassShaderFrag.spv", "..\\Asset\\Shader\\GlassShaderVert.spv"],
+  "shaderPaths": ["..\\Asset\\Shader\\Spv\\GlassShader.vert.spv", "..\\Asset\\Shader\\Spv\\GlassShader.frag.spv"],
   "srcAlphaBlendFactor": 1,
   "srcColorBlendFactor": 6,
   "depthTestEnable": 1,

@@ -14,6 +14,8 @@ AirEngine::Test::MirrorRendererBehaviour::MirrorRendererBehaviour()
 	: meshTask()
 	, shaderTask()
 	, loaded(false)
+	, backgroundTextureTask()
+	, backgroundTexture(nullptr)
 	, mesh(nullptr)
 	, shader(nullptr)
 	, material(nullptr)
@@ -31,23 +33,26 @@ void AirEngine::Test::MirrorRendererBehaviour::OnAwake()
 void AirEngine::Test::MirrorRendererBehaviour::OnStart()
 {
 	meshTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::Mesh>("..\\Asset\\Mesh\\DefaultMesh.ply");
+	backgroundTextureTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");
 	shaderTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Core::Graphic::Shader>("..\\Asset\\Shader\\MirrorShader.shader");
 }
 
 void AirEngine::Test::MirrorRendererBehaviour::OnUpdate()
 {
-	if (!loaded && meshTask._Is_ready() && shaderTask._Is_ready())
+	if (!loaded && meshTask._Is_ready() && backgroundTextureTask._Is_ready() && shaderTask._Is_ready())
 	{
 		auto meshRenderer = GameObject()->GetComponent<Renderer::Renderer>();
 
 		mesh = meshTask.get();
 		shader = shaderTask.get();
+		backgroundTexture = backgroundTextureTask.get();
 		material = new Core::Graphic::Material(shader);
 
 		loaded = true;
 
 		meshRenderer->material = material;
 		meshRenderer->mesh = mesh;
+		meshRenderer->material->SetTextureCube("backgroundCubeTexture", backgroundTexture);
 		Utils::Log::Message("Finish load.");
 	}
 }

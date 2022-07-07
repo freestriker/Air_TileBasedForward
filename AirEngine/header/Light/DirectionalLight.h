@@ -9,7 +9,7 @@ namespace AirEngine
 		class DirectionalLight final : public AirEngine::Light::LightBase
 		{
 		public:
-			LightData GetLightData() override;
+			LightInfo GetLightInfo() override;
 			DirectionalLight();
 			~DirectionalLight();
 			DirectionalLight(const DirectionalLight&) = delete;

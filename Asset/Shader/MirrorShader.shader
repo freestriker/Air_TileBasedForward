@@ -8,7 +8,7 @@
   "cullMode": 2,
   "dstAlphaBlendFactor": 0,
   "dstColorBlendFactor": 7,
-  "shaderPaths": ["..\\Asset\\Shader\\MirrorShaderFrag.spv", "..\\Asset\\Shader\\MirrorShaderVert.spv"],
+  "shaderPaths": ["..\\Asset\\Shader\\Spv\\MirrorShader.vert.spv", "..\\Asset\\Shader\\Spv\\MirrorShader.frag.spv"],
   "srcAlphaBlendFactor": 1,
   "srcColorBlendFactor": 6,
   "depthTestEnable": 1,

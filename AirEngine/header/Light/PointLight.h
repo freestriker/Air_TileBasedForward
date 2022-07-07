@@ -11,7 +11,7 @@ namespace AirEngine
 		public:
 			float minRange;
 			float maxRange;
-			LightData GetLightData() override;
+			LightInfo GetLightInfo() override;
 			PointLight();
 			~PointLight();
 			PointLight(const PointLight&) = delete;

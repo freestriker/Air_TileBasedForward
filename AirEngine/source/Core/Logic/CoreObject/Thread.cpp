@@ -498,7 +498,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 
 	Logic::Object::GameObject* skyBoxGo = new Logic::Object::GameObject("SkyBox");
 	lights->AddChild(skyBoxGo);
-	auto skyBox = new Light::SkyBox();
+	auto skyBox = new Light::AmbientLight();
 	skyBox->color = { 1, 1, 1, 1 };
 	skyBox->intensity = 0.8f;
 	skyBox->skyBoxTextureCube = IO::CoreObject::Instance::AssetManager().Load<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");

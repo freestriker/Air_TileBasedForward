@@ -5,9 +5,9 @@ RTTR_REGISTRATION
 	rttr::registration::class_<AirEngine::Light::SpotLight>("AirEngine::Light::SpotLight");
 }
 
-AirEngine::Light::LightBase::LightData AirEngine::Light::SpotLight::GetLightData()
+AirEngine::Light::LightBase::LightInfo AirEngine::Light::SpotLight::GetLightInfo()
 {
-	LightData lightDate{};
+	LightInfo lightDate{};
 	lightDate.type = 4;
 	lightDate.intensity = intensity;
 	lightDate.minRange = minRange;

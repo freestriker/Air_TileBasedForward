@@ -9,7 +9,7 @@ namespace AirEngine
 		class LightBase : public AirEngine::Core::Logic::Object::Component
 		{
 		public:
-			struct LightData
+			struct LightInfo
 			{
 				alignas(4) int type;
 				alignas(4) float intensity;
@@ -24,10 +24,10 @@ namespace AirEngine
 			{
 				DIRECTIONAL = 1,
 				POINT = 2,
-				SKY_BOX = 3,
+				AMBIENT = 3,
 				SPOT = 4
 			};
-			virtual LightData GetLightData() = 0;
+			virtual LightInfo GetLightInfo() = 0;
 			glm::vec4 color;
 			float intensity;
 			const LightType lightType;

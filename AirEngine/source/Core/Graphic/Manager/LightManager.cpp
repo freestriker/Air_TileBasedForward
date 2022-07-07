@@ -4,33 +4,25 @@
 #include "Core/Graphic/Command/CommandBuffer.h"
 #include "Light/LightBase.h"
 #include <map>
-#include "Light/SkyBox.h"
+#include "Light/AmbientLight.h"
 
 AirEngine::Core::Graphic::Manager::LightManager::LightManager()
-	: _stageBuffer(nullptr)
-	, _skyBoxTexture(nullptr)
-	, _skyBoxBuffer(nullptr)
-	, _mainLightBuffer(nullptr)
-	, _importantLightsBuffer(nullptr)
-	, _unimportantLightsBuffer(nullptr)
-	, _skyBoxData()
-	, _mainLightData()
-	, _importantLightData()
-	, _unimportantLightData()
+	: _stagingBuffer(nullptr)
+	, _forwardLightInfosBuffer(nullptr)
+	, _ambientTextureCube(nullptr)
+	, _ambientLightInfo()
+	, _mainLightInfo()
+	, _ortherLightInfos()
 {
-	VkDeviceSize dataSize = sizeof(LightData);
-	_stageBuffer = new Instance::Buffer(dataSize * 10, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-	_skyBoxBuffer = new Instance::Buffer(dataSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-	_mainLightBuffer = new Instance::Buffer(dataSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-	_importantLightsBuffer = new Instance::Buffer(dataSize * 4, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-	_unimportantLightsBuffer = new Instance::Buffer(dataSize * 4, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	_stagingBuffer = new Instance::Buffer(sizeof(StagingLightInfos), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	_forwardLightInfosBuffer = new Instance::Buffer(sizeof(ForwardLightInfos), VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 }
 
 AirEngine::Core::Graphic::Manager::LightManager::~LightManager()
 {
 }
 
-void AirEngine::Core::Graphic::Manager::LightManager::SetLightData(std::vector<Logic::Object::Component*> lights)
+void AirEngine::Core::Graphic::Manager::LightManager::SetLightInfo(std::vector<Logic::Object::Component*> lights)
 {
 	std::multimap<Light::LightBase::LightType, Light::LightBase*> unqiueLights = std::multimap<Light::LightBase::LightType, Light::LightBase*>();
 	std::vector< Light::LightBase*> otherLights = std::vector< Light::LightBase*>();
@@ -49,7 +41,7 @@ void AirEngine::Core::Graphic::Manager::LightManager::SetLightData(std::vector<L
 				otherLights.emplace_back(light);
 				break;
 			}
-			case Light::LightBase::LightType::SKY_BOX:
+			case Light::LightBase::LightType::AMBIENT:
 			{
 				unqiueLights.emplace(std::make_pair(light->lightType, light));
 				break;
@@ -63,107 +55,81 @@ void AirEngine::Core::Graphic::Manager::LightManager::SetLightData(std::vector<L
 				break;
 		}
 	}
-	//skybox
-	auto skyBoxIterator = unqiueLights.find(Light::LightBase::LightType::SKY_BOX);
+
+	//ambient
+	auto skyBoxIterator = unqiueLights.find(Light::LightBase::LightType::AMBIENT);
 	if (skyBoxIterator != std::end(unqiueLights))
 	{
-		auto data = skyBoxIterator->second->GetLightData();
-		_skyBoxData = *reinterpret_cast<LightData*>(&data);
-		_skyBoxTexture = static_cast<Light::SkyBox*>(skyBoxIterator->second)->skyBoxTextureCube;
+		auto data = skyBoxIterator->second->GetLightInfo();
+		_ambientLightInfo = *reinterpret_cast<LightInfo*>(&data);
+		_ambientTextureCube = static_cast<Light::AmbientLight*>(skyBoxIterator->second)->ambientLightTextureCube;
 	}
 	else
 	{
-		_skyBoxData = {};
+		_ambientLightInfo = {};
 	}
 
 	//main
 	auto directionalIterator = unqiueLights.find(Light::LightBase::LightType::DIRECTIONAL);
 	if (directionalIterator != std::end(unqiueLights))
 	{
-		auto data = directionalIterator->second->GetLightData();
-		_mainLightData = *reinterpret_cast<LightData*>(&data);
+		auto data = directionalIterator->second->GetLightInfo();
+		_mainLightInfo = *reinterpret_cast<LightInfo*>(&data);
 	}
 	else
 	{
-		_mainLightData = {};
+		_mainLightInfo = {};
 	}
 
-	auto otherLightIter = otherLights.begin();
-
-	//important
-	for (uint32_t i = 0; i < 4; i++)
+	_ortherLightInfos = {};
+	for (int i = 0; i < otherLights.size() && i < MAX_ORTHER_LIGHT_COUNT; i++)
 	{
-		if (otherLightIter != std::end(otherLights))
-		{
-			auto data = (*otherLightIter)->GetLightData();
-			_importantLightData[i] = *reinterpret_cast<LightData*>(&data);
-			otherLightIter++;
-		}
-		else
-		{
-			_importantLightData[i] = {};
-		}
-	}
-
-	//unimportant
-	for (uint32_t i = 0; i < 4; i++)
-	{
-		if (otherLightIter != std::end(otherLights))
-		{
-			auto data = (*otherLightIter)->GetLightData();
-			_unimportantLightData[i] = *reinterpret_cast<LightData*>(&data);
-			otherLightIter++;
-		}
-		else
-		{
-			_unimportantLightData[i] = {};
-		}
+		auto data = otherLights[i]->GetLightInfo();
+		_ortherLightInfos[i] = *reinterpret_cast<LightInfo*>(&data);
 	}
 }
 
-void AirEngine::Core::Graphic::Manager::LightManager::CopyLightData(Command::CommandBuffer* commandBuffer)
+void AirEngine::Core::Graphic::Manager::LightManager::CopyLightInfo(Command::CommandBuffer* commandBuffer)
 {
-	_stageBuffer->WriteData([this](void* pointer) -> void {
-		VkDeviceSize dataSize = sizeof(LightData);
-		memcpy(pointer, &_skyBoxData, dataSize);
-		memcpy(reinterpret_cast<char*>(pointer) + dataSize, &_mainLightData, dataSize);
-		memcpy(reinterpret_cast<char*>(pointer) + dataSize * 2, _importantLightData.data(), dataSize * 4);
-		memcpy(reinterpret_cast<char*>(pointer) + dataSize * 6, _unimportantLightData.data(), dataSize * 4);
-	});
+	_stagingBuffer->WriteData(
+		[this](void* pointer) -> void
+		{
+			VkDeviceSize dataSize = sizeof(LightInfo);
+			auto offset = reinterpret_cast<char*>(pointer);
+			int importantLightCount = std::min(static_cast<int>(_ortherLightInfos.size()), MAX_FORWARD_ORTHER_LIGHT_COUNT);
+			int unimportantLightCount = std::min(static_cast<int>(_ortherLightInfos.size() - importantLightCount), MAX_FORWARD_ORTHER_LIGHT_COUNT);
+			
+			memcpy(offset + offsetof(StagingLightInfos, importantLightCount), &importantLightCount, sizeof(int));
+			memcpy(offset + offsetof(StagingLightInfos, unimportantLightCount), &unimportantLightCount, sizeof(int));
+			memcpy(offset + offsetof(StagingLightInfos, ambientLightInfo), &_ambientLightInfo, dataSize);
+			memcpy(offset + offsetof(StagingLightInfos, mainLightInfo), &_mainLightInfo, dataSize);
+			memcpy(offset + offsetof(StagingLightInfos, ortherLightInfos), _ortherLightInfos.data(), dataSize * _ortherLightInfos.size());
+		}
+	);
 
-	VkDeviceSize dataSize = sizeof(LightData);
+	VkDeviceSize dataSize = sizeof(LightInfo);
 	commandBuffer->Reset();
 	commandBuffer->BeginRecord(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-	commandBuffer->CopyBuffer(_stageBuffer, 0, _skyBoxBuffer, 0, dataSize);
-	commandBuffer->CopyBuffer(_stageBuffer, dataSize, _mainLightBuffer, 0, dataSize);
-	commandBuffer->CopyBuffer(_stageBuffer, dataSize * 2, _importantLightsBuffer, 0, dataSize * 4);
-	commandBuffer->CopyBuffer(_stageBuffer, dataSize * 6, _unimportantLightsBuffer, 0, dataSize * 4);
+
+	//Forward
+	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, importantLightCount), _forwardLightInfosBuffer, offsetof(ForwardLightInfos, importantLightCount), sizeof(int));
+	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, unimportantLightCount), _forwardLightInfosBuffer, offsetof(ForwardLightInfos, unimportantLightCount), sizeof(int));
+	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, ambientLightInfo), _forwardLightInfosBuffer, offsetof(ForwardLightInfos, ambientLightInfo), dataSize);
+	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, mainLightInfo), _forwardLightInfosBuffer, offsetof(ForwardLightInfos, mainLightInfo), dataSize);
+	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, ortherLightInfos), _forwardLightInfosBuffer, offsetof(ForwardLightInfos, importantLightInfos), dataSize * MAX_FORWARD_ORTHER_LIGHT_COUNT);
+	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, ortherLightInfos) + MAX_FORWARD_ORTHER_LIGHT_COUNT * dataSize, _forwardLightInfosBuffer, offsetof(ForwardLightInfos, unimportantLightInfos), dataSize * MAX_FORWARD_ORTHER_LIGHT_COUNT);
+
 	commandBuffer->EndRecord();
 	commandBuffer->Submit();
 	commandBuffer->WaitForFinish();
 }
 
-AirEngine::Asset::TextureCube* AirEngine::Core::Graphic::Manager::LightManager::SkyBoxTexture()
+AirEngine::Asset::TextureCube* AirEngine::Core::Graphic::Manager::LightManager::AmbientTextureCube()
 {
-	return _skyBoxTexture;
+	return _ambientTextureCube;
 }
 
-AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Manager::LightManager::SkyBoxBuffer()
+AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Manager::LightManager::ForwardLightInfosBuffer()
 {
-	return _skyBoxBuffer;
-}
-
-AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Manager::LightManager::MainLightBuffer()
-{
-	return _mainLightBuffer;
-}
-
-AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Manager::LightManager::ImportantLightsBuffer()
-{
-	return _importantLightsBuffer;
-}
-
-AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Manager::LightManager::UnimportantLightsBuffer()
-{
-	return _unimportantLightsBuffer;
+	return _forwardLightInfosBuffer;
 }

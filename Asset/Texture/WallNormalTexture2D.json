@@ -5,7 +5,7 @@
     "format": 44,
     "usage": 4,
     "useSampler": true,
-    "imagePath": "..\\Asset\\Texture\\DefaultNormalTexture2D.png",
+    "imagePath": "..\\Asset\\Texture\\WallNormalTexture2D.png",
     "magFilter": 1,
     "minFilter": 1,
     "sampleCount": 1

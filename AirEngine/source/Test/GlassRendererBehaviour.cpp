@@ -14,6 +14,8 @@ AirEngine::Test::GlassRendererBehaviour::GlassRendererBehaviour()
 	: meshTask()
 	, shaderTask()
 	, loaded(false)
+	, backgroundTextureTask()
+	, backgroundTexture(nullptr)
 	, mesh(nullptr)
 	, shader(nullptr)
 	, material(nullptr)
@@ -30,24 +32,27 @@ void AirEngine::Test::GlassRendererBehaviour::OnAwake()
 
 void AirEngine::Test::GlassRendererBehaviour::OnStart()
 {
-	meshTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::Mesh>("..\\Asset\\Mesh\\DefaultMesh.ply");
+	meshTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::Mesh>("..\\Asset\\Mesh\\Sphere.ply");
+	backgroundTextureTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");
 	shaderTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Core::Graphic::Shader>("..\\Asset\\Shader\\GlassShader.shader");
 }
 
 void AirEngine::Test::GlassRendererBehaviour::OnUpdate()
 {
-	if (!loaded && meshTask._Is_ready() && shaderTask._Is_ready())
+	if (!loaded && meshTask._Is_ready() && backgroundTextureTask._Is_ready() && shaderTask._Is_ready())
 	{
 		auto meshRenderer = GameObject()->GetComponent<Renderer::Renderer>();
 
 		mesh = meshTask.get();
 		shader = shaderTask.get();
+		backgroundTexture = backgroundTextureTask.get();
 		material = new Core::Graphic::Material(shader);
 
 		loaded = true;
 
 		meshRenderer->material = material;
 		meshRenderer->mesh = mesh;
+		meshRenderer->material->SetTextureCube("backgroundCubeTexture", backgroundTexture);
 		Utils::Log::Message("Finish load.");
 	}
 }

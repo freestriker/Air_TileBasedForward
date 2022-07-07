@@ -34,8 +34,8 @@ void AirEngine::Test::TransparentRendererBehaviour::OnAwake()
 void AirEngine::Test::TransparentRendererBehaviour::OnStart()
 {
 	meshTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::Mesh>("..\\Asset\\Mesh\\SquareMesh.ply");
-	shaderTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Core::Graphic::Shader>("..\\Asset\\Shader\\DefaultTransparentShader.shader");
-	diffuseTexture2DTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::Texture2D>("..\\Asset\\Texture\\BrokenGlassTexture2d.json");
+	shaderTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Core::Graphic::Shader>("..\\Asset\\Shader\\TransparentShader.shader");
+	diffuseTexture2DTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::Texture2D>("..\\Asset\\Texture\\BrokenGlassTexture2D.json");
 }
 
 void AirEngine::Test::TransparentRendererBehaviour::OnUpdate()
@@ -46,7 +46,7 @@ void AirEngine::Test::TransparentRendererBehaviour::OnUpdate()
 		shader = shaderTask.get();
 		diffuseTexture2D = diffuseTexture2DTask.get();
 		material = new Core::Graphic::Material(shader);
-		material->SetTexture2D("albedo", diffuseTexture2D);
+		material->SetTexture2D("diffuseTexture", diffuseTexture2D);
 
 		loaded = true;
 

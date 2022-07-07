@@ -152,7 +152,7 @@
     <ClCompile Include="source\Light\DirectionalLight.cpp" />
     <ClCompile Include="source\Light\LightBase.cpp" />
     <ClCompile Include="source\Light\PointLight.cpp" />
-    <ClCompile Include="source\Light\SkyBox.cpp" />
+    <ClCompile Include="source\Light\AmbientLight.cpp" />
     <ClCompile Include="source\Light\SpotLight.cpp" />
     <ClCompile Include="source\Renderer\Renderer.cpp" />
     <ClCompile Include="source\Test\BackgroundRendererBehaviour.cpp" />
@@ -218,7 +218,7 @@
     <ClInclude Include="header\Light\DirectionalLight.h" />
     <ClInclude Include="header\Light\LightBase.h" />
     <ClInclude Include="header\Light\PointLight.h" />
-    <ClInclude Include="header\Light\SkyBox.h" />
+    <ClInclude Include="header\Light\AmbientLight.h" />
     <ClInclude Include="header\Light\SpotLight.h" />
     <ClInclude Include="header\Renderer\Renderer.h" />
     <ClInclude Include="header\Test\BackgroundRendererBehaviour.h" />

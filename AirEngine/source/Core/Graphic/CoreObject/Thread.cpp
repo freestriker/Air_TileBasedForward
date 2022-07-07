@@ -161,9 +161,9 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 		auto lightCopyTask = AddTask(
 			[](Command::CommandPool* graphicCommandPool, Command::CommandPool* computeCommandPool)->void 
 			{
-				CoreObject::Instance::LightManager().SetLightData(CoreObject::Instance::_lights);
+				CoreObject::Instance::LightManager().SetLightInfo(CoreObject::Instance::_lights);
 				auto commandBuffer = graphicCommandPool->CreateCommandBuffer("LightCopyCommandBuffer", VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY);
-				CoreObject::Instance::LightManager().CopyLightData(commandBuffer);
+				CoreObject::Instance::LightManager().CopyLightInfo(commandBuffer);
 				graphicCommandPool->DestoryCommandBuffer(commandBuffer);
 			}
 		);
@@ -204,7 +204,7 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 				{
 					renderer->SetMatrixData(viewMatrix, *projectionMatrix);
 					renderer->material->SetUniformBuffer("cameraData", camera->CameraDataBuffer());
-					renderer->material->SetTextureCube("skyBoxTexture", Instance::LightManager().SkyBoxTexture());
+					renderer->material->SetTextureCube("skyBoxTexture", Instance::LightManager().AmbientTextureCube());
 					renderer->material->SetUniformBuffer("skyBox", Instance::LightManager().SkyBoxBuffer());
 					renderer->material->SetUniformBuffer("mainLight", Instance::LightManager().MainLightBuffer());
 					renderer->material->SetUniformBuffer("importantLight", Instance::LightManager().ImportantLightsBuffer());

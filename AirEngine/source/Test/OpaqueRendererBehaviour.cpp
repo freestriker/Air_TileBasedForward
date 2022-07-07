@@ -36,27 +36,28 @@ void AirEngine::Test::OpaqueRendererBehaviour::OnAwake()
 
 void AirEngine::Test::OpaqueRendererBehaviour::OnStart()
 {
-	meshTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::Mesh>("..\\Asset\\Mesh\\DefaultMesh.ply");
-	shaderTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Core::Graphic::Shader>("..\\Asset\\Shader\\DefaultShader.shader");
-	diffuseTexture2DTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::Texture2D>("..\\Asset\\Texture\\DefaultTexture2D.json");
-	normalTexture2DTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::Texture2D>("..\\Asset\\Texture\\DefaultNormalTexture2D.json");
+	meshTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::Mesh>("..\\Asset\\Mesh\\Sphere.ply");
+	shaderTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Core::Graphic::Shader>("..\\Asset\\Shader\\OpaqueShader.shader");
+	diffuseTexture2DTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::Texture2D>("..\\Asset\\Texture\\WallDiffuseTexture2D.json");
+	normalTexture2DTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::Texture2D>("..\\Asset\\Texture\\WallNormalTexture2D.json");
 }
 
 void AirEngine::Test::OpaqueRendererBehaviour::OnUpdate()
 {
 	if (!loaded && meshTask._Is_ready() && shaderTask._Is_ready() && diffuseTexture2DTask._Is_ready() && normalTexture2DTask._Is_ready())
 	{
+		auto meshRenderer = GameObject()->GetComponent<Renderer::Renderer>();
+		
 		mesh = meshTask.get();
 		shader = shaderTask.get();
 		diffuseTexture2D = diffuseTexture2DTask.get();
 		normalTexture2D = normalTexture2DTask.get();
 		material = new Core::Graphic::Material(shader);
-		material->SetTexture2D("albedo", diffuseTexture2D);
+		material->SetTexture2D("diffuseTexture", diffuseTexture2D);
 		material->SetTexture2D("normalTexture", normalTexture2D);
 
 		loaded = true;
 
-		auto meshRenderer = GameObject()->GetComponent<Renderer::Renderer>();
 		meshRenderer->material = material;
 		meshRenderer->mesh = mesh;
 		Utils::Log::Message("Finish load.");

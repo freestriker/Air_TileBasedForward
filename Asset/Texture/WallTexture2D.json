@@ -5,7 +5,7 @@
     "format": 50,
     "usage": 4,
     "useSampler": true,
-    "imagePath": "..\\Asset\\Texture\\DefaultTexture2D.png",
+    "imagePath": "..\\Asset\\Texture\\WallDiffuseTexture2D.png",
     "magFilter": 1,
     "minFilter": 1,
     "sampleCount": 1

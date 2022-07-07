@@ -13,7 +13,7 @@ namespace AirEngine
 			float maxRange;
 			float innerAngle;
 			float outerAngle;
-			LightData GetLightData() override;
+			LightInfo GetLightInfo() override;
 			SpotLight();
 			~SpotLight();
 			SpotLight(const SpotLight&) = delete;

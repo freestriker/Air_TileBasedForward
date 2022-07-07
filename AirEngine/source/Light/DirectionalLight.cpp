@@ -5,9 +5,9 @@ RTTR_REGISTRATION
 	rttr::registration::class_<AirEngine::Light::DirectionalLight>("AirEngine::Light::DirectionalLight");
 }
 
-AirEngine::Light::LightBase::LightData AirEngine::Light::DirectionalLight::GetLightData()
+AirEngine::Light::LightBase::LightInfo AirEngine::Light::DirectionalLight::GetLightInfo()
 {
-	LightData lightDate{};
+	LightInfo lightDate{};
 	lightDate.type = 1;
 	lightDate.intensity = intensity;
 	lightDate.minRange = 0;
