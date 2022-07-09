@@ -13,6 +13,7 @@
 #include "Utils/Log.h"
 #include "Core/Graphic/Manager/RenderPassManager.h"
 #include "Core/Graphic/CoreObject/Instance.h"
+#include "Camera/CameraBase.h"
 
 void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
 {
@@ -40,10 +41,10 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateRende
 	);
 }
 
-void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Manager::RenderPassTarget* renderPassObject)
+void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
 {
 	_temporaryImage = Graphic::Instance::Image::Create2DImage(
-		renderPassObject->Extent()
+		camera->RenderPassTarget()->Extent()
 		, VkFormat::VK_FORMAT_D32_SFLOAT
 		, VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT
 		, VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
@@ -74,7 +75,7 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateComma
 		{
 			Command::ImageMemoryBarrier depthAttachmentLayoutBarrier = Command::ImageMemoryBarrier
 			(
-				renderPassObject->Attachment("DepthAttachment"),
+				camera->RenderPassTarget()->Attachment("DepthAttachment"),
 				VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
 				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 				VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
@@ -100,7 +101,7 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateComma
 		{
 			_renderCommandBuffer->Blit
 			(
-				renderPassObject->Attachment("DepthAttachment"),
+				camera->RenderPassTarget()->Attachment("DepthAttachment"),
 				VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 				_temporaryImage,
 				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
@@ -112,7 +113,7 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateComma
 		{
 			Command::ImageMemoryBarrier depthAttachmentLayoutBarrier = Command::ImageMemoryBarrier
 			(
-				renderPassObject->Attachment("DepthAttachment"),
+				camera->RenderPassTarget()->Attachment("DepthAttachment"),
 				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 				VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
 				VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT,
@@ -141,7 +142,7 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateComma
 		//Render background
 		_renderCommandBuffer->BeginRenderPass(
 			this,
-			renderPassObject,
+			camera->RenderPassTarget(),
 			{ }
 		);
 		_renderCommandBuffer->BindMaterial(renderer->material);

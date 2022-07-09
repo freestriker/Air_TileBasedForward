@@ -25,7 +25,7 @@ namespace AirEngine
 					Command::CommandPool* _renderCommandPool;
 					Instance::Buffer* _depthStorageBuffer;
 					void OnPopulateRenderPassSettings(RenderPassSettings& creator)override;
-					void OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Manager::RenderPassTarget* renderPassObject)override;
+					void OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)override;
 					void OnSubmit()override;
 					void OnClear()override;
 				public:

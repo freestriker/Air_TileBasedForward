@@ -8,7 +8,7 @@ namespace AirEngine
 		class PerspectiveCamera final : public Camera::CameraBase
 		{
 		private:
-			void OnSetParameter(glm::vec4& parameter)override;
+			void OnSetSize(glm::vec2& parameter)override;
 			void OnSetClipPlanes(glm::vec4* clipPlanes)override;
 			void OnSetProjectionMatrix(glm::mat4& matrix)override;
 

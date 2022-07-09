@@ -5,11 +5,11 @@ RTTR_REGISTRATION
 	registration::class_<AirEngine::Camera::OrthographicCamera>("AirEngine::Camera::OrthographicCamera");
 }
 
-void AirEngine::Camera::OrthographicCamera::OnSetParameter(glm::vec4& parameter)
+void AirEngine::Camera::OrthographicCamera::OnSetSize(glm::vec2& parameter)
 {
 	float halfWidth = aspectRatio * size;
 	float halfHeight = size;
-	parameter = glm::vec4(size, halfWidth, halfHeight, 0);
+	parameter = glm::vec2(halfWidth, halfHeight);
 }
 
 void AirEngine::Camera::OrthographicCamera::OnSetClipPlanes(glm::vec4* clipPlanes)

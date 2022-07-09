@@ -173,49 +173,22 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 		for (auto& component : Instance::_cameras)
 		{
 			auto camera = dynamic_cast<Camera::CameraBase*>(component);
-
-			camera->RefreshCameraData();
+			if(!(camera)) continue;
+			camera->RefreshCameraInfo();
 
 			auto viewMatrix = camera->ViewMatrix();
-			auto projectionMatrix = camera->ProjectionMatrix();
-			auto vpMatrix = *projectionMatrix * viewMatrix;
-
 
 			//Classify renderers
 			std::map<std::string, std::multimap<float, Renderer::Renderer*>> rendererDistenceMaps = std::map<std::string, std::multimap<float, Renderer::Renderer*>>();
 
-			auto clipPlanes = camera->ClipPlanes();
-			intersectionChecker.SetIntersectPlanes(clipPlanes, 6);
 			for (auto& rendererComponent : Instance::_renderers)
 			{
 				auto renderer = dynamic_cast<Renderer::Renderer*>(rendererComponent);
+				if (!(renderer && renderer->material && renderer->mesh)) continue;
+				renderer->RefreshObjectInfo();
 
-				if (!(renderer->material && renderer->mesh)) continue;
-
-				glm::mat4 modelMatrix = renderer->GameObject()->transform.ModelMatrix();
-				glm::mat4 mvMatrix = viewMatrix * modelMatrix;
-				glm::mat4 mvpMatrix = *projectionMatrix * viewMatrix * modelMatrix;
-
-				//Frustum Culling
-				auto obbCenter = renderer->mesh->OrientedBoundingBox().Center();
-				auto obbMvCenter = mvMatrix * glm::vec4(obbCenter, 1.0f);
-				auto obbBoundry = renderer->mesh->OrientedBoundingBox().BoundryVertexes();
-				if (!renderer->enableFrustumCulling || intersectionChecker.Check(obbBoundry.data(), obbBoundry.size(), mvMatrix))
-				{
-					renderer->SetMatrixData(viewMatrix, *projectionMatrix);
-					renderer->material->SetUniformBuffer("cameraData", camera->CameraDataBuffer());
-					renderer->material->SetTextureCube("skyBoxTexture", Instance::LightManager().AmbientTextureCube());
-					renderer->material->SetUniformBuffer("skyBox", Instance::LightManager().SkyBoxBuffer());
-					renderer->material->SetUniformBuffer("mainLight", Instance::LightManager().MainLightBuffer());
-					renderer->material->SetUniformBuffer("importantLight", Instance::LightManager().ImportantLightsBuffer());
-					renderer->material->SetUniformBuffer("unimportantLight", Instance::LightManager().UnimportantLightsBuffer());
-
-					rendererDistenceMaps[renderer->material->Shader()->Settings()->renderPass].insert({ obbMvCenter.z, renderer });
-				}
-				else
-				{
-					Utils::Log::Message("AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread cull GameObject called " + renderer->GameObject()->name + ".");
-				}
+				auto obbMvCenter = viewMatrix * renderer->GameObject()->transform.ModelMatrix() * glm::vec4(renderer->mesh->OrientedBoundingBox().Center(), 1.0f);
+				rendererDistenceMaps[renderer->material->Shader()->Settings()->renderPass].insert({ obbMvCenter.z, renderer });
 			}
 
 			std::map<std::string, std::future<void>> renderTasks = std::map<std::string, std::future<void>>();
@@ -226,9 +199,9 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 				auto renderPassTarget = camera->_renderPassTarget;
 
 				renderTasks[renderPass->Name()] = AddTask(
-					[renderPass, rendererDistanceMap, renderPassTarget](Command::CommandPool* graphicCommandPool, Command::CommandPool* computeCommandPool)
+					[renderPass, rendererDistanceMap, renderPassTarget, camera](Command::CommandPool* graphicCommandPool, Command::CommandPool* computeCommandPool)
 					{
-						renderPass->OnPopulateCommandBuffer(graphicCommandPool, *rendererDistanceMap, renderPassTarget);
+						renderPass->OnPopulateCommandBuffer(graphicCommandPool, *rendererDistanceMap, camera);
 					}
 				);
 			}

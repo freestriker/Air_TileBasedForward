@@ -9,19 +9,24 @@ RTTR_REGISTRATION
     registration::class_<AirEngine::Renderer::Renderer>("AirEngine::Renderer::Renderer");
 }
 
-void AirEngine::Renderer::Renderer::SetMatrixData(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix)
+void AirEngine::Renderer::Renderer::RefreshObjectInfo()
 {
-	MatrixData data = { _gameObject->transform.ModelMatrix() , viewMatrix , projectionMatrix, glm::transpose(glm::inverse(_gameObject->transform.ModelMatrix())) };
-	_matrixBuffer->WriteData(&data, sizeof(MatrixData));
-	material->SetUniformBuffer("matrixData", _matrixBuffer);
+	ObjectInfo data = { _gameObject->transform.ModelMatrix(), glm::transpose(glm::inverse(_gameObject->transform.ModelMatrix())) };
+	_objectInfoBuffer->WriteData(&data, sizeof(ObjectInfo));
+}
+
+AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Renderer::Renderer::ObjectInfoBuffer()
+{
+	return _objectInfoBuffer;
 }
 
 AirEngine::Renderer::Renderer::Renderer()
 	: Component(ComponentType::RENDERER)
-	, _matrixBuffer(new Core::Graphic::Instance::Buffer(sizeof(MatrixData), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
 	, mesh(nullptr)
 	, material(nullptr)
 	, enableFrustumCulling(true)
+	, _objectInfo()
+	, _objectInfoBuffer(new Core::Graphic::Instance::Buffer(sizeof(ObjectInfo), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
 {
 }
 

@@ -25,24 +25,27 @@ namespace AirEngine
 		class Renderer : public Core::Logic::Object::Component
 		{
 		public:
-			struct MatrixData
+			struct ObjectInfo
 			{
 				alignas(16) glm::mat4 model;
-				alignas(16) glm::mat4 view;
-				alignas(16) glm::mat4 projection;
 				alignas(16) glm::mat4 itModel;
 			};
-			Core::Graphic::Instance::Buffer* _matrixBuffer;
 			bool enableFrustumCulling;
 			Asset::Mesh* mesh;
 			Core::Graphic::Material* material;
-			void SetMatrixData(const glm::mat4& viewMatrix, const glm::mat4& projectionMatrix);
+			void RefreshObjectInfo();
+			Core::Graphic::Instance::Buffer* ObjectInfoBuffer();
+
 			Renderer();
 			virtual ~Renderer();
 			Renderer(const Renderer&) = delete;
 			Renderer& operator=(const Renderer&) = delete;
 			Renderer(Renderer&&) = delete;
 			Renderer& operator=(Renderer&&) = delete;
+
+		private:
+			ObjectInfo _objectInfo;
+			Core::Graphic::Instance::Buffer* _objectInfoBuffer;
 
 			RTTR_ENABLE(Core::Logic::Object::Component)
 

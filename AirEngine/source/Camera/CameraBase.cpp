@@ -23,38 +23,42 @@ RTTR_REGISTRATION
 
 glm::mat4 AirEngine::Camera::CameraBase::ViewMatrix()
 {
-	glm::vec3 eye = GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, 0, 1);
-	glm::vec3 center = glm::normalize(glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, -1, 1)));
-	glm::vec3 up = glm::normalize(glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 1, 0, 0)));
-
-	return glm::lookAt(eye, center, up);
+	return _cameraInfo.view;
 }
 
-const glm::mat4* AirEngine::Camera::CameraBase::ProjectionMatrix()
+glm::mat4 AirEngine::Camera::CameraBase::ProjectionMatrix()
 {
-	OnSetProjectionMatrix(_projectionMatrix);
-	return &_projectionMatrix;
+	return _cameraInfo.projection;
 }
 
 const glm::vec4* AirEngine::Camera::CameraBase::ClipPlanes()
 {
-	OnSetClipPlanes(_cameraData.clipPlanes);
-	return _cameraData.clipPlanes;
+	OnSetClipPlanes(_cameraInfo.clipPlanes);
+	return _cameraInfo.clipPlanes;
 }
 
-void AirEngine::Camera::CameraBase::RefreshCameraData()
+void AirEngine::Camera::CameraBase::RefreshCameraInfo()
 {
-	_cameraData.type = static_cast<int>(cameraType);
-	_cameraData.nearFlat = nearFlat;
-	_cameraData.farFlat = farFlat;
-	_cameraData.aspectRatio = aspectRatio;
-	_cameraData.position = GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, 0, 1);
-	OnSetParameter(_cameraData.parameter);
-	_cameraData.forward = glm::normalize(glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, -1, 0)));
-	_cameraData.right = glm::normalize(glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(1, 0, 0, 0)));
-	OnSetClipPlanes(_cameraData.clipPlanes);
+	_cameraInfo.type = static_cast<int>(cameraType);
+	_cameraInfo.nearFlat = nearFlat;
+	_cameraInfo.farFlat = farFlat;
+	_cameraInfo.aspectRatio = aspectRatio;
+	_cameraInfo.position = GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, 0, 1);
+	OnSetParameter(_cameraInfo.parameter);
+	OnSetSize(_cameraInfo.halfSize);
+	_cameraInfo.forward = glm::normalize(glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, -1, 0)));
+	_cameraInfo.right = glm::normalize(glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(1, 0, 0, 0)));
+	OnSetClipPlanes(_cameraInfo.clipPlanes);
+	OnSetProjectionMatrix(_cameraInfo.projection);
 
-	_buffer->WriteData(&_cameraData, sizeof(CameraData));
+	glm::vec3 eye = GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, 0, 1);
+	glm::vec3 center = glm::normalize(glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, -1, 1)));
+	glm::vec3 up = glm::normalize(glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 1, 0, 0)));
+	_cameraInfo.view = glm::lookAt(eye, center, up);
+
+	_intersectionChecker.SetIntersectPlanes(_cameraInfo.clipPlanes, 6);
+
+	_buffer->WriteData(&_cameraInfo, sizeof(CameraData));
 }
 
 AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Camera::CameraBase::CameraDataBuffer()
@@ -68,6 +72,16 @@ void AirEngine::Camera::CameraBase::RefreshRenderPassObject()
 	_renderPassTarget = Core::Graphic::CoreObject::Instance::RenderPassManager().GetRenderPassObject(renderPassNames, attachments);
 }
 
+bool AirEngine::Camera::CameraBase::CheckInFrustum(std::array<glm::vec3, 8>& vertexes, glm::mat4& matrix)
+{
+	return _intersectionChecker.Check(vertexes.data(), 8, matrix);
+}
+
+AirEngine::Core::Graphic::Manager::RenderPassTarget* AirEngine::Camera::CameraBase::RenderPassTarget()
+{
+	return _renderPassTarget;
+}
+
 AirEngine::Camera::CameraBase::CameraBase(CameraType cameraType, std::vector<std::string> renderPassNames, std::map<std::string, Core::Graphic::Instance::Image*> attachments)
 	: Component(ComponentType::CAMERA)
 	, attachments(attachments)
@@ -77,8 +91,9 @@ AirEngine::Camera::CameraBase::CameraBase(CameraType cameraType, std::vector<std
 	, nearFlat(3.0f)
 	, farFlat(100.0f)
 	, aspectRatio(16.0f / 9.0f)
-	, _cameraData()
+	, _cameraInfo()
 	, _projectionMatrix(glm::mat4(1.0f))
+	, _intersectionChecker()
 	, _buffer(new Core::Graphic::Instance::Buffer(sizeof(CameraData), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
 {
 	RefreshRenderPassObject();
@@ -87,4 +102,8 @@ AirEngine::Camera::CameraBase::CameraBase(CameraType cameraType, std::vector<std
 AirEngine::Camera::CameraBase::~CameraBase()
 {
 	delete _buffer;
+}
+
+void AirEngine::Camera::CameraBase::OnSetParameter(glm::vec4& parameter)
+{
 }

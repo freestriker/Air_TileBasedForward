@@ -10,6 +10,12 @@
 #include "Core/Graphic/Material.h"
 #include "Core/Graphic/Manager/RenderPassManager.h"
 #include "Core/Graphic/CoreObject/Instance.h"
+#include "Camera/CameraBase.h"
+#include "Utils/Log.h"
+#include "Asset/Mesh.h"
+#include "Utils/OrientedBoundingBox.h"
+#include "Core/Logic/Object/GameObject.h"
+#include "Core/Logic/Object/Transform.h"
 
 void AirEngine::Core::Graphic::RenderPass::TransparentRenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
 {
@@ -55,7 +61,7 @@ void AirEngine::Core::Graphic::RenderPass::TransparentRenderPass::OnPopulateRend
 	);
 }
 
-void AirEngine::Core::Graphic::RenderPass::TransparentRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Manager::RenderPassTarget* renderPassObject)
+void AirEngine::Core::Graphic::RenderPass::TransparentRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
 {
 	_renderCommandPool = commandPool;
 
@@ -68,13 +74,13 @@ void AirEngine::Core::Graphic::RenderPass::TransparentRenderPass::OnPopulateComm
 
 	_renderCommandBuffer->BeginRenderPass(
 		this,
-		renderPassObject,
+		camera->RenderPassTarget(),
 		{ }
 	);
 
 	Command::ImageMemoryBarrier drawBarrier = Command::ImageMemoryBarrier
 	(
-		renderPassObject->FrameBuffer(Name())->Attachment("ColorAttachment"),
+		camera->RenderPassTarget()->FrameBuffer(Name())->Attachment("ColorAttachment"),
 		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 		VK_ACCESS_COLOR_ATTACHMENT_READ_BIT,
@@ -83,6 +89,14 @@ void AirEngine::Core::Graphic::RenderPass::TransparentRenderPass::OnPopulateComm
 	for (auto iter = renderDistanceTable.rbegin(); iter != renderDistanceTable.rend(); iter++)
 	{
 		auto& renderer = iter->second;
+
+		auto obbVertexes = renderer->mesh->OrientedBoundingBox().BoundryVertexes();
+		auto modelMatrix = renderer->GameObject()->transform.ModelMatrix();
+		if (renderer->enableFrustumCulling || !camera->CheckInFrustum(obbVertexes, modelMatrix))
+		{
+			Utils::Log::Message("AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread cull GameObject called " + renderer->GameObject()->name + ".");
+			continue;
+		}
 
 		_renderCommandBuffer->BindMaterial(renderer->material);
 		_renderCommandBuffer->DrawMesh(renderer->mesh);

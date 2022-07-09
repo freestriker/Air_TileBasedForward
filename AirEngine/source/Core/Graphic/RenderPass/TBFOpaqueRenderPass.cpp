@@ -11,6 +11,7 @@
 #include "Core/Graphic/Material.h"
 #include "Core/Graphic/Instance/Buffer.h"
 #include "Core/Graphic/Instance/Image.h"
+#include "Camera/CameraBase.h"
 
 void AirEngine::Core::Graphic::RenderPass::TBFOpaqueRenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
 {
@@ -48,15 +49,15 @@ void AirEngine::Core::Graphic::RenderPass::TBFOpaqueRenderPass::OnPopulateRender
 	);
 }
 
-void AirEngine::Core::Graphic::RenderPass::TBFOpaqueRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Manager::RenderPassTarget* renderPassObject)
+void AirEngine::Core::Graphic::RenderPass::TBFOpaqueRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
 {
 	_renderCommandPool = commandPool;
 
 	_renderCommandBuffer = commandPool->CreateCommandBuffer("TBFOpaqueCommandBuffer", VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 	_renderCommandBuffer->Reset();
 
-	auto depthSize = renderPassObject->FrameBuffer(Name())->Attachment("DepthAttachment")->VkExtent3D_();
-	auto depthFormat = renderPassObject->FrameBuffer(Name())->Attachment("DepthAttachment")->VkFormat_();
+	auto depthSize = camera->RenderPassTarget()->FrameBuffer(Name())->Attachment("DepthAttachment")->VkExtent3D_();
+	auto depthFormat = camera->RenderPassTarget()->FrameBuffer(Name())->Attachment("DepthAttachment")->VkFormat_();
 	_depthStorageBuffer = new Instance::Buffer(depthSize.width * depthSize.height * 4, VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_TEXEL_BUFFER_BIT, VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthFormat);
 
 	//Render
@@ -65,7 +66,7 @@ void AirEngine::Core::Graphic::RenderPass::TBFOpaqueRenderPass::OnPopulateComman
 	{
 		Command::ImageMemoryBarrier depthAttachmentStartCopyBarrier = Command::ImageMemoryBarrier
 		(
-			renderPassObject->FrameBuffer(Name())->Attachment("DepthAttachment"),
+			camera->RenderPassTarget()->FrameBuffer(Name())->Attachment("DepthAttachment"),
 			VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
 			VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 			VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
@@ -88,11 +89,11 @@ void AirEngine::Core::Graphic::RenderPass::TBFOpaqueRenderPass::OnPopulateComman
 			{ &depthBufferStartCopyBarrier }
 		);
 	}
-	_renderCommandBuffer->CopyImageToBuffer(renderPassObject->FrameBuffer(Name())->Attachment("DepthAttachment"), _depthStorageBuffer, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
+	_renderCommandBuffer->CopyImageToBuffer(camera->RenderPassTarget()->FrameBuffer(Name())->Attachment("DepthAttachment"), _depthStorageBuffer, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 	{
 		Command::ImageMemoryBarrier depthAttachmentEndCopyBarrier = Command::ImageMemoryBarrier
 		(
-			renderPassObject->FrameBuffer(Name())->Attachment("DepthAttachment"),
+			camera->RenderPassTarget()->FrameBuffer(Name())->Attachment("DepthAttachment"),
 			VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 			VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
 			VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT,

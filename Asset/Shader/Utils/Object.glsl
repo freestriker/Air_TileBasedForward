@@ -5,7 +5,6 @@ struct ObjectInfo
 {
     mat4 model;
     mat4 itModel;
-    vec3[8] boundingBox;
 };
 
 vec3 PositionO2W(in vec3 position, in ObjectInfo objectInfo)

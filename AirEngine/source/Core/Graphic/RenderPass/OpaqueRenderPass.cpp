@@ -8,6 +8,12 @@
 #include "Core/Graphic/Instance/FrameBuffer.h"
 #include "Renderer/Renderer.h"
 #include "Core/Graphic/Material.h"
+#include "Camera/CameraBase.h"
+#include "Utils/Log.h"
+#include "Asset/Mesh.h"
+#include "Utils/OrientedBoundingBox.h"
+#include "Core/Logic/Object/GameObject.h"
+#include "Core/Logic/Object/Transform.h"
 
 void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
 {
@@ -45,8 +51,8 @@ void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnPopulateRenderPas
 	);
 }
 
-void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Manager::RenderPassTarget* renderPassObject)
-{
+void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
+{	
 	_renderCommandPool = commandPool;
 
 	_renderCommandBuffer = commandPool->CreateCommandBuffer("OpaqueCommandBuffer", VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY);
@@ -59,7 +65,7 @@ void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnPopulateCommandBu
 	{
 		Command::ImageMemoryBarrier depthAttachmentAcquireBarrier = Command::ImageMemoryBarrier
 		(
-			renderPassObject->FrameBuffer(Name())->Attachment("DepthAttachment"),
+			camera->RenderPassTarget()->FrameBuffer(Name())->Attachment("DepthAttachment"),
 			VK_IMAGE_LAYOUT_UNDEFINED,
 			VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
 			0,
@@ -74,7 +80,7 @@ void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnPopulateCommandBu
 	{
 		Command::ImageMemoryBarrier colorAttachmentAcquireBarrier = Command::ImageMemoryBarrier
 		(
-			renderPassObject->FrameBuffer(Name())->Attachment("ColorAttachment"),
+			camera->RenderPassTarget()->FrameBuffer(Name())->Attachment("ColorAttachment"),
 			VK_IMAGE_LAYOUT_UNDEFINED,
 			VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
 			0,
@@ -92,12 +98,19 @@ void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnPopulateCommandBu
 	depthClearValue.depthStencil.depth = 1.0f;
 	_renderCommandBuffer->BeginRenderPass(
 		this,
-		renderPassObject,
+		camera->RenderPassTarget(),
 		{ colorClearValue, depthClearValue }
 	);
 	for (const auto& rendererDistencePair : renderDistanceTable)
 	{
 		auto& renderer = rendererDistencePair.second;
+		auto obbVertexes = renderer->mesh->OrientedBoundingBox().BoundryVertexes();
+		auto modelMatrix = renderer->GameObject()->transform.ModelMatrix();
+		if (renderer->enableFrustumCulling || !camera->CheckInFrustum(obbVertexes, modelMatrix))
+		{
+			Utils::Log::Message("AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread cull GameObject called " + renderer->GameObject()->name + ".");
+			continue;
+		}
 
 		_renderCommandBuffer->BindMaterial(renderer->material);
 		_renderCommandBuffer->DrawMesh(renderer->mesh);

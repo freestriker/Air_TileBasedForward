@@ -5,6 +5,9 @@
 #include <glm/vec4.hpp>
 #include <map>
 #include <string>
+#include "Utils/IntersectionChecker.h"
+#include <array>
+
 namespace AirEngine
 {
 	namespace Asset
@@ -49,11 +52,14 @@ namespace AirEngine
 				alignas(4)	float nearFlat;
 				alignas(4)	float farFlat;
 				alignas(4)	float aspectRatio;
+				alignas(8)	glm::vec2 halfSize;
 				alignas(16)	glm::vec3 position;
 				alignas(16)	glm::vec4 parameter;
 				alignas(16)	glm::vec3 forward;
 				alignas(16)	glm::vec3 right;
 				alignas(16)	glm::vec4 clipPlanes[6];
+				alignas(16) glm::mat4 projection;
+				alignas(16) glm::mat4 view;
 			};
 		public:
 			static CameraBase* mainCamera;
@@ -66,21 +72,25 @@ namespace AirEngine
 		protected:
 		private:
 			Core::Graphic::Instance::Buffer* _buffer;
-			CameraData _cameraData;
+			CameraData _cameraInfo;
 			glm::mat4 _projectionMatrix;
 			Core::Graphic::Manager::RenderPassTarget* _renderPassTarget;
+			AirRenderer::Utils::IntersectionChecker _intersectionChecker;
 
 		public:
 			glm::mat4 ViewMatrix();
-			const glm::mat4* ProjectionMatrix();
+			glm::mat4 ProjectionMatrix();
 			const glm::vec4* ClipPlanes();
-			void RefreshCameraData();
+			void RefreshCameraInfo();
 			Core::Graphic::Instance::Buffer* CameraDataBuffer();
 			void RefreshRenderPassObject();
+			bool CheckInFrustum(std::array<glm::vec3, 8>& vertexes, glm::mat4& matrix);
+			Core::Graphic::Manager::RenderPassTarget* RenderPassTarget();
 		protected:
 			CameraBase(CameraType cameraType, std::vector<std::string> renderPassNames, std::map<std::string, Core::Graphic::Instance::Image*> attachments);
 			virtual ~CameraBase();
-			virtual void OnSetParameter(glm::vec4& parameter) = 0;
+			virtual void OnSetParameter(glm::vec4& parameter);
+			virtual void OnSetSize(glm::vec2& parameter) = 0;
 			virtual void OnSetClipPlanes(glm::vec4* clipPlanes) = 0;
 			virtual void OnSetProjectionMatrix(glm::mat4& matrix) = 0;
 		private:
