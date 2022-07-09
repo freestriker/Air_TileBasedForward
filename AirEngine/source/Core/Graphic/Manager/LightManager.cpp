@@ -13,6 +13,7 @@ AirEngine::Core::Graphic::Manager::LightManager::LightManager()
 	, _ambientLightInfo()
 	, _mainLightInfo()
 	, _ortherLightInfos()
+	, _ortherLightInfosCount()
 {
 	_stagingBuffer = new Instance::Buffer(sizeof(StagingLightInfos), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 	_forwardLightInfosBuffer = new Instance::Buffer(sizeof(ForwardLightInfos), VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
@@ -82,6 +83,7 @@ void AirEngine::Core::Graphic::Manager::LightManager::SetLightInfo(std::vector<L
 	}
 
 	_ortherLightInfos = {};
+	_ortherLightInfosCount = std::min(MAX_ORTHER_LIGHT_COUNT, static_cast<int>(otherLights.size()));
 	for (int i = 0; i < otherLights.size() && i < MAX_ORTHER_LIGHT_COUNT; i++)
 	{
 		auto data = otherLights[i]->GetLightInfo();
@@ -96,8 +98,8 @@ void AirEngine::Core::Graphic::Manager::LightManager::CopyLightInfo(Command::Com
 		{
 			VkDeviceSize dataSize = sizeof(LightInfo);
 			auto offset = reinterpret_cast<char*>(pointer);
-			int importantLightCount = std::min(static_cast<int>(_ortherLightInfos.size()), MAX_FORWARD_ORTHER_LIGHT_COUNT);
-			int unimportantLightCount = std::min(static_cast<int>(_ortherLightInfos.size() - importantLightCount), MAX_FORWARD_ORTHER_LIGHT_COUNT);
+			int importantLightCount = std::min(_ortherLightInfosCount, MAX_FORWARD_ORTHER_LIGHT_COUNT);
+			int unimportantLightCount = std::min(_ortherLightInfosCount - importantLightCount, MAX_FORWARD_ORTHER_LIGHT_COUNT);
 			
 			memcpy(offset + offsetof(StagingLightInfos, importantLightCount), &importantLightCount, sizeof(int));
 			memcpy(offset + offsetof(StagingLightInfos, unimportantLightCount), &unimportantLightCount, sizeof(int));

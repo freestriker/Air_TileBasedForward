@@ -91,6 +91,7 @@ namespace AirEngine
 					Asset::TextureCube* _ambientTextureCube;
 					LightInfo _mainLightInfo;
 					std::array<LightInfo, MAX_ORTHER_LIGHT_COUNT> _ortherLightInfos;
+					int _ortherLightInfosCount;
 				};
 			}
 		}

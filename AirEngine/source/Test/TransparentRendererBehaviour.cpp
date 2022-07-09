@@ -33,7 +33,7 @@ void AirEngine::Test::TransparentRendererBehaviour::OnAwake()
 
 void AirEngine::Test::TransparentRendererBehaviour::OnStart()
 {
-	meshTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::Mesh>("..\\Asset\\Mesh\\SquareMesh.ply");
+	meshTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::Mesh>("..\\Asset\\Mesh\\Square.ply");
 	shaderTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Core::Graphic::Shader>("..\\Asset\\Shader\\TransparentShader.shader");
 	diffuseTexture2DTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::Texture2D>("..\\Asset\\Texture\\BrokenGlassTexture2D.json");
 }

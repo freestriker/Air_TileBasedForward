@@ -53,7 +53,7 @@ namespace AirEngine
 				std::future< TAsset*> AssetManager::LoadAsync(std::string path)
 				{
 					{
-						ifstream f(name.c_str());
+						std::ifstream f(path);
 						Utils::Log::Exception("Can not find file: " + path + " .", !f.good());
 					}
 					{

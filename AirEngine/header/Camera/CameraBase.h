@@ -52,8 +52,8 @@ namespace AirEngine
 				alignas(4)	float nearFlat;
 				alignas(4)	float farFlat;
 				alignas(4)	float aspectRatio;
-				alignas(8)	glm::vec2 halfSize;
 				alignas(16)	glm::vec3 position;
+				alignas(8)	glm::vec2 halfSize;
 				alignas(16)	glm::vec4 parameter;
 				alignas(16)	glm::vec3 forward;
 				alignas(16)	glm::vec3 right;
@@ -82,7 +82,7 @@ namespace AirEngine
 			glm::mat4 ProjectionMatrix();
 			const glm::vec4* ClipPlanes();
 			void RefreshCameraInfo();
-			Core::Graphic::Instance::Buffer* CameraDataBuffer();
+			Core::Graphic::Instance::Buffer* CameraInfoBuffer();
 			void RefreshRenderPassObject();
 			bool CheckInFrustum(std::array<glm::vec3, 8>& vertexes, glm::mat4& matrix);
 			Core::Graphic::Manager::RenderPassTarget* RenderPassTarget();

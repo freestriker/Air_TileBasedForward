@@ -61,7 +61,7 @@ void AirEngine::Camera::CameraBase::RefreshCameraInfo()
 	_buffer->WriteData(&_cameraInfo, sizeof(CameraData));
 }
 
-AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Camera::CameraBase::CameraDataBuffer()
+AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Camera::CameraBase::CameraInfoBuffer()
 {
 	return _buffer;
 }

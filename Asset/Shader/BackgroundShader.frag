@@ -20,7 +20,7 @@ void main()
     {
         vec3 worldPosition = PositionS2NFW(inTexCoords, cameraInfo.info);
         vec3 worldView = CameraWObserveDirection(worldPosition, cameraInfo.info);
-        colorAttachment = vec4(textu, worldView).xyz, 1);
+        colorAttachment = vec4(texture(backgroundTexture, worldView).xyz, 1);
     }
     else
     {

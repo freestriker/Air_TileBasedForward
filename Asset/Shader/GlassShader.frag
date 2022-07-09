@@ -9,7 +9,7 @@ layout(location = 2) in vec3 inWorldNormal;
 
 layout(location = 0) out vec4 colorAttachment;
 
-layout(set = START_SET_INDEX + 0, binding = 0) uniform samplerCube backgroundCubeTexture;
+layout(set = START_SET_INDEX + 0, binding = 0) uniform samplerCube backgroundTexture;
 
 const float refractRatio = 1.0 / 1.52;
 
@@ -29,7 +29,7 @@ void main()
         diffuse += DiffuseLighting(lightInfos.importantLightInfos[i], worldNormal, inWorldPosition);
         specular += SpecularLighting(lightInfos.importantLightInfos[i], viewDirection, inWorldPosition, worldNormal, 80.0);
     }
-    vec3 background = texture(backgroundCubeTexture, -normalize(reflect(viewDirection, worldNormal))).xyz;
+    vec3 background = texture(backgroundTexture, -normalize(reflect(viewDirection, worldNormal))).xyz;
 
-    colorAttachment = vec4(background * 1.8 + ambient + diffuse + specular, 1);
+    colorAttachment = vec4(background + ambient * 0.2 + diffuse * 0.2 + specular * 0.2, 1);
 }

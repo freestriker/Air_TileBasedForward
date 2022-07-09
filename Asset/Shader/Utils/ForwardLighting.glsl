@@ -31,11 +31,11 @@ layout(set = 2, binding = 0) uniform MainLightInfo
     LightInfo[MAX_ORTHER_LIGHT_COUNT] unimportantLightInfos;
 } lightInfos;
 
-layout(set = 3, binding = 0) uniform samplerCube ambientLightCubeTexture;
+layout(set = 3, binding = 0) uniform samplerCube ambientLightTexture;
 
 vec3 AmbinentLighting(in vec3 direction)
 {
-    vec4 color  = lightInfos.ambientLightInfo.intensity * lightInfos.ambientLightInfo.color * texture(ambientLightCubeTexture, normalize(direction));
+    vec4 color  = lightInfos.ambientLightInfo.intensity * lightInfos.ambientLightInfo.color * texture(ambientLightTexture, normalize(direction));
     return color.xyz;
 }
 

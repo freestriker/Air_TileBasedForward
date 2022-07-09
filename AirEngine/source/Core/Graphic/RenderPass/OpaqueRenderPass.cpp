@@ -14,6 +14,9 @@
 #include "Utils/OrientedBoundingBox.h"
 #include "Core/Logic/Object/GameObject.h"
 #include "Core/Logic/Object/Transform.h"
+#include "Core/IO/CoreObject/Instance.h"
+#include "Core/IO/Manager/AssetManager.h"
+#include "Core/Graphic/Manager/LightManager.h"
 
 void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
 {
@@ -49,6 +52,7 @@ void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnPopulateRenderPas
 		0,
 		VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
 	);
+	_ambientLightTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");
 }
 
 void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
@@ -101,16 +105,23 @@ void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnPopulateCommandBu
 		camera->RenderPassTarget(),
 		{ colorClearValue, depthClearValue }
 	);
+
+	auto viewMatrix = camera->ViewMatrix();
 	for (const auto& rendererDistencePair : renderDistanceTable)
 	{
 		auto& renderer = rendererDistencePair.second;
 		auto obbVertexes = renderer->mesh->OrientedBoundingBox().BoundryVertexes();
-		auto modelMatrix = renderer->GameObject()->transform.ModelMatrix();
-		if (renderer->enableFrustumCulling || !camera->CheckInFrustum(obbVertexes, modelMatrix))
+		auto mvMatrix = viewMatrix * renderer->GameObject()->transform.ModelMatrix();
+		if (renderer->enableFrustumCulling && !camera->CheckInFrustum(obbVertexes, mvMatrix))
 		{
-			Utils::Log::Message("AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread cull GameObject called " + renderer->GameObject()->name + ".");
+			Utils::Log::Message("AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass cull GameObject called " + renderer->GameObject()->name + ".");
 			continue;
 		}
+
+		renderer->material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
+		renderer->material->SetUniformBuffer("meshObjectInfo", renderer->ObjectInfoBuffer());
+		renderer->material->SetUniformBuffer("lightInfos", CoreObject::Instance::LightManager().ForwardLightInfosBuffer());
+		renderer->material->SetTextureCube("ambientLightTexture", _ambientLightTexture);
 
 		_renderCommandBuffer->BindMaterial(renderer->material);
 		_renderCommandBuffer->DrawMesh(renderer->mesh);
@@ -133,6 +144,7 @@ AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OpaqueRenderPass()
 	: RenderPassBase("OpaqueRenderPass", 2000)
 	, _renderCommandBuffer(nullptr)
 	, _renderCommandPool(nullptr)
+	, _ambientLightTexture(nullptr)
 {
 }
 

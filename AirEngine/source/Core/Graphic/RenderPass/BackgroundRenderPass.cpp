@@ -145,6 +145,7 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateComma
 			camera->RenderPassTarget(),
 			{ }
 		);
+		renderer->material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
 		_renderCommandBuffer->BindMaterial(renderer->material);
 		_renderCommandBuffer->DrawMesh(renderer->mesh);
 		_renderCommandBuffer->EndRenderPass();

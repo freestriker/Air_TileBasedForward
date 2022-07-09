@@ -32,7 +32,7 @@ void AirEngine::Test::MirrorRendererBehaviour::OnAwake()
 
 void AirEngine::Test::MirrorRendererBehaviour::OnStart()
 {
-	meshTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::Mesh>("..\\Asset\\Mesh\\DefaultMesh.ply");
+	meshTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::Mesh>("..\\Asset\\Mesh\\Sphere.ply");
 	backgroundTextureTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");
 	shaderTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Core::Graphic::Shader>("..\\Asset\\Shader\\MirrorShader.shader");
 }
@@ -52,7 +52,7 @@ void AirEngine::Test::MirrorRendererBehaviour::OnUpdate()
 
 		meshRenderer->material = material;
 		meshRenderer->mesh = mesh;
-		meshRenderer->material->SetTextureCube("backgroundCubeTexture", backgroundTexture);
+		meshRenderer->material->SetTextureCube("backgroundTexture", backgroundTexture);
 		Utils::Log::Message("Finish load.");
 	}
 }

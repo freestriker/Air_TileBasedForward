@@ -33,8 +33,10 @@ void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::initRes
 
     AirEngine::Core::Graphic::CoreObject::Thread::Start();
     AirEngine::Core::Graphic::CoreObject::Thread::WaitForStartFinish();
+
     AirEngine::Core::IO::CoreObject::Thread::Start();
     AirEngine::Core::IO::CoreObject::Thread::WaitForStartFinish();
+
     AirEngine::Core::Logic::CoreObject::Thread::Start();
     AirEngine::Core::Logic::CoreObject::Thread::WaitForStartFinish();
 }

@@ -108,9 +108,9 @@ vec3 PositionN2V(in vec3 ndcPosition, in CameraInfo cameraInfo)
 
 vec2 PositionS2N(in vec2 imagePosition)
 {
-    float x = (2 * imagePosition.x  - 1);
-    float y = (1 - 2 * imagePosition.y);
-    return clamp(vec2(x, y), -1, 1);
+    float x = clamp((2 * imagePosition.x  - 1), -1, 1);
+    float y = clamp((1 - 2 * imagePosition.y), -1, 1);
+    return vec2(x, y);
 }
 
 vec3 PositionS2NFW(in vec2 screenPosition, in CameraInfo cameraInfo)
@@ -119,7 +119,6 @@ vec3 PositionS2NFW(in vec2 screenPosition, in CameraInfo cameraInfo)
     float x = cameraInfo.halfSize.x * ndcPos.x;
     float y = cameraInfo.halfSize.y * ndcPos.y;
     vec3 up = cross(cameraInfo.right, cameraInfo.forward);
-    //return cameraInfo.position + normalize(cameraInfo.forward) * cameraInfo.nearFlat + normalize(cameraInfo.right) * x + normalize(-up) * y;
     return cameraInfo.position + normalize(cameraInfo.forward) * cameraInfo.nearFlat + normalize(cameraInfo.right) * x + normalize(up) * y;
 }
 

@@ -123,12 +123,6 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnStart()
 
 void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnThreadStart()
 {
-	qDebug() << "AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnThreadStart()";
-	CoreObject::Instance::RenderPassManager().AddRenderPass(new RenderPass::BackgroundRenderPass());
-	CoreObject::Instance::RenderPassManager().AddRenderPass(new RenderPass::OpaqueRenderPass());
-	CoreObject::Instance::RenderPassManager().AddRenderPass(new RenderPass::TBFOpaqueRenderPass());
-	CoreObject::Instance::RenderPassManager().AddRenderPass(new RenderPass::TransparentRenderPass());
-
 	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::UNIFORM_BUFFER, { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER }, 10);
 	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::STORAGE_BUFFER, { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER }, 10);
 	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::UNIFORM_TEXEL_BUFFER, { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER }, 10);

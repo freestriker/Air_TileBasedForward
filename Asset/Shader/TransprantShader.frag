@@ -31,5 +31,5 @@ void main()
         specular += SpecularLighting(lightInfos.importantLightInfos[i], viewDirection, inWorldPosition, worldNormal, 80.0);
     }
 
-    colorAttachment = texture(diffuseTexture, inTexCoords) * vec4(diffuse + specular + ambient + inColor.xyz, 1);
+    colorAttachment = texture(diffuseTexture, inTexCoords) * vec4((diffuse + specular + ambient + inColor.xyz) * 0.3, 1);
 }

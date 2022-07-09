@@ -1,5 +1,6 @@
 #pragma once
 #include "Core/Graphic/RenderPass/RenderPassBase.h"
+#include "Asset/TextureCube.h"
 
 namespace AirEngine
 {
@@ -19,6 +20,7 @@ namespace AirEngine
 				private:
 					Command::CommandBuffer* _renderCommandBuffer;
 					Command::CommandPool* _renderCommandPool;
+					Asset::TextureCube* _ambientLightTexture;
 					void OnPopulateRenderPassSettings(RenderPassSettings& creator)override;
 					void OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)override;
 					void OnSubmit()override;
