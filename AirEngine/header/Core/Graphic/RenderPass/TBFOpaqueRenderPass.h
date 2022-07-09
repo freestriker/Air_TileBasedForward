@@ -1,6 +1,5 @@
 #pragma once
 #include "Core/Graphic/RenderPass/RenderPassBase.h"
-#include "Asset/TextureCube.h"
 
 namespace AirEngine
 {
@@ -13,25 +12,29 @@ namespace AirEngine
 				class CommandBuffer;
 				class CommandPool;
 			}
+			namespace Instance
+			{
+				class Buffer;
+			}
 			namespace RenderPass
 			{
-				class TransparentRenderPass final : public RenderPassBase
+				class TBFOpaqueRenderPass final : public RenderPassBase
 				{
 				private:
 					Command::CommandBuffer* _renderCommandBuffer;
 					Command::CommandPool* _renderCommandPool;
-					Asset::TextureCube* _ambientLightTexture;
+					Instance::Buffer* _depthStorageBuffer;
 					void OnPopulateRenderPassSettings(RenderPassSettings& creator)override;
 					void OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)override;
 					void OnSubmit()override;
 					void OnClear()override;
 				public:
-					TransparentRenderPass();
-					~TransparentRenderPass();
-					TransparentRenderPass(const TransparentRenderPass&) = delete;
-					TransparentRenderPass& operator=(const TransparentRenderPass&) = delete;
-					TransparentRenderPass(TransparentRenderPass&&) = delete;
-					TransparentRenderPass& operator=(TransparentRenderPass&&) = delete;
+					TBFOpaqueRenderPass();
+					~TBFOpaqueRenderPass();
+					TBFOpaqueRenderPass(const TBFOpaqueRenderPass&) = delete;
+					TBFOpaqueRenderPass& operator=(const TBFOpaqueRenderPass&) = delete;
+					TBFOpaqueRenderPass(TBFOpaqueRenderPass&&) = delete;
+					TBFOpaqueRenderPass& operator=(TBFOpaqueRenderPass&&) = delete;
 
 				};
 			}

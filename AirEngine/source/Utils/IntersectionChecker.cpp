@@ -16,7 +16,6 @@ bool AirRenderer::Utils::IntersectionChecker::Check(const glm::vec3* vertexes, s
 	int planeCount = _intersectPlanes.size();
 	for (int j = 0; j < planeCount; j++)
 	{
-		int outCount = 0;
 		for (int i = 0; i < vertexCount; i++)
 		{
 			if (glm::dot(glm::vec4(vertexes[i], 1), _intersectPlanes[j]) >= 0)
@@ -41,7 +40,6 @@ bool AirRenderer::Utils::IntersectionChecker::Check(const glm::vec3* vertexes, s
 	int planeCount = _intersectPlanes.size();
 	for (int j = 0; j < planeCount; j++)
 	{
-		int outCount = 0;
 		for (int i = 0; i < vertexCount; i++)
 		{
 			if (glm::dot(wvBoundryVertexes[i], _intersectPlanes[j]) >= 0)

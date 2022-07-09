@@ -28,6 +28,7 @@
 #include "Core/Graphic/Material.h"
 #include "Core/Graphic/CoreObject/Window.h"
 #include "Core/Graphic/Command/ImageMemoryBarrier.h"
+#include "Core/Graphic/RenderPass/TBFOpaqueRenderPass.h"
 
 AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread AirEngine::Core::Graphic::CoreObject::Thread::_graphicThread = AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread();
 std::array<AirEngine::Core::Graphic::CoreObject::Thread::SubGraphicThread, 4> AirEngine::Core::Graphic::CoreObject::Thread::_subGraphicThreads = std::array<AirEngine::Core::Graphic::CoreObject::Thread::SubGraphicThread, 4>();
@@ -122,15 +123,15 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnStart()
 
 void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnThreadStart()
 {
-	qDebug() << "AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnThreadStart()";
-	CoreObject::Instance::RenderPassManager().AddRenderPass(new RenderPass::BackgroundRenderPass());
-	CoreObject::Instance::RenderPassManager().AddRenderPass(new RenderPass::OpaqueRenderPass());
-	CoreObject::Instance::RenderPassManager().AddRenderPass(new RenderPass::TransparentRenderPass());
-
 	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::UNIFORM_BUFFER, { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER }, 10);
+	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::STORAGE_BUFFER, { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER }, 10);
+	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::UNIFORM_TEXEL_BUFFER, { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER }, 10);
+	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::STORAGE_TEXEL_BUFFER, { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER }, 10);
 	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::TEXTURE_CUBE, { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER }, 10);
 	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::TEXTURE2D, { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER }, 10);
 	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::TEXTURE2D_WITH_INFO, { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER }, 10);
+	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::STORAGE_TEXTURE2D, { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE }, 10);
+	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::STORAGE_TEXTURE2D_WITH_INFO, { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER }, 10);
 
 }
 
@@ -154,9 +155,9 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 		auto lightCopyTask = AddTask(
 			[](Command::CommandPool* graphicCommandPool, Command::CommandPool* computeCommandPool)->void 
 			{
-				CoreObject::Instance::LightManager().SetLightData(CoreObject::Instance::_lights);
+				CoreObject::Instance::LightManager().SetLightInfo(CoreObject::Instance::_lights);
 				auto commandBuffer = graphicCommandPool->CreateCommandBuffer("LightCopyCommandBuffer", VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY);
-				CoreObject::Instance::LightManager().CopyLightData(commandBuffer);
+				CoreObject::Instance::LightManager().CopyLightInfo(commandBuffer);
 				graphicCommandPool->DestoryCommandBuffer(commandBuffer);
 			}
 		);
@@ -166,49 +167,22 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 		for (auto& component : Instance::_cameras)
 		{
 			auto camera = dynamic_cast<Camera::CameraBase*>(component);
-
-			camera->RefreshCameraData();
+			if(!(camera)) continue;
+			camera->RefreshCameraInfo();
 
 			auto viewMatrix = camera->ViewMatrix();
-			auto projectionMatrix = camera->ProjectionMatrix();
-			auto vpMatrix = *projectionMatrix * viewMatrix;
-
 
 			//Classify renderers
 			std::map<std::string, std::multimap<float, Renderer::Renderer*>> rendererDistenceMaps = std::map<std::string, std::multimap<float, Renderer::Renderer*>>();
 
-			auto clipPlanes = camera->ClipPlanes();
-			intersectionChecker.SetIntersectPlanes(clipPlanes, 6);
 			for (auto& rendererComponent : Instance::_renderers)
 			{
 				auto renderer = dynamic_cast<Renderer::Renderer*>(rendererComponent);
+				if (!(renderer && renderer->material && renderer->mesh)) continue;
+				renderer->RefreshObjectInfo();
 
-				if (!(renderer->material && renderer->mesh)) continue;
-
-				glm::mat4 modelMatrix = renderer->GameObject()->transform.ModelMatrix();
-				glm::mat4 mvMatrix = viewMatrix * modelMatrix;
-				glm::mat4 mvpMatrix = *projectionMatrix * viewMatrix * modelMatrix;
-
-				//Frustum Culling
-				auto obbCenter = renderer->mesh->OrientedBoundingBox().Center();
-				auto obbMvCenter = mvMatrix * glm::vec4(obbCenter, 1.0f);
-				auto obbBoundry = renderer->mesh->OrientedBoundingBox().BoundryVertexes();
-				if (!renderer->enableFrustumCulling || intersectionChecker.Check(obbBoundry.data(), obbBoundry.size(), mvMatrix))
-				{
-					renderer->SetMatrixData(viewMatrix, *projectionMatrix);
-					renderer->material->SetUniformBuffer("cameraData", camera->CameraDataBuffer());
-					renderer->material->SetTextureCube("skyBoxTexture", Instance::LightManager().SkyBoxTexture());
-					renderer->material->SetUniformBuffer("skyBox", Instance::LightManager().SkyBoxBuffer());
-					renderer->material->SetUniformBuffer("mainLight", Instance::LightManager().MainLightBuffer());
-					renderer->material->SetUniformBuffer("importantLight", Instance::LightManager().ImportantLightsBuffer());
-					renderer->material->SetUniformBuffer("unimportantLight", Instance::LightManager().UnimportantLightsBuffer());
-
-					rendererDistenceMaps[renderer->material->Shader()->Settings()->renderPass].insert({ obbMvCenter.z, renderer });
-				}
-				else
-				{
-					Utils::Log::Message("AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread cull GameObject called " + renderer->GameObject()->name + ".");
-				}
+				auto obbMvCenter = viewMatrix * renderer->GameObject()->transform.ModelMatrix() * glm::vec4(renderer->mesh->OrientedBoundingBox().Center(), 1.0f);
+				rendererDistenceMaps[renderer->material->Shader()->Settings()->renderPass].insert({ obbMvCenter.z, renderer });
 			}
 
 			std::map<std::string, std::future<void>> renderTasks = std::map<std::string, std::future<void>>();
@@ -219,9 +193,9 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 				auto renderPassTarget = camera->_renderPassTarget;
 
 				renderTasks[renderPass->Name()] = AddTask(
-					[renderPass, rendererDistanceMap, renderPassTarget](Command::CommandPool* graphicCommandPool, Command::CommandPool* computeCommandPool)
+					[renderPass, rendererDistanceMap, renderPassTarget, camera](Command::CommandPool* graphicCommandPool, Command::CommandPool* computeCommandPool)
 					{
-						renderPass->OnPopulateCommandBuffer(graphicCommandPool, *rendererDistanceMap, renderPassTarget);
+						renderPass->OnPopulateCommandBuffer(graphicCommandPool, *rendererDistanceMap, camera);
 					}
 				);
 			}
@@ -278,7 +252,7 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 							VK_ACCESS_TRANSFER_READ_BIT
 						);
 
-						presentCommandBuffer->AddPipelineBarrier(
+						presentCommandBuffer->AddPipelineImageBarrier(
 							VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
 							{ &attachmentReleaseBarrier }
 						);
@@ -302,7 +276,7 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 							{ subresourceRange }
 						);
 
-						presentCommandBuffer->AddPipelineBarrier(
+						presentCommandBuffer->AddPipelineImageBarrier(
 							VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
 							{ &transferDstBarrier }
 						);
@@ -338,7 +312,7 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 							{ subresourceRange }
 						);
 
-						presentCommandBuffer->AddPipelineBarrier(
+						presentCommandBuffer->AddPipelineImageBarrier(
 							VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
 							{ &presentSrcBarrier }
 						);

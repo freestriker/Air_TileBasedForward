@@ -4,6 +4,7 @@
 #include "Asset/Mesh.h"
 #include "Core/Graphic/Shader.h"
 #include "Asset/Texture2D.h"
+#include "Asset/TextureCube.h"
 #include "Core/Graphic/Material.h"
 #include <future>
 
@@ -15,9 +16,11 @@ namespace AirEngine
 		{
 		private:
 			std::future<Asset::Mesh*> meshTask;
+			std::future<Asset::TextureCube*> backgroundTextureTask;
 			std::future<Core::Graphic::Shader*> shaderTask;
 			bool loaded;
 			Asset::Mesh* mesh;
+			Asset::TextureCube* backgroundTexture;
 			Core::Graphic::Shader* shader;
 			Core::Graphic::Material* material;
 		public:

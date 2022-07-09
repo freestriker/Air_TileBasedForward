@@ -22,12 +22,14 @@ namespace AirEngine
 					{
 						VkDescriptorType type;
 						VkBuffer buffer;
+						VkBufferView bufferView;
 						VkDeviceSize offset;
 						VkDeviceSize range;
 						VkSampler sampler;
 						VkImageView imageView;
 						VkImageLayout imageLayout;
 						DescriptorSetWriteData(VkDescriptorType type, VkBuffer buffer, VkDeviceSize offset, VkDeviceSize range);
+						DescriptorSetWriteData(VkDescriptorType type, VkBuffer buffer, VkBufferView bufferView, VkDeviceSize offset, VkDeviceSize range);
 						DescriptorSetWriteData(VkDescriptorType type, VkSampler sampler, VkImageView imageView, VkImageLayout imageLayout);
 					};
 					VkDescriptorSet VkDescriptorSet_();

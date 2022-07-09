@@ -39,6 +39,8 @@ namespace AirEngine
 				std::string imagePath;
 				VkSampleCountFlags sampleCount;
 				VkFormat format;
+				VkImageUsageFlags usage;
+				bool useSampler;
 				VkFilter magFilter;
 				VkFilter minFilter;
 				VkSamplerAddressMode addressMode;
@@ -49,6 +51,8 @@ namespace AirEngine
 					imagePath,
 					sampleCount,
 					format,
+					usage,
+					useSampler,
 					magFilter,
 					minFilter,
 					addressMode,
@@ -61,19 +65,18 @@ namespace AirEngine
 			Core::Graphic::Instance::Buffer* _textureInfoBuffer;
 			Core::Graphic::Instance::Image* _image;
 			Core::Graphic::Instance::ImageSampler* _imageSampler;
-			std::vector<unsigned char> _byteData;
 			Texture2D::TextureInfo _textureInfo;
 			Texture2DSettings _settings;
 			void OnLoad(Core::Graphic::Command::CommandBuffer* transferCommandBuffer)override;
 		public:
 			Texture2D();
-			Texture2D(Core::Graphic::Command::CommandBuffer* transferCommandBuffer, VkExtent2D extent, Texture2DSettings settings, std::vector<unsigned char>& byteData);
+			Texture2D(VkExtent2D extent, Texture2DSettings settings);
 			~Texture2D();
+			void WriteData(Core::Graphic::Command::CommandBuffer* transferCommandBuffer, std::vector<unsigned char>& byteData);
 			VkExtent2D VkExtent2D_();
 			Core::Graphic::Instance::Buffer* InfoBuffer();
 			Core::Graphic::Instance::Image* Image();
 			Core::Graphic::Instance::ImageSampler* ImageSampler();
-			std::vector<unsigned char>* ByteData();
 			Texture2D::TextureInfo Info();
 			Texture2DSettings Settings();
 

@@ -1,0 +1,139 @@
+#version 450
+#extension GL_GOOGLE_include_directive: enable
+#extension GL_EXT_shader_atomic_float2: enable
+
+#include "Common.glsl"
+#include "Camera.glsl"
+#include "Light.glsl"
+#include "Collision.glsl"
+
+const int MAX_LIGHT_COUNT = 1024;
+const int MAX_LIGHT_INDEX_LIST_SIZE = 64;
+const int TILE_WIDTH = 32;
+const int LOCAL_GROUP_WIDTH = 8;
+const int LOCAL_GROUP_STEP = LOCAL_GROUP_WIDTH * LOCAL_GROUP_WIDTH;
+const int ITERATER_END_1D = TILE_WIDTH / LOCAL_GROUP_WIDTH;
+const int ITERATER_END =  ITERATER_END_1D * ITERATER_END_1D;
+
+struct LightOBBInfo
+{
+	vec3[8] box;
+	mat4 modelMatrix;
+};
+
+struct LightIndexList
+{
+	int size;
+	int[MAX_LIGHT_INDEX_LIST_SIZE] indexes;
+};
+
+layout (local_size_x = LOCAL_GROUP_WIDTH, local_size_y = LOCAL_GROUP_WIDTH) in;
+layout (set = START_SET + 0, binding = 0, r32f) uniform readonly image2D inputDepthImage;
+layout (set = START_SET + 1, binding = 0) uniform LightOBBInfoList
+{
+	int size;
+	LightOBBInfo[MAX_LIGHT_COUNT] infos;
+}lightOBBInfoList;
+layout (set = START_SET + 2, binding = 0) buffer LightIndexLists
+{
+	LightIndexList[] lists;
+}lightIndexLists;
+
+uint Iterater = 0;
+
+vec2 globalGroupOffset = ivec2(gl_WorkGroupID.xy * TILE_WIDTH);
+vec2 localGroupOffset = ivec2(gl_LocalInvocationID.xy);
+#define iterationOffset (ivec2(Iterater / ITERATER_END_1D, Iterater % ITERATER_END_1D) * LOCAL_GROUP_WIDTH)
+#define pixelOffset (globalGroupOffset + localGroupOffset + iterationOffset)
+
+#define globalGroupID (ivec2(gl_WorkGroupID.xy))
+#define globalGroupSize (ivec2(gl_NumWorkGroups.xy))
+#define globalGroup1DID (globalGroupID.y * globalGroupSize.x + globalGroupID.x)
+
+#define depthImageSize (imageSize(inputDepthImage))
+
+shared float minNdcDepth;
+shared float maxNdcDepth;
+shared vec4[6] frustumPlanes;
+shared int lightIndexListSize;
+void main()
+{	
+	///Init shared
+	if(localGroupOffset == uvec2(0, 0))
+	{
+		minNdcDepth = 1;
+		maxNdcDepth = 0;
+
+		lightIndexListSize = 0;
+	}
+	barrier();
+
+	///Find max min depth
+	for(Iterater = 0; Iterater < ITERATER_END; Iterater++)
+	{
+		vec2 po = pixelOffset;
+		if(po.x >= depthImageSize.x || po.y >= depthImageSize.y) continue;
+		float pixelNdcDepth = imageLoad(inputDepthImage, ivec2(po)).r;
+		atomicMax(maxNdcDepth, pixelNdcDepth);
+		atomicMin(minNdcDepth, pixelNdcDepth);
+	}
+	barrier();
+
+	///Build ggo bounding box
+	if(localGroupOffset == uvec2(0, 0))
+	{
+		uint boundingBoxPixelWidth = depthImageSize.x - globalGroupOffset.x >= TILE_WIDTH ? TILE_WIDTH : depthImageSize.x % TILE_WIDTH;
+		uint boundingBoxPixelHeight = depthImageSize.y - globalGroupOffset.y >= TILE_WIDTH ? TILE_WIDTH : depthImageSize.y % TILE_WIDTH;
+	
+		vec2[4] NSPositions;
+		NSPositions[0] = PositionScreenToNdc(globalGroupOffset / depthImageSize);
+		NSPositions[1] = PositionScreenToNdc((globalGroupOffset + ivec2(0, boundingBoxPixelHeight)) / depthImageSize);
+		NSPositions[2] = PositionScreenToNdc((globalGroupOffset + ivec2(boundingBoxPixelWidth, boundingBoxPixelHeight)) / depthImageSize);
+		NSPositions[3] = PositionScreenToNdc((globalGroupOffset + ivec2(boundingBoxPixelWidth, 0)) / depthImageSize);
+
+		vec3[4] nearVSPositions;
+		nearVSPositions[0] = PositionNdcToView(vec3(NSPositions[0], minNdcDepth));
+		nearVSPositions[1] = PositionNdcToView(vec3(NSPositions[1], minNdcDepth));
+		nearVSPositions[2] = PositionNdcToView(vec3(NSPositions[2], minNdcDepth));
+		nearVSPositions[3] = PositionNdcToView(vec3(NSPositions[3], minNdcDepth));
+		
+		vec3[4] farVSPositions;
+		farVSPositions[0] = PositionNdcToView(vec3(NSPositions[0], maxNdcDepth));
+		farVSPositions[1] = PositionNdcToView(vec3(NSPositions[1], maxNdcDepth));
+		farVSPositions[2] = PositionNdcToView(vec3(NSPositions[2], maxNdcDepth));
+		farVSPositions[3] = PositionNdcToView(vec3(NSPositions[3], maxNdcDepth));
+
+		///left
+		frustumPlanes[0] = BuildPlane(nearVSPositions[0], nearVSPositions[1], farVSPositions[1]);
+		///right
+		frustumPlanes[1] = BuildPlane(nearVSPositions[3], farVSPositions[3], farVSPositions[2]);
+		///bottom
+		frustumPlanes[2] = BuildPlane(nearVSPositions[1], nearVSPositions[2], farVSPositions[2]);
+		///top
+		frustumPlanes[3] = BuildPlane(nearVSPositions[0], farVSPositions[0], farVSPositions[3]);
+		///near
+		frustumPlanes[4] = BuildPlane(nearVSPositions[0], nearVSPositions[3], nearVSPositions[2]);
+		///far
+		frustumPlanes[5] = BuildPlane(farVSPositions[3], farVSPositions[0], farVSPositions[1]);
+	}
+	barrier();
+
+	///Intersection test
+	for(int i = 0; i < lightOBBInfoList.size; i += LOCAL_GROUP_STEP)
+	{
+		bool intersected = ObbPlaneMatrixIntersection(lightOBBInfoList.infos[i].box, frustumPlanes, matrixData.view * lightOBBInfoList.infos[i].modelMatrix);
+		if(intersected)
+		{
+			int storeIndex = atomicAdd(lightIndexListSize, 1);
+			if(storeIndex >= MAX_LIGHT_INDEX_LIST_SIZE) break;
+			lightIndexLists.lists[globalGroup1DID].indexes[storeIndex] = i;
+		}
+	}
+	barrier();
+
+	///Set size
+	if(localGroupOffset == uvec2(0, 0))
+	{
+		lightIndexLists.lists[globalGroup1DID].size = lightIndexListSize;
+	}
+}

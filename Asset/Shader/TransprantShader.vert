@@ -4,11 +4,13 @@
 #include "ForwardLighting.glsl"
 
 layout(location = 0) in vec3 vertexPosition;
-layout(location = 1) in vec3 vertexNormal;
+layout(location = 1) in vec2 vertexTexCoords;
+layout(location = 2) in vec3 vertexNormal;
 
-layout(location = 0) out vec4 outColor;
-layout(location = 1) out vec3 outWorldPosition;
-layout(location = 2) out vec3 outWorldNormal;
+layout(location = 0) out vec2 outTexCoords;
+layout(location = 1) out vec4 outColor;
+layout(location = 2) out vec3 outWorldPosition;
+layout(location = 3) out vec3 outWorldNormal;
 
 void main() 
 {
@@ -25,6 +27,7 @@ void main()
         specular += SpecularLighting(lightInfos.unimportantLightInfos[i], viewDirection, worldPosition, worldNormal, 50.0);
     }
 
+    outTexCoords = vertexTexCoords;
     outColor = vec4(diffuse.xyz + specular.xyz, 1);
     outWorldPosition = worldPosition;
     outWorldNormal = worldNormal;

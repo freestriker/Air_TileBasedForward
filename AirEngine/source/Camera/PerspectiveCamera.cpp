@@ -5,13 +5,13 @@ RTTR_REGISTRATION
     registration::class_<AirEngine::Camera::PerspectiveCamera>("AirEngine::Camera::PerspectiveCamera");
 }
 
-void AirEngine::Camera::PerspectiveCamera::OnSetParameter(glm::vec4& parameter)
+void AirEngine::Camera::PerspectiveCamera::OnSetSize(glm::vec2& parameter)
 {
     const double pi = std::acos(-1.0);
     double halfFov = fovAngle * pi / 360.0;
     float halfHeight = std::tanf(halfFov) * nearFlat;
     float halfWidth = halfHeight * aspectRatio;
-    parameter = glm::vec4(halfFov * 2, halfWidth, halfHeight, 0);
+    parameter = glm::vec2(halfWidth, halfHeight);
 }
 
 void AirEngine::Camera::PerspectiveCamera::OnSetClipPlanes(glm::vec4* clipPlanes)

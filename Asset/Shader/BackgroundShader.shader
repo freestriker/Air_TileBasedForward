@@ -1,17 +1,17 @@
 {
-  "renderPass": "OpaqueRenderPass",
+  "renderPass": "BackgroundRenderPass",
   "subpass": "DrawSubpass",
   "alphaBlendOp": 0,
   "blendEnable": 1,
   "colorBlendOp": 0,
   "colorWriteMask": 15,
-  "cullMode": 2,
+  "cullMode": 0,
   "dstAlphaBlendFactor": 0,
   "dstColorBlendFactor": 7,
-  "shaderPaths": ["..\\Asset\\Shader\\DefaultShaderFrag.spv", "..\\Asset\\Shader\\DefaultShaderVert.spv"],
+  "shaderPaths": ["..\\Asset\\Shader\\Spv\\BackgroundShader.vert.spv", "..\\Asset\\Shader\\Spv\\BackgroundShader.frag.spv"],
   "srcAlphaBlendFactor": 1,
   "srcColorBlendFactor": 6,
-  "depthTestEnable": 1,
-  "depthWriteEnable": 1,
+  "depthTestEnable": 0,
+  "depthWriteEnable": 0,
   "depthCompareOp": 1
 }

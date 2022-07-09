@@ -88,7 +88,7 @@ void AirEngine::Asset::TextureCube::OnLoad(Core::Graphic::Command::CommandBuffer
 			0,
 			VK_ACCESS_TRANSFER_WRITE_BIT
 		);
-		transferCommandBuffer->AddPipelineBarrier(
+		transferCommandBuffer->AddPipelineImageBarrier(
 			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
 			{ &imageTransferStartBarrier }
 		);
@@ -100,7 +100,7 @@ void AirEngine::Asset::TextureCube::OnLoad(Core::Graphic::Command::CommandBuffer
 			VK_ACCESS_TRANSFER_WRITE_BIT,
 			0
 		);
-		transferCommandBuffer->AddPipelineBarrier(
+		transferCommandBuffer->AddPipelineImageBarrier(
 			VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
 			{ &imageTransferEndBarrier }
 		);

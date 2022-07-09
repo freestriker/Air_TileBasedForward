@@ -10,6 +10,10 @@ namespace AirEngine
 	{
 		class Renderer;
 	}
+	namespace Camera
+	{
+		class CameraBase;
+	}
 	namespace Core
 	{
 		namespace Graphic
@@ -110,7 +114,7 @@ namespace AirEngine
 					std::map<std::string, Command::Semaphore*> _customSemaphores;
 
 					virtual void OnPopulateRenderPassSettings(RenderPassSettings& creator) = 0;
-					virtual void OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Manager::RenderPassTarget* renderPassObject) = 0;
+					virtual void OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera) = 0;
 					virtual void OnSubmit() = 0;
 					virtual void OnClear() = 0;
 				public:

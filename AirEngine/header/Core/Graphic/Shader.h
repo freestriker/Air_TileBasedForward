@@ -17,13 +17,23 @@ namespace AirEngine
 			enum class ShaderSlotType
 			{
 				UNIFORM_BUFFER,
+				STORAGE_BUFFER,
+				UNIFORM_TEXEL_BUFFER,
+				STORAGE_TEXEL_BUFFER,
 				TEXTURE2D,
 				TEXTURE2D_WITH_INFO,
+				STORAGE_TEXTURE2D,
+				STORAGE_TEXTURE2D_WITH_INFO,
 				TEXTURE_CUBE
 			};
 			class Shader final: public IO::Asset::AssetBase
 			{
 			public:
+				enum class ShaderType
+				{
+					GRAPHIC,
+					COMPUTE,
+				};
 				struct SlotDescriptor
 				{
 					std::string name{};
@@ -114,6 +124,7 @@ namespace AirEngine
 				std::map<std::string, SlotDescriptor> _slotDescriptors;
 				VkPipeline _vkPipeline;
 				VkPipelineLayout _vkPipelineLayout;
+				ShaderType _shaderType;
 
 				void _ParseShaderData(_PipelineData& pipelineData);
 				void _LoadSpirvs(_PipelineData& pipelineData);
@@ -121,10 +132,11 @@ namespace AirEngine
 				void _PopulateShaderStages(_PipelineData& pipelineData);
 				void _PopulateVertexInputState(_PipelineData& pipelineData);
 				void _CheckAttachmentOutputState(_PipelineData& pipelineData);
-				void _PopulatePipelineSettings(_PipelineData& pipelineData);
+				void _PopulateGraphicPipelineSettings(_PipelineData& pipelineData);
 				void _CreateDescriptorLayouts(_PipelineData& pipelineData);
 				void _PopulateDescriptorLayouts(_PipelineData& pipelineData);
-				void _CreatePipeline(_PipelineData& pipelineData);
+				void _CreateGraphicPipeline(_PipelineData& pipelineData);
+				void _CreateComputePipeline(_PipelineData& pipelineData);
 				void _DestroyData(_PipelineData& pipelineData);
 				void OnLoad(Core::Graphic::Command::CommandBuffer* transferCommandBuffer);
 			public:
@@ -133,6 +145,7 @@ namespace AirEngine
 				VkPipeline VkPipeline_();
 				VkPipelineLayout VkPipelineLayout_();
 				const ShaderSettings* Settings();
+				ShaderType ShaderType_();
 				Shader();
 				~Shader();
 				Shader(const Shader&) = delete;

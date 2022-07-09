@@ -3,7 +3,9 @@
     "anisotropy": 0.0,
     "borderColor": 3,
     "format": 44,
-    "imagePath": "..\\Asset\\Texture\\DefaultNormalTexture2D.png",
+    "usage": 4,
+    "useSampler": true,
+    "imagePath": "..\\Asset\\Texture\\WallNormalTexture2D.png",
     "magFilter": 1,
     "minFilter": 1,
     "sampleCount": 1

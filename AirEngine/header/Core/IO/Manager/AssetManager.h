@@ -8,6 +8,7 @@
 #include <functional>
 #include <string>
 #include <vector>
+#include <fstream>
 
 namespace AirEngine
 {
@@ -51,6 +52,10 @@ namespace AirEngine
 				template<typename TAsset>
 				std::future< TAsset*> AssetManager::LoadAsync(std::string path)
 				{
+					{
+						std::ifstream f(path);
+						Utils::Log::Exception("Can not find file: " + path + " .", !f.good());
+					}
 					{
 						std::unique_lock<std::mutex> managerLock(_mutex);
 
