@@ -48,11 +48,12 @@ layout (set = 3, binding = 0) buffer LightIndexLists
 
 layout (set = 4, binding = 0, r32f) uniform readonly image2D inputDepthImage;
 
-uint Iterater = 0;
+int Iterater = 0;
 
-vec2 globalGroupOffset = ivec2(gl_WorkGroupID.xy * TILE_WIDTH);
-vec2 localGroupOffset = ivec2(gl_LocalInvocationID.xy);
-#define iterationOffset (ivec2(Iterater / ITERATER_END_1D, Iterater % ITERATER_END_1D) * LOCAL_GROUP_WIDTH)
+ivec2 globalGroupOffset = ivec2(gl_WorkGroupID.xy * TILE_WIDTH);
+ivec2 localGroupOffset = ivec2(gl_LocalInvocationID.xy);
+int threadLocalIndex = int(gl_LocalInvocationID.y * LOCAL_GROUP_WIDTH + gl_LocalInvocationID.x);
+#define iterationOffset (ivec2(Iterater % ITERATER_END_1D, Iterater / ITERATER_END_1D) * LOCAL_GROUP_WIDTH)
 #define pixelOffset (globalGroupOffset + localGroupOffset + iterationOffset)
 
 #define globalGroupID (ivec2(gl_WorkGroupID.xy))
@@ -68,7 +69,7 @@ shared int lightIndexListSize;
 void main()
 {	
 	///Init shared
-	if(localGroupOffset == uvec2(0, 0))
+	if(localGroupOffset == ivec2(0, 0))
 	{
 		minNdcDepth = 1;
 		maxNdcDepth = 0;
@@ -89,16 +90,16 @@ void main()
 	barrier();
 
 	///Build ggo bounding box
-	if(localGroupOffset == uvec2(0, 0))
+	if(localGroupOffset == ivec2(0, 0))
 	{
-		uint boundingBoxPixelWidth = depthImageSize.x - globalGroupOffset.x >= TILE_WIDTH ? TILE_WIDTH : depthImageSize.x % TILE_WIDTH;
-		uint boundingBoxPixelHeight = depthImageSize.y - globalGroupOffset.y >= TILE_WIDTH ? TILE_WIDTH : depthImageSize.y % TILE_WIDTH;
+		int boundingBoxPixelWidth = depthImageSize.x - globalGroupOffset.x >= TILE_WIDTH ? TILE_WIDTH : depthImageSize.x % TILE_WIDTH;
+		int boundingBoxPixelHeight = depthImageSize.y - globalGroupOffset.y >= TILE_WIDTH ? TILE_WIDTH : depthImageSize.y % TILE_WIDTH;
 	
 		vec2[4] NSPositions;
-		NSPositions[0] = PositionS2N(globalGroupOffset / depthImageSize);
-		NSPositions[1] = PositionS2N((globalGroupOffset + ivec2(0, boundingBoxPixelHeight)) / depthImageSize);
-		NSPositions[2] = PositionS2N((globalGroupOffset + ivec2(boundingBoxPixelWidth, boundingBoxPixelHeight)) / depthImageSize);
-		NSPositions[3] = PositionS2N((globalGroupOffset + ivec2(boundingBoxPixelWidth, 0)) / depthImageSize);
+		NSPositions[0] = PositionS2N(vec2(globalGroupOffset) / depthImageSize);
+		NSPositions[1] = PositionS2N(vec2(globalGroupOffset + ivec2(0, boundingBoxPixelHeight)) / depthImageSize);
+		NSPositions[2] = PositionS2N(vec2(globalGroupOffset + ivec2(boundingBoxPixelWidth, boundingBoxPixelHeight)) / depthImageSize);
+		NSPositions[3] = PositionS2N(vec2(globalGroupOffset + ivec2(boundingBoxPixelWidth, 0)) / depthImageSize);
 
 		vec3[4] nearVSPositions;
 		nearVSPositions[0] = PositionN2V(vec3(NSPositions[0], minNdcDepth), cameraInfo.info);
@@ -128,7 +129,7 @@ void main()
 	barrier();
 
 	///Intersection test
-	for(int i = 0; i < lightBoundingBoxInfos.size; i += LOCAL_GROUP_STEP)
+	for(int i = threadLocalIndex; i < lightBoundingBoxInfos.size; i += LOCAL_GROUP_STEP)
 	{
 		bool intersected = ObbPlaneMatrixIntersection(lightBoundingBoxInfos.infos[i].vertexes, frustumPlanes, cameraInfo.info.view);
 		if(intersected)
@@ -141,7 +142,7 @@ void main()
 	barrier();
 
 	///Set size
-	if(localGroupOffset == uvec2(0, 0))
+	if(localGroupOffset == ivec2(0, 0))
 	{
 		lightIndexLists.lists[globalGroup1DID].size = lightIndexListSize;
 	}
