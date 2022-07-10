@@ -118,6 +118,7 @@
     <ClCompile Include="source\Core\Graphic\Material.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\BackgroundRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\OpaqueRenderPass.cpp" />
+    <ClCompile Include="source\Core\Graphic\RenderPass\PreZRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\RenderPassBase.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\TBFOpaqueRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\TransparentRenderPass.cpp" />
@@ -201,6 +202,7 @@
     <ClInclude Include="header\Core\Graphic\Material.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\BackgroundRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\OpaqueRenderPass.h" />
+    <ClInclude Include="header\Core\Graphic\RenderPass\PreZRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\RenderPassBase.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\TBFOpaqueRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\TransparentRenderPass.h" />
