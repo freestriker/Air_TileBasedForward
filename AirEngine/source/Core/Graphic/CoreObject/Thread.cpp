@@ -178,11 +178,15 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 			for (auto& rendererComponent : Instance::_renderers)
 			{
 				auto renderer = dynamic_cast<Renderer::Renderer*>(rendererComponent);
-				if (!(renderer && renderer->material && renderer->mesh)) continue;
+				if (!(renderer && renderer->GetMAterials()->size() && renderer->mesh)) continue;
 				renderer->RefreshObjectInfo();
 
 				auto obbMvCenter = viewMatrix * renderer->GameObject()->transform.ModelMatrix() * glm::vec4(renderer->mesh->OrientedBoundingBox().Center(), 1.0f);
-				rendererDistenceMaps[renderer->material->Shader()->Settings()->renderPass].insert({ obbMvCenter.z, renderer });
+
+				for (const auto& materialPair : *renderer->GetMAterials())
+				{
+					rendererDistenceMaps[materialPair.first].insert({ obbMvCenter.z, renderer });
+				}
 			}
 
 			std::map<std::string, std::future<void>> renderTasks = std::map<std::string, std::future<void>>();

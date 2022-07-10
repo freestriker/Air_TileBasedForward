@@ -58,7 +58,7 @@ void AirEngine::Test::OpaqueRendererBehaviour::OnUpdate()
 
 		loaded = true;
 
-		meshRenderer->material = material;
+		meshRenderer->AddMaterial(material);
 		meshRenderer->mesh = mesh;
 		Utils::Log::Message("Finish load.");
 	}

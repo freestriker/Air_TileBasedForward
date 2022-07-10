@@ -2,7 +2,8 @@
 #include "Core/Logic/Object/Component.h"
 #include <glm/glm.hpp>
 #include <array>
-
+#include <map>
+#include <string>
 namespace AirEngine
 {
 	namespace Asset
@@ -32,9 +33,12 @@ namespace AirEngine
 			};
 			bool enableFrustumCulling;
 			Asset::Mesh* mesh;
-			Core::Graphic::Material* material;
 			void RefreshObjectInfo();
 			Core::Graphic::Instance::Buffer* ObjectInfoBuffer();
+
+			void AddMaterial(Core::Graphic::Material* material);
+			Core::Graphic::Material* GetMaterial(std::string pass);
+			const std::map<std::string, Core::Graphic::Material*>* GetMAterials();
 
 			Renderer();
 			virtual ~Renderer();
@@ -46,7 +50,7 @@ namespace AirEngine
 		private:
 			ObjectInfo _objectInfo;
 			Core::Graphic::Instance::Buffer* _objectInfoBuffer;
-
+			std::map<std::string, Core::Graphic::Material*> _materials;
 			RTTR_ENABLE(Core::Logic::Object::Component)
 
 		};

@@ -50,9 +50,9 @@ void AirEngine::Test::GlassRendererBehaviour::OnUpdate()
 
 		loaded = true;
 
-		meshRenderer->material = material;
+		meshRenderer->AddMaterial(material);
 		meshRenderer->mesh = mesh;
-		meshRenderer->material->SetTextureCube("backgroundTexture", backgroundTexture);
+		material->SetTextureCube("backgroundTexture", backgroundTexture);
 		Utils::Log::Message("Finish load.");
 	}
 }

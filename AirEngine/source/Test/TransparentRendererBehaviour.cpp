@@ -51,7 +51,7 @@ void AirEngine::Test::TransparentRendererBehaviour::OnUpdate()
 		loaded = true;
 
 		auto meshRenderer = GameObject()->GetComponent<Renderer::Renderer>();
-		meshRenderer->material = material;
+		meshRenderer->AddMaterial(material);
 		meshRenderer->mesh = mesh;
 		Utils::Log::Message("Finish load.");
 	}

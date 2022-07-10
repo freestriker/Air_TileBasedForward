@@ -69,7 +69,7 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateComma
 	{
 		auto renderer = renderDistanceTable.begin()->second;
 
-		renderer->material->SetSlotData("depthTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _temporaryImageSampler->VkSampler_(), _temporaryImage->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
+		renderer->GetMaterial(Name())->SetSlotData("depthTexture", {0}, {{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _temporaryImageSampler->VkSampler_(), _temporaryImage->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}});
 
 		//Change layout
 		{
@@ -145,8 +145,8 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateComma
 			camera->RenderPassTarget(),
 			{ }
 		);
-		renderer->material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
-		_renderCommandBuffer->BindMaterial(renderer->material);
+		renderer->GetMaterial(Name())->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
+		_renderCommandBuffer->BindMaterial(renderer->GetMaterial(Name()));
 		_renderCommandBuffer->DrawMesh(renderer->mesh);
 		_renderCommandBuffer->EndRenderPass();
 
