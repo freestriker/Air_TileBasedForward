@@ -8,12 +8,14 @@ namespace AirEngine
 	{
 		class SpotLight final : public AirEngine::Light::LightBase
 		{
+		private:
+			void OnSetLightInfo(LightInfo& info)override;
+			void OnSetBoundingBoxInfo(std::array<glm::vec4, 8>& boundingBoxVertexes)override;
 		public:
 			float minRange;
 			float maxRange;
 			float innerAngle;
 			float outerAngle;
-			LightInfo GetLightInfo() override;
 			SpotLight();
 			~SpotLight();
 			SpotLight(const SpotLight&) = delete;

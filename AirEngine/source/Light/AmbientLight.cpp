@@ -4,18 +4,21 @@ RTTR_REGISTRATION
 	rttr::registration::class_<AirEngine::Light::AmbientLight>("AirEngine::Light::AmbientLight");
 }
 
-AirEngine::Light::LightBase::LightInfo AirEngine::Light::AmbientLight::GetLightInfo()
+void AirEngine::Light::AmbientLight::OnSetLightInfo(LightInfo& info)
 {
-	LightInfo lightDate{};
-	lightDate.type = 3;
-	lightDate.intensity = intensity;
-	lightDate.minRange = 0;
-	lightDate.maxRange = 0;
-	lightDate.extraParamter = glm::vec4(0);
-	lightDate.position = glm::vec3(0);
-	lightDate.direction = { 0, 0, 0 };
-	lightDate.color = color;
-	return lightDate;
+	info.type = 3;
+	info.intensity = intensity;
+	info.minRange = 0;
+	info.maxRange = 0;
+	info.extraParamter = glm::vec4(0);
+	info.position = glm::vec3(0);
+	info.direction = { 0, 0, 0 };
+	info.color = color;
+}
+
+void AirEngine::Light::AmbientLight::OnSetBoundingBoxInfo(std::array<glm::vec4, 8>& boundingBoxVertexes)
+{
+
 }
 
 AirEngine::Light::AmbientLight::AmbientLight()

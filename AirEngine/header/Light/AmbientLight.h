@@ -12,9 +12,12 @@ namespace AirEngine
 	{
 		class AmbientLight final : public AirEngine::Light::LightBase
 		{
+		private:
+			void OnSetLightInfo(LightInfo& info)override;
+			void OnSetBoundingBoxInfo(std::array<glm::vec4, 8>& boundingBoxVertexes)override;
 		public:
 			Asset::TextureCube* ambientLightTextureCube;
-			LightInfo GetLightInfo() override;
+
 			AmbientLight();
 			~AmbientLight();
 			AmbientLight(const AmbientLight&) = delete;

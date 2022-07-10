@@ -8,8 +8,10 @@ namespace AirEngine
 	{
 		class DirectionalLight final : public AirEngine::Light::LightBase
 		{
+		private:
+			void OnSetLightInfo(LightInfo& info)override;
+			void OnSetBoundingBoxInfo(std::array<glm::vec4, 8>& boundingBoxVertexes)override;
 		public:
-			LightInfo GetLightInfo() override;
 			DirectionalLight();
 			~DirectionalLight();
 			DirectionalLight(const DirectionalLight&) = delete;

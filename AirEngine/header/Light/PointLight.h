@@ -8,10 +8,12 @@ namespace AirEngine
 	{
 		class PointLight final : public AirEngine::Light::LightBase
 		{
+		private:
+			void OnSetLightInfo(LightInfo& info)override;
+			void OnSetBoundingBoxInfo(std::array<glm::vec4, 8>& boundingBoxVertexes)override;
 		public:
 			float minRange;
 			float maxRange;
-			LightInfo GetLightInfo() override;
 			PointLight();
 			~PointLight();
 			PointLight(const PointLight&) = delete;

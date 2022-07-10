@@ -5,18 +5,29 @@ RTTR_REGISTRATION
 	rttr::registration::class_<AirEngine::Light::PointLight>("AirEngine::Light::PointLight");
 }
 
-AirEngine::Light::LightBase::LightInfo AirEngine::Light::PointLight::GetLightInfo()
+void AirEngine::Light::PointLight::OnSetLightInfo(LightInfo& info)
 {
-	LightInfo lightDate{};
-	lightDate.type = 2;
-	lightDate.intensity = intensity;
-	lightDate.minRange = minRange;
-	lightDate.minRange = maxRange;
-	lightDate.extraParamter = { 0, 0, 0, 0 };
-	lightDate.position = GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, 0, 1);
-	lightDate.direction = { 0, 0, 0 };
-	lightDate.color = color;
-	return lightDate;
+	info.type = 2;
+	info.intensity = intensity;
+	info.minRange = minRange;
+	info.maxRange = maxRange;
+	info.extraParamter = { 0, 0, 0, 0 };
+	info.position = GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, 0, 1);
+	info.direction = { 0, 0, 0 };
+	info.color = color;
+}
+
+void AirEngine::Light::PointLight::OnSetBoundingBoxInfo(std::array<glm::vec4, 8>& boundingBoxVertexes)
+{
+	auto matrix = GameObject()->transform.ModelMatrix();
+	boundingBoxVertexes[0] = matrix * glm::vec4(maxRange, maxRange, maxRange, 1);
+	boundingBoxVertexes[1] = matrix * glm::vec4(maxRange, maxRange, -maxRange, 1);
+	boundingBoxVertexes[2] = matrix * glm::vec4(maxRange, -maxRange, maxRange, 1);
+	boundingBoxVertexes[3] = matrix * glm::vec4(maxRange, -maxRange, -maxRange, 1);
+	boundingBoxVertexes[4] = matrix * glm::vec4(-maxRange, maxRange, maxRange, 1);
+	boundingBoxVertexes[5] = matrix * glm::vec4(-maxRange, maxRange, -maxRange, 1);
+	boundingBoxVertexes[6] = matrix * glm::vec4(-maxRange, -maxRange, maxRange, 1);
+	boundingBoxVertexes[7] = matrix * glm::vec4(-maxRange, -maxRange, -maxRange, 1);
 }
 
 AirEngine::Light::PointLight::PointLight()

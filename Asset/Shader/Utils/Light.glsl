@@ -26,6 +26,11 @@ struct LightInfo
     vec4 color;
 };
 
+struct LightBoundingBoxInfo
+{
+    vec3[8] vertexes;
+};
+
 vec3 DiffuseDirectionalLighting(in LightInfo lightInfo, in vec3 worldNormal)
 {
     vec4 color = lightInfo.intensity * lightInfo.color * max(0, dot(normalize(worldNormal), -normalize(lightInfo.direction)));

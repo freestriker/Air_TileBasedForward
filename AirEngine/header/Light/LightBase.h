@@ -1,6 +1,8 @@
 #pragma once
 #include <glm/glm.hpp>
 #include "Core/Logic/Object/Component.h"
+#include <array>
+#include "glm/glm.hpp"
 
 namespace AirEngine
 {
@@ -27,10 +29,15 @@ namespace AirEngine
 				AMBIENT = 3,
 				SPOT = 4
 			};
-			virtual LightInfo GetLightInfo() = 0;
+			const LightInfo* GetLightInfo();
+			const std::array<glm::vec4, 8>* GetBoundingBox();
 			glm::vec4 color;
 			float intensity;
 			const LightType lightType;
+		private:
+			LightInfo _lightInfo;
+			std::array<glm::vec4, 8> _boundingBoxVertexes;
+			void OnUpdate()override;
 		protected:
 			LightBase(LightType lightType);
 			~LightBase();
@@ -38,6 +45,9 @@ namespace AirEngine
 			LightBase& operator=(const LightBase&) = delete;
 			LightBase(LightBase&&) = delete;
 			LightBase& operator=(LightBase&&) = delete;
+
+			virtual void OnSetLightInfo(LightInfo& info) = 0;
+			virtual void OnSetBoundingBoxInfo(std::array<glm::vec4, 8>& boundingBoxVertexes) = 0;
 
 			RTTR_ENABLE(AirEngine::Core::Logic::Object::Component)
 		};

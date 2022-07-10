@@ -117,7 +117,7 @@ void AirEngine::Core::Graphic::CoreObject::Window::Start()
         infos[0].queueCount = 4;
         infos[0].pQueuePriorities = p->data();
     });
-    _window->resize(1024, 768);
+    _window->resize(800, 450);
     _window->show();
 
 }
