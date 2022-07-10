@@ -1,6 +1,6 @@
 {
-  "renderPass": "OpaqueRenderPass",
-  "subpass": "DrawSubpass",
+  "renderPass": "",
+  "subpass": "",
   "alphaBlendOp": 0,
   "blendEnable": 1,
   "colorBlendOp": 0,
@@ -8,7 +8,7 @@
   "cullMode": 2,
   "dstAlphaBlendFactor": 0,
   "dstColorBlendFactor": 7,
-  "shaderPaths": ["..\\Asset\\Shader\\TestShader.comp.spv"],
+  "shaderPaths": ["..\\Asset\\Shader\\Spv\\TBFBuildLightListsShader.comp.spv"],
   "srcAlphaBlendFactor": 1,
   "srcColorBlendFactor": 6,
   "depthTestEnable": 1,

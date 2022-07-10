@@ -2,42 +2,51 @@
 #extension GL_GOOGLE_include_directive: enable
 #extension GL_EXT_shader_atomic_float2: enable
 
-#include "Common.glsl"
+#include "Object.glsl"
 #include "Camera.glsl"
 #include "Light.glsl"
 #include "Collision.glsl"
 
-const int MAX_LIGHT_COUNT = 1024;
-const int MAX_LIGHT_INDEX_LIST_SIZE = 64;
-const int TILE_WIDTH = 32;
-const int LOCAL_GROUP_WIDTH = 8;
-const int LOCAL_GROUP_STEP = LOCAL_GROUP_WIDTH * LOCAL_GROUP_WIDTH;
-const int ITERATER_END_1D = TILE_WIDTH / LOCAL_GROUP_WIDTH;
-const int ITERATER_END =  ITERATER_END_1D * ITERATER_END_1D;
+#define MAX_LIGHT_COUNT 1024
+#define MAX_LIGHT_INDEX_LIST_SIZE 64
+#define TILE_WIDTH 32
+#define LOCAL_GROUP_WIDTH 8
+#define LOCAL_GROUP_STEP (LOCAL_GROUP_WIDTH * LOCAL_GROUP_WIDTH)
+#define ITERATER_END_1D (TILE_WIDTH / LOCAL_GROUP_WIDTH)
+#define ITERATER_END (ITERATER_END_1D * ITERATER_END_1D)
 
-struct LightOBBInfo
+layout (local_size_x = LOCAL_GROUP_WIDTH, local_size_y = LOCAL_GROUP_WIDTH) in;
+
+layout(set = 0, binding = 0) uniform _CameraInfo
 {
-	vec3[8] box;
-	mat4 modelMatrix;
-};
+    CameraInfo info;
+} cameraInfo;
+
+layout(set = 1, binding = 0) uniform LightInfos
+{
+    LightInfo ambientLightInfo;
+    LightInfo mainLightInfo;
+    int ortherLightCount;
+    LightInfo[MAX_LIGHT_COUNT] ortherLightInfos;
+} lightInfos;
+
+layout (set = 2, binding = 0) uniform LightBoundingBoxInfos
+{
+	int size;
+	LightBoundingBoxInfo[MAX_LIGHT_COUNT] infos;
+}lightBoundingBoxInfos;
 
 struct LightIndexList
 {
 	int size;
 	int[MAX_LIGHT_INDEX_LIST_SIZE] indexes;
 };
-
-layout (local_size_x = LOCAL_GROUP_WIDTH, local_size_y = LOCAL_GROUP_WIDTH) in;
-layout (set = START_SET + 0, binding = 0, r32f) uniform readonly image2D inputDepthImage;
-layout (set = START_SET + 1, binding = 0) uniform LightOBBInfoList
-{
-	int size;
-	LightOBBInfo[MAX_LIGHT_COUNT] infos;
-}lightOBBInfoList;
-layout (set = START_SET + 2, binding = 0) buffer LightIndexLists
+layout (set = 3, binding = 0) buffer LightIndexLists
 {
 	LightIndexList[] lists;
 }lightIndexLists;
+
+layout (set = 4, binding = 0, r32f) uniform readonly image2D inputDepthImage;
 
 uint Iterater = 0;
 
@@ -86,22 +95,22 @@ void main()
 		uint boundingBoxPixelHeight = depthImageSize.y - globalGroupOffset.y >= TILE_WIDTH ? TILE_WIDTH : depthImageSize.y % TILE_WIDTH;
 	
 		vec2[4] NSPositions;
-		NSPositions[0] = PositionScreenToNdc(globalGroupOffset / depthImageSize);
-		NSPositions[1] = PositionScreenToNdc((globalGroupOffset + ivec2(0, boundingBoxPixelHeight)) / depthImageSize);
-		NSPositions[2] = PositionScreenToNdc((globalGroupOffset + ivec2(boundingBoxPixelWidth, boundingBoxPixelHeight)) / depthImageSize);
-		NSPositions[3] = PositionScreenToNdc((globalGroupOffset + ivec2(boundingBoxPixelWidth, 0)) / depthImageSize);
+		NSPositions[0] = PositionS2N(globalGroupOffset / depthImageSize);
+		NSPositions[1] = PositionS2N((globalGroupOffset + ivec2(0, boundingBoxPixelHeight)) / depthImageSize);
+		NSPositions[2] = PositionS2N((globalGroupOffset + ivec2(boundingBoxPixelWidth, boundingBoxPixelHeight)) / depthImageSize);
+		NSPositions[3] = PositionS2N((globalGroupOffset + ivec2(boundingBoxPixelWidth, 0)) / depthImageSize);
 
 		vec3[4] nearVSPositions;
-		nearVSPositions[0] = PositionNdcToView(vec3(NSPositions[0], minNdcDepth));
-		nearVSPositions[1] = PositionNdcToView(vec3(NSPositions[1], minNdcDepth));
-		nearVSPositions[2] = PositionNdcToView(vec3(NSPositions[2], minNdcDepth));
-		nearVSPositions[3] = PositionNdcToView(vec3(NSPositions[3], minNdcDepth));
+		nearVSPositions[0] = PositionN2V(vec3(NSPositions[0], minNdcDepth), cameraInfo.info);
+		nearVSPositions[1] = PositionN2V(vec3(NSPositions[1], minNdcDepth), cameraInfo.info);
+		nearVSPositions[2] = PositionN2V(vec3(NSPositions[2], minNdcDepth), cameraInfo.info);
+		nearVSPositions[3] = PositionN2V(vec3(NSPositions[3], minNdcDepth), cameraInfo.info);
 		
 		vec3[4] farVSPositions;
-		farVSPositions[0] = PositionNdcToView(vec3(NSPositions[0], maxNdcDepth));
-		farVSPositions[1] = PositionNdcToView(vec3(NSPositions[1], maxNdcDepth));
-		farVSPositions[2] = PositionNdcToView(vec3(NSPositions[2], maxNdcDepth));
-		farVSPositions[3] = PositionNdcToView(vec3(NSPositions[3], maxNdcDepth));
+		farVSPositions[0] = PositionN2V(vec3(NSPositions[0], maxNdcDepth), cameraInfo.info);
+		farVSPositions[1] = PositionN2V(vec3(NSPositions[1], maxNdcDepth), cameraInfo.info);
+		farVSPositions[2] = PositionN2V(vec3(NSPositions[2], maxNdcDepth), cameraInfo.info);
+		farVSPositions[3] = PositionN2V(vec3(NSPositions[3], maxNdcDepth), cameraInfo.info);
 
 		///left
 		frustumPlanes[0] = BuildPlane(nearVSPositions[0], nearVSPositions[1], farVSPositions[1]);
@@ -119,9 +128,9 @@ void main()
 	barrier();
 
 	///Intersection test
-	for(int i = 0; i < lightOBBInfoList.size; i += LOCAL_GROUP_STEP)
+	for(int i = 0; i < lightBoundingBoxInfos.size; i += LOCAL_GROUP_STEP)
 	{
-		bool intersected = ObbPlaneMatrixIntersection(lightOBBInfoList.infos[i].box, frustumPlanes, matrixData.view * lightOBBInfoList.infos[i].modelMatrix);
+		bool intersected = ObbPlaneMatrixIntersection(lightBoundingBoxInfos.infos[i].vertexes, frustumPlanes, cameraInfo.info.view);
 		if(intersected)
 		{
 			int storeIndex = atomicAdd(lightIndexListSize, 1);

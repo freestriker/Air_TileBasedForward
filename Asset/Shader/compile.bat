@@ -16,6 +16,6 @@ glslangValidator.exe -t -V GlassShader.frag -IUtils/ -o Spv/GlassShader.frag.spv
 glslangValidator.exe -t -V PreZShader.vert -IUtils/ -o Spv/PreZShader.vert.spv
 glslangValidator.exe -t -V PreZShader.frag -IUtils/ -o Spv/PreZShader.frag.spv
 
-::glslangValidator.exe -t -V TestShader.comp -IUtils/ -o Spv/TestShader.comp.spv
+glslangValidator.exe -t -V TBFBuildLightListsShader.comp -IUtils/ -o Spv/TBFBuildLightListsShader.comp.spv
 
 cmd
