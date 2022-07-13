@@ -189,6 +189,11 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::CopyImageToBuffer(Instanc
     vkCmdCopyImageToBuffer(_vkCommandBuffer, srcImage->VkImage_(), srcImageLayout, dstBuffer->VkBuffer_(), static_cast<uint32_t>(layerCount), infos.data());
 }
 
+void AirEngine::Core::Graphic::Command::CommandBuffer::FillBuffer(Instance::Buffer* dstBuffer, uint32_t data)
+{
+    vkCmdFillBuffer(_vkCommandBuffer, dstBuffer->VkBuffer_(), 0, dstBuffer->Size(), data);
+}
+
 void AirEngine::Core::Graphic::Command::CommandBuffer::CopyBuffer(Instance::Buffer* srcBuffer, Instance::Buffer* dstBuffer)
 {
     VkBufferCopy copyRegion{};

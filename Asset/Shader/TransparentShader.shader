@@ -1,5 +1,5 @@
 {
-  "renderPass": "TransparentRenderPass",
+  "renderPass": "F_TransparentRenderPass",
   "subpass": "DrawSubpass",
   "shaderPaths": ["..\\Asset\\Shader\\Spv\\TransparentShader.vert.spv", "..\\Asset\\Shader\\Spv\\TransparentShader.frag.spv"],
   "cullMode": 0,

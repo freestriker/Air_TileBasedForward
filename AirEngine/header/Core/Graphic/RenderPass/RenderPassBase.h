@@ -40,10 +40,11 @@ namespace AirEngine
 			}
 			namespace RenderPass
 			{
-#define OPAQUE_RENDER_INDEX 2000
-#define BACKGROUND_RENDER_INDEX 5000
-#define TRANSPARENT_RENDER_INDEX 8000
 #define PRE_Z_RENDER_INDEX 0
+#define F_OPAQUE_RENDER_INDEX 2000
+#define TBF_OPAQUE_RENDER_INDEX 3000
+#define BACKGROUND_RENDER_INDEX 5000
+#define F_TRANSPARENT_RENDER_INDEX 8000
 				class RenderPassBase
 				{
 					friend class Manager::RenderPassManager;

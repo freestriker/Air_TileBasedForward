@@ -46,7 +46,7 @@ layout (set = 3, binding = 0) buffer LightIndexLists
 	LightIndexList[] lists;
 }lightIndexLists;
 
-layout (set = 4, binding = 0, r32f) uniform readonly image2D inputDepthImage;
+layout (set = 4, binding = 0, r32f) uniform readonly image2D depthImage;
 
 int Iterater = 0;
 
@@ -60,7 +60,7 @@ int threadLocalIndex = int(gl_LocalInvocationID.y * LOCAL_GROUP_WIDTH + gl_Local
 #define globalGroupSize (ivec2(gl_NumWorkGroups.xy))
 #define globalGroup1DID (globalGroupID.y * globalGroupSize.x + globalGroupID.x)
 
-#define depthImageSize (imageSize(inputDepthImage))
+#define depthImageSize (imageSize(depthImage))
 
 shared float minNdcDepth;
 shared float maxNdcDepth;
@@ -84,7 +84,7 @@ void main()
 	{
 		vec2 po = pixelOffset;
 		if(po.x >= depthImageSize.x || po.y >= depthImageSize.y) continue;
-		float pixelNdcDepth = imageLoad(inputDepthImage, ivec2(po)).r;
+		float pixelNdcDepth = imageLoad(depthImage, ivec2(po)).r;
 		atomicMax(maxNdcDepth, pixelNdcDepth);
 		atomicMin(minNdcDepth, pixelNdcDepth);
 	}
@@ -132,7 +132,7 @@ void main()
 	///Intersection test
 	for(int i = threadLocalIndex; i < lightBoundingBoxInfos.count; i += LOCAL_GROUP_STEP)
 	{
-		bool intersected = ObbPlaneMatrixIntersection(lightBoundingBoxInfos.infos[i].vertexes, frustumPlanes, cameraInfo.info.view);
+		bool intersected = CheckIntersection(lightBoundingBoxInfos.infos[i].vertexes, frustumPlanes, cameraInfo.info.view);
 		if(intersected)
 		{
 			int storeIndex = atomicAdd(lightIndexCount, 1);

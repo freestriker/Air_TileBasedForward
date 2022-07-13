@@ -87,19 +87,20 @@ namespace AirEngine
 					{
 						LightInfo ambientLightInfo;
 						LightInfo mainLightInfo;
-						int lightCount;
+						int ortherLightCount;
 						LightInfo ortherLightInfos[MAX_TILE_BASED_FORWARD_ORTHER_LIGHT_COUNT];
 					};
 					struct TileBasedForwardLightBoundingBoxInfos
 					{
-						int lightCount;
-						LightBoundingBox lightBoundingBoxInfos[MAX_TILE_BASED_FORWARD_ORTHER_LIGHT_COUNT];
+						alignas(4) int lightCount;
+						alignas(16) LightBoundingBox lightBoundingBoxInfos[MAX_TILE_BASED_FORWARD_ORTHER_LIGHT_COUNT];
 					};
 					void SetLightInfo(std::vector<Logic::Object::Component*> lights);
 					void CopyLightInfo(Command::CommandBuffer* commandBuffer);
 					Asset::TextureCube* AmbientTextureCube();
 					Instance::Buffer* ForwardLightInfosBuffer();
 					Instance::Buffer* TileBasedForwardLightInfosBuffer();
+					Instance::Buffer* TileBasedForwardLightBoundindBoxInfosBuffer();
 				private:
 					Instance::Buffer* _stagingBuffer;
 					Instance::Buffer* _forwardLightInfosBuffer;

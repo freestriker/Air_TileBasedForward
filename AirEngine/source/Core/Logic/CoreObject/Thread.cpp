@@ -27,8 +27,9 @@
 #include "Core/Graphic/Manager/RenderPassManager.h"
 #include "Core/Graphic/CoreObject/Instance.h"
 #include "Core/Graphic/RenderPass/BackgroundRenderPass.h"
-#include "Core/Graphic/RenderPass/OpaqueRenderPass.h"
-#include "Core/Graphic/RenderPass/TransparentRenderPass.h"
+#include "Core/Graphic/RenderPass/F_OpaqueRenderPass.h"
+#include "Core/Graphic/RenderPass/TBF_OpaqueRenderPass.h"
+#include "Core/Graphic/RenderPass/F_TransparentRenderPass.h"
 #include "Core/Graphic/RenderPass/PreZRenderPass.h"
 
 AirEngine::Core::Logic::CoreObject::Thread::LogicThread AirEngine::Core::Logic::CoreObject::Thread::_logicThread = AirEngine::Core::Logic::CoreObject::Thread::LogicThread();
@@ -396,15 +397,16 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	qDebug() << "AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()";
 
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::BackgroundRenderPass());
-	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::OpaqueRenderPass());
+	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::F_OpaqueRenderPass());
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::PreZRenderPass());
-	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::TransparentRenderPass());
+	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::F_TransparentRenderPass());
+	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::TBF_OpaqueRenderPass());
 
 	//Camera
 	Object::GameObject* cameraGo = new Logic::Object::GameObject("Camera");
 	CoreObject::Instance::rootObject.AddChild(cameraGo);
 	auto camera = new Camera::PerspectiveCamera(
-		{ "BackgroundRenderPass", "TransparentRenderPass", "OpaqueRenderPass", "PreZRenderPass"},
+		{ "BackgroundRenderPass", "F_TransparentRenderPass", "F_OpaqueRenderPass", "PreZRenderPass", "TBF_OpaqueRenderPass"},
 		{
 			{"ColorAttachment", Graphic::Instance::Image::Create2DImage({800, 450}, VK_FORMAT_R8G8B8A8_SRGB, VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT)},
 			{"DepthAttachment", Graphic::Instance::Image::Create2DImage({800, 450}, VK_FORMAT_D32_SFLOAT, VkImageUsageFlagBits::VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT)}

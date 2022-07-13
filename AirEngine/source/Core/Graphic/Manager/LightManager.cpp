@@ -89,7 +89,7 @@ void AirEngine::Core::Graphic::Manager::LightManager::SetLightInfo(std::vector<L
 	_ortherLightInfos = {};
 	_ortherLightBoundingBoxInfos = {};
 	_ortherLightCount = std::min(MAX_ORTHER_LIGHT_COUNT, static_cast<int>(otherLights.size()));
-	for (int i = 0; i < otherLights.size() && i < MAX_ORTHER_LIGHT_COUNT; i++)
+	for (int i = 0; i < _ortherLightCount; i++)
 	{
 		auto data = otherLights[i]->GetLightInfo();
 		auto boxData = otherLights[i]->GetBoundingBox();
@@ -105,36 +105,35 @@ void AirEngine::Core::Graphic::Manager::LightManager::CopyLightInfo(Command::Com
 		{
 			const VkDeviceSize dataSize = sizeof(LightInfo);
 			auto offset = reinterpret_cast<char*>(pointer);
-			int ortherLightCount = static_cast<int>(_ortherLightCount);
-			int importantLightCount = std::min(_ortherLightCount, MAX_FORWARD_ORTHER_LIGHT_COUNT);
-			int unimportantLightCount = std::min(_ortherLightCount - importantLightCount, MAX_FORWARD_ORTHER_LIGHT_COUNT);
+			int ortherLightCount = _ortherLightCount;
+			int importantLightCount = std::min(ortherLightCount, MAX_FORWARD_ORTHER_LIGHT_COUNT);
+			int unimportantLightCount = std::min(ortherLightCount - importantLightCount, MAX_FORWARD_ORTHER_LIGHT_COUNT);
 			
 			memcpy(offset + offsetof(StagingLightInfos, ortherLightCount), &ortherLightCount, sizeof(int));
 			memcpy(offset + offsetof(StagingLightInfos, importantLightCount), &importantLightCount, sizeof(int));
 			memcpy(offset + offsetof(StagingLightInfos, unimportantLightCount), &unimportantLightCount, sizeof(int));
 			memcpy(offset + offsetof(StagingLightInfos, ambientLightInfo), &_ambientLightInfo, dataSize);
 			memcpy(offset + offsetof(StagingLightInfos, mainLightInfo), &_mainLightInfo, dataSize);
-			memcpy(offset + offsetof(StagingLightInfos, ortherLightInfos), _ortherLightInfos.data(), dataSize * _ortherLightCount);
-			memcpy(offset + offsetof(StagingLightInfos, ortherLightBoundingBoxInfos), _ortherLightBoundingBoxInfos.data(), sizeof(LightBoundingBox) * _ortherLightCount);
+			memcpy(offset + offsetof(StagingLightInfos, ortherLightInfos), _ortherLightInfos.data(), dataSize * ortherLightCount);
+			memcpy(offset + offsetof(StagingLightInfos, ortherLightBoundingBoxInfos), _ortherLightBoundingBoxInfos.data(), sizeof(LightBoundingBox) * ortherLightCount);
 		}
 	);
 
-	VkDeviceSize dataSize = sizeof(LightInfo);
 	commandBuffer->Reset();
 	commandBuffer->BeginRecord(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
 	//Forward
 	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, importantLightCount), _forwardLightInfosBuffer, offsetof(ForwardLightInfos, importantLightCount), sizeof(int));
 	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, unimportantLightCount), _forwardLightInfosBuffer, offsetof(ForwardLightInfos, unimportantLightCount), sizeof(int));
-	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, ambientLightInfo), _forwardLightInfosBuffer, offsetof(ForwardLightInfos, ambientLightInfo), dataSize);
-	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, mainLightInfo), _forwardLightInfosBuffer, offsetof(ForwardLightInfos, mainLightInfo), dataSize);
-	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, ortherLightInfos), _forwardLightInfosBuffer, offsetof(ForwardLightInfos, importantLightInfos), dataSize * MAX_FORWARD_ORTHER_LIGHT_COUNT);
-	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, ortherLightInfos) + MAX_FORWARD_ORTHER_LIGHT_COUNT * dataSize, _forwardLightInfosBuffer, offsetof(ForwardLightInfos, unimportantLightInfos), dataSize * MAX_FORWARD_ORTHER_LIGHT_COUNT);
+	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, ambientLightInfo), _forwardLightInfosBuffer, offsetof(ForwardLightInfos, ambientLightInfo), sizeof(LightInfo));
+	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, mainLightInfo), _forwardLightInfosBuffer, offsetof(ForwardLightInfos, mainLightInfo), sizeof(LightInfo));
+	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, ortherLightInfos), _forwardLightInfosBuffer, offsetof(ForwardLightInfos, importantLightInfos), sizeof(LightInfo) * MAX_FORWARD_ORTHER_LIGHT_COUNT);
+	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, ortherLightInfos) + MAX_FORWARD_ORTHER_LIGHT_COUNT * sizeof(LightInfo), _forwardLightInfosBuffer, offsetof(ForwardLightInfos, unimportantLightInfos), sizeof(LightInfo) * MAX_FORWARD_ORTHER_LIGHT_COUNT);
 
 	//Tile based forward
 	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, ambientLightInfo), _tileBasedForwardLightInfosBuffer, offsetof(TileBasedForwardLightInfos, ambientLightInfo), sizeof(LightInfo));
 	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, mainLightInfo), _tileBasedForwardLightInfosBuffer, offsetof(TileBasedForwardLightInfos, mainLightInfo), sizeof(LightInfo));
-	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, ortherLightCount), _tileBasedForwardLightInfosBuffer, offsetof(TileBasedForwardLightInfos, lightCount), sizeof(int));
+	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, ortherLightCount), _tileBasedForwardLightInfosBuffer, offsetof(TileBasedForwardLightInfos, ortherLightCount), sizeof(int));
 	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, ortherLightInfos), _tileBasedForwardLightInfosBuffer, offsetof(TileBasedForwardLightInfos, ortherLightInfos), sizeof(LightInfo) * _ortherLightCount);
 	
 	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, ortherLightCount), _tileBasedForwardLightBoundingBoxInfosBuffer, offsetof(TileBasedForwardLightBoundingBoxInfos, lightCount), sizeof(int));
@@ -158,4 +157,9 @@ AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Manager::L
 AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Manager::LightManager::TileBasedForwardLightInfosBuffer()
 {
 	return _tileBasedForwardLightInfosBuffer;
+}
+
+AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Manager::LightManager::TileBasedForwardLightBoundindBoxInfosBuffer()
+{
+	return _tileBasedForwardLightBoundingBoxInfosBuffer;
 }

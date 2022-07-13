@@ -15,7 +15,7 @@ namespace AirEngine
 			}
 			namespace RenderPass
 			{
-				class OpaqueRenderPass final: public RenderPassBase
+				class F_TransparentRenderPass final : public RenderPassBase
 				{
 				private:
 					Command::CommandBuffer* _renderCommandBuffer;
@@ -26,12 +26,12 @@ namespace AirEngine
 					void OnSubmit()override;
 					void OnClear()override;
 				public:
-					OpaqueRenderPass();
-					~OpaqueRenderPass();
-					OpaqueRenderPass(const OpaqueRenderPass&) = delete;
-					OpaqueRenderPass& operator=(const OpaqueRenderPass&) = delete;
-					OpaqueRenderPass(OpaqueRenderPass&&) = delete;
-					OpaqueRenderPass& operator=(OpaqueRenderPass&&) = delete;
+					F_TransparentRenderPass();
+					~F_TransparentRenderPass();
+					F_TransparentRenderPass(const F_TransparentRenderPass&) = delete;
+					F_TransparentRenderPass& operator=(const F_TransparentRenderPass&) = delete;
+					F_TransparentRenderPass(F_TransparentRenderPass&&) = delete;
+					F_TransparentRenderPass& operator=(F_TransparentRenderPass&&) = delete;
 
 				};
 			}

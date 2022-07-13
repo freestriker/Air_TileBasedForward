@@ -12,8 +12,6 @@
 #include "Core/Graphic/Manager/RenderPassManager.h"
 #include "Core/Graphic/CoreObject/Instance.h"
 #include "Core/Graphic/RenderPass/BackgroundRenderPass.h"
-#include "Core/Graphic/RenderPass/OpaqueRenderPass.h"
-#include "Core/Graphic/RenderPass/TransparentRenderPass.h"
 #include "Core/Graphic/Shader.h"
 #include "Utils/IntersectionChecker.h"
 #include <future>
@@ -28,7 +26,6 @@
 #include "Core/Graphic/Material.h"
 #include "Core/Graphic/CoreObject/Window.h"
 #include "Core/Graphic/Command/ImageMemoryBarrier.h"
-#include "Core/Graphic/RenderPass/TBFOpaqueRenderPass.h"
 
 AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread AirEngine::Core::Graphic::CoreObject::Thread::_graphicThread = AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread();
 std::array<AirEngine::Core::Graphic::CoreObject::Thread::SubGraphicThread, 4> AirEngine::Core::Graphic::CoreObject::Thread::_subGraphicThreads = std::array<AirEngine::Core::Graphic::CoreObject::Thread::SubGraphicThread, 4>();

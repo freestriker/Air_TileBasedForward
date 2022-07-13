@@ -1,7 +1,7 @@
 #ifndef _COLLISION_GLSL_
 #define _COLLISION_GLSL_
 
-vec4 BuildPlane(vec3 pos0, vec3 pos1, vec3 pos2)
+vec4 BuildPlane(in vec3 pos0, in vec3 pos1, in vec3 pos2)
 {
     vec3 d0 = pos1 - pos0;
     vec3 d1 = pos2 - pos1;
@@ -10,7 +10,7 @@ vec4 BuildPlane(vec3 pos0, vec3 pos1, vec3 pos2)
     return vec4(normal, p);
 }
 
-bool ObbPlaneIntersection(vec3[8] vertexes, vec4[6] planes)
+bool CheckIntersection(in vec3[8] vertexes, in vec4[6] planes)
 {
     for(int i = 0; i < 6; i++)
     {
@@ -27,7 +27,7 @@ bool ObbPlaneIntersection(vec3[8] vertexes, vec4[6] planes)
     return true;
 }
 
-bool ObbPlaneMatrixIntersection(vec3[8] vertexes, vec4[6] planes, mat4 matrix)
+bool CheckIntersection(in vec3[8] vertexes, in vec4[6] planes, in mat4 matrix)
 {
     for(int i = 0; i < 6; i++)
     {

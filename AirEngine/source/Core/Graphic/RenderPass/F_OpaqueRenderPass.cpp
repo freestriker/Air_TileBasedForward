@@ -1,4 +1,4 @@
-#include "Core/Graphic/RenderPass/OpaqueRenderPass.h"
+#include "Core/Graphic/RenderPass/F_OpaqueRenderPass.h"
 #include "Core/Graphic/Command/CommandBuffer.h"
 #include "Core/Graphic/Command/CommandPool.h"
 #include "Core/Graphic/CoreObject/Instance.h"
@@ -18,7 +18,7 @@
 #include "Core/IO/Manager/AssetManager.h"
 #include "Core/Graphic/Manager/LightManager.h"
 
-void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
+void AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
 {
 	creator.AddColorAttachment(
 		"ColorAttachment",
@@ -55,11 +55,11 @@ void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnPopulateRenderPas
 	_ambientLightTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");
 }
 
-void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
+void AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
 {	
 	_renderCommandPool = commandPool;
 
-	_renderCommandBuffer = commandPool->CreateCommandBuffer("OpaqueCommandBuffer", VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+	_renderCommandBuffer = commandPool->CreateCommandBuffer("F_OpaqueCommandBuffer", VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 	_renderCommandBuffer->Reset();
 
 	//Render
@@ -130,25 +130,25 @@ void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnPopulateCommandBu
 	_renderCommandBuffer->EndRecord();
 }
 
-void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnSubmit()
+void AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::OnSubmit()
 {
 	_renderCommandBuffer->Submit();
 	_renderCommandBuffer->WaitForFinish();
 }
 
-void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnClear()
+void AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::OnClear()
 {
-	_renderCommandPool->DestoryCommandBuffer("OpaqueCommandBuffer");
+	_renderCommandPool->DestoryCommandBuffer(_renderCommandBuffer);
 }
 
-AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OpaqueRenderPass()
-	: RenderPassBase("OpaqueRenderPass", OPAQUE_RENDER_INDEX)
+AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::F_OpaqueRenderPass()
+	: RenderPassBase("F_OpaqueRenderPass", F_OPAQUE_RENDER_INDEX)
 	, _renderCommandBuffer(nullptr)
 	, _renderCommandPool(nullptr)
 	, _ambientLightTexture(nullptr)
 {
 }
 
-AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::~OpaqueRenderPass()
+AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::~F_OpaqueRenderPass()
 {
 }

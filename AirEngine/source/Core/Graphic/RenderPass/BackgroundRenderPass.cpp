@@ -43,20 +43,12 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateRende
 
 void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
 {
-	_temporaryImage = Graphic::Instance::Image::Create2DImage(
+	_temporaryDepthImage = Graphic::Instance::Image::Create2DImage(
 		camera->RenderPassTarget()->Extent()
 		, VkFormat::VK_FORMAT_D32_SFLOAT
 		, VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT
 		, VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 		, VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT
-	);
-	_temporaryImageSampler = new Graphic::Instance::ImageSampler
-	(
-		VkFilter::VK_FILTER_LINEAR,
-		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_LINEAR,
-		VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
-		0.0f,
-		VkBorderColor::VK_BORDER_COLOR_FLOAT_OPAQUE_WHITE
 	);
 	_renderCommandPool = commandPool;
 	_renderCommandBuffer = commandPool->CreateCommandBuffer("BackgroundCommandBuffer", VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY);
@@ -69,7 +61,7 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateComma
 	{
 		auto renderer = renderDistanceTable.begin()->second;
 
-		renderer->GetMaterial(Name())->SetSlotData("depthImage", {0}, {{VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_NULL_HANDLE, _temporaryImage->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL}});
+		renderer->GetMaterial(Name())->SetSlotData("depthImage", {0}, {{VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_NULL_HANDLE, _temporaryDepthImage->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL}});
 
 		//Change layout
 		{
@@ -84,10 +76,10 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateComma
 
 			Command::ImageMemoryBarrier temporaryImageLayoutBarrier = Command::ImageMemoryBarrier
 			(
-				_temporaryImage,
+				_temporaryDepthImage,
 				VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
 				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-				VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+				0,
 				VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT
 			);
 
@@ -103,7 +95,7 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateComma
 			(
 				camera->RenderPassTarget()->Attachment("DepthAttachment"),
 				VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-				_temporaryImage,
+				_temporaryDepthImage,
 				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
 			);
 		}
@@ -116,12 +108,12 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateComma
 				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 				VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
 				VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT,
-				VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT
+				VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
 			);
 
 			Command::ImageMemoryBarrier temporaryImageLayoutBarrier = Command::ImageMemoryBarrier
 			(
-				_temporaryImage,
+				_temporaryDepthImage,
 				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 				VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
@@ -165,17 +157,15 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnSubmit()
 
 void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnClear()
 {
-	_renderCommandPool->DestoryCommandBuffer("BackgroundCommandBuffer");
-	delete _temporaryImageSampler;
-	delete _temporaryImage;
+	_renderCommandPool->DestoryCommandBuffer(_renderCommandBuffer);
+	delete _temporaryDepthImage;
 }
 
 AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::BackgroundRenderPass()
 	: RenderPassBase("BackgroundRenderPass", BACKGROUND_RENDER_INDEX)
 	, _renderCommandBuffer(nullptr)
 	, _renderCommandPool(nullptr)
-	, _temporaryImage(nullptr)
-	, _temporaryImageSampler(nullptr)
+	, _temporaryDepthImage(nullptr)
 {
 }
 
