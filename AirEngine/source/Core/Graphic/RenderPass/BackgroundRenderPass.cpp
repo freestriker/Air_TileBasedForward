@@ -46,7 +46,7 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateComma
 	_temporaryImage = Graphic::Instance::Image::Create2DImage(
 		camera->RenderPassTarget()->Extent()
 		, VkFormat::VK_FORMAT_D32_SFLOAT
-		, VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT
+		, VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT
 		, VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 		, VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT
 	);
@@ -69,7 +69,7 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateComma
 	{
 		auto renderer = renderDistanceTable.begin()->second;
 
-		renderer->GetMaterial(Name())->SetSlotData("depthTexture", {0}, {{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _temporaryImageSampler->VkSampler_(), _temporaryImage->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}});
+		renderer->GetMaterial(Name())->SetSlotData("depthImage", {0}, {{VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_NULL_HANDLE, _temporaryImage->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL}});
 
 		//Change layout
 		{
@@ -99,13 +99,12 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateComma
 
 		//Copy depth
 		{
-			_renderCommandBuffer->Blit
+			_renderCommandBuffer->CopyImage
 			(
 				camera->RenderPassTarget()->Attachment("DepthAttachment"),
 				VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 				_temporaryImage,
-				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-				VkFilter::VK_FILTER_NEAREST
+				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
 			);
 		}
 
@@ -124,7 +123,7 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateComma
 			(
 				_temporaryImage,
 				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-				VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 				VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
 				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
 			);
@@ -160,8 +159,8 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateComma
 
 void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnSubmit()
 {
-	auto opaqueSemaphore = CoreObject::Instance::RenderPassManager().RenderPass("OpaqueRenderPass").Semaphore();
-	_renderCommandBuffer->Submit({ opaqueSemaphore }, { VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT }, { Semaphore() });
+	_renderCommandBuffer->Submit();
+	_renderCommandBuffer->WaitForFinish();
 }
 
 void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnClear()
@@ -172,7 +171,7 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnClear()
 }
 
 AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::BackgroundRenderPass()
-	: RenderPassBase("BackgroundRenderPass", 5000)
+	: RenderPassBase("BackgroundRenderPass", BACKGROUND_RENDER_INDEX)
 	, _renderCommandBuffer(nullptr)
 	, _renderCommandPool(nullptr)
 	, _temporaryImage(nullptr)

@@ -318,7 +318,7 @@ void AirEngine::Core::Graphic::Material::RefreshSlotData(std::vector<std::string
 			case ShaderSlotType::STORAGE_TEXTURE2D:
 			{
 				Asset::Texture2D* t = static_cast<Asset::Texture2D*>(slot.asset);
-				slot.descriptorSet->UpdateBindingData({ 0 }, { Graphic::Instance::DescriptorSet::DescriptorSetWriteData(VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, t->ImageSampler()->VkSampler_(), t->Image()->VkImageView_(), VK_IMAGE_LAYOUT_GENERAL) });
+				slot.descriptorSet->UpdateBindingData({ 0 }, { Graphic::Instance::DescriptorSet::DescriptorSetWriteData(VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_NULL_HANDLE, t->Image()->VkImageView_(), VK_IMAGE_LAYOUT_GENERAL) });
 				break;
 			}
 			case ShaderSlotType::STORAGE_TEXTURE2D_WITH_INFO:

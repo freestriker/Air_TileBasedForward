@@ -8,7 +8,7 @@
 #include "Collision.glsl"
 
 #define MAX_LIGHT_COUNT 1024
-#define MAX_LIGHT_INDEX_LIST_SIZE 64
+#define MAX_LIGHT_INDEX_COUNT 64
 #define TILE_WIDTH 32
 #define LOCAL_GROUP_WIDTH 8
 #define LOCAL_GROUP_STEP (LOCAL_GROUP_WIDTH * LOCAL_GROUP_WIDTH)
@@ -32,14 +32,14 @@ layout(set = 1, binding = 0) uniform LightInfos
 
 layout (set = 2, binding = 0) uniform LightBoundingBoxInfos
 {
-	int size;
+	int count;
 	LightBoundingBoxInfo[MAX_LIGHT_COUNT] infos;
 }lightBoundingBoxInfos;
 
 struct LightIndexList
 {
-	int size;
-	int[MAX_LIGHT_INDEX_LIST_SIZE] indexes;
+	int count;
+	int[MAX_LIGHT_INDEX_COUNT] indexes;
 };
 layout (set = 3, binding = 0) buffer LightIndexLists
 {
@@ -65,7 +65,8 @@ int threadLocalIndex = int(gl_LocalInvocationID.y * LOCAL_GROUP_WIDTH + gl_Local
 shared float minNdcDepth;
 shared float maxNdcDepth;
 shared vec4[6] frustumPlanes;
-shared int lightIndexListSize;
+shared int lightIndexCount;
+
 void main()
 {	
 	///Init shared
@@ -74,7 +75,7 @@ void main()
 		minNdcDepth = 1;
 		maxNdcDepth = 0;
 
-		lightIndexListSize = 0;
+		lightIndexCount = 0;
 	}
 	barrier();
 
@@ -95,47 +96,47 @@ void main()
 		int boundingBoxPixelWidth = depthImageSize.x - globalGroupOffset.x >= TILE_WIDTH ? TILE_WIDTH : depthImageSize.x % TILE_WIDTH;
 		int boundingBoxPixelHeight = depthImageSize.y - globalGroupOffset.y >= TILE_WIDTH ? TILE_WIDTH : depthImageSize.y % TILE_WIDTH;
 	
-		vec2[4] NSPositions;
-		NSPositions[0] = PositionS2N(vec2(globalGroupOffset) / depthImageSize);
-		NSPositions[1] = PositionS2N(vec2(globalGroupOffset + ivec2(0, boundingBoxPixelHeight)) / depthImageSize);
-		NSPositions[2] = PositionS2N(vec2(globalGroupOffset + ivec2(boundingBoxPixelWidth, boundingBoxPixelHeight)) / depthImageSize);
-		NSPositions[3] = PositionS2N(vec2(globalGroupOffset + ivec2(boundingBoxPixelWidth, 0)) / depthImageSize);
+		vec2[4] NPositions;
+		NPositions[0] = PositionS2N(vec2(globalGroupOffset + ivec2(0, 0)) / depthImageSize);
+		NPositions[1] = PositionS2N(vec2(globalGroupOffset + ivec2(0, boundingBoxPixelHeight)) / depthImageSize);
+		NPositions[2] = PositionS2N(vec2(globalGroupOffset + ivec2(boundingBoxPixelWidth, boundingBoxPixelHeight)) / depthImageSize);
+		NPositions[3] = PositionS2N(vec2(globalGroupOffset + ivec2(boundingBoxPixelWidth, 0)) / depthImageSize);
 
-		vec3[4] nearVSPositions;
-		nearVSPositions[0] = PositionN2V(vec3(NSPositions[0], minNdcDepth), cameraInfo.info);
-		nearVSPositions[1] = PositionN2V(vec3(NSPositions[1], minNdcDepth), cameraInfo.info);
-		nearVSPositions[2] = PositionN2V(vec3(NSPositions[2], minNdcDepth), cameraInfo.info);
-		nearVSPositions[3] = PositionN2V(vec3(NSPositions[3], minNdcDepth), cameraInfo.info);
+		vec3[4] nearVPositions;
+		nearVPositions[0] = PositionN2V(vec3(NPositions[0], minNdcDepth), cameraInfo.info);
+		nearVPositions[1] = PositionN2V(vec3(NPositions[1], minNdcDepth), cameraInfo.info);
+		nearVPositions[2] = PositionN2V(vec3(NPositions[2], minNdcDepth), cameraInfo.info);
+		nearVPositions[3] = PositionN2V(vec3(NPositions[3], minNdcDepth), cameraInfo.info);
 		
-		vec3[4] farVSPositions;
-		farVSPositions[0] = PositionN2V(vec3(NSPositions[0], maxNdcDepth), cameraInfo.info);
-		farVSPositions[1] = PositionN2V(vec3(NSPositions[1], maxNdcDepth), cameraInfo.info);
-		farVSPositions[2] = PositionN2V(vec3(NSPositions[2], maxNdcDepth), cameraInfo.info);
-		farVSPositions[3] = PositionN2V(vec3(NSPositions[3], maxNdcDepth), cameraInfo.info);
+		vec3[4] farVPositions;
+		farVPositions[0] = PositionN2V(vec3(NPositions[0], maxNdcDepth), cameraInfo.info);
+		farVPositions[1] = PositionN2V(vec3(NPositions[1], maxNdcDepth), cameraInfo.info);
+		farVPositions[2] = PositionN2V(vec3(NPositions[2], maxNdcDepth), cameraInfo.info);
+		farVPositions[3] = PositionN2V(vec3(NPositions[3], maxNdcDepth), cameraInfo.info);
 
 		///left
-		frustumPlanes[0] = BuildPlane(nearVSPositions[0], nearVSPositions[1], farVSPositions[1]);
+		frustumPlanes[0] = BuildPlane(nearVPositions[0], nearVPositions[1], farVPositions[1]);
 		///right
-		frustumPlanes[1] = BuildPlane(nearVSPositions[3], farVSPositions[3], farVSPositions[2]);
+		frustumPlanes[1] = BuildPlane(nearVPositions[3], farVPositions[3], farVPositions[2]);
 		///bottom
-		frustumPlanes[2] = BuildPlane(nearVSPositions[1], nearVSPositions[2], farVSPositions[2]);
+		frustumPlanes[2] = BuildPlane(nearVPositions[1], nearVPositions[2], farVPositions[2]);
 		///top
-		frustumPlanes[3] = BuildPlane(nearVSPositions[0], farVSPositions[0], farVSPositions[3]);
+		frustumPlanes[3] = BuildPlane(nearVPositions[0], farVPositions[0], farVPositions[3]);
 		///near
-		frustumPlanes[4] = BuildPlane(nearVSPositions[0], nearVSPositions[3], nearVSPositions[2]);
+		frustumPlanes[4] = BuildPlane(nearVPositions[0], nearVPositions[3], nearVPositions[2]);
 		///far
-		frustumPlanes[5] = BuildPlane(farVSPositions[3], farVSPositions[0], farVSPositions[1]);
+		frustumPlanes[5] = BuildPlane(farVPositions[3], farVPositions[0], farVPositions[1]);
 	}
 	barrier();
 
 	///Intersection test
-	for(int i = threadLocalIndex; i < lightBoundingBoxInfos.size; i += LOCAL_GROUP_STEP)
+	for(int i = threadLocalIndex; i < lightBoundingBoxInfos.count; i += LOCAL_GROUP_STEP)
 	{
 		bool intersected = ObbPlaneMatrixIntersection(lightBoundingBoxInfos.infos[i].vertexes, frustumPlanes, cameraInfo.info.view);
 		if(intersected)
 		{
-			int storeIndex = atomicAdd(lightIndexListSize, 1);
-			if(storeIndex >= MAX_LIGHT_INDEX_LIST_SIZE) break;
+			int storeIndex = atomicAdd(lightIndexCount, 1);
+			if(storeIndex >= MAX_LIGHT_INDEX_COUNT) break;
 			lightIndexLists.lists[globalGroup1DID].indexes[storeIndex] = i;
 		}
 	}
@@ -144,6 +145,6 @@ void main()
 	///Set size
 	if(localGroupOffset == ivec2(0, 0))
 	{
-		lightIndexLists.lists[globalGroup1DID].size = lightIndexListSize;
+		lightIndexLists.lists[globalGroup1DID].count = lightIndexCount;
 	}
 }

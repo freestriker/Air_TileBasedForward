@@ -35,6 +35,11 @@ void AirEngine::Test::GlassRendererBehaviour::OnStart()
 	meshTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::Mesh>("..\\Asset\\Mesh\\Sphere.ply");
 	backgroundTextureTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");
 	shaderTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Core::Graphic::Shader>("..\\Asset\\Shader\\GlassShader.shader");
+	{
+		auto preZShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Shader>("..\\Asset\\Shader\\PreZShader.shader");
+		auto preZMaterial = new Core::Graphic::Material(preZShader);
+		GameObject()->GetComponent<Renderer::Renderer>()->AddMaterial(preZMaterial);
+	}
 }
 
 void AirEngine::Test::GlassRendererBehaviour::OnUpdate()

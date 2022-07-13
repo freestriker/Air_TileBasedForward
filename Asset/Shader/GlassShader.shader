@@ -13,5 +13,5 @@
   "srcColorBlendFactor": 6,
   "depthTestEnable": 1,
   "depthWriteEnable": 1,
-  "depthCompareOp": 1
+  "depthCompareOp": 2
 }

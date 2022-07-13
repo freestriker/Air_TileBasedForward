@@ -33,7 +33,7 @@ void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnPopulateRenderPas
 		"DepthAttachment",
 		VK_FORMAT_D32_SFLOAT,
 		VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT,
-		VK_ATTACHMENT_LOAD_OP_CLEAR,
+		VK_ATTACHMENT_LOAD_OP_LOAD,
 		VK_ATTACHMENT_STORE_OP_STORE,
 		VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
 		VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
@@ -66,21 +66,21 @@ void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnPopulateCommandBu
 	_renderCommandBuffer->Reset();
 	_renderCommandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 	//Render queue attachment to attachment layout
-	{
-		Command::ImageMemoryBarrier depthAttachmentAcquireBarrier = Command::ImageMemoryBarrier
-		(
-			camera->RenderPassTarget()->FrameBuffer(Name())->Attachment("DepthAttachment"),
-			VK_IMAGE_LAYOUT_UNDEFINED,
-			VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-			0,
-			VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
-		);
+	//{
+	//	Command::ImageMemoryBarrier depthAttachmentAcquireBarrier = Command::ImageMemoryBarrier
+	//	(
+	//		camera->RenderPassTarget()->FrameBuffer(Name())->Attachment("DepthAttachment"),
+	//		VK_IMAGE_LAYOUT_UNDEFINED,
+	//		VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+	//		0,
+	//		VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
+	//	);
 
-		_renderCommandBuffer->AddPipelineImageBarrier(
-			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
-			{ &depthAttachmentAcquireBarrier }
-		);
-	}
+	//	_renderCommandBuffer->AddPipelineImageBarrier(
+	//		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+	//		{ &depthAttachmentAcquireBarrier }
+	//	);
+	//}
 	{
 		Command::ImageMemoryBarrier colorAttachmentAcquireBarrier = Command::ImageMemoryBarrier
 		(
@@ -132,7 +132,8 @@ void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnPopulateCommandBu
 
 void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnSubmit()
 {
-	_renderCommandBuffer->Submit({}, {}, { Semaphore() });
+	_renderCommandBuffer->Submit();
+	_renderCommandBuffer->WaitForFinish();
 }
 
 void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnClear()
@@ -141,7 +142,7 @@ void AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OnClear()
 }
 
 AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass::OpaqueRenderPass()
-	: RenderPassBase("OpaqueRenderPass", 2000)
+	: RenderPassBase("OpaqueRenderPass", OPAQUE_RENDER_INDEX)
 	, _renderCommandBuffer(nullptr)
 	, _renderCommandPool(nullptr)
 	, _ambientLightTexture(nullptr)

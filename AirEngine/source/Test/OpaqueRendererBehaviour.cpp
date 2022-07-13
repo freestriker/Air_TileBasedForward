@@ -40,6 +40,12 @@ void AirEngine::Test::OpaqueRendererBehaviour::OnStart()
 	shaderTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Core::Graphic::Shader>("..\\Asset\\Shader\\OpaqueShader.shader");
 	diffuseTexture2DTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::Texture2D>("..\\Asset\\Texture\\WallDiffuseTexture2D.json");
 	normalTexture2DTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::Texture2D>("..\\Asset\\Texture\\WallNormalTexture2D.json");
+
+	{
+		auto preZShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Shader>("..\\Asset\\Shader\\PreZShader.shader");
+		auto preZMaterial = new Core::Graphic::Material(preZShader);
+		GameObject()->GetComponent<Renderer::Renderer>()->AddMaterial(preZMaterial);
+	}
 }
 
 void AirEngine::Test::OpaqueRendererBehaviour::OnUpdate()

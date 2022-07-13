@@ -103,7 +103,7 @@ void AirEngine::Core::Graphic::RenderPass::PreZRenderPass::OnPopulateCommandBuff
 
 void AirEngine::Core::Graphic::RenderPass::PreZRenderPass::OnSubmit()
 {
-	_renderCommandBuffer->Submit({}, {}, { });
+	_renderCommandBuffer->Submit();
 	_renderCommandBuffer->WaitForFinish();
 }
 
@@ -113,7 +113,7 @@ void AirEngine::Core::Graphic::RenderPass::PreZRenderPass::OnClear()
 }
 
 AirEngine::Core::Graphic::RenderPass::PreZRenderPass::PreZRenderPass()
-	: RenderPassBase("PreZRenderPass", 1000)
+	: RenderPassBase("PreZRenderPass", PRE_Z_RENDER_INDEX)
 	, _renderCommandBuffer(nullptr)
 	, _renderCommandPool(nullptr)
 {

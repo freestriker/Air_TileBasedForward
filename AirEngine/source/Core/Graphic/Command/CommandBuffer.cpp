@@ -110,6 +110,25 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::AddPipelineBarrier(VkPipe
         static_cast<uint32_t>(vkImageBarriers.size()), vkImageBarriers.data()
     );
 }
+void AirEngine::Core::Graphic::Command::CommandBuffer::CopyImage(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Image* dstImage, VkImageLayout dstImageLayout)
+{
+    auto layerCount = std::min(srcImage->LayerCount(), dstImage->LayerCount());
+    auto srcSubresources = srcImage->VkImageSubresourceLayers_();
+    auto dstSubresources = dstImage->VkImageSubresourceLayers_();
+    std::vector< VkImageCopy> infos = std::vector<VkImageCopy>(layerCount);
+    for (uint32_t i = 0; i < layerCount; i++)
+    {
+        auto& copy = infos[i];
+
+        copy.srcSubresource = srcSubresources[i];
+        copy.srcOffset = { 0, 0, 0 };
+        copy.dstSubresource = dstSubresources[i];
+        copy.srcOffset = { 0, 0, 0 };
+        copy.extent = dstImage->VkExtent3D_();
+    }
+
+    vkCmdCopyImage(_vkCommandBuffer, srcImage->VkImage_(), srcImageLayout, dstImage->VkImage_(), dstImageLayout, static_cast<uint32_t>(layerCount), infos.data());
+}
 void AirEngine::Core::Graphic::Command::CommandBuffer::AddPipelineImageBarrier(VkDependencyFlags dependencyFlag, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, std::vector<ImageMemoryBarrier*> imageMemoryBarriers)
 {
     std::vector< VkImageMemoryBarrier> vkBarriers = std::vector< VkImageMemoryBarrier>();

@@ -29,6 +29,7 @@
 #include "Core/Graphic/RenderPass/BackgroundRenderPass.h"
 #include "Core/Graphic/RenderPass/OpaqueRenderPass.h"
 #include "Core/Graphic/RenderPass/TransparentRenderPass.h"
+#include "Core/Graphic/RenderPass/PreZRenderPass.h"
 
 AirEngine::Core::Logic::CoreObject::Thread::LogicThread AirEngine::Core::Logic::CoreObject::Thread::_logicThread = AirEngine::Core::Logic::CoreObject::Thread::LogicThread();
 
@@ -396,16 +397,14 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::BackgroundRenderPass());
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::OpaqueRenderPass());
-	//CoreObject::Instance::RenderPassManager().AddRenderPass(new RenderPass::TBFOpaqueRenderPass());
+	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::PreZRenderPass());
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::TransparentRenderPass());
-	//auto testShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Shader>("..\\Asset\\Shader\\TestShader.shader");
-
 
 	//Camera
 	Object::GameObject* cameraGo = new Logic::Object::GameObject("Camera");
 	CoreObject::Instance::rootObject.AddChild(cameraGo);
 	auto camera = new Camera::PerspectiveCamera(
-		{ "BackgroundRenderPass", "TransparentRenderPass", "OpaqueRenderPass"/*, "TBFOpaqueRenderPass"*/},
+		{ "BackgroundRenderPass", "TransparentRenderPass", "OpaqueRenderPass", "PreZRenderPass"},
 		{
 			{"ColorAttachment", Graphic::Instance::Image::Create2DImage({800, 450}, VK_FORMAT_R8G8B8A8_SRGB, VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT)},
 			{"DepthAttachment", Graphic::Instance::Image::Create2DImage({800, 450}, VK_FORMAT_D32_SFLOAT, VkImageUsageFlagBits::VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT)}

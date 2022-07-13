@@ -230,8 +230,8 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 
 		//Copy
 		auto mainCamera = Camera::CameraBase::mainCamera;
-		auto qfi1 = Window::VulkanWindow_()->graphicsQueueFamilyIndex();
-		auto qfi2 = Instance::Queue_("GraphicQueue")->queueFamilyIndex;
+		//auto qfi1 = Window::VulkanWindow_()->graphicsQueueFamilyIndex();
+		//auto qfi2 = Instance::Queue_("GraphicQueue")->queueFamilyIndex;
 		if (mainCamera)
 		{
 			Utils::Log::Message("Copy()");
