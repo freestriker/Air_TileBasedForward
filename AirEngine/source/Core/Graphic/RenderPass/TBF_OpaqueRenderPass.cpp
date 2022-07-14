@@ -60,17 +60,17 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPopulateRende
 	creator.AddDependency(
 		"VK_SUBPASS_EXTERNAL",
 		"DrawSubpass",
-		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
 		0,
-		VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
+		0
 	);
 }
 
-void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
+void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPrepare(Camera::CameraBase* camera)
 {
 	auto pixelSize = camera->RenderPassTarget()->Extent();
-	
+
 	_depthImage = Graphic::Instance::Image::Create2DImage(
 		pixelSize,
 		camera->RenderPassTarget()->Attachment("DepthAttachment")->VkFormat_(),
@@ -81,6 +81,13 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPopulateComma
 
 	VkExtent2D globalGroupSize = { (pixelSize.width + TILE_WIDTH - 1) / TILE_WIDTH, (pixelSize.height + TILE_WIDTH - 1) / TILE_WIDTH };
 	_lightIndexListsBuffer = new Instance::Buffer(sizeof(LightIndexList) * globalGroupSize.width * globalGroupSize.height + 8, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+}
+
+void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
+{
+
+	auto pixelSize = camera->RenderPassTarget()->Extent();
+	VkExtent2D globalGroupSize = { (pixelSize.width + TILE_WIDTH - 1) / TILE_WIDTH, (pixelSize.height + TILE_WIDTH - 1) / TILE_WIDTH };
 
 	_renderCommandPool = commandPool;
 
@@ -171,7 +178,6 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPopulateComma
 	}
 
 	_buildLightListsMaterial->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
-	_buildLightListsMaterial->SetUniformBuffer("lightInfos", CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
 	_buildLightListsMaterial->SetUniformBuffer("lightBoundingBoxInfos", CoreObject::Instance::LightManager().TileBasedForwardLightBoundindBoxInfosBuffer());
 	_buildLightListsMaterial->SetStorageBuffer("lightIndexLists", _lightIndexListsBuffer);
 	_buildLightListsMaterial->SetSlotData("depthImage", { 0 }, { {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_NULL_HANDLE, _depthImage->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL} });
@@ -230,7 +236,6 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnSubmit()
 {
 	_renderCommandBuffer->Submit();
 	_renderCommandBuffer->WaitForFinish();
-	_renderCommandBuffer->Reset();
 }
 
 void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnClear()

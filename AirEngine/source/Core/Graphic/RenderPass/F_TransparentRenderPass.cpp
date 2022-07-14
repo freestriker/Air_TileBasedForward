@@ -73,7 +73,6 @@ void AirEngine::Core::Graphic::RenderPass::F_TransparentRenderPass::OnPopulateCo
 	_renderCommandBuffer->Reset();
 
 	//Render
-	_renderCommandBuffer->Reset();
 	_renderCommandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
 	_renderCommandBuffer->BeginRenderPass(

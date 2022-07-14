@@ -29,6 +29,7 @@ namespace AirEngine
 					void OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)override;
 					void OnSubmit()override;
 					void OnClear()override;
+					void OnPrepare(Camera::CameraBase* camera)override;
 				public:
 					BackgroundRenderPass();
 					~BackgroundRenderPass();

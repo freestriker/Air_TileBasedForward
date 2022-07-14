@@ -38,10 +38,10 @@ void AirEngine::Core::Graphic::RenderPass::PreZRenderPass::OnPopulateRenderPassS
 	creator.AddDependency(
 		"VK_SUBPASS_EXTERNAL",
 		"DrawSubpass",
-		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
 		0,
-		VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
+		0
 	);
 }
 
@@ -53,24 +53,8 @@ void AirEngine::Core::Graphic::RenderPass::PreZRenderPass::OnPopulateCommandBuff
 	_renderCommandBuffer->Reset();
 
 	//Render
-	_renderCommandBuffer->Reset();
 	_renderCommandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-	//Render queue attachment to attachment layout
-	{
-		Command::ImageMemoryBarrier depthAttachmentAcquireBarrier = Command::ImageMemoryBarrier
-		(
-			camera->RenderPassTarget()->FrameBuffer(Name())->Attachment("DepthAttachment"),
-			VK_IMAGE_LAYOUT_UNDEFINED,
-			VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-			0,
-			VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
-		);
 
-		_renderCommandBuffer->AddPipelineImageBarrier(
-			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
-			{ &depthAttachmentAcquireBarrier }
-		);
-	}
 	VkClearValue depthClearValue{};
 	depthClearValue.depthStencil.depth = 1.0f;
 	_renderCommandBuffer->BeginRenderPass(

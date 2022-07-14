@@ -26,7 +26,7 @@ void AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::OnPopulateRenderP
 		VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT,
 		VK_ATTACHMENT_LOAD_OP_CLEAR,
 		VK_ATTACHMENT_STORE_OP_STORE,
-		VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+		VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
 		VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
 	);
 	creator.AddDepthAttachment(
@@ -47,10 +47,10 @@ void AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::OnPopulateRenderP
 	creator.AddDependency(
 		"VK_SUBPASS_EXTERNAL",
 		"DrawSubpass",
-		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
 		0,
-		VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
+		0
 	);
 	_ambientLightTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");
 }
@@ -63,47 +63,14 @@ void AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::OnPopulateCommand
 	_renderCommandBuffer->Reset();
 
 	//Render
-	_renderCommandBuffer->Reset();
 	_renderCommandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-	//Render queue attachment to attachment layout
-	//{
-	//	Command::ImageMemoryBarrier depthAttachmentAcquireBarrier = Command::ImageMemoryBarrier
-	//	(
-	//		camera->RenderPassTarget()->FrameBuffer(Name())->Attachment("DepthAttachment"),
-	//		VK_IMAGE_LAYOUT_UNDEFINED,
-	//		VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-	//		0,
-	//		VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
-	//	);
 
-	//	_renderCommandBuffer->AddPipelineImageBarrier(
-	//		VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
-	//		{ &depthAttachmentAcquireBarrier }
-	//	);
-	//}
-	{
-		Command::ImageMemoryBarrier colorAttachmentAcquireBarrier = Command::ImageMemoryBarrier
-		(
-			camera->RenderPassTarget()->FrameBuffer(Name())->Attachment("ColorAttachment"),
-			VK_IMAGE_LAYOUT_UNDEFINED,
-			VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
-			0,
-			VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
-		);
-
-		_renderCommandBuffer->AddPipelineImageBarrier(
-			VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			{ &colorAttachmentAcquireBarrier }
-		);
-	}
 	VkClearValue colorClearValue{};
 	colorClearValue.color = { {0.0f, 0.0f, 0.0f, 1.0f} };
-	VkClearValue depthClearValue{};
-	depthClearValue.depthStencil.depth = 1.0f;
 	_renderCommandBuffer->BeginRenderPass(
 		this,
 		camera->RenderPassTarget(),
-		{ colorClearValue, depthClearValue }
+		{ colorClearValue }
 	);
 
 	auto viewMatrix = camera->ViewMatrix();
@@ -114,7 +81,7 @@ void AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::OnPopulateCommand
 		auto mvMatrix = viewMatrix * renderer->GameObject()->transform.ModelMatrix();
 		if (renderer->enableFrustumCulling && !camera->CheckInFrustum(obbVertexes, mvMatrix))
 		{
-			Utils::Log::Message("AirEngine::Core::Graphic::RenderPass::OpaqueRenderPass cull GameObject called " + renderer->GameObject()->name + ".");
+			Utils::Log::Message("AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass cull GameObject called " + renderer->GameObject()->name + ".");
 			continue;
 		}
 

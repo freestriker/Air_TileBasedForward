@@ -119,6 +119,7 @@ namespace AirEngine
 					std::map<std::string, Command::Semaphore*> _customSemaphores;
 
 					virtual void OnPopulateRenderPassSettings(RenderPassSettings& creator) = 0;
+					virtual void OnPrepare(Camera::CameraBase* camera);
 					virtual void OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera) = 0;
 					virtual void OnSubmit() = 0;
 					virtual void OnClear() = 0;

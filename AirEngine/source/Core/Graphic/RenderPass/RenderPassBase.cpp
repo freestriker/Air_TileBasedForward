@@ -272,3 +272,8 @@ std::map<std::string, std::map<std::string, uint32_t>> AirEngine::Core::Graphic:
 {
     return _colorAttachmentMap;
 }
+
+void AirEngine::Core::Graphic::RenderPass::RenderPassBase::OnPrepare(Camera::CameraBase* camera)
+{
+
+}

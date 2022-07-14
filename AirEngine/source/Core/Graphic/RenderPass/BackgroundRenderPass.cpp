@@ -34,14 +34,14 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateRende
 	creator.AddDependency(
 		"VK_SUBPASS_EXTERNAL",
 		"DrawSubpass",
-		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-		VK_ACCESS_COLOR_ATTACHMENT_READ_BIT,
-		VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+		0,
+		0
 	);
 }
 
-void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
+void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPrepare(Camera::CameraBase* camera)
 {
 	_temporaryDepthImage = Graphic::Instance::Image::Create2DImage(
 		camera->RenderPassTarget()->Extent()
@@ -50,12 +50,15 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateComma
 		, VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 		, VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT
 	);
+}
+
+void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
+{
 	_renderCommandPool = commandPool;
 	_renderCommandBuffer = commandPool->CreateCommandBuffer("BackgroundCommandBuffer", VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 	_renderCommandBuffer->Reset();
 
 	//Render
-	_renderCommandBuffer->Reset();
 	_renderCommandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 	if (renderDistanceTable.size() >= 1)
 	{

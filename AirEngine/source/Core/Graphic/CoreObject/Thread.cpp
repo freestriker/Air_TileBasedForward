@@ -133,9 +133,7 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnThreadStart(
 }
 
 void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
-{
-	AirRenderer::Utils::IntersectionChecker intersectionChecker = AirRenderer::Utils::IntersectionChecker();
-	
+{	
 	while (!_stopped)
 	{
 		Instance::StartPresentCondition().Wait();
@@ -186,15 +184,20 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 				}
 			}
 
+			//Prepare render pass
+			for (const auto& renderPass : *camera->_renderPassTarget->RenderPasses())
+			{
+				renderPass->OnPrepare(camera);
+			}
+
 			std::map<std::string, std::future<void>> renderTasks = std::map<std::string, std::future<void>>();
 			//Add build command buffer task
 			for (const auto& renderPass : *camera->_renderPassTarget->RenderPasses())
 			{
 				auto rendererDistanceMap = &rendererDistenceMaps[renderPass->Name()];
-				auto renderPassTarget = camera->_renderPassTarget;
 
 				renderTasks[renderPass->Name()] = AddTask(
-					[renderPass, rendererDistanceMap, renderPassTarget, camera](Command::CommandPool* graphicCommandPool, Command::CommandPool* computeCommandPool)
+					[renderPass, rendererDistanceMap, camera](Command::CommandPool* graphicCommandPool, Command::CommandPool* computeCommandPool)
 					{
 						renderPass->OnPopulateCommandBuffer(graphicCommandPool, *rendererDistanceMap, camera);
 					}
