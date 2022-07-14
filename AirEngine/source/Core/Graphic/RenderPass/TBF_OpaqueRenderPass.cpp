@@ -80,7 +80,8 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPrepare(Camer
 	);
 
 	VkExtent2D globalGroupSize = { (pixelSize.width + TILE_WIDTH - 1) / TILE_WIDTH, (pixelSize.height + TILE_WIDTH - 1) / TILE_WIDTH };
-	_lightIndexListsBuffer = new Instance::Buffer(sizeof(LightIndexList) * globalGroupSize.width * globalGroupSize.height + 8, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	_opauqeLightIndexListsBuffer = new Instance::Buffer(sizeof(LightIndexList) * globalGroupSize.width * globalGroupSize.height + 8, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	_transparentLightIndexListsBuffer = new Instance::Buffer(sizeof(LightIndexList) * globalGroupSize.width * globalGroupSize.height + 8, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 }
 
 void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
@@ -163,23 +164,31 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPopulateComma
 	}
 
 	//clear buffer
-	_renderCommandBuffer->FillBuffer(_lightIndexListsBuffer, 0);
+	_renderCommandBuffer->FillBuffer(_opauqeLightIndexListsBuffer, 0);
+	_renderCommandBuffer->FillBuffer(_transparentLightIndexListsBuffer, 0);
 	{
-		Command::BufferMemoryBarrier bufferClearEndBarrier = Command::BufferMemoryBarrier
+		Command::BufferMemoryBarrier opaqueBufferClearEndBarrier = Command::BufferMemoryBarrier
 		(
-			_lightIndexListsBuffer,
+			_opauqeLightIndexListsBuffer,
+			VK_ACCESS_TRANSFER_WRITE_BIT,
+			VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
+		);
+		Command::BufferMemoryBarrier transparentBufferClearEndBarrier = Command::BufferMemoryBarrier
+		(
+			_transparentLightIndexListsBuffer,
 			VK_ACCESS_TRANSFER_WRITE_BIT,
 			VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
 		);
 		_renderCommandBuffer->AddPipelineBufferBarrier(
 			VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-			{ &bufferClearEndBarrier }
+			{ &opaqueBufferClearEndBarrier, &transparentBufferClearEndBarrier }
 		);
 	}
 
 	_buildLightListsMaterial->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
 	_buildLightListsMaterial->SetUniformBuffer("lightBoundingBoxInfos", CoreObject::Instance::LightManager().TileBasedForwardLightBoundindBoxInfosBuffer());
-	_buildLightListsMaterial->SetStorageBuffer("lightIndexLists", _lightIndexListsBuffer);
+	_buildLightListsMaterial->SetStorageBuffer("opaqueLightIndexLists", _opauqeLightIndexListsBuffer);
+	_buildLightListsMaterial->SetStorageBuffer("transparentLightIndexLists", _transparentLightIndexListsBuffer);
 	_buildLightListsMaterial->SetSlotData("depthImage", { 0 }, { {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_NULL_HANDLE, _depthImage->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL} });
 
 	_renderCommandBuffer->BindMaterial(_buildLightListsMaterial);
@@ -189,7 +198,7 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPopulateComma
 	{
 		Command::BufferMemoryBarrier bufferClearEndBarrier = Command::BufferMemoryBarrier
 		(
-			_lightIndexListsBuffer,
+			_opauqeLightIndexListsBuffer,
 			VK_ACCESS_SHADER_WRITE_BIT,
 			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
 		);
@@ -221,7 +230,7 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPopulateComma
 		renderer->GetMaterial(Name())->SetUniformBuffer("meshObjectInfo", renderer->ObjectInfoBuffer());
 		renderer->GetMaterial(Name())->SetUniformBuffer("lightInfos", CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
 		renderer->GetMaterial(Name())->SetTextureCube("ambientLightTexture", _ambientLightTexture);
-		renderer->GetMaterial(Name())->SetStorageBuffer("lightIndexLists", _lightIndexListsBuffer);
+		renderer->GetMaterial(Name())->SetStorageBuffer("opaqueLightIndexLists", _opauqeLightIndexListsBuffer);
 
 		_renderCommandBuffer->BindMaterial(renderer->GetMaterial(Name()));
 		_renderCommandBuffer->DrawMesh(renderer->mesh);
@@ -240,7 +249,8 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnSubmit()
 
 void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnClear()
 {
-	delete _lightIndexListsBuffer;
+	delete _opauqeLightIndexListsBuffer;
+	delete _transparentLightIndexListsBuffer;
 	delete _depthImage;
 	_renderCommandPool->DestoryCommandBuffer(_renderCommandBuffer);
 }
@@ -250,7 +260,8 @@ AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::TBF_OpaqueRenderPass
 	, _renderCommandBuffer(nullptr)
 	, _renderCommandPool(nullptr)
 	, _buildLightListsMaterial(nullptr)
-	, _lightIndexListsBuffer(nullptr)
+	, _opauqeLightIndexListsBuffer(nullptr)
+	, _transparentLightIndexListsBuffer(nullptr)
 	, _depthImage(nullptr)
 	, _ambientLightTexture(nullptr)
 {
@@ -261,4 +272,9 @@ AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::TBF_OpaqueRenderPass
 
 AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::~TBF_OpaqueRenderPass()
 {
+}
+
+AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::TransparentLightIndexListsBuffer()
+{
+	return _transparentLightIndexListsBuffer;
 }

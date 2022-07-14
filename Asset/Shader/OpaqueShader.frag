@@ -35,10 +35,10 @@ void main()
     //     diffuse += DiffuseLighting(lightInfos.importantLightInfos[i], worldNormal, inWorldPosition);
     //     specular += SpecularLighting(lightInfos.importantLightInfos[i], viewDirection, inWorldPosition, worldNormal, 80.0);
     // }
-    for(int i = 0; i < lightIndexList.count; i++)
+    for(int i = 0; i < opaqueLightIndexList.count; i++)
     {
-        diffuse += DiffuseLighting(lightInfos.ortherLightInfos[lightIndexList.indexes[i]], worldNormal, inWorldPosition);
-        specular += SpecularLighting(lightInfos.ortherLightInfos[lightIndexList.indexes[i]], viewDirection, inWorldPosition, worldNormal, 80.0);
+        diffuse += DiffuseLighting(lightInfos.ortherLightInfos[opaqueLightIndexList.indexes[i]], worldNormal, inWorldPosition);
+        specular += SpecularLighting(lightInfos.ortherLightInfos[opaqueLightIndexList.indexes[i]], viewDirection, inWorldPosition, worldNormal, 80.0);
     }
 
     colorAttachment = texture(diffuseTexture, inTexCoords) * vec4(diffuse + specular + ambient, 1);

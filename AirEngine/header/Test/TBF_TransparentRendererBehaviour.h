@@ -11,7 +11,7 @@ namespace AirEngine
 {
 	namespace Test
 	{
-		class TransparentRendererBehaviour : public AirEngine::Behaviour::Behaviour
+		class TBF_TransparentRendererBehaviour : public AirEngine::Behaviour::Behaviour
 		{
 		private:
 			std::future<Asset::Mesh*> meshTask;
@@ -23,12 +23,12 @@ namespace AirEngine
 			Asset::Texture2D* diffuseTexture2D;
 			Core::Graphic::Material* material;
 		public:
-			TransparentRendererBehaviour();
-			~TransparentRendererBehaviour();
-			TransparentRendererBehaviour(const TransparentRendererBehaviour&) = delete;
-			TransparentRendererBehaviour& operator=(const TransparentRendererBehaviour&) = delete;
-			TransparentRendererBehaviour(TransparentRendererBehaviour&&) = delete;
-			TransparentRendererBehaviour& operator=(TransparentRendererBehaviour&&) = delete;
+			TBF_TransparentRendererBehaviour();
+			~TBF_TransparentRendererBehaviour();
+			TBF_TransparentRendererBehaviour(const TBF_TransparentRendererBehaviour&) = delete;
+			TBF_TransparentRendererBehaviour& operator=(const TBF_TransparentRendererBehaviour&) = delete;
+			TBF_TransparentRendererBehaviour(TBF_TransparentRendererBehaviour&&) = delete;
+			TBF_TransparentRendererBehaviour& operator=(TBF_TransparentRendererBehaviour&&) = delete;
 			void OnAwake()override;
 			void OnStart()override;
 			void OnUpdate()override;

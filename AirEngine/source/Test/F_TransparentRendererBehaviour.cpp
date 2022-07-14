@@ -1,4 +1,4 @@
-#include "Test/TransparentRendererBehaviour.h"
+#include "Test/F_TransparentRendererBehaviour.h"
 #include "Core/IO/CoreObject/Instance.h"
 #include "Core/IO/Manager/AssetManager.h"
 #include "Core/Logic/Object/GameObject.h"
@@ -8,10 +8,10 @@
 
 RTTR_REGISTRATION
 {
-	rttr::registration::class_<AirEngine::Test::TransparentRendererBehaviour>("AirEngine::Test::TransparentRendererBehaviour");
+	rttr::registration::class_<AirEngine::Test::F_TransparentRendererBehaviour>("AirEngine::Test::F_TransparentRendererBehaviour");
 }
 
-AirEngine::Test::TransparentRendererBehaviour::TransparentRendererBehaviour()
+AirEngine::Test::F_TransparentRendererBehaviour::F_TransparentRendererBehaviour()
 	: meshTask()
 	, shaderTask()
 	, diffuseTexture2DTask()
@@ -23,22 +23,22 @@ AirEngine::Test::TransparentRendererBehaviour::TransparentRendererBehaviour()
 {
 }
 
-AirEngine::Test::TransparentRendererBehaviour::~TransparentRendererBehaviour()
+AirEngine::Test::F_TransparentRendererBehaviour::~F_TransparentRendererBehaviour()
 {
 }
 
-void AirEngine::Test::TransparentRendererBehaviour::OnAwake()
+void AirEngine::Test::F_TransparentRendererBehaviour::OnAwake()
 {
 }
 
-void AirEngine::Test::TransparentRendererBehaviour::OnStart()
+void AirEngine::Test::F_TransparentRendererBehaviour::OnStart()
 {
 	meshTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::Mesh>("..\\Asset\\Mesh\\Square.ply");
-	shaderTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Core::Graphic::Shader>("..\\Asset\\Shader\\TransparentShader.shader");
+	shaderTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Core::Graphic::Shader>("..\\Asset\\Shader\\F_TransparentShader.shader");
 	diffuseTexture2DTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::Texture2D>("..\\Asset\\Texture\\BrokenGlassTexture2D.json");
 }
 
-void AirEngine::Test::TransparentRendererBehaviour::OnUpdate()
+void AirEngine::Test::F_TransparentRendererBehaviour::OnUpdate()
 {
 	if (!loaded && meshTask._Is_ready() && shaderTask._Is_ready() && diffuseTexture2DTask._Is_ready())
 	{
@@ -57,6 +57,6 @@ void AirEngine::Test::TransparentRendererBehaviour::OnUpdate()
 	}
 }
 
-void AirEngine::Test::TransparentRendererBehaviour::OnDestroy()
+void AirEngine::Test::F_TransparentRendererBehaviour::OnDestroy()
 {
 }

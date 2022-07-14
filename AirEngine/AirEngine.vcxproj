@@ -105,6 +105,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Core\Graphic\RenderPass\TBF_TransparentRenderPass.cpp" />
     <ClCompile Include="source\Behaviour\Behaviour.cpp" />
     <ClCompile Include="source\Camera\CameraBase.cpp" />
     <ClCompile Include="source\Camera\OrthographicCamera.cpp" />
@@ -162,7 +163,8 @@
     <ClCompile Include="source\Test\MirrorRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\OpaqueRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\SelfRotateBehaviour.cpp" />
-    <ClCompile Include="source\Test\TransparentRendererBehaviour.cpp" />
+    <ClCompile Include="source\Test\F_TransparentRendererBehaviour.cpp" />
+    <ClCompile Include="source\Test\TBF_TransparentRendererBehaviour.cpp" />
     <ClCompile Include="source\Utils\ChildBrotherTree.cpp" />
     <ClCompile Include="source\Utils\Condition.cpp" />
     <ClCompile Include="source\Utils\CrossLinkableNode.cpp" />
@@ -206,6 +208,7 @@
     <ClInclude Include="header\Core\Graphic\RenderPass\RenderPassBase.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\TBF_OpaqueRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\F_TransparentRenderPass.h" />
+    <ClInclude Include="header\Core\Graphic\RenderPass\TBF_TransparentRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\Shader.h" />
     <ClInclude Include="header\Core\IO\Asset\AssetBase.h" />
     <ClInclude Include="header\Core\IO\CoreObject\Instance.h" />
@@ -229,7 +232,8 @@
     <ClInclude Include="header\Test\MirrorRendererBehaviour.h" />
     <ClInclude Include="header\Test\OpaqueRendererBehaviour.h" />
     <ClInclude Include="header\Test\SelfRotateBehaviour.h" />
-    <ClInclude Include="header\Test\TransparentRendererBehaviour.h" />
+    <ClInclude Include="header\Test\F_TransparentRendererBehaviour.h" />
+    <ClInclude Include="header\Test\TBF_TransparentRendererBehaviour.h" />
     <ClInclude Include="header\Utils\ChildBrotherTree.h" />
     <ClInclude Include="header\Utils\Condition.h" />
     <ClInclude Include="header\Utils\CrossLinkableNode.h" />

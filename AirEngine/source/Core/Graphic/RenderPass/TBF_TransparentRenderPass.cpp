@@ -1,4 +1,4 @@
-#include "Core/Graphic/RenderPass/F_TransparentRenderPass.h"
+#include "Core/Graphic/RenderPass/TBF_TransparentRenderPass.h"
 #include "Core/Graphic/Command/CommandBuffer.h"
 #include "Core/Graphic/Command/CommandPool.h"
 #include "Core/Graphic/CoreObject/Instance.h"
@@ -19,8 +19,9 @@
 #include "Core/IO/CoreObject/Instance.h"
 #include "Core/IO/Manager/AssetManager.h"
 #include "Core/Graphic/Manager/LightManager.h"
+#include "Core/Graphic/RenderPass/TBF_OpaqueRenderPass.h"
 
-void AirEngine::Core::Graphic::RenderPass::F_TransparentRenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
+void AirEngine::Core::Graphic::RenderPass::TBF_TransparentRenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
 {
 	creator.AddColorAttachment(
 		"ColorAttachment",
@@ -65,11 +66,16 @@ void AirEngine::Core::Graphic::RenderPass::F_TransparentRenderPass::OnPopulateRe
 	_ambientLightTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");
 }
 
-void AirEngine::Core::Graphic::RenderPass::F_TransparentRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
+void AirEngine::Core::Graphic::RenderPass::TBF_TransparentRenderPass::OnPrepare(Camera::CameraBase* camera)
+{
+	_transparentLightListsBuffer = dynamic_cast<TBF_OpaqueRenderPass&>(CoreObject::Instance::RenderPassManager().RenderPass("TBF_OpaqueRenderPass")).TransparentLightIndexListsBuffer();
+}
+
+void AirEngine::Core::Graphic::RenderPass::TBF_TransparentRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
 {
 	_renderCommandPool = commandPool;
 
-	_renderCommandBuffer = commandPool->CreateCommandBuffer("F_TransparentCommandBuffer", VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+	_renderCommandBuffer = commandPool->CreateCommandBuffer("TBF_TransparentCommandBuffer", VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 	_renderCommandBuffer->Reset();
 
 	//Render
@@ -99,14 +105,15 @@ void AirEngine::Core::Graphic::RenderPass::F_TransparentRenderPass::OnPopulateCo
 		auto mvMatrix = viewMatrix * renderer->GameObject()->transform.ModelMatrix();
 		if (renderer->enableFrustumCulling && !camera->CheckInFrustum(obbVertexes, mvMatrix))
 		{
-			Utils::Log::Message("AirEngine::Core::Graphic::RenderPass::F_TransparentCommandBuffer cull GameObject called " + renderer->GameObject()->name + ".");
+			Utils::Log::Message("AirEngine::Core::Graphic::RenderPass::TBF_TransparentCommandBuffer cull GameObject called " + renderer->GameObject()->name + ".");
 			continue;
 		}
 
 		renderer->GetMaterial(Name())->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
 		renderer->GetMaterial(Name())->SetUniformBuffer("meshObjectInfo", renderer->ObjectInfoBuffer());
-		renderer->GetMaterial(Name())->SetUniformBuffer("lightInfos", CoreObject::Instance::LightManager().ForwardLightInfosBuffer());
+		renderer->GetMaterial(Name())->SetUniformBuffer("lightInfos", CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
 		renderer->GetMaterial(Name())->SetTextureCube("ambientLightTexture", _ambientLightTexture);
+		renderer->GetMaterial(Name())->SetStorageBuffer("transparentLightIndexLists", _transparentLightListsBuffer);
 
 		_renderCommandBuffer->BindMaterial(renderer->GetMaterial(Name()));
 		_renderCommandBuffer->DrawMesh(renderer->mesh);
@@ -122,25 +129,27 @@ void AirEngine::Core::Graphic::RenderPass::F_TransparentRenderPass::OnPopulateCo
 	_renderCommandBuffer->EndRecord();
 }
 
-void AirEngine::Core::Graphic::RenderPass::F_TransparentRenderPass::OnSubmit()
+void AirEngine::Core::Graphic::RenderPass::TBF_TransparentRenderPass::OnSubmit()
 {
 	_renderCommandBuffer->Submit();
 	_renderCommandBuffer->WaitForFinish();
 }
 
-void AirEngine::Core::Graphic::RenderPass::F_TransparentRenderPass::OnClear()
+void AirEngine::Core::Graphic::RenderPass::TBF_TransparentRenderPass::OnClear()
 {
+	_transparentLightListsBuffer = nullptr;
 	_renderCommandPool->DestoryCommandBuffer(_renderCommandBuffer);
 }
 
-AirEngine::Core::Graphic::RenderPass::F_TransparentRenderPass::F_TransparentRenderPass()
-	: RenderPassBase("F_TransparentRenderPass", F_TRANSPARENT_RENDER_INDEX)
+AirEngine::Core::Graphic::RenderPass::TBF_TransparentRenderPass::TBF_TransparentRenderPass()
+	: RenderPassBase("TBF_TransparentRenderPass", TBF_TRANSPARENT_RENDER_INDEX)
 	, _renderCommandBuffer(nullptr)
 	, _renderCommandPool(nullptr)
 	, _ambientLightTexture(nullptr)
+	, _transparentLightListsBuffer(nullptr)
 {
 }
 
-AirEngine::Core::Graphic::RenderPass::F_TransparentRenderPass::~F_TransparentRenderPass()
+AirEngine::Core::Graphic::RenderPass::TBF_TransparentRenderPass::~TBF_TransparentRenderPass()
 {
 }

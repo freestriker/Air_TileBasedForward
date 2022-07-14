@@ -39,16 +39,26 @@ struct LightIndexList
 	int count;
 	int[MAX_LIGHT_INDEX_COUNT] indexes;
 };
-layout (set = 4, binding = 0) buffer LightIndexLists
+layout (set = 4, binding = 0) buffer OpaqueLightIndexLists
 {
 	ivec2 tileCount;
     LightIndexList[] lists;
-}lightIndexLists;
+}opaqueLightIndexLists;
+
+layout (set = 5, binding = 0) buffer TransparentLightIndexLists
+{
+	ivec2 tileCount;
+    LightIndexList[] lists;
+}transparentLightIndexLists;
 
 #define pixelOffset (ivec2(gl_FragCoord.xy))
 #define TILE_ID (ivec2(gl_FragCoord.xy) / TILE_WIDTH)
-#define TILE_1D_ID (TILE_ID.y * lightIndexLists.tileCount.x + TILE_ID.x)
-#define lightIndexList (lightIndexLists.lists[TILE_1D_ID])
+
+#define OPAQUE_TILE_1D_ID (TILE_ID.y * opaqueLightIndexLists.tileCount.x + TILE_ID.x)
+#define opaqueLightIndexList (opaqueLightIndexLists.lists[OPAQUE_TILE_1D_ID])
+
+#define TRANSPARENT_TILE_1D_ID (TILE_ID.y * transparentLightIndexLists.tileCount.x + TILE_ID.x)
+#define transparentLightIndexList (transparentLightIndexLists.lists[TRANSPARENT_TILE_1D_ID])
 
 vec3 AmbinentLighting(in vec3 direction)
 {
