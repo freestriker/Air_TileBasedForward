@@ -7,7 +7,7 @@
 #include "Light.glsl"
 #include "Collision.glsl"
 
-#define MAX_LIGHT_COUNT 1024
+#define MAX_ORTHER_LIGHT_COUNT 1024
 #define MAX_LIGHT_INDEX_COUNT 64
 #define TILE_WIDTH 32
 #define LOCAL_GROUP_WIDTH 8
@@ -22,18 +22,10 @@ layout(set = 0, binding = 0) uniform _CameraInfo
     CameraInfo info;
 } cameraInfo;
 
-layout(set = 1, binding = 0) uniform LightInfos
-{
-    LightInfo ambientLightInfo;
-    LightInfo mainLightInfo;
-    int ortherLightCount;
-    LightInfo[MAX_LIGHT_COUNT] ortherLightInfos;
-} lightInfos;
-
-layout (set = 2, binding = 0) uniform LightBoundingBoxInfos
+layout (set = 1, binding = 0) uniform LightBoundingBoxInfos
 {
 	int count;
-	LightBoundingBoxInfo[MAX_LIGHT_COUNT] infos;
+	LightBoundingBoxInfo[MAX_ORTHER_LIGHT_COUNT] infos;
 }lightBoundingBoxInfos;
 
 struct LightIndexList
@@ -41,12 +33,13 @@ struct LightIndexList
 	int count;
 	int[MAX_LIGHT_INDEX_COUNT] indexes;
 };
-layout (set = 3, binding = 0) buffer LightIndexLists
+layout (set = 2, binding = 0) buffer LightIndexLists
 {
+	ivec2 tileCount;
 	LightIndexList[] lists;
 }lightIndexLists;
 
-layout (set = 4, binding = 0, r32f) uniform readonly image2D depthImage;
+layout (set = 3, binding = 0, r32f) uniform readonly image2D depthImage;
 
 int Iterater = 0;
 
@@ -145,6 +138,7 @@ void main()
 	///Set size
 	if(localGroupOffset == ivec2(0, 0))
 	{
+		lightIndexLists.tileCount = (depthImageSize + ivec2(TILE_WIDTH - 1, TILE_WIDTH - 1)) / TILE_WIDTH;
 		lightIndexLists.lists[globalGroup1DID].count = lightIndexCount;
 	}
 }

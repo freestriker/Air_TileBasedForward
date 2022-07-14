@@ -1,5 +1,5 @@
 {
-  "renderPass": "F_OpaqueRenderPass",
+  "renderPass": "TBF_OpaqueRenderPass",
   "subpass": "DrawSubpass",
   "alphaBlendOp": 0,
   "blendEnable": 1,

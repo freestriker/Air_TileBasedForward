@@ -21,6 +21,15 @@
 #include "Core/Graphic/Command/ImageMemoryBarrier.h"
 #include "Core/Graphic/Manager/LightManager.h"
 #include "Core/Graphic/CoreObject/Instance.h"
+#include "Camera/CameraBase.h"
+#include "Utils/Log.h"
+#include "Asset/Mesh.h"
+#include "Utils/OrientedBoundingBox.h"
+#include "Core/Logic/Object/GameObject.h"
+#include "Core/Logic/Object/Transform.h"
+#include "Core/IO/CoreObject/Instance.h"
+#include "Core/IO/Manager/AssetManager.h"
+#include "Core/Graphic/Manager/LightManager.h"
 
 void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
 {
@@ -71,7 +80,7 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPopulateComma
 	);
 
 	VkExtent2D globalGroupSize = { (pixelSize.width + TILE_WIDTH - 1) / TILE_WIDTH, (pixelSize.height + TILE_WIDTH - 1) / TILE_WIDTH };
-	_lightIndexListsBuffer = new Instance::Buffer(sizeof(LightIndexList) * globalGroupSize.width * globalGroupSize.height, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	_lightIndexListsBuffer = new Instance::Buffer(sizeof(LightIndexList) * globalGroupSize.width * globalGroupSize.height + 8, VK_BUFFER_USAGE_STORAGE_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 
 	_renderCommandPool = commandPool;
 
@@ -153,7 +162,7 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPopulateComma
 		(
 			_lightIndexListsBuffer,
 			VK_ACCESS_TRANSFER_WRITE_BIT,
-			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+			VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
 		);
 		_renderCommandBuffer->AddPipelineBufferBarrier(
 			VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
@@ -169,6 +178,51 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPopulateComma
 
 	_renderCommandBuffer->BindMaterial(_buildLightListsMaterial);
 	_renderCommandBuffer->Dispatch(globalGroupSize.width, globalGroupSize.height, 1);
+
+	//finish build lists buffer
+	{
+		Command::BufferMemoryBarrier bufferClearEndBarrier = Command::BufferMemoryBarrier
+		(
+			_lightIndexListsBuffer,
+			VK_ACCESS_SHADER_WRITE_BIT,
+			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+		);
+		_renderCommandBuffer->AddPipelineBufferBarrier(
+			VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+			{ &bufferClearEndBarrier }
+		);
+	}
+
+	_renderCommandBuffer->BeginRenderPass(
+		this,
+		camera->RenderPassTarget(),
+		{ }
+	);
+
+	auto viewMatrix = camera->ViewMatrix();
+	for (const auto& rendererDistencePair : renderDistanceTable)
+	{
+		auto& renderer = rendererDistencePair.second;
+		auto obbVertexes = renderer->mesh->OrientedBoundingBox().BoundryVertexes();
+		auto mvMatrix = viewMatrix * renderer->GameObject()->transform.ModelMatrix();
+		if (renderer->enableFrustumCulling && !camera->CheckInFrustum(obbVertexes, mvMatrix))
+		{
+			Utils::Log::Message("AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass cull GameObject called " + renderer->GameObject()->name + ".");
+			continue;
+		}
+
+		renderer->GetMaterial(Name())->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
+		renderer->GetMaterial(Name())->SetUniformBuffer("meshObjectInfo", renderer->ObjectInfoBuffer());
+		renderer->GetMaterial(Name())->SetUniformBuffer("lightInfos", CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
+		renderer->GetMaterial(Name())->SetTextureCube("ambientLightTexture", _ambientLightTexture);
+		renderer->GetMaterial(Name())->SetStorageBuffer("lightIndexLists", _lightIndexListsBuffer);
+
+		_renderCommandBuffer->BindMaterial(renderer->GetMaterial(Name()));
+		_renderCommandBuffer->DrawMesh(renderer->mesh);
+	}
+	_renderCommandBuffer->EndRenderPass();
+
+
 	_renderCommandBuffer->EndRecord();
 }
 
@@ -193,9 +247,11 @@ AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::TBF_OpaqueRenderPass
 	, _buildLightListsMaterial(nullptr)
 	, _lightIndexListsBuffer(nullptr)
 	, _depthImage(nullptr)
+	, _ambientLightTexture(nullptr)
 {
 	auto buildLightListsShader = Core::IO::CoreObject::Instance::AssetManager().Load<Shader>("..\\Asset\\Shader\\TBFBuildLightListsShader.shader");
 	_buildLightListsMaterial = new Material(buildLightListsShader);
+	_ambientLightTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");
 }
 
 AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::~TBF_OpaqueRenderPass()

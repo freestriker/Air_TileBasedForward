@@ -1,5 +1,6 @@
 #pragma once
 #include "Core/Graphic/RenderPass/RenderPassBase.h"
+#include "Asset/TextureCube.h"
 
 #define MAX_LIGHT_INDEX_COUNT 64
 #define TILE_WIDTH 32
@@ -35,6 +36,7 @@ namespace AirEngine
 					Command::CommandPool* _renderCommandPool;
 					Instance::Buffer* _lightIndexListsBuffer;
 					Instance::Image* _depthImage;
+					Asset::TextureCube* _ambientLightTexture;
 					Material* _buildLightListsMaterial;
 					void OnPopulateRenderPassSettings(RenderPassSettings& creator)override;
 					void OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)override;
