@@ -20,6 +20,7 @@
 #include "Core/IO/Manager/AssetManager.h"
 #include "Core/Graphic/Manager/LightManager.h"
 #include "Core/Graphic/RenderPass/TBF_OpaqueRenderPass.h"
+#include "Core/Graphic/Command/BufferMemoryBarrier.h"
 
 void AirEngine::Core::Graphic::RenderPass::TBF_TransparentRenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
 {
@@ -95,6 +96,20 @@ void AirEngine::Core::Graphic::RenderPass::TBF_TransparentRenderPass::OnPopulate
 		VK_ACCESS_COLOR_ATTACHMENT_READ_BIT,
 		VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
 	);
+
+	//finish build lists buffer
+	{
+		Command::BufferMemoryBarrier bufferClearEndBarrier = Command::BufferMemoryBarrier
+		(
+			_transparentLightListsBuffer,
+			VK_ACCESS_SHADER_WRITE_BIT,
+			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+		);
+		_renderCommandBuffer->AddPipelineBufferBarrier(
+			VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+			{ &bufferClearEndBarrier }
+		);
+	}
 
 	auto viewMatrix = camera->ViewMatrix();
 	for (auto iter = renderDistanceTable.rbegin(); iter != renderDistanceTable.rend(); iter++)

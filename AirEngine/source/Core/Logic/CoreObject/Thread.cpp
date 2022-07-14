@@ -471,31 +471,31 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		transparentRendererGo->transform.SetTranslation(glm::vec3(-2, 2, 0));
 		transparentRendererGo->transform.SetEulerRotation(glm::vec3(90, 0, 0));
 	}
-	//{
-	//	Logic::Object::GameObject* transparentRendererGo = new Logic::Object::GameObject("TBF_TransparentRenderer3");
-	//	transparentRenderers->AddChild(transparentRendererGo);
-	//	transparentRendererGo->AddComponent(new Renderer::Renderer());
-	//	transparentRendererGo->AddComponent(new Test::TBF_TransparentRendererBehaviour());
-	//	transparentRendererGo->transform.SetScale(glm::vec3(2, 2, 2));
-	//	transparentRendererGo->transform.SetTranslation(glm::vec3(2, 0, 2));
-	//}
-	//{
-	//	Logic::Object::GameObject* transparentRendererGo = new Logic::Object::GameObject("TBF_TransparentRenderer4");
-	//	transparentRenderers->AddChild(transparentRendererGo);
-	//	transparentRendererGo->AddComponent(new Renderer::Renderer());
-	//	transparentRendererGo->AddComponent(new Test::TBF_TransparentRendererBehaviour());
-	//	transparentRendererGo->transform.SetScale(glm::vec3(2, 2, 2));
-	//	transparentRendererGo->transform.SetTranslation(glm::vec3(-2, 0, 2));
-	//}
-	//{
-	//	Logic::Object::GameObject* transparentRendererGo = new Logic::Object::GameObject("TBF_TransparentRenderer5");
-	//	transparentRenderers->AddChild(transparentRendererGo);
-	//	transparentRendererGo->AddComponent(new Renderer::Renderer());
-	//	transparentRendererGo->AddComponent(new Test::TBF_TransparentRendererBehaviour());
-	//	transparentRendererGo->transform.SetScale(glm::vec3(2, 2, 2));
-	//	transparentRendererGo->transform.SetTranslation(glm::vec3(4, 0, 0));
-	//	transparentRendererGo->transform.SetEulerRotation(glm::vec3(90, 90, 90));
-	//}
+	{
+		Logic::Object::GameObject* transparentRendererGo = new Logic::Object::GameObject("TBF_TransparentRenderer3");
+		transparentRenderers->AddChild(transparentRendererGo);
+		transparentRendererGo->AddComponent(new Renderer::Renderer());
+		transparentRendererGo->AddComponent(new Test::TBF_TransparentRendererBehaviour());
+		transparentRendererGo->transform.SetScale(glm::vec3(2, 2, 2));
+		transparentRendererGo->transform.SetTranslation(glm::vec3(2, 0, 2));
+	}
+	{
+		Logic::Object::GameObject* transparentRendererGo = new Logic::Object::GameObject("TBF_TransparentRenderer4");
+		transparentRenderers->AddChild(transparentRendererGo);
+		transparentRendererGo->AddComponent(new Renderer::Renderer());
+		transparentRendererGo->AddComponent(new Test::TBF_TransparentRendererBehaviour());
+		transparentRendererGo->transform.SetScale(glm::vec3(2, 2, 2));
+		transparentRendererGo->transform.SetTranslation(glm::vec3(-2, 0, 2));
+	}
+	{
+		Logic::Object::GameObject* transparentRendererGo = new Logic::Object::GameObject("TBF_TransparentRenderer5");
+		transparentRenderers->AddChild(transparentRendererGo);
+		transparentRendererGo->AddComponent(new Renderer::Renderer());
+		transparentRendererGo->AddComponent(new Test::TBF_TransparentRendererBehaviour());
+		transparentRendererGo->transform.SetScale(glm::vec3(2, 2, 2));
+		transparentRendererGo->transform.SetTranslation(glm::vec3(4, 0, 0));
+		transparentRendererGo->transform.SetEulerRotation(glm::vec3(90, 90, 90));
+	}
 
 	//Lights
 	Logic::Object::GameObject* lights = new Logic::Object::GameObject("Lights");

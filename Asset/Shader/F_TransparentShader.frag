@@ -4,7 +4,6 @@
 #include "ForwardLighting.glsl"
 
 layout(set = START_SET_INDEX + 0, binding = 0) uniform sampler2D diffuseTexture;
-layout(set = START_SET_INDEX + 1, binding = 0) uniform sampler2D normalTexture;
 
 layout(location = 0) in vec2 inTexCoords;
 layout(location = 1) in vec4 inColor;

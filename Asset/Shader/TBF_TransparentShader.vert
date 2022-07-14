@@ -16,7 +16,6 @@ void main()
     gl_Position = PositionO2P(vertexPosition, meshObjectInfo.info, cameraInfo.info);
     vec3 worldNormal = DirectionO2W(vertexNormal, meshObjectInfo.info);
     vec3 worldPosition = PositionO2W(vertexPosition, meshObjectInfo.info);
-    vec3 viewDirection = CameraWObserveDirection(worldPosition, cameraInfo.info);
 
     outTexCoords = vertexTexCoords;
     outWorldPosition = worldPosition;
