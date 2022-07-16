@@ -214,7 +214,7 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::CopyBuffer(Instance::Buff
 
 void AirEngine::Core::Graphic::Command::CommandBuffer::EndRecord()
 {
-    vkEndCommandBuffer(_vkCommandBuffer);
+    Utils::Log::Exception("Failed to end command buffer called: " + _name + ".", vkEndCommandBuffer(_vkCommandBuffer));
 }
 
 void AirEngine::Core::Graphic::Command::CommandBuffer::ClearDepthImage(Instance::Image* image, VkImageLayout layout, float depth)
@@ -316,13 +316,13 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::Submit()
     {
         std::unique_lock<std::mutex> lock(CoreObject::Instance::Queue_(_parentCommandPool->_queueName)->mutex);
 
-        vkQueueSubmit(CoreObject::Instance::Queue_(_parentCommandPool->_queueName)->queue, 1, &submitInfo, _vkFence);
+        Utils::Log::Exception("Failed to submit command buffer called: " + _name + ".", vkQueueSubmit(CoreObject::Instance::Queue_(_parentCommandPool->_queueName)->queue, 1, &submitInfo, _vkFence));
     }
 }
 
 void AirEngine::Core::Graphic::Command::CommandBuffer::WaitForFinish()
 {
-    vkWaitForFences(Graphic::CoreObject::Instance::VkDevice_(), 1, &_vkFence, VK_TRUE, UINT64_MAX);
+    Utils::Log::Exception("Failed to wait command buffer called: " + _name + ".", vkWaitForFences(Graphic::CoreObject::Instance::VkDevice_(), 1, &_vkFence, VK_TRUE, UINT64_MAX));
 }
 
 void AirEngine::Core::Graphic::Command::CommandBuffer::BeginRenderPass(Graphic::RenderPass::RenderPassBase* renderPass, Graphic::Manager::RenderPassTarget* renderPassObject, std::vector<VkClearValue> clearValues)

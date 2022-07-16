@@ -49,6 +49,7 @@ namespace AirEngine
 					TBF_OIT_DepthPeelingRenderPass& operator=(TBF_OIT_DepthPeelingRenderPass&&) = delete;
 
 					std::vector<Instance::Image*> PeeledColorImages();
+					std::vector<Instance::Image*> PeeledDepthImages();
 					bool NeedDepthPeelingPass();
 
 				};

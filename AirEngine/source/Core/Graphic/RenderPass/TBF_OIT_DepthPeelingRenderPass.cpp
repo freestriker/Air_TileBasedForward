@@ -94,7 +94,7 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingRenderPass::OnPre
 		auto depthImage = Instance::Image::Create2DImage(
 			{ cameraDepthImage->VkExtent3D_().width, cameraDepthImage->VkExtent3D_().height },
 			cameraDepthImage->VkFormat_(),
-			cameraDepthImage->VkImageUsageFlags_() | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+			cameraDepthImage->VkImageUsageFlags_() | VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
 			cameraDepthImage->VkMemoryPropertyFlags_(),
 			cameraDepthImage->VkImageAspectFlags_()
 		);
@@ -153,7 +153,7 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingRenderPass::OnPop
 			_depthPeelingThresholdImage,
 			VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
 			VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			0,
+			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT,
 			VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT
 		);
 		Command::ImageMemoryBarrier thresholdImageDstBarrier = Command::ImageMemoryBarrier
@@ -168,19 +168,13 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingRenderPass::OnPop
 		for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
 		{
 			///First time populate 0 to _depthPeelingThresholdImage
+			_renderCommandBuffer->AddPipelineImageBarrier(
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
+				{ &thresholdImageSrcBarrier }
+			);
 			if (i == 0)
 			{
-				_renderCommandBuffer->AddPipelineImageBarrier(
-					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-					{ &thresholdImageSrcBarrier }
-				);
-
 				_renderCommandBuffer->ClearDepthImage(_depthPeelingThresholdImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 0);
-
-				_renderCommandBuffer->AddPipelineImageBarrier(
-					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-					{ &thresholdImageDstBarrier }
-				);
 			}
 			///Orther time populate preceding depth attachment to _depthPeelingThresholdImage
 			else
@@ -195,7 +189,7 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingRenderPass::OnPop
 				);
 				_renderCommandBuffer->AddPipelineImageBarrier(
 					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-					{ &attachmentSrcBarrier, &thresholdImageSrcBarrier }
+					{ &attachmentSrcBarrier }
 				);
 
 				_renderCommandBuffer->CopyImage(_renderPassTargets[i - 1]->Attachment("DepthAttachment"), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, _depthPeelingThresholdImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
@@ -212,11 +206,11 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingRenderPass::OnPop
 					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
 					{ &attachmentDstBarrier }
 				);
-				_renderCommandBuffer->AddPipelineImageBarrier(
-					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-					{ &thresholdImageDstBarrier }
-				);
 			}
+			_renderCommandBuffer->AddPipelineImageBarrier(
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+				{ &thresholdImageDstBarrier }
+			);
 
 			///Change current layer's attachment
 			{
@@ -252,53 +246,6 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingRenderPass::OnPop
 				{ colorClearValue, depthClearValue }
 			);
 
-			///Copy depth to depth attachment
-			{
-				Command::ImageMemoryBarrier cameraAttachmentSrcBarrier = Command::ImageMemoryBarrier
-				(
-					camera->RenderPassTarget()->Attachment("DepthAttachment"),
-					VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-					VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-					0,
-					VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT
-				);
-				Command::ImageMemoryBarrier attachmentSrcBarrier = Command::ImageMemoryBarrier
-				(
-					_renderPassTargets[i]->Attachment("DepthAttachment"),
-					VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-					VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-					0,
-					VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT
-				);
-				_renderCommandBuffer->AddPipelineImageBarrier(
-					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-					{ &cameraAttachmentSrcBarrier , &attachmentSrcBarrier }
-				);
-
-				_renderCommandBuffer->CopyImage(camera->RenderPassTarget()->Attachment("DepthAttachment"), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, _renderPassTargets[i]->Attachment("DepthAttachment"), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-
-				Command::ImageMemoryBarrier cameraAttachmentDstBarrier = Command::ImageMemoryBarrier
-				(
-					camera->RenderPassTarget()->Attachment("DepthAttachment"),
-					VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-					VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-					VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT,
-					VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
-				);
-				Command::ImageMemoryBarrier attachmentDstBarrier = Command::ImageMemoryBarrier
-				(
-					_renderPassTargets[i]->Attachment("DepthAttachment"),
-					VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-					VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-					VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
-					VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
-				);
-				_renderCommandBuffer->AddPipelineImageBarrier(
-					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
-					{ &cameraAttachmentDstBarrier, &attachmentDstBarrier }
-				);
-			}
-
 			///Render
 			for (const auto& renderer : targetRenderers)
 			{
@@ -326,6 +273,18 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingRenderPass::OnPop
 			);
 			_renderCommandBuffer->AddPipelineImageBarrier(
 				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+				{ &colorAttachmentFinishBarrier }
+			);
+			auto depthAttachmentFinishBarrier = Command::ImageMemoryBarrier
+			(
+				_renderPassTargets[i]->Attachment("DepthAttachment"),
+				VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+				VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+			);
+			_renderCommandBuffer->AddPipelineImageBarrier(
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
 				{ &colorAttachmentFinishBarrier }
 			);
 		}
@@ -379,6 +338,16 @@ std::vector<AirEngine::Core::Graphic::Instance::Image*> AirEngine::Core::Graphic
 	for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
 	{
 		images[i] = _renderPassTargets[i]->Attachment("ColorAttachment");
+	}
+	return images;
+}
+
+std::vector<AirEngine::Core::Graphic::Instance::Image*> AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingRenderPass::PeeledDepthImages()
+{
+	std::vector<Instance::Image*> images = std::vector<Instance::Image*>(DEPTH_PEELING_STEP_COUNT, nullptr);
+	for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
+	{
+		images[i] = _renderPassTargets[i]->Attachment("DepthAttachment");
 	}
 	return images;
 }

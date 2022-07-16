@@ -523,14 +523,14 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		oitRendererGo->AddComponent(new Test::TBF_OIT_RedBoxBehaviour());
 		oitRendererGo->AddComponent(new Test::SelfRotateBehaviour(30));
 	}
-	//{
-	//	Logic::Object::GameObject* oitRendererGo = new Logic::Object::GameObject("OitRenderer2");
-	//	oitRenderers->AddChild(oitRendererGo);
-	//	oitRendererGo->AddComponent(new Renderer::Renderer());
-	//	oitRendererGo->transform.SetScale(glm::vec3(1.5, 1.5, 1.5));
-	//	oitRendererGo->AddComponent(new Test::TBF_OIT_RedBoxBehaviour());
-	//	oitRendererGo->AddComponent(new Test::SelfRotateBehaviour(60));
-	//}
+	{
+		Logic::Object::GameObject* oitRendererGo = new Logic::Object::GameObject("OitRenderer2");
+		oitRenderers->AddChild(oitRendererGo);
+		oitRendererGo->AddComponent(new Renderer::Renderer());
+		oitRendererGo->transform.SetScale(glm::vec3(1.5, 1.5, 1.5));
+		oitRendererGo->AddComponent(new Test::TBF_OIT_RedBoxBehaviour());
+		oitRendererGo->AddComponent(new Test::SelfRotateBehaviour(60));
+	}
 
 	//Lights
 	Logic::Object::GameObject* lights = new Logic::Object::GameObject("Lights");

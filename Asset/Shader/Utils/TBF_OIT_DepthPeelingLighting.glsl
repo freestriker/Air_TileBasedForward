@@ -5,7 +5,7 @@
 
 layout (set = START_SET_INDEX + 0, binding = 0, r32f) uniform readonly image2D depthPeelingThresholdImage;
 
-#define DISCARD_PEELED_LAYER {float depth = gl_FragCoord.z; float depthPeelingThreshold = imageLoad(depthPeelingThresholdImage, ivec2(gl_FragCoord.xy)).r; if(depth <= depthPeelingThreshold) discard;}
+#define DISCARD_PEELED_LAYER {float depth = gl_FragCoord.z; float depthPeelingThreshold = imageLoad(depthPeelingThresholdImage, ivec2(gl_FragCoord.xy)).r; if(depth <= depthPeelingThreshold) {discard;}}
 
 #undef START_SET_INDEX
 #define START_SET_INDEX 5
