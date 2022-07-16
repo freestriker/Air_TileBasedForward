@@ -87,64 +87,68 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingBlendRenderPass::
 	_renderCommandBuffer->Reset();
 	_renderCommandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
-	_renderCommandBuffer->BeginRenderPass(
-		this,
-		camera->RenderPassTarget(),
-		{ }
-	);
+	bool needDepthPeelingPass = dynamic_cast<TBF_OIT_DepthPeelingRenderPass&>(CoreObject::Instance::RenderPassManager().RenderPass("TBF_OIT_DepthPeelingRenderPass")).NeedDepthPeelingPass();
 
-	///Wait render finish
+	if (needDepthPeelingPass)
 	{
-		for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
-		{
-			auto colorAttachmentFinishBarrier = Command::ImageMemoryBarrier
-			(
-				_peeledColorImages[i],
-				VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-				VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-				VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-			);
-			_renderCommandBuffer->AddPipelineImageBarrier(
-				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-				{ &colorAttachmentFinishBarrier }
-			);
-		}
-	}
-
-	//Blend all layers to color attachment
-	{
-		Command::ImageMemoryBarrier drawBarrier = Command::ImageMemoryBarrier
-		(
-			camera->RenderPassTarget()->FrameBuffer(Name())->Attachment("ColorAttachment"),
-			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-			VK_ACCESS_COLOR_ATTACHMENT_READ_BIT,
-			VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
+		_renderCommandBuffer->BeginRenderPass(
+			this,
+			camera->RenderPassTarget(),
+			{ }
 		);
 
-		for (int i = DEPTH_PEELING_STEP_COUNT - 1; i >= 0; i--)
+		///Wait render finish
 		{
-			_blendMaterials[i]->SetSlotData("srcPeeledColorTexture", {0}, {{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _imageSamplers[i]->VkSampler_(), _peeledColorImages[i]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}});
-			_renderCommandBuffer->BindMaterial(_blendMaterials[i]);
-			_renderCommandBuffer->DrawMesh(_fullScreenMesh);
-
-			_renderCommandBuffer->AddPipelineImageBarrier(
-				VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
-				VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-				{ &drawBarrier }
-			);
+			for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
+			{
+				auto colorAttachmentFinishBarrier = Command::ImageMemoryBarrier
+				(
+					_peeledColorImages[i],
+					VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+					VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+					VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+					VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+				);
+				_renderCommandBuffer->AddPipelineImageBarrier(
+					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+					{ &colorAttachmentFinishBarrier }
+				);
+			}
 		}
-	}
 
-	_renderCommandBuffer->EndRenderPass();
+		//Blend all layers to color attachment
+		{
+			Command::ImageMemoryBarrier drawBarrier = Command::ImageMemoryBarrier
+			(
+				camera->RenderPassTarget()->FrameBuffer(Name())->Attachment("ColorAttachment"),
+				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+				VK_ACCESS_COLOR_ATTACHMENT_READ_BIT,
+				VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
+			);
+
+			for (int i = DEPTH_PEELING_STEP_COUNT - 1; i >= 0; i--)
+			{
+				_blendMaterials[i]->SetSlotData("srcPeeledColorTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _imageSamplers[i]->VkSampler_(), _peeledColorImages[i]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
+				_renderCommandBuffer->BindMaterial(_blendMaterials[i]);
+				_renderCommandBuffer->DrawMesh(_fullScreenMesh);
+
+				_renderCommandBuffer->AddPipelineImageBarrier(
+					VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
+					VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+					{ &drawBarrier }
+				);
+			}
+		}
+
+		_renderCommandBuffer->EndRenderPass();
+	}
 	_renderCommandBuffer->EndRecord();
 }
 
 void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingBlendRenderPass::OnSubmit()
 {
-	auto semaphore = CoreObject::Instance::RenderPassManager().RenderPass("TBF_OIT_DepthPeelingRenderPass").Semaphore();
-	_renderCommandBuffer->Submit({ semaphore }, { VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT });
+	_renderCommandBuffer->Submit();
 	_renderCommandBuffer->WaitForFinish();
 }
 

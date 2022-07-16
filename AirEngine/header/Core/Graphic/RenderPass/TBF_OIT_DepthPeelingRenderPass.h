@@ -34,6 +34,7 @@ namespace AirEngine
 					Instance::Buffer* _transparentLightListsBuffer;
 					Instance::Image* _depthPeelingThresholdImage;
 					std::vector<Manager::RenderPassTarget*> _renderPassTargets;
+					bool _needDepthPeelingPass;
 					void OnPopulateRenderPassSettings(RenderPassSettings& creator)override;
 					void OnPrepare(Camera::CameraBase* camera)override;
 					void OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)override;
@@ -48,6 +49,7 @@ namespace AirEngine
 					TBF_OIT_DepthPeelingRenderPass& operator=(TBF_OIT_DepthPeelingRenderPass&&) = delete;
 
 					std::vector<Instance::Image*> PeeledColorImages();
+					bool NeedDepthPeelingPass();
 
 				};
 			}
