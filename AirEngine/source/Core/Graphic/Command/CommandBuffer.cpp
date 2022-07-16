@@ -217,6 +217,13 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::EndRecord()
     vkEndCommandBuffer(_vkCommandBuffer);
 }
 
+void AirEngine::Core::Graphic::Command::CommandBuffer::ClearDepthImage(Instance::Image* image, VkImageLayout layout, float depth)
+{
+    auto ranges = image->VkImageSubresourceRanges_();
+    std::vector< VkClearDepthStencilValue> clearValues = std::vector< VkClearDepthStencilValue>(ranges.size(), { depth, 0 });
+    vkCmdClearDepthStencilImage(_vkCommandBuffer, image->VkImage_(), layout, clearValues.data(), static_cast<uint32_t>(ranges.size()), ranges.data());
+}
+
 void AirEngine::Core::Graphic::Command::CommandBuffer::Submit(std::vector<Command::Semaphore*> waitSemaphores, std::vector<VkPipelineStageFlags> waitStages, std::vector<Command::Semaphore*> signalSemaphores)
 {
     std::vector <VkSemaphore> wait = std::vector <VkSemaphore>(waitSemaphores.size());
@@ -238,6 +245,30 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::Submit(std::vector<Comman
     submitInfo.pWaitDstStageMask = waitStages.data();
     submitInfo.signalSemaphoreCount = static_cast<uint32_t>(signal.size());
     submitInfo.pSignalSemaphores = signal.data();
+
+    {
+        std::unique_lock<std::mutex> lock(CoreObject::Instance::Queue_(_parentCommandPool->_queueName)->mutex);
+
+        vkQueueSubmit(CoreObject::Instance::Queue_(_parentCommandPool->_queueName)->queue, 1, &submitInfo, _vkFence);
+    }
+}
+
+void AirEngine::Core::Graphic::Command::CommandBuffer::Submit(std::vector<Command::Semaphore*> waitSemaphores, std::vector<VkPipelineStageFlags> waitStages)
+{
+    std::vector <VkSemaphore> wait = std::vector <VkSemaphore>(waitSemaphores.size());
+    for (uint32_t i = 0; i < waitSemaphores.size(); i++)
+    {
+        wait[i] = waitSemaphores[i]->VkSemphore_();
+    }
+    VkSubmitInfo submitInfo{};
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &_vkCommandBuffer;
+    submitInfo.waitSemaphoreCount = static_cast<uint32_t>(wait.size());
+    submitInfo.pWaitSemaphores = wait.data();
+    submitInfo.pWaitDstStageMask = waitStages.data();
+    submitInfo.signalSemaphoreCount = 0;
+    submitInfo.pSignalSemaphores = nullptr;
 
     {
         std::unique_lock<std::mutex> lock(CoreObject::Instance::Queue_(_parentCommandPool->_queueName)->mutex);

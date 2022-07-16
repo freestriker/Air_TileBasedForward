@@ -38,6 +38,7 @@ namespace AirEngine
 						float maxAnisotropy,
 						VkBorderColor borderColor
 					);
+					ImageSampler(VkFilter filter);
 					ImageSampler(
 						VkFilter filter,
 						VkSamplerMipmapMode mipmapMode,

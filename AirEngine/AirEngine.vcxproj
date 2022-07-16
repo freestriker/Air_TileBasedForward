@@ -105,6 +105,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Core\Graphic\RenderPass\TBF_OIT_DepthPeelingBlendRenderPass.cpp" />
+    <ClCompile Include="source\Core\Graphic\RenderPass\TBF_OIT_DepthPeelingRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\TBF_TransparentRenderPass.cpp" />
     <ClCompile Include="source\Behaviour\Behaviour.cpp" />
     <ClCompile Include="source\Camera\CameraBase.cpp" />
@@ -206,6 +208,8 @@
     <ClInclude Include="header\Core\Graphic\RenderPass\F_OpaqueRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\PreZRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\RenderPassBase.h" />
+    <ClInclude Include="header\Core\Graphic\RenderPass\TBF_OIT_DepthPeelingBlendRenderPass.h" />
+    <ClInclude Include="header\Core\Graphic\RenderPass\TBF_OIT_DepthPeelingRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\TBF_OpaqueRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\F_TransparentRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\TBF_TransparentRenderPass.h" />

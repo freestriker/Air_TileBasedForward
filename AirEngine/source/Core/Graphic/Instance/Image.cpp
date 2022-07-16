@@ -105,6 +105,21 @@ size_t AirEngine::Core::Graphic::Instance::Image::PerLayerSize()
 	return _perLayerSize;
 }
 
+VkImageUsageFlags AirEngine::Core::Graphic::Instance::Image::VkImageUsageFlags_()
+{
+	return _vkImageUsage;
+}
+
+VkMemoryPropertyFlags AirEngine::Core::Graphic::Instance::Image::VkMemoryPropertyFlags_()
+{
+	return _vkMemoryProperty;
+}
+
+VkImageAspectFlags AirEngine::Core::Graphic::Instance::Image::VkImageAspectFlags_()
+{
+	return _vkImageAspect;
+}
+
 AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::Image::CreateCubeImage(VkExtent2D extent, VkFormat format, VkImageUsageFlags imageUsage, VkMemoryPropertyFlags memoryProperty, VkImageAspectFlags aspect)
 {
 	VkImageCreateInfo imageInfo{};

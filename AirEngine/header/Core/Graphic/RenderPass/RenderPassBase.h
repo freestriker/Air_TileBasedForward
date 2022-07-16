@@ -4,6 +4,15 @@
 #include <map>
 #include <vector>
 
+#define PRE_Z_RENDER_INDEX 0
+#define F_OPAQUE_RENDER_INDEX 2000
+#define TBF_OPAQUE_RENDER_INDEX 4000
+#define BACKGROUND_RENDER_INDEX 6000
+#define F_TRANSPARENT_RENDER_INDEX 8000
+#define TBF_TRANSPARENT_RENDER_INDEX 10000
+#define TBF_OIT_DEPTH_PEELING_RENDER_INDEX 12000
+#define TBF_OIT_DEPTH_PEELING_BLEND_RENDER_INDEX 12100
+
 namespace AirEngine
 {
 	namespace Renderer
@@ -40,12 +49,6 @@ namespace AirEngine
 			}
 			namespace RenderPass
 			{
-#define PRE_Z_RENDER_INDEX 0
-#define F_OPAQUE_RENDER_INDEX 2000
-#define TBF_OPAQUE_RENDER_INDEX 4000
-#define BACKGROUND_RENDER_INDEX 6000
-#define F_TRANSPARENT_RENDER_INDEX 8000
-#define TBF_TRANSPARENT_RENDER_INDEX 10000
 				class RenderPassBase
 				{
 					friend class Manager::RenderPassManager;

@@ -24,6 +24,9 @@ namespace AirEngine
 					std::vector<VkImageSubresourceLayers> VkImageSubresourceLayers_();
 					uint32_t LayerCount();
 					size_t PerLayerSize();
+					VkImageUsageFlags VkImageUsageFlags_();
+					VkMemoryPropertyFlags VkMemoryPropertyFlags_();
+					VkImageAspectFlags VkImageAspectFlags_();
 
 					static Image* CreateCubeImage(
 						VkExtent2D extent,
