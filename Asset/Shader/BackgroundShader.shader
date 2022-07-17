@@ -2,7 +2,7 @@
   "renderPass": "BackgroundRenderPass",
   "subpass": "DrawSubpass",
   "alphaBlendOp": 0,
-  "blendEnable": 1,
+  "blendEnable": 0,
   "colorBlendOp": 0,
   "colorWriteMask": 15,
   "cullMode": 0,
@@ -11,7 +11,7 @@
   "shaderPaths": ["..\\Asset\\Shader\\Spv\\BackgroundShader.vert.spv", "..\\Asset\\Shader\\Spv\\BackgroundShader.frag.spv"],
   "srcAlphaBlendFactor": 1,
   "srcColorBlendFactor": 6,
-  "depthTestEnable": 0,
+  "depthTestEnable": 1,
   "depthWriteEnable": 0,
-  "depthCompareOp": 1
+  "depthCompareOp": 2
 }

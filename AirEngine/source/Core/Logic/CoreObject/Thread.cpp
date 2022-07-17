@@ -402,7 +402,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 {
 	qDebug() << "AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()";
 
-	//Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::BackgroundRenderPass());
+	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::BackgroundRenderPass());
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::F_OpaqueRenderPass());
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::PreZRenderPass());
 	//Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::F_TransparentRenderPass());
@@ -420,7 +420,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 			"PreZRenderPass",
 			"F_OpaqueRenderPass",
 			//"F_TransparentRenderPass",
-			//"BackgroundRenderPass", 
+			"BackgroundRenderPass", 
 			//"TBF_OpaqueRenderPass",
 			//"TBF_TransparentRenderPass",
 			//"TBF_OIT_DepthPeelingRenderPass", 
@@ -438,11 +438,6 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	//Renderers
 	Logic::Object::GameObject* renderers = new Logic::Object::GameObject("Renderers");
 	CoreObject::Instance::rootObject.AddChild(renderers);
-
-	//Logic::Object::GameObject* backgroundRendererGo = new Logic::Object::GameObject("BackgroundRenderer");
-	//renderers->AddChild(backgroundRendererGo);
-	//backgroundRendererGo->AddComponent(new Renderer::Renderer());
-	//backgroundRendererGo->AddComponent(new Test::BackgroundRendererBehaviour());
 
 	//Logic::Object::GameObject* opaqueRendererGo = new Logic::Object::GameObject("meshRenderer");
 	//renderers->AddChild(opaqueRendererGo);

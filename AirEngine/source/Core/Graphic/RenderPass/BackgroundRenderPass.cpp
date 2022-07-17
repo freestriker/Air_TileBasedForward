@@ -14,6 +14,11 @@
 #include "Core/Graphic/Manager/RenderPassManager.h"
 #include "Core/Graphic/CoreObject/Instance.h"
 #include "Camera/CameraBase.h"
+#include "Core/IO/CoreObject/Instance.h"
+#include "Core/IO/Manager/AssetManager.h"
+#include "Asset/Mesh.h"
+#include "Asset/TextureCube.h"
+#include "Core/Graphic/Shader.h"
 
 void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
 {
@@ -26,10 +31,20 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateRende
 		VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 		VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
 	);
+	creator.AddDepthAttachment(
+		"DepthAttachment",
+		VK_FORMAT_D32_SFLOAT,
+		VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT,
+		VK_ATTACHMENT_LOAD_OP_LOAD,
+		VK_ATTACHMENT_STORE_OP_STORE,
+		VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+		VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+	);
 	creator.AddSubpass(
 		"DrawSubpass",
 		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		{ "ColorAttachment" }
+		{ "ColorAttachment" },
+		"DepthAttachment"
 	);
 	creator.AddDependency(
 		"VK_SUBPASS_EXTERNAL",
@@ -43,13 +58,11 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateRende
 
 void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPrepare(Camera::CameraBase* camera)
 {
-	_temporaryDepthImage = Graphic::Instance::Image::Create2DImage(
-		camera->RenderPassTarget()->Extent()
-		, VkFormat::VK_FORMAT_D32_SFLOAT
-		, VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT
-		, VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-		, VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT
-	);
+	if (_material == nullptr)
+	{
+		auto shader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Shader>("..\\Asset\\Shader\\BackgroundShader.shader");
+		_material = new Core::Graphic::Material(shader);
+	}
 }
 
 void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
@@ -57,98 +70,56 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateComma
 	_renderCommandPool = commandPool;
 	_renderCommandBuffer = commandPool->CreateCommandBuffer("BackgroundCommandBuffer", VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 	_renderCommandBuffer->Reset();
-
-	//Render
 	_renderCommandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-	if (renderDistanceTable.size() >= 1)
+
+	///Init attachmnet layout
 	{
-		auto renderer = renderDistanceTable.begin()->second;
+		Command::ImageMemoryBarrier colorAttachmnetLayoutBarrier = Command::ImageMemoryBarrier
+		(
+			camera->RenderPassTarget()->Attachment("ColorAttachment"),
+			VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+			VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
+		);
 
-		renderer->GetMaterial(Name())->SetSlotData("depthImage", {0}, {{VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_NULL_HANDLE, _temporaryDepthImage->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL}});
+		_renderCommandBuffer->AddPipelineImageBarrier(
+			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+			{ &colorAttachmnetLayoutBarrier }
+		);
+		Command::ImageMemoryBarrier depthAttachmentLayoutBarrier = Command::ImageMemoryBarrier
+		(
+			camera->RenderPassTarget()->Attachment("DepthAttachment"),
+			VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+			VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+			VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+			VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
+		);
 
-		//Change layout
-		{
-			Command::ImageMemoryBarrier depthAttachmentLayoutBarrier = Command::ImageMemoryBarrier
-			(
-				camera->RenderPassTarget()->Attachment("DepthAttachment"),
-				VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-				VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-				VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT
-			);
+		_renderCommandBuffer->AddPipelineImageBarrier(
+			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+			{ &depthAttachmentLayoutBarrier }
+		);
+	}
 
-			Command::ImageMemoryBarrier temporaryImageLayoutBarrier = Command::ImageMemoryBarrier
-			(
-				_temporaryDepthImage,
-				VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-				0,
-				VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT
-			);
+	///Render background
+	{
 
-			_renderCommandBuffer->AddPipelineImageBarrier(
-				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-				{ &depthAttachmentLayoutBarrier, &temporaryImageLayoutBarrier }
-			);
-		}
-
-		//Copy depth
-		{
-			_renderCommandBuffer->CopyImage
-			(
-				camera->RenderPassTarget()->Attachment("DepthAttachment"),
-				VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-				_temporaryDepthImage,
-				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-			);
-		}
-
-		//Change layout
-		{
-			Command::ImageMemoryBarrier depthAttachmentLayoutBarrier = Command::ImageMemoryBarrier
-			(
-				camera->RenderPassTarget()->Attachment("DepthAttachment"),
-				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-				VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-				VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT,
-				VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
-			);
-
-			Command::ImageMemoryBarrier temporaryImageLayoutBarrier = Command::ImageMemoryBarrier
-			(
-				_temporaryDepthImage,
-				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-				VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
-				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-			);
-
-			_renderCommandBuffer->AddPipelineImageBarrier(
-				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
-				{ &depthAttachmentLayoutBarrier }
-			);
-			_renderCommandBuffer->AddPipelineImageBarrier(
-				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-				{ &temporaryImageLayoutBarrier }
-			);
-		}
-
-		//Render background
 		_renderCommandBuffer->BeginRenderPass(
 			this,
 			camera->RenderPassTarget(),
 			{ }
 		);
-		renderer->GetMaterial(Name())->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
-		_renderCommandBuffer->BindMaterial(renderer->GetMaterial(Name()));
-		_renderCommandBuffer->DrawMesh(renderer->mesh);
-		_renderCommandBuffer->EndRenderPass();
 
+		_material->SetTextureCube("backgroundTexture", _backgroundTexture);
+		_material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
+		//_material->SetSlotData("depthImage", { 0 }, { {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_NULL_HANDLE, _temporaryDepthImage->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL} });
+		_renderCommandBuffer->BindMaterial(_material);
+		_renderCommandBuffer->DrawMesh(_fullScreenMesh);
+
+		_renderCommandBuffer->EndRenderPass();
 	}
-	if (renderDistanceTable.size() > 1)
-	{
-		Utils::Log::Exception("Contains multiple background renderer.");
-	}
+
 	_renderCommandBuffer->EndRecord();
 }
 
@@ -161,15 +132,18 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnSubmit()
 void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnClear()
 {
 	_renderCommandPool->DestoryCommandBuffer(_renderCommandBuffer);
-	delete _temporaryDepthImage;
 }
 
 AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::BackgroundRenderPass()
 	: RenderPassBase("BackgroundRenderPass", BACKGROUND_RENDER_INDEX)
 	, _renderCommandBuffer(nullptr)
 	, _renderCommandPool(nullptr)
-	, _temporaryDepthImage(nullptr)
+	, _material(nullptr)
+	, _fullScreenMesh(nullptr)
+	, _backgroundTexture(nullptr)
 {
+	_fullScreenMesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\BackgroundMesh.ply");
+	_backgroundTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");
 }
 
 AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::~BackgroundRenderPass()
