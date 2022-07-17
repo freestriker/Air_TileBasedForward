@@ -52,7 +52,6 @@ void AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::OnPopulateRenderP
 		0,
 		0
 	);
-	_ambientLightTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");
 }
 
 void AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
@@ -99,6 +98,7 @@ void AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::OnPopulateCommand
 	);
 
 	auto viewMatrix = camera->ViewMatrix();
+	auto ambientLightTexture = CoreObject::Instance::LightManager().AmbientTextureCube();
 	for (const auto& rendererDistencePair : renderDistanceTable)
 	{
 		auto& renderer = rendererDistencePair.second;
@@ -113,7 +113,7 @@ void AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::OnPopulateCommand
 		renderer->GetMaterial(Name())->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
 		renderer->GetMaterial(Name())->SetUniformBuffer("meshObjectInfo", renderer->ObjectInfoBuffer());
 		renderer->GetMaterial(Name())->SetUniformBuffer("lightInfos", CoreObject::Instance::LightManager().ForwardLightInfosBuffer());
-		renderer->GetMaterial(Name())->SetTextureCube("ambientLightTexture", _ambientLightTexture);
+		renderer->GetMaterial(Name())->SetTextureCube("ambientLightTexture", ambientLightTexture);
 
 		_renderCommandBuffer->BindMaterial(renderer->GetMaterial(Name()));
 		_renderCommandBuffer->DrawMesh(renderer->mesh);
@@ -137,7 +137,6 @@ AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::F_OpaqueRenderPass()
 	: RenderPassBase("F_OpaqueRenderPass", F_OPAQUE_RENDER_INDEX)
 	, _renderCommandBuffer(nullptr)
 	, _renderCommandPool(nullptr)
-	, _ambientLightTexture(nullptr)
 {
 }
 
