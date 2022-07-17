@@ -102,6 +102,8 @@ void AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::OnPopulateCommand
 	for (const auto& rendererDistencePair : renderDistanceTable)
 	{
 		auto& renderer = rendererDistencePair.second;
+		auto material = renderer->GetMaterial(Name());
+
 		auto obbVertexes = renderer->mesh->OrientedBoundingBox().BoundryVertexes();
 		auto mvMatrix = viewMatrix * renderer->GameObject()->transform.ModelMatrix();
 		if (renderer->enableFrustumCulling && !camera->CheckInFrustum(obbVertexes, mvMatrix))
@@ -110,12 +112,12 @@ void AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::OnPopulateCommand
 			continue;
 		}
 
-		renderer->GetMaterial(Name())->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
-		renderer->GetMaterial(Name())->SetUniformBuffer("meshObjectInfo", renderer->ObjectInfoBuffer());
-		renderer->GetMaterial(Name())->SetUniformBuffer("lightInfos", CoreObject::Instance::LightManager().ForwardLightInfosBuffer());
-		renderer->GetMaterial(Name())->SetTextureCube("ambientLightTexture", ambientLightTexture);
+		material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
+		material->SetUniformBuffer("meshObjectInfo", renderer->ObjectInfoBuffer());
+		material->SetUniformBuffer("lightInfos", CoreObject::Instance::LightManager().ForwardLightInfosBuffer());
+		material->SetTextureCube("ambientLightTexture", ambientLightTexture);
 
-		_renderCommandBuffer->BindMaterial(renderer->GetMaterial(Name()));
+		_renderCommandBuffer->BindMaterial(material);
 		_renderCommandBuffer->DrawMesh(renderer->mesh);
 	}
 	_renderCommandBuffer->EndRenderPass();

@@ -406,7 +406,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::F_OpaqueRenderPass());
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::PreZRenderPass());
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::F_TransparentRenderPass());
-	//Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::TBF_OpaqueRenderPass());
+	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::TBF_OpaqueRenderPass());
 	//Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::TBF_TransparentRenderPass());
 	//Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::TBF_OIT_DepthPeelingRenderPass());
 	//Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::TBF_OIT_DepthPeelingBlendRenderPass());
@@ -421,7 +421,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 			"F_OpaqueRenderPass",
 			"F_TransparentRenderPass",
 			"BackgroundRenderPass", 
-			//"TBF_OpaqueRenderPass",
+			"TBF_OpaqueRenderPass",
 			//"TBF_TransparentRenderPass",
 			//"TBF_OIT_DepthPeelingRenderPass", 
 			//"TBF_OIT_DepthPeelingBlendRenderPass"
@@ -439,11 +439,11 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	Logic::Object::GameObject* renderers = new Logic::Object::GameObject("Renderers");
 	CoreObject::Instance::rootObject.AddChild(renderers);
 
-	//Logic::Object::GameObject* opaqueRendererGo = new Logic::Object::GameObject("meshRenderer");
-	//renderers->AddChild(opaqueRendererGo);
-	//opaqueRendererGo->AddComponent(new Renderer::Renderer());
-	//opaqueRendererGo->AddComponent(new Test::F_OpaqueRendererBehaviour());
-	//opaqueRendererGo->transform.SetScale(glm::vec3(0.8, 0.8, 0.8));
+	Logic::Object::GameObject* opaqueRendererGo = new Logic::Object::GameObject("meshRenderer");
+	renderers->AddChild(opaqueRendererGo);
+	opaqueRendererGo->AddComponent(new Renderer::Renderer());
+	opaqueRendererGo->AddComponent(new Test::F_OpaqueRendererBehaviour());
+	opaqueRendererGo->transform.SetScale(glm::vec3(0.8, 0.8, 0.8));
 
 	Logic::Object::GameObject* glassMeshRendererGo = new Logic::Object::GameObject("GlassMeshRenderer");
 	renderers->AddChild(glassMeshRendererGo);

@@ -33,7 +33,7 @@ void AirEngine::Test::F_OpaqueRendererBehaviour::OnStart()
 	{
 		auto diffuseTexture2D = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Texture2D>("..\\Asset\\Texture\\WallDiffuseTexture2D.json");
 		auto normalTexture2D = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Texture2D>("..\\Asset\\Texture\\WallNormalTexture2D.json");
-		auto shader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Shader>("..\\Asset\\Shader\\GlassShader.shader");
+		auto shader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Shader>("..\\Asset\\Shader\\OpaqueShader.shader");
 		auto material = new Core::Graphic::Material(shader);
 		material->SetTexture2D("diffuseTexture", diffuseTexture2D);
 		material->SetTexture2D("normalTexture", normalTexture2D);

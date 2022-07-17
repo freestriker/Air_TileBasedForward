@@ -36,8 +36,8 @@ namespace AirEngine
 					Command::CommandPool* _renderCommandPool;
 					Instance::Buffer* _opauqeLightIndexListsBuffer;
 					Instance::Buffer* _transparentLightIndexListsBuffer;
+					Instance::Buffer* _depthBuffer;
 					Instance::Image* _depthImage;
-					Asset::TextureCube* _ambientLightTexture;
 					Material* _buildLightListsMaterial;
 					void OnPopulateRenderPassSettings(RenderPassSettings& creator)override;
 					void OnPrepare(Camera::CameraBase* camera)override;

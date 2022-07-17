@@ -168,7 +168,7 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::CopyBufferToImage(Instanc
     vkCmdCopyBufferToImage(_vkCommandBuffer, srcBuffer->VkBuffer_(), dstImage->VkImage_(), dstImageLayout, static_cast<uint32_t>(layerCount), infos.data());
 }
 
-void AirEngine::Core::Graphic::Command::CommandBuffer::CopyImageToBuffer(Instance::Image* srcImage, Instance::Buffer* dstBuffer, VkImageLayout srcImageLayout)
+void AirEngine::Core::Graphic::Command::CommandBuffer::CopyImageToBuffer(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Buffer* dstBuffer)
 {
     auto layerCount = srcImage->LayerCount();
     auto layerSize = srcImage->PerLayerSize();

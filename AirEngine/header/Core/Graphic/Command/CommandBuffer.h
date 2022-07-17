@@ -69,7 +69,7 @@ namespace AirEngine
 					void AddPipelineBarrier(VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, std::vector <ImageMemoryBarrier*> imageMemoryBarriers, std::vector <BufferMemoryBarrier*> bufferMemoryBarriers);
 					void CopyImage(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Image* dstImage, VkImageLayout dstImageLayout);
 					void CopyBufferToImage(Instance::Buffer* srcBuffer, Instance::Image* dstImage, VkImageLayout dstImageLayout);
-					void CopyImageToBuffer(Instance::Image* srcImage, Instance::Buffer* dstBuffer, VkImageLayout dstImageLayout);
+					void CopyImageToBuffer(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Buffer* dstBuffer);
 					void FillBuffer(Instance::Buffer* dstBuffer, uint32_t data);
 					void CopyBuffer(Instance::Buffer* srcBuffer, Instance::Buffer* dstBuffer);
 					void CopyBuffer(Instance::Buffer* srcBuffer, VkDeviceSize srcOffset, Instance::Buffer* dstBuffer, VkDeviceSize dstOffset, VkDeviceSize size);

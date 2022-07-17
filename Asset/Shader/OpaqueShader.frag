@@ -1,5 +1,6 @@
 #version 450
 #extension GL_GOOGLE_include_directive: enable
+#extension GL_EXT_shader_atomic_float: enable
 
 #include "TileBasedForwardLighting.glsl"
 

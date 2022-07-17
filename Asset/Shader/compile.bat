@@ -28,6 +28,6 @@ glslangValidator.exe -t -V OIT_DP_BlendShader.frag -IUtils/ -o Spv/OIT_DP_BlendS
 glslangValidator.exe -t -V PresentShader.vert -IUtils/ -o Spv/PresentShader.vert.spv
 glslangValidator.exe -t -V PresentShader.frag -IUtils/ -o Spv/PresentShader.frag.spv
 
-glslangValidator.exe -t -V TBFBuildLightListsShader.comp -IUtils/ -o Spv/TBFBuildLightListsShader.comp.spv
+glslangValidator.exe -t -V BuildTBFLightListsShader.comp -IUtils/ -o Spv/BuildTBFLightListsShader.comp.spv
 
 cmd
