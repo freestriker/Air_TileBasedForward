@@ -105,6 +105,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Core\Graphic\RenderPass\TBF_OIT_DepthPeelingBlendRenderPass.cpp" />
+    <ClCompile Include="source\Core\Graphic\RenderPass\TBF_OIT_DepthPeelingRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\TBF_TransparentRenderPass.cpp" />
     <ClCompile Include="source\Behaviour\Behaviour.cpp" />
     <ClCompile Include="source\Camera\CameraBase.cpp" />
@@ -164,6 +166,7 @@
     <ClCompile Include="source\Test\OpaqueRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\SelfRotateBehaviour.cpp" />
     <ClCompile Include="source\Test\F_TransparentRendererBehaviour.cpp" />
+    <ClCompile Include="source\Test\TBF_OIT_RedBoxBehaviour.cpp" />
     <ClCompile Include="source\Test\TBF_TransparentRendererBehaviour.cpp" />
     <ClCompile Include="source\Utils\ChildBrotherTree.cpp" />
     <ClCompile Include="source\Utils\Condition.cpp" />
@@ -206,6 +209,8 @@
     <ClInclude Include="header\Core\Graphic\RenderPass\F_OpaqueRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\PreZRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\RenderPassBase.h" />
+    <ClInclude Include="header\Core\Graphic\RenderPass\TBF_OIT_DepthPeelingBlendRenderPass.h" />
+    <ClInclude Include="header\Core\Graphic\RenderPass\TBF_OIT_DepthPeelingRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\TBF_OpaqueRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\F_TransparentRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\TBF_TransparentRenderPass.h" />
@@ -233,6 +238,7 @@
     <ClInclude Include="header\Test\OpaqueRendererBehaviour.h" />
     <ClInclude Include="header\Test\SelfRotateBehaviour.h" />
     <ClInclude Include="header\Test\F_TransparentRendererBehaviour.h" />
+    <ClInclude Include="header\Test\TBF_OIT_RedBoxBehaviour.h" />
     <ClInclude Include="header\Test\TBF_TransparentRendererBehaviour.h" />
     <ClInclude Include="header\Utils\ChildBrotherTree.h" />
     <ClInclude Include="header\Utils\Condition.h" />

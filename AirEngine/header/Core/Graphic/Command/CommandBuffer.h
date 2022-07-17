@@ -74,7 +74,9 @@ namespace AirEngine
 					void CopyBuffer(Instance::Buffer* srcBuffer, Instance::Buffer* dstBuffer);
 					void CopyBuffer(Instance::Buffer* srcBuffer, VkDeviceSize srcOffset, Instance::Buffer* dstBuffer, VkDeviceSize dstOffset, VkDeviceSize size);
 					void EndRecord();
+					void ClearDepthImage(Instance::Image* image, VkImageLayout layout, float depth);
 					void Submit(std::vector<Command::Semaphore*> waitSemaphores, std::vector<VkPipelineStageFlags> waitStages, std::vector<Command::Semaphore*> signalSemaphores);
+					void Submit(std::vector<Command::Semaphore*> waitSemaphores, std::vector<VkPipelineStageFlags> waitStages);
 					void Submit(std::vector<Command::Semaphore*> signalSemaphores);
 					void Submit();
 					void WaitForFinish();

@@ -67,7 +67,7 @@ void AirEngine::Core::Graphic::Instance::DescriptorSet::UpdateBindingData(std::v
 			writeInfos[i].descriptorCount = 1;
 			writeInfos[i].pBufferInfo = &bufferInfos[i];
 		}
-		if (data[i].type == VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER || data[i].type == VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER)
+		else if (data[i].type == VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER || data[i].type == VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER)
 		{
 			bufferInfos[i].buffer = data[i].buffer;
 			bufferInfos[i].offset = data[i].offset;
