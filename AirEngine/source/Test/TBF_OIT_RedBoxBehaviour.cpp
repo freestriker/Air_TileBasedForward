@@ -5,7 +5,6 @@
 #include "Renderer/Renderer.h"
 
 AirEngine::Test::TBF_OIT_RedBoxBehaviour::TBF_OIT_RedBoxBehaviour()
-	: _material(nullptr)
 {
 }
 
@@ -22,10 +21,10 @@ void AirEngine::Test::TBF_OIT_RedBoxBehaviour::OnStart()
 	auto boxMesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\Box.ply");
 	auto shader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Shader>("..\\Asset\\Shader\\TBF_OIT_DP_RedShader.shader");
 
-	_material = new AirEngine::Core::Graphic::Material(shader);
+	auto material = new AirEngine::Core::Graphic::Material(shader);
 
 	auto renderer = GameObject()->GetComponent<Renderer::Renderer>();
-	renderer->AddMaterial(_material);
+	renderer->AddMaterial(material);
 	renderer->mesh = boxMesh;
 }
 

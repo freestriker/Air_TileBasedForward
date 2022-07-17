@@ -55,6 +55,23 @@ void AirEngine::Core::Graphic::RenderPass::PreZRenderPass::OnPopulateCommandBuff
 	//Render
 	_renderCommandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
+	//Init attachment layout
+	{
+		auto depthAttachmentFinishBarrier = Command::ImageMemoryBarrier
+		(
+			camera->RenderPassTarget()->Attachment("DepthAttachment"),
+			VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+			VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+			0,
+			0
+		);
+		_renderCommandBuffer->AddPipelineImageBarrier(
+			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+			{ &depthAttachmentFinishBarrier }
+		);
+	}
+
+
 	VkClearValue depthClearValue{};
 	depthClearValue.depthStencil.depth = 1.0f;
 	_renderCommandBuffer->BeginRenderPass(

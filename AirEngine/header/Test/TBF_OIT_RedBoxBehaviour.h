@@ -13,8 +13,6 @@ namespace AirEngine
 	{
 		class TBF_OIT_RedBoxBehaviour : public AirEngine::Behaviour::Behaviour
 		{
-		private:
-			Core::Graphic::Material* _material;
 		public:
 			TBF_OIT_RedBoxBehaviour();
 			~TBF_OIT_RedBoxBehaviour();

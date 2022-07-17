@@ -26,6 +26,8 @@
 #include "Core/Graphic/Material.h"
 #include "Core/Graphic/CoreObject/Window.h"
 #include "Core/Graphic/Command/ImageMemoryBarrier.h"
+#include "Core/Graphic/RenderPass/PresentRenderPass.h"
+#include "Core/Graphic/RenderPass/RenderPassBase.h"
 
 AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread AirEngine::Core::Graphic::CoreObject::Thread::_graphicThread = AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread();
 std::array<AirEngine::Core::Graphic::CoreObject::Thread::SubGraphicThread, 4> AirEngine::Core::Graphic::CoreObject::Thread::_subGraphicThreads = std::array<AirEngine::Core::Graphic::CoreObject::Thread::SubGraphicThread, 4>();
@@ -173,12 +175,12 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 			for (auto& rendererComponent : Instance::_renderers)
 			{
 				auto renderer = dynamic_cast<Renderer::Renderer*>(rendererComponent);
-				if (!(renderer && renderer->GetMAterials()->size() && renderer->mesh)) continue;
+				if (!(renderer && renderer->GetMaterials()->size() && renderer->mesh)) continue;
 				renderer->RefreshObjectInfo();
 
 				auto obbMvCenter = viewMatrix * renderer->GameObject()->transform.ModelMatrix() * glm::vec4(renderer->mesh->OrientedBoundingBox().Center(), 1.0f);
 
-				for (const auto& materialPair : *renderer->GetMAterials())
+				for (const auto& materialPair : *renderer->GetMaterials())
 				{
 					rendererDistenceMaps[materialPair.first].insert({ obbMvCenter.z, renderer });
 				}
@@ -202,16 +204,18 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 						renderPass->OnPopulateCommandBuffer(graphicCommandPool, *rendererDistanceMap, camera);
 					}
 				);
+				renderTasks[renderPass->Name()].wait();
+				renderPass->OnSubmit();
 			}
 
 			std::this_thread::yield();
 
-			//Submit command buffers
-			for (const auto& renderPass : *camera->_renderPassTarget->RenderPasses())
-			{
-				renderTasks[renderPass->Name()].wait();
-				renderPass->OnSubmit();
-			}
+			////Submit command buffers
+			//for (const auto& renderPass : *camera->_renderPassTarget->RenderPasses())
+			//{
+			//	renderTasks[renderPass->Name()].wait();
+			//	renderPass->OnSubmit();
+			//}
 
 			//Clear command buffers
 			for (const auto& renderPass : *camera->_renderPassTarget->RenderPasses())
@@ -223,114 +227,26 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 			ClearCommandPools();
 		}
 
-
 		Logic::CoreObject::Instance::SetNeedIterateRenderer(false);
 		Utils::Log::Message("Instance::EndRenderCondition().Awake()");
 		Instance::EndRenderCondition().Awake();
 
 		//Copy
+		Utils::Log::Message("Copy to swapchain image");
 		auto mainCamera = Camera::CameraBase::mainCamera;
-		//auto qfi1 = Window::VulkanWindow_()->graphicsQueueFamilyIndex();
-		//auto qfi2 = Instance::Queue_("GraphicQueue")->queueFamilyIndex;
 		if (mainCamera)
 		{
-			Utils::Log::Message("Copy()");
-			auto curSwapchaineImageIndex = Window::VulkanWindow_()->currentSwapChainImageIndex();
-			auto curSwapchaineImage = Window::VulkanWindow_()->swapChainImage(curSwapchaineImageIndex);
-			auto windowExtent = Window::Extent();
-
-			auto copyTask = AddTask(
-				[curSwapchaineImage, windowExtent, mainCamera](Command::CommandPool* graphicCommandPool, Command::CommandPool* computeCommandPool)
+			auto presentRenderPass = &Graphic::CoreObject::Instance::RenderPassManager().RenderPass("PresentRenderPass");
+			presentRenderPass->OnPrepare(mainCamera);
+			AddTask(
+				[mainCamera, presentRenderPass](Command::CommandPool* graphicCommandPool, Command::CommandPool* computeCommandPool)
 				{
-					auto presentCommandBuffer = graphicCommandPool->CreateCommandBuffer("PresentCopyCommandBuffer", VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY);
-					presentCommandBuffer->Reset();
-					presentCommandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT);
-					//Present queue attachment to transfer layout
-					{
-						Command::ImageMemoryBarrier attachmentReleaseBarrier = Command::ImageMemoryBarrier
-						(
-							mainCamera->attachments["ColorAttachment"],
-							VK_IMAGE_LAYOUT_ATTACHMENT_OPTIMAL,
-							VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-							VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-							VK_ACCESS_TRANSFER_READ_BIT
-						);
-
-						presentCommandBuffer->AddPipelineImageBarrier(
-							VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
-							{ &attachmentReleaseBarrier }
-						);
-					}
-					//Present queue swapchain image to transfer layout
-					{
-						VkImageSubresourceRange subresourceRange = {};
-						subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-						subresourceRange.baseMipLevel = 0;
-						subresourceRange.levelCount = 1;
-						subresourceRange.baseArrayLayer = 0;
-						subresourceRange.layerCount = 1;
-
-						Command::ImageMemoryBarrier transferDstBarrier = Command::ImageMemoryBarrier
-						(
-							curSwapchaineImage,
-							VK_IMAGE_LAYOUT_UNDEFINED,
-							VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-							0,
-							VK_ACCESS_TRANSFER_WRITE_BIT,
-							{ subresourceRange }
-						);
-
-						presentCommandBuffer->AddPipelineImageBarrier(
-							VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-							{ &transferDstBarrier }
-						);
-					}
-					//Copy attachment
-					{
-						presentCommandBuffer->Blit(
-							mainCamera->attachments["ColorAttachment"],
-							VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-							curSwapchaineImage,
-							VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-							{ 0, static_cast<int>(windowExtent.height), 0 },
-							VkOffset3D{ static_cast<int>(windowExtent.width), 0, 1 },
-							VkFilter::VK_FILTER_LINEAR
-						);
-					}
-					//Present queue swapchain image to present layout
-					{
-						VkImageSubresourceRange subresourceRange = {};
-						subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-						subresourceRange.baseMipLevel = 0;
-						subresourceRange.levelCount = 1;
-						subresourceRange.baseArrayLayer = 0;
-						subresourceRange.layerCount = 1;
-
-						Command::ImageMemoryBarrier presentSrcBarrier = Command::ImageMemoryBarrier
-						(
-							curSwapchaineImage,
-							VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-							VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
-							VK_ACCESS_TRANSFER_WRITE_BIT,
-							0,
-							{ subresourceRange }
-						);
-
-						presentCommandBuffer->AddPipelineImageBarrier(
-							VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-							{ &presentSrcBarrier }
-						);
-					}
-					presentCommandBuffer->EndRecord();
-					presentCommandBuffer->Submit();
-					presentCommandBuffer->WaitForFinish();
-
-					graphicCommandPool->DestoryCommandBuffer(presentCommandBuffer);
+					std::multimap<float, Renderer::Renderer*> emptyTable = std::multimap<float, Renderer::Renderer*>();
+					presentRenderPass->OnPopulateCommandBuffer(graphicCommandPool, emptyTable, mainCamera);
 				}
-			);
-
-			std::this_thread::yield();
-			copyTask.wait();
+			).wait();
+			presentRenderPass->OnSubmit();
+			presentRenderPass->OnClear();
 		}
 
 		Utils::Log::Message("Instance::EndPresentCondition().Awake()");

@@ -20,6 +20,7 @@ AirEngine::Core::Graphic::Instance::Image::Image()
 	, _memory(nullptr)
 	, _layerCount(1)
 	, _perLayerSize()
+	, _isNative(false)
 {
 
 }
@@ -27,10 +28,13 @@ AirEngine::Core::Graphic::Instance::Image::Image()
 
 AirEngine::Core::Graphic::Instance::Image::~Image()
 {
-	vkDestroyImageView(Core::Graphic::CoreObject::Instance::VkDevice_(), _vkImageView, nullptr);
-	vkDestroyImage(Core::Graphic::CoreObject::Instance::VkDevice_(), _vkImage, nullptr);
-	Core::Graphic::CoreObject::Instance::MemoryManager().ReleaseMemory(*_memory);
-	delete _memory;
+	if (!_isNative)
+	{
+		vkDestroyImageView(Core::Graphic::CoreObject::Instance::VkDevice_(), _vkImageView, nullptr);
+		vkDestroyImage(Core::Graphic::CoreObject::Instance::VkDevice_(), _vkImage, nullptr);
+		Core::Graphic::CoreObject::Instance::MemoryManager().ReleaseMemory(*_memory);
+		delete _memory;
+	}
 }
 
 VkImage AirEngine::Core::Graphic::Instance::Image::VkImage_()
@@ -227,6 +231,35 @@ AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::I
 	newImage->_mipLevels = 1;
 	newImage->_vkSampleCount = VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT;
 	newImage->_vkMemoryProperty = memoryProperty;
+	newImage->_vkImageViewType = VkImageViewType::VK_IMAGE_VIEW_TYPE_2D;
+	newImage->_vkImageAspect = aspect;
+	newImage->_vkImage = newVkImage;
+	newImage->_vkImageView = newImageView;
+	newImage->_memory = newMemory;
+	newImage->_layerCount = 1;
+	newImage->_perLayerSize = extent.width * extent.height * 4;
+
+	return newImage;
+}
+
+AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::Image::CreateNative2DImage(VkImage vkImage, VkImageView vkImageView, VkExtent2D extent, VkFormat format, VkImageUsageFlags imageUsage, VkImageAspectFlags aspect)
+{
+	VkImage newVkImage = vkImage;
+
+	auto newMemory = nullptr;
+
+	VkImageView newImageView = vkImageView;
+
+	Graphic::Instance::Image* newImage = new Graphic::Instance::Image();
+	newImage->_isNative = true;
+	newImage->_vkImageType = VkImageType::VK_IMAGE_TYPE_2D;
+	newImage->_extent = { extent.width, extent.height, 1 };
+	newImage->_vkFormat = format;
+	newImage->_vkImageTiling = VkImageTiling::VK_IMAGE_TILING_OPTIMAL;
+	newImage->_vkImageUsage = imageUsage;
+	newImage->_mipLevels = 1;
+	newImage->_vkSampleCount = VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT;
+	newImage->_vkMemoryProperty = 0;
 	newImage->_vkImageViewType = VkImageViewType::VK_IMAGE_VIEW_TYPE_2D;
 	newImage->_vkImageAspect = aspect;
 	newImage->_vkImage = newVkImage;

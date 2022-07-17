@@ -32,7 +32,7 @@ AirEngine::Core::Graphic::Material* AirEngine::Renderer::Renderer::GetMaterial(s
 	return _materials[pass];
 }
 
-const std::map<std::string, AirEngine::Core::Graphic::Material*>* AirEngine::Renderer::Renderer::GetMAterials()
+const std::map<std::string, AirEngine::Core::Graphic::Material*>* AirEngine::Renderer::Renderer::GetMaterials()
 {
 	return &_materials;
 }

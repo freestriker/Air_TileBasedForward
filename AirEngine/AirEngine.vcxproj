@@ -105,6 +105,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Core\Graphic\RenderPass\PresentRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\TBF_OIT_DepthPeelingBlendRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\TBF_OIT_DepthPeelingRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\TBF_TransparentRenderPass.cpp" />
@@ -161,9 +162,9 @@
     <ClCompile Include="source\Renderer\Renderer.cpp" />
     <ClCompile Include="source\Test\BackgroundRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\CameraMoveBehaviour.cpp" />
-    <ClCompile Include="source\Test\GlassRendererBehaviour.cpp" />
-    <ClCompile Include="source\Test\MirrorRendererBehaviour.cpp" />
-    <ClCompile Include="source\Test\OpaqueRendererBehaviour.cpp" />
+    <ClCompile Include="source\Test\F_GlassRendererBehaviour.cpp" />
+    <ClCompile Include="source\Test\F_MirrorRendererBehaviour.cpp" />
+    <ClCompile Include="source\Test\F_OpaqueRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\SelfRotateBehaviour.cpp" />
     <ClCompile Include="source\Test\F_TransparentRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\TBF_OIT_RedBoxBehaviour.cpp" />
@@ -207,6 +208,7 @@
     <ClInclude Include="header\Core\Graphic\Material.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\BackgroundRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\F_OpaqueRenderPass.h" />
+    <ClInclude Include="header\Core\Graphic\RenderPass\PresentRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\PreZRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\RenderPassBase.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\TBF_OIT_DepthPeelingBlendRenderPass.h" />
@@ -233,9 +235,9 @@
     <ClInclude Include="header\Renderer\Renderer.h" />
     <ClInclude Include="header\Test\BackgroundRendererBehaviour.h" />
     <ClInclude Include="header\Test\CameraMoveBehaviour.h" />
-    <ClInclude Include="header\Test\GlassRendererBehaviour.h" />
-    <ClInclude Include="header\Test\MirrorRendererBehaviour.h" />
-    <ClInclude Include="header\Test\OpaqueRendererBehaviour.h" />
+    <ClInclude Include="header\Test\F_GlassRendererBehaviour.h" />
+    <ClInclude Include="header\Test\F_MirrorRendererBehaviour.h" />
+    <ClInclude Include="header\Test\F_OpaqueRendererBehaviour.h" />
     <ClInclude Include="header\Test\SelfRotateBehaviour.h" />
     <ClInclude Include="header\Test\F_TransparentRendererBehaviour.h" />
     <ClInclude Include="header\Test\TBF_OIT_RedBoxBehaviour.h" />

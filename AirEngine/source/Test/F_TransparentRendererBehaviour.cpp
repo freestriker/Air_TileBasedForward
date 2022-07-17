@@ -12,14 +12,6 @@ RTTR_REGISTRATION
 }
 
 AirEngine::Test::F_TransparentRendererBehaviour::F_TransparentRendererBehaviour()
-	: meshTask()
-	, shaderTask()
-	, diffuseTexture2DTask()
-	, loaded(false)
-	, mesh(nullptr)
-	, shader(nullptr)
-	, diffuseTexture2D(nullptr)
-	, material(nullptr)
 {
 }
 
@@ -33,28 +25,21 @@ void AirEngine::Test::F_TransparentRendererBehaviour::OnAwake()
 
 void AirEngine::Test::F_TransparentRendererBehaviour::OnStart()
 {
-	meshTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::Mesh>("..\\Asset\\Mesh\\Square.ply");
-	shaderTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Core::Graphic::Shader>("..\\Asset\\Shader\\F_TransparentShader.shader");
-	diffuseTexture2DTask = Core::IO::CoreObject::Instance::AssetManager().LoadAsync<Asset::Texture2D>("..\\Asset\\Texture\\BrokenGlassTexture2D.json");
+	auto mesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\Square.ply");
+	auto shader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Shader>("..\\Asset\\Shader\\F_TransparentShader.shader");
+	auto diffuse = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Texture2D>("..\\Asset\\Texture\\BrokenGlassTexture2D.json");
+
+	auto material = new Core::Graphic::Material(shader);
+	material->SetTexture2D("diffuseTexture", diffuse);
+
+	auto renderer = GameObject()->GetComponent<Renderer::Renderer>();
+	renderer->AddMaterial(material);
+	renderer->mesh = mesh;
 }
 
 void AirEngine::Test::F_TransparentRendererBehaviour::OnUpdate()
 {
-	if (!loaded && meshTask._Is_ready() && shaderTask._Is_ready() && diffuseTexture2DTask._Is_ready())
-	{
-		mesh = meshTask.get();
-		shader = shaderTask.get();
-		diffuseTexture2D = diffuseTexture2DTask.get();
-		material = new Core::Graphic::Material(shader);
-		material->SetTexture2D("diffuseTexture", diffuseTexture2D);
 
-		loaded = true;
-
-		auto meshRenderer = GameObject()->GetComponent<Renderer::Renderer>();
-		meshRenderer->AddMaterial(material);
-		meshRenderer->mesh = mesh;
-		Utils::Log::Message("Finish load.");
-	}
 }
 
 void AirEngine::Test::F_TransparentRendererBehaviour::OnDestroy()

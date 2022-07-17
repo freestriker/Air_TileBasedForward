@@ -65,6 +65,31 @@ void AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::OnPopulateCommand
 	//Render
 	_renderCommandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
+	//Init attachment layout
+	{
+		auto colorAttachmentFinishBarrier = Command::ImageMemoryBarrier
+		(
+			camera->RenderPassTarget()->Attachment("ColorAttachment"),
+			VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+			VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			0,
+			0
+		);
+		auto depthAttachmentFinishBarrier = Command::ImageMemoryBarrier
+		(
+			camera->RenderPassTarget()->Attachment("DepthAttachment"),
+			VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+			VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+			0,
+			0
+		);
+		_renderCommandBuffer->AddPipelineImageBarrier(
+			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+			{ &colorAttachmentFinishBarrier, &depthAttachmentFinishBarrier }
+		);
+
+	}
+
 	VkClearValue colorClearValue{};
 	colorClearValue.color = { {0.0f, 0.0f, 0.0f, 1.0f} };
 	_renderCommandBuffer->BeginRenderPass(

@@ -38,7 +38,7 @@ namespace AirEngine
 
 			void AddMaterial(Core::Graphic::Material* material);
 			Core::Graphic::Material* GetMaterial(std::string pass);
-			const std::map<std::string, Core::Graphic::Material*>* GetMAterials();
+			const std::map<std::string, Core::Graphic::Material*>* GetMaterials();
 
 			Renderer();
 			virtual ~Renderer();
