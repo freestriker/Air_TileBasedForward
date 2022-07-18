@@ -3,6 +3,7 @@
 #include "Asset/TextureCube.h"
 #include <vector>
 #include <array>
+#include <optional>
 #define DEPTH_PEELING_STEP_COUNT 4
 
 namespace AirEngine
@@ -40,7 +41,7 @@ namespace AirEngine
 					std::array<Manager::RenderPassTarget*, DEPTH_PEELING_STEP_COUNT> _renderPassTargets;
 					Instance::ImageSampler* _depthTextureSampler;
 
-					bool _needDepthPeelingPass;
+					std::optional<bool> _needDepthPeelingPass;
 
 					void OnPopulateRenderPassSettings(RenderPassSettings& creator)override;
 					void OnPrepare(Camera::CameraBase* camera)override;
@@ -57,7 +58,6 @@ namespace AirEngine
 
 					std::array<Instance::Image*, DEPTH_PEELING_STEP_COUNT> PeeledColorImages();
 					bool NeedDepthPeelingPass();
-
 				};
 			}
 		}

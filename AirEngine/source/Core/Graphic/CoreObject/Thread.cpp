@@ -196,6 +196,7 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 			//Add build command buffer task
 			for (const auto& renderPass : *camera->_renderPassTarget->RenderPasses())
 			{
+				//Utils::Log::Message(renderPass->Name());
 				auto rendererDistanceMap = &rendererDistenceMaps[renderPass->Name()];
 
 				renderTasks[renderPass->Name()] = AddTask(
@@ -204,18 +205,14 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 						renderPass->OnPopulateCommandBuffer(graphicCommandPool, *rendererDistanceMap, camera);
 					}
 				);
+			}
+
+			//Submit command buffers
+			for (const auto& renderPass : *camera->_renderPassTarget->RenderPasses())
+			{
 				renderTasks[renderPass->Name()].wait();
 				renderPass->OnSubmit();
 			}
-
-			std::this_thread::yield();
-
-			////Submit command buffers
-			//for (const auto& renderPass : *camera->_renderPassTarget->RenderPasses())
-			//{
-			//	renderTasks[renderPass->Name()].wait();
-			//	renderPass->OnSubmit();
-			//}
 
 			//Clear command buffers
 			for (const auto& renderPass : *camera->_renderPassTarget->RenderPasses())
@@ -231,8 +228,8 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 		Utils::Log::Message("Instance::EndRenderCondition().Awake()");
 		Instance::EndRenderCondition().Awake();
 
-		//Copy
-		Utils::Log::Message("Copy to swapchain image");
+		//Present
+		Utils::Log::Message("Blit to swapchain image");
 		auto mainCamera = Camera::CameraBase::mainCamera;
 		if (mainCamera)
 		{

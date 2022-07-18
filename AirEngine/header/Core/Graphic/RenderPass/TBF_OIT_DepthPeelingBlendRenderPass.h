@@ -32,10 +32,7 @@ namespace AirEngine
 					Command::CommandPool* _renderCommandPool;
 					Asset::Mesh* _fullScreenMesh;
 					std::vector<Material*> _blendMaterials;
-					Instance::Image* _temporaryDepthImage;
-					std::vector<Instance::Image*> _peeledColorImages;
-					std::vector<Instance::Image*> _peeledDepthImages;
-					std::vector<Instance::ImageSampler*> _imageSamplers;
+					Instance::ImageSampler* _colorTextureSampler;
 					void OnPopulateRenderPassSettings(RenderPassSettings& creator)override;
 					void OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)override;
 					void OnSubmit()override;

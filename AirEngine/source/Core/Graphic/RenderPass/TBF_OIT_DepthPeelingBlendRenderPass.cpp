@@ -76,16 +76,6 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingBlendRenderPass::
 			_blendMaterials[i] = new Material(Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Shader>("..\\Asset\\Shader\\OIT_DP_BlendShader.shader"));
 		}
 	}
-	//_peeledColorImages = dynamic_cast<TBF_OIT_DepthPeelingRenderPass&>(CoreObject::Instance::RenderPassManager().RenderPass("TBF_OIT_DepthPeelingRenderPass")).PeeledColorImages();
-	//_peeledDepthImages = dynamic_cast<TBF_OIT_DepthPeelingRenderPass&>(CoreObject::Instance::RenderPassManager().RenderPass("TBF_OIT_DepthPeelingRenderPass")).PeeledDepthImages();
-	
-	_temporaryDepthImage = Graphic::Instance::Image::Create2DImage(
-		camera->RenderPassTarget()->Extent()
-		, VkFormat::VK_FORMAT_D32_SFLOAT
-		, VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT
-		, VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-		, VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT
-	);
 }
 
 void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingBlendRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
@@ -96,123 +86,51 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingBlendRenderPass::
 	_renderCommandBuffer->Reset();
 	_renderCommandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
-	bool needDepthPeelingPass = dynamic_cast<TBF_OIT_DepthPeelingRenderPass&>(CoreObject::Instance::RenderPassManager().RenderPass("TBF_OIT_DepthPeelingRenderPass")).NeedDepthPeelingPass();
+	auto peeledColorImages = dynamic_cast<TBF_OIT_DepthPeelingRenderPass&>(CoreObject::Instance::RenderPassManager().RenderPass("TBF_OIT_DepthPeelingRenderPass")).PeeledColorImages();
 
+	bool needDepthPeelingPass = dynamic_cast<TBF_OIT_DepthPeelingRenderPass&>(CoreObject::Instance::RenderPassManager().RenderPass("TBF_OIT_DepthPeelingRenderPass")).NeedDepthPeelingPass();
 	if (needDepthPeelingPass)
 	{
-		///Wait render finish
+		///Init attachment layout
 		{
-			for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
-			{
-				auto colorAttachmentFinishBarrier = Command::ImageMemoryBarrier
-				(
-					_peeledColorImages[i],
-					VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-					VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-					VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-					VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-				);
-				_renderCommandBuffer->AddPipelineImageBarrier(
-					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-					{ &colorAttachmentFinishBarrier }
-				);
-				auto depthAttachmentFinishBarrier = Command::ImageMemoryBarrier
-				(
-					_peeledDepthImages[i],
-					VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-					VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-					VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-					VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-				);
-				_renderCommandBuffer->AddPipelineImageBarrier(
-					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-					{ &depthAttachmentFinishBarrier }
-				);
-			}
+			Command::ImageMemoryBarrier colorAttachmentBarrier = Command::ImageMemoryBarrier
+			(
+				camera->RenderPassTarget()->Attachment("ColorAttachment"),
+				VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+				VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+				VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+				VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
+			);
+			_renderCommandBuffer->AddPipelineImageBarrier(
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+				{ &colorAttachmentBarrier }
+			);
+
+			Command::ImageMemoryBarrier depthAttachmentBarrier = Command::ImageMemoryBarrier
+			(
+				camera->RenderPassTarget()->Attachment("DepthAttachment"),
+				VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+				VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+				VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+				VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
+			);
+			_renderCommandBuffer->AddPipelineImageBarrier(
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+				{ &depthAttachmentBarrier }
+			);
 		}
-
-		///Copy depth image
-		{
-			//Change layout
-			{
-				Command::ImageMemoryBarrier depthAttachmentLayoutBarrier = Command::ImageMemoryBarrier
-				(
-					camera->RenderPassTarget()->Attachment("DepthAttachment"),
-					VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-					VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-					VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-					VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT
-				);
-
-				Command::ImageMemoryBarrier temporaryImageLayoutBarrier = Command::ImageMemoryBarrier
-				(
-					_temporaryDepthImage,
-					VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-					VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-					0,
-					VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT
-				);
-
-				_renderCommandBuffer->AddPipelineImageBarrier(
-					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-					{ &depthAttachmentLayoutBarrier, &temporaryImageLayoutBarrier }
-				);
-			}
-
-			//Copy depth
-			{
-				_renderCommandBuffer->CopyImage
-				(
-					camera->RenderPassTarget()->Attachment("DepthAttachment"),
-					VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-					_temporaryDepthImage,
-					VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
-				);
-			}
-
-			//Change layout
-			{
-				Command::ImageMemoryBarrier depthAttachmentLayoutBarrier = Command::ImageMemoryBarrier
-				(
-					camera->RenderPassTarget()->Attachment("DepthAttachment"),
-					VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-					VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-					VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT,
-					VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
-				);
-
-				Command::ImageMemoryBarrier temporaryImageLayoutBarrier = Command::ImageMemoryBarrier
-				(
-					_temporaryDepthImage,
-					VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-					VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-					VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
-					VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-				);
-
-				_renderCommandBuffer->AddPipelineImageBarrier(
-					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
-					{ &depthAttachmentLayoutBarrier }
-				);
-				_renderCommandBuffer->AddPipelineImageBarrier(
-					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-					{ &temporaryImageLayoutBarrier }
-				);
-			}
-
-		}
-
-		_renderCommandBuffer->BeginRenderPass(
-			this,
-			camera->RenderPassTarget(),
-			{ }
-		);
 
 		//Blend all layers to color attachment
 		{
+			_renderCommandBuffer->BeginRenderPass(
+				this,
+				camera->RenderPassTarget(),
+				{ }
+			);
+
 			Command::ImageMemoryBarrier drawBarrier = Command::ImageMemoryBarrier
 			(
-				camera->RenderPassTarget()->FrameBuffer(Name())->Attachment("ColorAttachment"),
+				camera->RenderPassTarget()->Attachment("ColorAttachment"),
 				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 				VK_ACCESS_COLOR_ATTACHMENT_READ_BIT,
@@ -221,9 +139,8 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingBlendRenderPass::
 
 			for (int i = DEPTH_PEELING_STEP_COUNT - 1; i >= 0; i--)
 			{
-				_blendMaterials[i]->SetSlotData("srcPeeledColorTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _imageSamplers[i]->VkSampler_(), _peeledColorImages[i]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
-				_blendMaterials[i]->SetSlotData("srcPeeledDepthImage", { 0 }, { {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_NULL_HANDLE, _peeledColorImages[i]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL} });
-				_blendMaterials[i]->SetSlotData("depthImage", { 0 }, { {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_NULL_HANDLE, _temporaryDepthImage->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL} });
+				_blendMaterials[i]->SetSlotData("srcPeeledColorTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _colorTextureSampler->VkSampler_(), peeledColorImages[i]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
+
 				_renderCommandBuffer->BindMaterial(_blendMaterials[i]);
 				_renderCommandBuffer->DrawMesh(_fullScreenMesh);
 
@@ -233,9 +150,8 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingBlendRenderPass::
 					{ &drawBarrier }
 				);
 			}
+			_renderCommandBuffer->EndRenderPass();
 		}
-
-		_renderCommandBuffer->EndRenderPass();
 	}
 	_renderCommandBuffer->EndRecord();
 }
@@ -248,9 +164,6 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingBlendRenderPass::
 
 void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingBlendRenderPass::OnClear()
 {
-	delete _temporaryDepthImage;
-	_peeledColorImages.clear();
-	_peeledDepthImages.clear();
 	_renderCommandPool->DestoryCommandBuffer(_renderCommandBuffer);
 }
 
@@ -260,18 +173,18 @@ AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingBlendRenderPass::TBF_O
 	, _renderCommandPool(nullptr)
 	, _fullScreenMesh(nullptr)
 	, _blendMaterials()
-	, _peeledColorImages()
-	, _peeledDepthImages()
-	, _imageSamplers()
-	, _temporaryDepthImage(nullptr)
+	, _colorTextureSampler()
 {
 	_fullScreenMesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\BackgroundMesh.ply");
 
-	_imageSamplers.resize(DEPTH_PEELING_STEP_COUNT, nullptr);
-	for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
-	{
-		_imageSamplers[i] = new Instance::ImageSampler(VkFilter::VK_FILTER_NEAREST);
-	}
+	_colorTextureSampler = new Instance::ImageSampler
+	(
+		VkFilter::VK_FILTER_NEAREST,
+		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
+		VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
+		0.0f,
+		VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
+	);
 }
 
 AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingBlendRenderPass::~TBF_OIT_DepthPeelingBlendRenderPass()

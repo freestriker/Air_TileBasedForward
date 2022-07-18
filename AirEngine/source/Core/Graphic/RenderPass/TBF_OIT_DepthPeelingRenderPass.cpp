@@ -318,7 +318,7 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingRenderPass::OnCle
 
 	_renderCommandPool->DestoryCommandBuffer(_renderCommandBuffer);
 
-	_needDepthPeelingPass = false;
+	_needDepthPeelingPass = std::nullopt;
 }
 
 AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingRenderPass::TBF_OIT_DepthPeelingRenderPass()
@@ -326,7 +326,7 @@ AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingRenderPass::TBF_OIT_De
 	, _renderCommandBuffer(nullptr)
 	, _renderCommandPool(nullptr)
 	, _renderPassTargets()
-	, _needDepthPeelingPass(false)
+	, _needDepthPeelingPass(std::nullopt)
 	, _thresholdDepthTexture(nullptr)
 	, _depthAttachment(nullptr)
 	, _colorAttachments()
@@ -353,5 +353,9 @@ std::array<AirEngine::Core::Graphic::Instance::Image*, DEPTH_PEELING_STEP_COUNT>
 
 bool AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingRenderPass::NeedDepthPeelingPass()
 {
-	return _needDepthPeelingPass;
+	while (!_needDepthPeelingPass.has_value())
+	{
+		std::this_thread::yield();
+	}
+	return _needDepthPeelingPass.value();
 }
