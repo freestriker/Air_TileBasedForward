@@ -30,8 +30,6 @@
 #include "Core/Graphic/RenderPass/TBF_OIT_DepthPeelingRenderPass.h"
 #include "Core/Graphic/Instance/ImageSampler.h"
 
-#define DEPTH_PEELING_STEP_COUNT 4
-
 void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingBlendRenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
 {
 	creator.AddColorAttachment(
@@ -128,28 +126,13 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingBlendRenderPass::
 				{ }
 			);
 
-			Command::ImageMemoryBarrier drawBarrier = Command::ImageMemoryBarrier
-			(
-				camera->RenderPassTarget()->Attachment("ColorAttachment"),
-				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-				VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-				VK_ACCESS_COLOR_ATTACHMENT_READ_BIT,
-				VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
-			);
-
-			for (int i = DEPTH_PEELING_STEP_COUNT - 1; i >= 0; i--)
+			for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
 			{
-				_blendMaterials[i]->SetSlotData("srcPeeledColorTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _colorTextureSampler->VkSampler_(), peeledColorImages[i]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
-
-				_renderCommandBuffer->BindMaterial(_blendMaterials[i]);
-				_renderCommandBuffer->DrawMesh(_fullScreenMesh);
-
-				_renderCommandBuffer->AddPipelineImageBarrier(
-					VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
-					VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-					{ &drawBarrier }
-				);
+				_blendMaterials[0]->SetSlotData("srcPeeledColorTexture_" + std::to_string(i), {0}, {{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _colorTextureSampler->VkSampler_(), peeledColorImages[i]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}});
 			}
+			_renderCommandBuffer->BindMaterial(_blendMaterials[0]);
+			_renderCommandBuffer->DrawMesh(_fullScreenMesh);
+
 			_renderCommandBuffer->EndRenderPass();
 		}
 	}

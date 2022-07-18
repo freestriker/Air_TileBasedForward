@@ -9,5 +9,5 @@ layout(location = 0) out vec4 colorAttachment;
 
 void main() 
 {
-    colorAttachment = texture(srcColorTexture, outTexCoords.xy);
+    colorAttachment = vec4(texture(srcColorTexture, outTexCoords.xy).xyz, 1);
 }
