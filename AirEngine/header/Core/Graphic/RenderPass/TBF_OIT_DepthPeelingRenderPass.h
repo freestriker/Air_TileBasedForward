@@ -34,8 +34,9 @@ namespace AirEngine
 				private:
 					Command::CommandBuffer* _renderCommandBuffer;
 					Command::CommandPool* _renderCommandPool;
-					std::array<Instance::Image*, 2> _depthTextures;
-					std::array<Instance::Image*, DEPTH_PEELING_STEP_COUNT> _colorTextures;
+					Instance::Image* _thresholdDepthTexture;
+					Instance::Image* _depthAttachment;
+					std::array<Instance::Image*, DEPTH_PEELING_STEP_COUNT> _colorAttachments;
 					std::array<Manager::RenderPassTarget*, DEPTH_PEELING_STEP_COUNT> _renderPassTargets;
 					Instance::ImageSampler* _depthTextureSampler;
 

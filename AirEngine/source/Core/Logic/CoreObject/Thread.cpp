@@ -148,7 +148,6 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::IterateByDynamicBf
 
 	validGameObjectInIteration.clear();
 	validComponentInIteration.clear();
-	Utils::Log::Message("Core::Thread::LogicThread iterate " + std::to_string(static_cast<int>(targetComponentType)) + " by dynamic BFS.");
 }
 
 void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::IterateByStaticBfs(Object::Component::ComponentType targetComponentType)
@@ -196,8 +195,6 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::IterateByStaticBfs
 		curGenGameObjectHeads.clear();
 		std::swap(nextGenGameObjectHeads, curGenGameObjectHeads);
 	}
-
-	Utils::Log::Message("Core::Thread::LogicThread iterate " + std::to_string(static_cast<int>(targetComponentType)) + " by static BFS.");
 }
 
 void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::IterateByStaticBfs(Object::Component::ComponentType targetComponentType, std::vector<Object::Component*>& targetComponents)
@@ -247,8 +244,6 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::IterateByStaticBfs
 		curGenGameObjectHeads.clear();
 		std::swap(nextGenGameObjectHeads, curGenGameObjectHeads);
 	}
-
-	Utils::Log::Message("Core::Thread::LogicThread iterate " + std::to_string(static_cast<int>(targetComponentType)) + " by static BFS with record.");
 }
 
 void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::IterateByStaticBfs(std::vector<Object::Component::ComponentType> targetComponentTypes)
@@ -306,8 +301,6 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::IterateByStaticBfs
 		curGenGameObjectHeads.clear();
 		std::swap(nextGenGameObjectHeads, curGenGameObjectHeads);
 	}
-
-	Utils::Log::Message("Core::Thread::LogicThread iterate " + targetComponentTypeString + "by static BFS with record.");
 }
 
 void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::IterateByStaticBfs(std::vector<Object::Component::ComponentType> targetComponentTypes, std::vector<std::vector<Object::Component*>>& targetComponents)
@@ -368,8 +361,6 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::IterateByStaticBfs
 		curGenGameObjectHeads.clear();
 		std::swap(nextGenGameObjectHeads, curGenGameObjectHeads);
 	}
-
-	Utils::Log::Message("Core::Thread::LogicThread iterate " + targetComponentTypeString + "by static BFS with record.");
 }
 
 AirEngine::Core::Logic::CoreObject::Thread::LogicThread::LogicThread()
@@ -457,11 +448,11 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	mirrorMeshRendererGo->AddComponent(new Test::F_MirrorRendererBehaviour());
 	mirrorMeshRendererGo->transform.SetTranslation(glm::vec3(-3, 0, 0));
 
-	//Logic::Object::GameObject* culledRendererGo = new Logic::Object::GameObject("MeshRendererCulled");
-	//renderers->AddChild(culledRendererGo);
-	//culledRendererGo->AddComponent(new Renderer::Renderer());
-	//culledRendererGo->AddComponent(new Test::F_OpaqueRendererBehaviour());
-	//culledRendererGo->transform.SetTranslation(glm::vec3(2000, 2000, 2000));
+	Logic::Object::GameObject* culledRendererGo = new Logic::Object::GameObject("MeshRendererCulled");
+	renderers->AddChild(culledRendererGo);
+	culledRendererGo->AddComponent(new Renderer::Renderer());
+	culledRendererGo->AddComponent(new Test::F_OpaqueRendererBehaviour());
+	culledRendererGo->transform.SetTranslation(glm::vec3(2000, 2000, 2000));
 
 	Logic::Object::GameObject* transparentRenderers = new Logic::Object::GameObject("TransparentRenderers");
 	renderers->AddChild(transparentRenderers);
