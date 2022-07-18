@@ -30,6 +30,7 @@
 #include "Core/IO/CoreObject/Instance.h"
 #include "Core/IO/Manager/AssetManager.h"
 #include "Core/Graphic/Manager/LightManager.h"
+#include "Core/Graphic/RenderPass/PreZRenderPass.h"
 
 void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
 {
@@ -71,18 +72,6 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPrepare(Camer
 {
 	auto attachmentSize = camera->RenderPassTarget()->Extent();
 
-	_depthBuffer = new Instance::Buffer(
-		attachmentSize.width * attachmentSize.height * sizeof(float), 
-		VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-		VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-	);
-	_depthImage = Instance::Image::Create2DImage(
-		attachmentSize,
-		VkFormat::VK_FORMAT_R32_SFLOAT,
-		VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT,
-		VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-		VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
-	);
 	VkExtent2D globalGroupSize = { (attachmentSize.width + TILE_WIDTH - 1) / TILE_WIDTH, (attachmentSize.height + TILE_WIDTH - 1) / TILE_WIDTH };
 	_opauqeLightIndexListsBuffer = new Instance::Buffer(
 		sizeof(LightIndexList) * globalGroupSize.width * globalGroupSize.height + 8, 
@@ -107,86 +96,19 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPopulateComma
 	_renderCommandBuffer->Reset();
 	_renderCommandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
-	//Change layout
-	{
-		Command::ImageMemoryBarrier depthAttachmentLayoutBarrier = Command::ImageMemoryBarrier
-		(
-			camera->RenderPassTarget()->Attachment("DepthAttachment"),
-			VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-			VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-			VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-			VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT
-		);
-
-		_renderCommandBuffer->AddPipelineImageBarrier(
-			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-			{ &depthAttachmentLayoutBarrier }
-		);
-	}
-
-	//Copy depth to buffer
-	_renderCommandBuffer->CopyImageToBuffer(camera->RenderPassTarget()->Attachment("DepthAttachment"), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, _depthBuffer);
-
 	//Clear lists buffer
 	_renderCommandBuffer->FillBuffer(_opauqeLightIndexListsBuffer, 0);
 	_renderCommandBuffer->FillBuffer(_transparentLightIndexListsBuffer, 0);
 
-	///Wait copy depth to buffer finish
-	{
-		Command::BufferMemoryBarrier depthTexelBufferCopyEndBarrier = Command::BufferMemoryBarrier
-		(
-			_depthBuffer,
-			VK_ACCESS_TRANSFER_WRITE_BIT,
-			VK_ACCESS_TRANSFER_READ_BIT
-		);
-		_renderCommandBuffer->AddPipelineBufferBarrier(
-			VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-			{ &depthTexelBufferCopyEndBarrier }
-		);
-		Command::ImageMemoryBarrier depthAttachmentLayoutBarrier = Command::ImageMemoryBarrier
-		(
-			_depthImage,
-			VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-			VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			0,
-			VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT
-		);
-
-		_renderCommandBuffer->AddPipelineImageBarrier(
-			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-			{ &depthAttachmentLayoutBarrier }
-		);
-	}
-
-	///Copy buffer to color
-	_renderCommandBuffer->CopyBufferToImage(_depthBuffer, _depthImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-
-	///Wait copy buffer to color finish
-	{
-		Command::ImageMemoryBarrier depthAttachmentLayoutBarrier = Command::ImageMemoryBarrier
-		(
-			_depthImage,
-			VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-			VK_ACCESS_TRANSFER_WRITE_BIT,
-			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-		);
-
-		_renderCommandBuffer->AddPipelineImageBarrier(
-			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-			{ &depthAttachmentLayoutBarrier }
-		);
-	}
-
 	///Wait clear lists buffer finish
 	{
-		Command::BufferMemoryBarrier opaqueBufferClearEndBarrier = Command::BufferMemoryBarrier
+		Command::BufferMemoryBarrier opaqueLightListsBarrier = Command::BufferMemoryBarrier
 		(
 			_opauqeLightIndexListsBuffer,
 			VK_ACCESS_TRANSFER_WRITE_BIT,
 			VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
 		);
-		Command::BufferMemoryBarrier transparentBufferClearEndBarrier = Command::BufferMemoryBarrier
+		Command::BufferMemoryBarrier transparentLightListsBarrier = Command::BufferMemoryBarrier
 		(
 			_transparentLightIndexListsBuffer,
 			VK_ACCESS_TRANSFER_WRITE_BIT,
@@ -194,15 +116,17 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPopulateComma
 		);
 		_renderCommandBuffer->AddPipelineBufferBarrier(
 			VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-			{ &opaqueBufferClearEndBarrier, &transparentBufferClearEndBarrier }
+			{ &opaqueLightListsBarrier, &transparentLightListsBarrier }
 		);
 	}
+
+	auto depthImage = dynamic_cast<PreZRenderPass&>(CoreObject::Instance::RenderPassManager().RenderPass("PreZRenderPass")).DepthImage();
 
 	_buildLightListsMaterial->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
 	_buildLightListsMaterial->SetUniformBuffer("lightBoundingBoxInfos", CoreObject::Instance::LightManager().TileBasedForwardLightBoundindBoxInfosBuffer());
 	_buildLightListsMaterial->SetStorageBuffer("opaqueLightIndexLists", _opauqeLightIndexListsBuffer);
 	_buildLightListsMaterial->SetStorageBuffer("transparentLightIndexLists", _transparentLightIndexListsBuffer);
-	_buildLightListsMaterial->SetSlotData("depthImage", { 0 }, { {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_NULL_HANDLE, _depthImage->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL} });
+	_buildLightListsMaterial->SetSlotData("depthImage", { 0 }, { {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_NULL_HANDLE, depthImage->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL} });
 	
 	_renderCommandBuffer->BindMaterial(_buildLightListsMaterial);
 	_renderCommandBuffer->Dispatch(globalGroupSize.width, globalGroupSize.height, 1);
@@ -229,7 +153,7 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPopulateComma
 
 	///Init attachmnet layout
 	{
-		Command::ImageMemoryBarrier colorAttachmnetLayoutBarrier = Command::ImageMemoryBarrier
+		Command::ImageMemoryBarrier colorAttachmnetBarrier = Command::ImageMemoryBarrier
 		(
 			camera->RenderPassTarget()->Attachment("ColorAttachment"),
 			VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
@@ -240,21 +164,21 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPopulateComma
 
 		_renderCommandBuffer->AddPipelineImageBarrier(
 			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			{ &colorAttachmnetLayoutBarrier }
+			{ &colorAttachmnetBarrier }
 		);
 
-		Command::ImageMemoryBarrier depthAttachmentLayoutBarrier = Command::ImageMemoryBarrier
+		Command::ImageMemoryBarrier depthAttachmentBarrier = Command::ImageMemoryBarrier
 		(
 			camera->RenderPassTarget()->Attachment("DepthAttachment"),
-			VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 			VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-			VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT,
+			VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+			VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
 			VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
 		);
 
 		_renderCommandBuffer->AddPipelineImageBarrier(
-			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
-			{ &depthAttachmentLayoutBarrier }
+			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+			{ &depthAttachmentBarrier }
 		);
 	}
 
@@ -306,8 +230,6 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnClear()
 {
 	delete _opauqeLightIndexListsBuffer;
 	delete _transparentLightIndexListsBuffer;
-	delete _depthBuffer;
-	delete _depthImage;
 
 	_renderCommandPool->DestoryCommandBuffer(_renderCommandBuffer);
 }
@@ -319,8 +241,6 @@ AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::TBF_OpaqueRenderPass
 	, _buildLightListsMaterial(nullptr)
 	, _opauqeLightIndexListsBuffer(nullptr)
 	, _transparentLightIndexListsBuffer(nullptr)
-	, _depthImage(nullptr)
-	, _depthBuffer(nullptr)
 {
 	_buildLightListsMaterial = new Material(Core::IO::CoreObject::Instance::AssetManager().Load<Shader>("..\\Asset\\Shader\\BuildTBFLightListsShader.shader"));
 }

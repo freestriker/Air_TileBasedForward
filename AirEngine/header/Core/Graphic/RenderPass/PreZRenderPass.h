@@ -8,6 +8,11 @@ namespace AirEngine
 	{
 		namespace Graphic
 		{
+			namespace Instance
+			{
+				class Image;
+				class Buffer;
+			}
 			namespace Command
 			{
 				class CommandBuffer;
@@ -20,7 +25,10 @@ namespace AirEngine
 				private:
 					Command::CommandBuffer* _renderCommandBuffer;
 					Command::CommandPool* _renderCommandPool;
+					Instance::Image* _depthImage;
+					Instance::Buffer* _depthBuffer;
 					void OnPopulateRenderPassSettings(RenderPassSettings& creator)override;
+					void OnPrepare(Camera::CameraBase* camera)override;
 					void OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)override;
 					void OnSubmit()override;
 					void OnClear()override;
@@ -32,6 +40,8 @@ namespace AirEngine
 					PreZRenderPass(PreZRenderPass&&) = delete;
 					PreZRenderPass& operator=(PreZRenderPass&&) = delete;
 
+					Instance::Image* DepthImage();
+					Instance::Buffer* DepthBuffer();
 				};
 			}
 		}
