@@ -9,8 +9,8 @@
   "blendEnable": 1,
   "alphaBlendOp": 0,
   "colorBlendOp": 0,
-  "colorWriteMask": 15,
-  "srcAlphaBlendFactor": 1,
+  "colorWriteMask": 7,
+  "srcAlphaBlendFactor": 0,
   "srcColorBlendFactor": 6,
   "dstAlphaBlendFactor": 0,
   "dstColorBlendFactor": 7
