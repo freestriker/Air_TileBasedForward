@@ -2,6 +2,8 @@
 #include "Core/Graphic/RenderPass/RenderPassBase.h"
 #include "Asset/TextureCube.h"
 #include <vector>
+#include <array>
+#define DEPTH_PEELING_STEP_COUNT 4
 
 namespace AirEngine
 {
@@ -18,6 +20,7 @@ namespace AirEngine
 			{
 				class Buffer;
 				class Image;
+				class ImageSampler;
 			}
 			namespace Manager
 			{
@@ -31,10 +34,13 @@ namespace AirEngine
 				private:
 					Command::CommandBuffer* _renderCommandBuffer;
 					Command::CommandPool* _renderCommandPool;
-					Instance::Buffer* _transparentLightListsBuffer;
-					Instance::Image* _depthPeelingThresholdImage;
-					std::vector<Manager::RenderPassTarget*> _renderPassTargets;
+					std::array<Instance::Image*, 2> _depthTextures;
+					std::array<Instance::Image*, DEPTH_PEELING_STEP_COUNT> _colorTextures;
+					std::array<Manager::RenderPassTarget*, DEPTH_PEELING_STEP_COUNT> _renderPassTargets;
+					Instance::ImageSampler* _depthTextureSampler;
+
 					bool _needDepthPeelingPass;
+
 					void OnPopulateRenderPassSettings(RenderPassSettings& creator)override;
 					void OnPrepare(Camera::CameraBase* camera)override;
 					void OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)override;
@@ -48,8 +54,7 @@ namespace AirEngine
 					TBF_OIT_DepthPeelingRenderPass(TBF_OIT_DepthPeelingRenderPass&&) = delete;
 					TBF_OIT_DepthPeelingRenderPass& operator=(TBF_OIT_DepthPeelingRenderPass&&) = delete;
 
-					std::vector<Instance::Image*> PeeledColorImages();
-					std::vector<Instance::Image*> PeeledDepthImages();
+					std::array<Instance::Image*, DEPTH_PEELING_STEP_COUNT> PeeledColorImages();
 					bool NeedDepthPeelingPass();
 
 				};

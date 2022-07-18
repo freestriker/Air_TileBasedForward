@@ -408,7 +408,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::F_TransparentRenderPass());
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::TBF_OpaqueRenderPass());
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::TBF_TransparentRenderPass());
-	//Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::TBF_OIT_DepthPeelingRenderPass());
+	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::TBF_OIT_DepthPeelingRenderPass());
 	//Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::TBF_OIT_DepthPeelingBlendRenderPass());
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::PresentRenderPass());
 
@@ -423,7 +423,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 			"BackgroundRenderPass", 
 			"TBF_OpaqueRenderPass",
 			"TBF_TransparentRenderPass",
-			//"TBF_OIT_DepthPeelingRenderPass", 
+			"TBF_OIT_DepthPeelingRenderPass", 
 			//"TBF_OIT_DepthPeelingBlendRenderPass"
 		},
 		{
@@ -512,22 +512,22 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	///OIT
 	Logic::Object::GameObject* oitRenderers = new Logic::Object::GameObject("OitRenderers");
 	renderers->AddChild(oitRenderers);
-	//{
-	//	Logic::Object::GameObject* oitRendererGo = new Logic::Object::GameObject("OitRenderer1");
-	//	oitRenderers->AddChild(oitRendererGo);
-	//	oitRendererGo->AddComponent(new Renderer::Renderer());
-	//	oitRendererGo->transform.SetScale(glm::vec3(1, 1, 1));
-	//	oitRendererGo->AddComponent(new Test::TBF_OIT_RedBoxBehaviour());
-	//	oitRendererGo->AddComponent(new Test::SelfRotateBehaviour(30));
-	//}
-	//{
-	//	Logic::Object::GameObject* oitRendererGo = new Logic::Object::GameObject("OitRenderer2");
-	//	oitRenderers->AddChild(oitRendererGo);
-	//	oitRendererGo->AddComponent(new Renderer::Renderer());
-	//	oitRendererGo->transform.SetScale(glm::vec3(1.5, 1.5, 1.5));
-	//	oitRendererGo->AddComponent(new Test::TBF_OIT_RedBoxBehaviour());
-	//	oitRendererGo->AddComponent(new Test::SelfRotateBehaviour(60));
-	//}
+	{
+		Logic::Object::GameObject* oitRendererGo = new Logic::Object::GameObject("OitRenderer1");
+		oitRenderers->AddChild(oitRendererGo);
+		oitRendererGo->AddComponent(new Renderer::Renderer());
+		oitRendererGo->transform.SetScale(glm::vec3(1, 1, 1));
+		oitRendererGo->AddComponent(new Test::TBF_OIT_RedBoxBehaviour());
+		oitRendererGo->AddComponent(new Test::SelfRotateBehaviour(30));
+	}
+	{
+		Logic::Object::GameObject* oitRendererGo = new Logic::Object::GameObject("OitRenderer2");
+		oitRenderers->AddChild(oitRendererGo);
+		oitRendererGo->AddComponent(new Renderer::Renderer());
+		oitRendererGo->transform.SetScale(glm::vec3(1.5, 1.5, 1.5));
+		oitRendererGo->AddComponent(new Test::TBF_OIT_RedBoxBehaviour());
+		oitRendererGo->AddComponent(new Test::SelfRotateBehaviour(60));
+	}
 
 	//Lights
 	Logic::Object::GameObject* lights = new Logic::Object::GameObject("Lights");
