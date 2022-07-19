@@ -80,8 +80,6 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingBlendRenderPass::
 	_renderCommandBuffer->Reset();
 	_renderCommandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
-	auto peeledColorImages = dynamic_cast<TBF_OIT_DepthPeelingRenderPass&>(CoreObject::Instance::RenderPassManager().RenderPass("TBF_OIT_DepthPeelingRenderPass")).PeeledColorImages();
-
 	bool needDepthPeelingPass = dynamic_cast<TBF_OIT_DepthPeelingRenderPass&>(CoreObject::Instance::RenderPassManager().RenderPass("TBF_OIT_DepthPeelingRenderPass")).NeedDepthPeelingPass();
 	if (needDepthPeelingPass)
 	{
@@ -99,19 +97,6 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingBlendRenderPass::
 				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 				{ &colorAttachmentBarrier }
 			);
-
-			Command::ImageMemoryBarrier depthAttachmentBarrier = Command::ImageMemoryBarrier
-			(
-				camera->RenderPassTarget()->Attachment("DepthAttachment"),
-				VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-				VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-				VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-				VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
-			);
-			_renderCommandBuffer->AddPipelineImageBarrier(
-				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
-				{ &depthAttachmentBarrier }
-			);
 		}
 
 		//Blend all layers to color attachment
@@ -122,9 +107,11 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingBlendRenderPass::
 				{ }
 			);
 
+			auto peeledColorImages = dynamic_cast<TBF_OIT_DepthPeelingRenderPass&>(CoreObject::Instance::RenderPassManager().RenderPass("TBF_OIT_DepthPeelingRenderPass")).PeeledColorImages();
+
 			for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
 			{
-				_blendMaterial->SetSlotData("srcPeeledColorTexture_" + std::to_string(i), {0}, {{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _colorTextureSampler->VkSampler_(), peeledColorImages[i]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}});
+				_blendMaterial->SetSlotData("srcPeeledColorTexture_" + std::to_string(i), { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _colorTextureSampler->VkSampler_(), peeledColorImages[i]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
 			}
 			_renderCommandBuffer->BindMaterial(_blendMaterial);
 			_renderCommandBuffer->DrawMesh(_fullScreenMesh);

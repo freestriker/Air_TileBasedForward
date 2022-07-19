@@ -224,6 +224,13 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::ClearDepthImage(Instance:
     vkCmdClearDepthStencilImage(_vkCommandBuffer, image->VkImage_(), layout, clearValues.data(), static_cast<uint32_t>(ranges.size()), ranges.data());
 }
 
+void AirEngine::Core::Graphic::Command::CommandBuffer::ClearColorImage(Instance::Image* image, VkImageLayout layout, VkClearColorValue targetColor)
+{
+    auto ranges = image->VkImageSubresourceRanges_();
+    std::vector< VkClearColorValue> clearValues = std::vector< VkClearColorValue>(ranges.size(), targetColor);
+    vkCmdClearColorImage(_vkCommandBuffer, image->VkImage_(), layout, clearValues.data(), static_cast<uint32_t>(ranges.size()), ranges.data());
+}
+
 void AirEngine::Core::Graphic::Command::CommandBuffer::Submit(std::vector<Command::Semaphore*> waitSemaphores, std::vector<VkPipelineStageFlags> waitStages, std::vector<Command::Semaphore*> signalSemaphores)
 {
     std::vector <VkSemaphore> wait = std::vector <VkSemaphore>(waitSemaphores.size());
