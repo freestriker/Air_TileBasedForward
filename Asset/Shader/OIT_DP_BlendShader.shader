@@ -11,7 +11,7 @@
   "colorBlendOp": 0,
   "colorWriteMask": 7,
   "srcAlphaBlendFactor": 0,
-  "srcColorBlendFactor": 6,
+  "srcColorBlendFactor": 1,
   "dstAlphaBlendFactor": 0,
-  "dstColorBlendFactor": 7
+  "dstColorBlendFactor": 6
 }

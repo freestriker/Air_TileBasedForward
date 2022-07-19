@@ -31,7 +31,7 @@ namespace AirEngine
 					Command::CommandBuffer* _renderCommandBuffer;
 					Command::CommandPool* _renderCommandPool;
 					Asset::Mesh* _fullScreenMesh;
-					std::vector<Material*> _blendMaterials;
+					Material* _blendMaterial;
 					Instance::ImageSampler* _colorTextureSampler;
 					void OnPopulateRenderPassSettings(RenderPassSettings& creator)override;
 					void OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)override;
