@@ -66,13 +66,9 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingBlendRenderPass::
 
 void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingBlendRenderPass::OnPrepare(Camera::CameraBase* camera)
 {
-	if (_blendMaterials.size() != DEPTH_PEELING_STEP_COUNT)
+	if (_blendMaterial == nullptr)
 	{
-		_blendMaterials.resize(DEPTH_PEELING_STEP_COUNT, nullptr);
-		for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
-		{
-			_blendMaterials[i] = new Material(Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Shader>("..\\Asset\\Shader\\OIT_DP_BlendShader.shader"));
-		}
+		_blendMaterial = new Material(Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Shader>("..\\Asset\\Shader\\OIT_DP_BlendShader.shader"));
 	}
 }
 
@@ -128,9 +124,9 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingBlendRenderPass::
 
 			for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
 			{
-				_blendMaterials[0]->SetSlotData("srcPeeledColorTexture_" + std::to_string(i), {0}, {{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _colorTextureSampler->VkSampler_(), peeledColorImages[i]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}});
+				_blendMaterial->SetSlotData("srcPeeledColorTexture_" + std::to_string(i), {0}, {{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _colorTextureSampler->VkSampler_(), peeledColorImages[i]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}});
 			}
-			_renderCommandBuffer->BindMaterial(_blendMaterials[0]);
+			_renderCommandBuffer->BindMaterial(_blendMaterial);
 			_renderCommandBuffer->DrawMesh(_fullScreenMesh);
 
 			_renderCommandBuffer->EndRenderPass();
@@ -155,7 +151,7 @@ AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingBlendRenderPass::TBF_O
 	, _renderCommandBuffer(nullptr)
 	, _renderCommandPool(nullptr)
 	, _fullScreenMesh(nullptr)
-	, _blendMaterials()
+	, _blendMaterial(nullptr)
 	, _colorTextureSampler()
 {
 	_fullScreenMesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\BackgroundMesh.ply");
