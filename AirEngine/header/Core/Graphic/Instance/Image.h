@@ -42,7 +42,17 @@ namespace AirEngine
 						VkMemoryPropertyFlags memoryProperty,
 						VkImageAspectFlags aspect
 					);
+					static Image* CreateNative2DImage(
+						VkImage vkImage,
+						VkImageView vkImageView,
+						VkExtent2D extent,
+						VkFormat format,
+						VkImageUsageFlags imageUsage,
+						VkImageAspectFlags aspect
+					);
 				private:
+					bool _isNative;
+
 					VkImageType _vkImageType;
 					VkExtent3D _extent;
 					VkFormat _vkFormat;

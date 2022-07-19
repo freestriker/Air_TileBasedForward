@@ -64,12 +64,11 @@ void AirEngine::Core::Graphic::RenderPass::TBF_TransparentRenderPass::OnPopulate
 		VK_ACCESS_COLOR_ATTACHMENT_READ_BIT,
 		VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
 	);
-	_ambientLightTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");
 }
 
 void AirEngine::Core::Graphic::RenderPass::TBF_TransparentRenderPass::OnPrepare(Camera::CameraBase* camera)
 {
-	_transparentLightListsBuffer = dynamic_cast<TBF_OpaqueRenderPass&>(CoreObject::Instance::RenderPassManager().RenderPass("TBF_OpaqueRenderPass")).TransparentLightIndexListsBuffer();
+
 }
 
 void AirEngine::Core::Graphic::RenderPass::TBF_TransparentRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
@@ -78,69 +77,105 @@ void AirEngine::Core::Graphic::RenderPass::TBF_TransparentRenderPass::OnPopulate
 
 	_renderCommandBuffer = commandPool->CreateCommandBuffer("TBF_TransparentCommandBuffer", VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 	_renderCommandBuffer->Reset();
-
-	//Render
 	_renderCommandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
-	_renderCommandBuffer->BeginRenderPass(
-		this,
-		camera->RenderPassTarget(),
-		{ }
-	);
-
-	Command::ImageMemoryBarrier drawBarrier = Command::ImageMemoryBarrier
-	(
-		camera->RenderPassTarget()->FrameBuffer(Name())->Attachment("ColorAttachment"),
-		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-		VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-		VK_ACCESS_COLOR_ATTACHMENT_READ_BIT,
-		VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
-	);
+	auto transparentLightListsBuffer = dynamic_cast<TBF_OpaqueRenderPass&>(CoreObject::Instance::RenderPassManager().RenderPass("TBF_OpaqueRenderPass")).TransparentLightIndexListsBuffer();
+	auto ambientLightTexture = CoreObject::Instance::LightManager().AmbientTextureCube();
 
 	//finish build lists buffer
 	{
-		Command::BufferMemoryBarrier bufferClearEndBarrier = Command::BufferMemoryBarrier
+		Command::BufferMemoryBarrier transparentLightListsBarrier = Command::BufferMemoryBarrier
 		(
-			_transparentLightListsBuffer,
+			transparentLightListsBuffer,
 			VK_ACCESS_SHADER_WRITE_BIT,
 			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
 		);
 		_renderCommandBuffer->AddPipelineBufferBarrier(
 			VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-			{ &bufferClearEndBarrier }
+			{ &transparentLightListsBarrier }
 		);
 	}
 
-	auto viewMatrix = camera->ViewMatrix();
-	for (auto iter = renderDistanceTable.rbegin(); iter != renderDistanceTable.rend(); iter++)
+	///Init attachmnet layout
 	{
-		auto& renderer = iter->second;
-
-		auto obbVertexes = renderer->mesh->OrientedBoundingBox().BoundryVertexes();
-		auto mvMatrix = viewMatrix * renderer->GameObject()->transform.ModelMatrix();
-		if (renderer->enableFrustumCulling && !camera->CheckInFrustum(obbVertexes, mvMatrix))
-		{
-			Utils::Log::Message("AirEngine::Core::Graphic::RenderPass::TBF_TransparentCommandBuffer cull GameObject called " + renderer->GameObject()->name + ".");
-			continue;
-		}
-
-		renderer->GetMaterial(Name())->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
-		renderer->GetMaterial(Name())->SetUniformBuffer("meshObjectInfo", renderer->ObjectInfoBuffer());
-		renderer->GetMaterial(Name())->SetUniformBuffer("lightInfos", CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
-		renderer->GetMaterial(Name())->SetTextureCube("ambientLightTexture", _ambientLightTexture);
-		renderer->GetMaterial(Name())->SetStorageBuffer("transparentLightIndexLists", _transparentLightListsBuffer);
-
-		_renderCommandBuffer->BindMaterial(renderer->GetMaterial(Name()));
-		_renderCommandBuffer->DrawMesh(renderer->mesh);
+		Command::ImageMemoryBarrier colorAttachmnetBarrier = Command::ImageMemoryBarrier
+		(
+			camera->RenderPassTarget()->Attachment("ColorAttachment"),
+			VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+			VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
+		);
 
 		_renderCommandBuffer->AddPipelineImageBarrier(
-			VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
-			VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			{ &drawBarrier }
+			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+			{ &colorAttachmnetBarrier }
+		);
+
+		Command::ImageMemoryBarrier depthAttachmentBarrier = Command::ImageMemoryBarrier
+		(
+			camera->RenderPassTarget()->Attachment("DepthAttachment"),
+			VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+			VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+			VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+			VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
+		);
+
+		_renderCommandBuffer->AddPipelineImageBarrier(
+			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+			{ &depthAttachmentBarrier }
 		);
 	}
 
-	_renderCommandBuffer->EndRenderPass();
+	///Render
+	{
+		_renderCommandBuffer->BeginRenderPass(
+			this,
+			camera->RenderPassTarget(),
+			{ }
+		);
+
+		Command::ImageMemoryBarrier drawBarrier = Command::ImageMemoryBarrier
+		(
+			camera->RenderPassTarget()->FrameBuffer(Name())->Attachment("ColorAttachment"),
+			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			VK_ACCESS_COLOR_ATTACHMENT_READ_BIT,
+			VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
+		);
+
+		auto viewMatrix = camera->ViewMatrix();
+		for (auto iter = renderDistanceTable.rbegin(); iter != renderDistanceTable.rend(); iter++)
+		{
+			auto& renderer = iter->second;
+			auto material = renderer->GetMaterial(Name());
+
+			auto obbVertexes = renderer->mesh->OrientedBoundingBox().BoundryVertexes();
+			auto mvMatrix = viewMatrix * renderer->GameObject()->transform.ModelMatrix();
+			if (renderer->enableFrustumCulling && !camera->CheckInFrustum(obbVertexes, mvMatrix))
+			{
+				Utils::Log::Message("AirEngine::Core::Graphic::RenderPass::TBF_TransparentCommandBuffer cull GameObject called " + renderer->GameObject()->name + ".");
+				continue;
+			}
+
+			material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
+			material->SetUniformBuffer("meshObjectInfo", renderer->ObjectInfoBuffer());
+			material->SetUniformBuffer("lightInfos", CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
+			material->SetTextureCube("ambientLightTexture", ambientLightTexture);
+			material->SetStorageBuffer("transparentLightIndexLists", transparentLightListsBuffer);
+
+			_renderCommandBuffer->BindMaterial(material);
+			_renderCommandBuffer->DrawMesh(renderer->mesh);
+
+			_renderCommandBuffer->AddPipelineImageBarrier(
+				VkDependencyFlagBits::VK_DEPENDENCY_BY_REGION_BIT,
+				VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+				{ &drawBarrier }
+			);
+		}
+
+		_renderCommandBuffer->EndRenderPass();
+	}
 	_renderCommandBuffer->EndRecord();
 }
 
@@ -152,7 +187,6 @@ void AirEngine::Core::Graphic::RenderPass::TBF_TransparentRenderPass::OnSubmit()
 
 void AirEngine::Core::Graphic::RenderPass::TBF_TransparentRenderPass::OnClear()
 {
-	_transparentLightListsBuffer = nullptr;
 	_renderCommandPool->DestoryCommandBuffer(_renderCommandBuffer);
 }
 
@@ -160,8 +194,6 @@ AirEngine::Core::Graphic::RenderPass::TBF_TransparentRenderPass::TBF_Transparent
 	: RenderPassBase("TBF_TransparentRenderPass", TBF_TRANSPARENT_RENDER_INDEX)
 	, _renderCommandBuffer(nullptr)
 	, _renderCommandPool(nullptr)
-	, _ambientLightTexture(nullptr)
-	, _transparentLightListsBuffer(nullptr)
 {
 }
 

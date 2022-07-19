@@ -43,9 +43,9 @@ namespace AirEngine
 				class LightManager final
 				{
 				public:
-					#define MAX_ORTHER_LIGHT_COUNT 1024
+					#define MAX_ORTHER_LIGHT_COUNT 256
 					#define MAX_FORWARD_ORTHER_LIGHT_COUNT 4
-					#define MAX_TILE_BASED_FORWARD_ORTHER_LIGHT_COUNT 1024
+					#define MAX_TILE_BASED_FORWARD_ORTHER_LIGHT_COUNT 256
 					LightManager();
 					~LightManager();
 					LightManager(const LightManager&) = delete;

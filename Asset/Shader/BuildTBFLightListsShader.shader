@@ -8,7 +8,7 @@
   "cullMode": 2,
   "dstAlphaBlendFactor": 0,
   "dstColorBlendFactor": 7,
-  "shaderPaths": ["..\\Asset\\Shader\\Spv\\TBFBuildLightListsShader.comp.spv"],
+  "shaderPaths": ["..\\Asset\\Shader\\Spv\\BuildTBFLightListsShader.comp.spv"],
   "srcAlphaBlendFactor": 1,
   "srcColorBlendFactor": 6,
   "depthTestEnable": 1,

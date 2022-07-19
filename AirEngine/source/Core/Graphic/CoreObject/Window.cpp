@@ -94,7 +94,8 @@ void AirEngine::Core::Graphic::CoreObject::Window::Start()
     QLoggingCategory::setFilterRules(QStringLiteral("qt.vulkan=true"));
 
     _qVulkanInstance = new QVulkanInstance();
-
+    auto supportVersion = _qVulkanInstance->supportedApiVersion();
+    _qVulkanInstance->setApiVersion(supportVersion);
     _qVulkanInstance->setLayers(QByteArrayList()
         << "VK_LAYER_KHRONOS_validation"
         << "VK_LAYER_RENDERDOC_Capture"
@@ -104,13 +105,17 @@ void AirEngine::Core::Graphic::CoreObject::Window::Start()
         << "VK_LAYER_LUNARG_core_validation"
         << "VK_LAYER_LUNARG_image"
         << "VK_LAYER_LUNARG_swapchain"
-        << "VK_LAYER_GOOGLE_unique_objects");
+        << "VK_LAYER_GOOGLE_unique_objects"
+    );
     if (!_qVulkanInstance->create())
         qFatal("Failed to create Vulkan instance: %d", _qVulkanInstance->errorCode());
 
     _window = new VulkanWindow();
     _window->setPreferredColorFormats({VkFormat::VK_FORMAT_B8G8R8A8_SRGB});
     _window->setVulkanInstance(_qVulkanInstance);
+    _window->setDeviceExtensions(QByteArrayList()
+        << "VK_EXT_shader_atomic_float"
+    );
     auto queuePrioritieMapPtr = new std::map<uint32_t, std::vector<float>>();
     _window->setQueueCreateInfoModifier([](const VkQueueFamilyProperties* properties, uint32_t queueFamilyCount, QList<VkDeviceQueueCreateInfo>& infos)->void
     {

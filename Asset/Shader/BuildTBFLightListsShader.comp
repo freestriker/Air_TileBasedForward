@@ -1,13 +1,12 @@
 #version 450
 #extension GL_GOOGLE_include_directive: enable
-#extension GL_EXT_shader_atomic_float2: enable
 
 #include "Object.glsl"
 #include "Camera.glsl"
 #include "Light.glsl"
 #include "Collision.glsl"
 
-#define MAX_ORTHER_LIGHT_COUNT 1024
+#define MAX_ORTHER_LIGHT_COUNT 256
 #define MAX_LIGHT_INDEX_COUNT 64
 #define TILE_WIDTH 32
 #define LOCAL_GROUP_WIDTH 8
@@ -63,6 +62,8 @@ int threadLocalIndex = int(gl_LocalInvocationID.y * LOCAL_GROUP_WIDTH + gl_Local
 
 shared float minNdcDepth;
 shared float maxNdcDepth;
+shared float[LOCAL_GROUP_WIDTH * LOCAL_GROUP_WIDTH] localMinNdcDepths;
+shared float[LOCAL_GROUP_WIDTH * LOCAL_GROUP_WIDTH] localMaxNdcDepths;
 shared vec4[6] opaqueFrustumPlanes;
 shared vec4[6] transparentFrustumPlanes;
 shared int opaqueLightIndexCount;
@@ -81,16 +82,37 @@ void main()
 	}
 	barrier();
 
-	///Find max min depth
-	for(Iterater = 0; Iterater < ITERATER_END; Iterater++)
+	///Find local thread's max min depth
 	{
-		vec2 po = pixelOffset;
-		if(po.x >= depthImageSize.x || po.y >= depthImageSize.y) continue;
-		float pixelNdcDepth = imageLoad(depthImage, ivec2(po)).r;
-		atomicMax(maxNdcDepth, pixelNdcDepth);
-		atomicMin(minNdcDepth, pixelNdcDepth);
+		float minLocalDepth = 1;
+		float maxLocalDepth = 0;
+		for(Iterater = 0; Iterater < ITERATER_END; Iterater++)
+		{
+			vec2 po = pixelOffset;
+			if(po.x >= depthImageSize.x || po.y >= depthImageSize.y) continue;
+			float pixelNdcDepth = imageLoad(depthImage, ivec2(po)).r;
+			minLocalDepth = minLocalDepth <= pixelNdcDepth ? minLocalDepth : pixelNdcDepth;
+			maxLocalDepth = maxLocalDepth >= pixelNdcDepth ? maxLocalDepth : pixelNdcDepth;
+		}
+		localMinNdcDepths[threadLocalIndex] = minLocalDepth;
+		localMaxNdcDepths[threadLocalIndex] = maxLocalDepth;
+		barrier();
 	}
-	barrier();
+
+	///Find group's max min depth
+	if(localGroupOffset == ivec2(0, 0))
+	{
+		float minGroupDepth = 1;
+		float maxGroupDepth = 0;
+		for(int i = 0; i < LOCAL_GROUP_WIDTH * LOCAL_GROUP_WIDTH; i++)
+		{
+			minGroupDepth = localMinNdcDepths[i] < minGroupDepth ? localMinNdcDepths[i] : minGroupDepth;
+			maxGroupDepth = localMaxNdcDepths[i] > maxGroupDepth ? localMaxNdcDepths[i] : maxGroupDepth;
+		}
+		minNdcDepth = minGroupDepth;
+		maxNdcDepth = maxGroupDepth;
+		barrier();
+	}
 
 	///Build ggo bounding box
 	if(localGroupOffset == ivec2(0, 0))

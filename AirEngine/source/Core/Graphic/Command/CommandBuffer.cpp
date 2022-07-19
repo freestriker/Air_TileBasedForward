@@ -168,7 +168,7 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::CopyBufferToImage(Instanc
     vkCmdCopyBufferToImage(_vkCommandBuffer, srcBuffer->VkBuffer_(), dstImage->VkImage_(), dstImageLayout, static_cast<uint32_t>(layerCount), infos.data());
 }
 
-void AirEngine::Core::Graphic::Command::CommandBuffer::CopyImageToBuffer(Instance::Image* srcImage, Instance::Buffer* dstBuffer, VkImageLayout srcImageLayout)
+void AirEngine::Core::Graphic::Command::CommandBuffer::CopyImageToBuffer(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Buffer* dstBuffer)
 {
     auto layerCount = srcImage->LayerCount();
     auto layerSize = srcImage->PerLayerSize();
@@ -222,6 +222,13 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::ClearDepthImage(Instance:
     auto ranges = image->VkImageSubresourceRanges_();
     std::vector< VkClearDepthStencilValue> clearValues = std::vector< VkClearDepthStencilValue>(ranges.size(), { depth, 0 });
     vkCmdClearDepthStencilImage(_vkCommandBuffer, image->VkImage_(), layout, clearValues.data(), static_cast<uint32_t>(ranges.size()), ranges.data());
+}
+
+void AirEngine::Core::Graphic::Command::CommandBuffer::ClearColorImage(Instance::Image* image, VkImageLayout layout, VkClearColorValue targetColor)
+{
+    auto ranges = image->VkImageSubresourceRanges_();
+    std::vector< VkClearColorValue> clearValues = std::vector< VkClearColorValue>(ranges.size(), targetColor);
+    vkCmdClearColorImage(_vkCommandBuffer, image->VkImage_(), layout, clearValues.data(), static_cast<uint32_t>(ranges.size()), ranges.data());
 }
 
 void AirEngine::Core::Graphic::Command::CommandBuffer::Submit(std::vector<Command::Semaphore*> waitSemaphores, std::vector<VkPipelineStageFlags> waitStages, std::vector<Command::Semaphore*> signalSemaphores)

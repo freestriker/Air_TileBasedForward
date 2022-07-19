@@ -24,8 +24,6 @@ namespace AirEngine
 				private:
 					Command::CommandBuffer* _renderCommandBuffer;
 					Command::CommandPool* _renderCommandPool;
-					Asset::TextureCube* _ambientLightTexture;
-					Instance::Buffer* _transparentLightListsBuffer;
 					void OnPopulateRenderPassSettings(RenderPassSettings& creator)override;
 					void OnPrepare(Camera::CameraBase* camera)override;
 					void OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)override;

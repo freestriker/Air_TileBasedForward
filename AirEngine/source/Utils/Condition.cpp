@@ -14,14 +14,7 @@ AirEngine::Utils::Condition::~Condition()
 void AirEngine::Utils::Condition::Wait()
 {
 	std::unique_lock<std::mutex> lock(_mutex);
-	if (_ready)
-	{
-
-	}
-	else
-	{
-		_conditionVariable.wait(lock, [this] {return this->_ready; });
-	}
+	_conditionVariable.wait(lock, [this] {return this->_ready; });
 	_ready = false;
 }
 

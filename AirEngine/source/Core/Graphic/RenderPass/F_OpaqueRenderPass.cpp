@@ -52,7 +52,6 @@ void AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::OnPopulateRenderP
 		0,
 		0
 	);
-	_ambientLightTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");
 }
 
 void AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
@@ -65,6 +64,31 @@ void AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::OnPopulateCommand
 	//Render
 	_renderCommandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
+	//Init attachment layout
+	{
+		auto colorAttachmentFinishBarrier = Command::ImageMemoryBarrier
+		(
+			camera->RenderPassTarget()->Attachment("ColorAttachment"),
+			VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+			VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			0,
+			0
+		);
+		auto depthAttachmentFinishBarrier = Command::ImageMemoryBarrier
+		(
+			camera->RenderPassTarget()->Attachment("DepthAttachment"),
+			VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+			VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
+			0,
+			0
+		);
+		_renderCommandBuffer->AddPipelineImageBarrier(
+			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+			{ &colorAttachmentFinishBarrier, &depthAttachmentFinishBarrier }
+		);
+
+	}
+
 	VkClearValue colorClearValue{};
 	colorClearValue.color = { {0.0f, 0.0f, 0.0f, 1.0f} };
 	_renderCommandBuffer->BeginRenderPass(
@@ -74,9 +98,12 @@ void AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::OnPopulateCommand
 	);
 
 	auto viewMatrix = camera->ViewMatrix();
+	auto ambientLightTexture = CoreObject::Instance::LightManager().AmbientTextureCube();
 	for (const auto& rendererDistencePair : renderDistanceTable)
 	{
 		auto& renderer = rendererDistencePair.second;
+		auto material = renderer->GetMaterial(Name());
+
 		auto obbVertexes = renderer->mesh->OrientedBoundingBox().BoundryVertexes();
 		auto mvMatrix = viewMatrix * renderer->GameObject()->transform.ModelMatrix();
 		if (renderer->enableFrustumCulling && !camera->CheckInFrustum(obbVertexes, mvMatrix))
@@ -85,12 +112,12 @@ void AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::OnPopulateCommand
 			continue;
 		}
 
-		renderer->GetMaterial(Name())->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
-		renderer->GetMaterial(Name())->SetUniformBuffer("meshObjectInfo", renderer->ObjectInfoBuffer());
-		renderer->GetMaterial(Name())->SetUniformBuffer("lightInfos", CoreObject::Instance::LightManager().ForwardLightInfosBuffer());
-		renderer->GetMaterial(Name())->SetTextureCube("ambientLightTexture", _ambientLightTexture);
+		material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
+		material->SetUniformBuffer("meshObjectInfo", renderer->ObjectInfoBuffer());
+		material->SetUniformBuffer("lightInfos", CoreObject::Instance::LightManager().ForwardLightInfosBuffer());
+		material->SetTextureCube("ambientLightTexture", ambientLightTexture);
 
-		_renderCommandBuffer->BindMaterial(renderer->GetMaterial(Name()));
+		_renderCommandBuffer->BindMaterial(material);
 		_renderCommandBuffer->DrawMesh(renderer->mesh);
 	}
 	_renderCommandBuffer->EndRenderPass();
@@ -112,7 +139,6 @@ AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::F_OpaqueRenderPass()
 	: RenderPassBase("F_OpaqueRenderPass", F_OPAQUE_RENDER_INDEX)
 	, _renderCommandBuffer(nullptr)
 	, _renderCommandPool(nullptr)
-	, _ambientLightTexture(nullptr)
 {
 }
 

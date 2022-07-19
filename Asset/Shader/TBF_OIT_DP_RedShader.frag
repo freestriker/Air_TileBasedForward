@@ -9,5 +9,5 @@ void main()
 {
     DISCARD_PEELED_LAYER
 
-    colorAttachment = vec4(1, 0, 0, 0.3);
+    colorAttachment = vec4(1, 0, 0, 0.5);
 }
