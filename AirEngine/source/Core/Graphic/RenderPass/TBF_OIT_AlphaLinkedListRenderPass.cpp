@@ -213,20 +213,20 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_AlphaLinkedListRenderPass::On
 				VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
 				VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
 			);
-			Command::BufferMemoryBarrier infosBuffer = Command::BufferMemoryBarrier(
-				_pixelColorsBuffer,
+			Command::BufferMemoryBarrier infosBarrier = Command::BufferMemoryBarrier(
+				_pixelInfosBuffer,
 				VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
 				VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
 			);
 			Command::BufferMemoryBarrier atomicCounterBarrier = Command::BufferMemoryBarrier(
-				_pixelColorsBuffer,
+				_pixelAtomicCounterBuffer,
 				VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
 				VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
 			);
 			_renderCommandBuffer->AddPipelineBarrier(
 				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
 				{ &headImageBarrier },
-				{ &colorsBarrier , &infosBuffer , &atomicCounterBarrier }
+				{ &colorsBarrier , &infosBarrier , &atomicCounterBarrier }
 			);
 		}
 
@@ -262,15 +262,15 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_AlphaLinkedListRenderPass::On
 				VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
 				VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
 			);
-			Command::BufferMemoryBarrier infosBuffer = Command::BufferMemoryBarrier(
-				_pixelColorsBuffer,
+			Command::BufferMemoryBarrier infosBarrier = Command::BufferMemoryBarrier(
+				_pixelInfosBuffer,
 				VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
 				VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
 			);
 			_renderCommandBuffer->AddPipelineBarrier(
 				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
 				{ &headImageBarrier },
-				{ &colorsBarrier , &infosBuffer }
+				{ &colorsBarrier , &infosBarrier }
 			);
 		}
 	}

@@ -38,6 +38,7 @@
 #include "Test/TBF_OIT_RedBoxBehaviour.h"
 #include "Core/Graphic/RenderPass/PresentRenderPass.h"
 #include "Core/Graphic/RenderPass/TBF_OIT_AlphaLinkedListRenderPass.h"
+#include "Core/Graphic/RenderPass/TBF_OIT_ALL_SortBlendRenderPass.h"
 
 AirEngine::Core::Logic::CoreObject::Thread::LogicThread AirEngine::Core::Logic::CoreObject::Thread::_logicThread = AirEngine::Core::Logic::CoreObject::Thread::LogicThread();
 
@@ -403,6 +404,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::TBF_OIT_DepthPeelingRenderPass());
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::TBF_OIT_DepthPeelingBlendRenderPass());
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::TBF_OIT_AlphaLinkedListRenderPass());
+	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::TBF_OIT_ALL_SortBlendRenderPass());
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::PresentRenderPass());
 
 	//Camera
@@ -418,7 +420,8 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 			"TBF_TransparentRenderPass",
 			"TBF_OIT_DepthPeelingRenderPass", 
 			"TBF_OIT_DepthPeelingBlendRenderPass",
-			"TBF_OIT_AlphaLinkedListRenderPass"
+			"TBF_OIT_AlphaLinkedListRenderPass",
+			"TBF_OIT_ALL_SortBlendRenderPass"
 		},
 		{
 			{"ColorAttachment", Graphic::Instance::Image::Create2DImage({800, 450}, VK_FORMAT_R8G8B8A8_SRGB, VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT)},
