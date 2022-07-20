@@ -9,7 +9,7 @@ layout (origin_upper_left) in vec4 gl_FragCoord;
 #endif ///#ifdef FRAGMENT_STAGE
 
 layout (set = START_SET_INDEX + 0, binding = 0, r32ui) uniform uimage2D linkedListHeadImage;
-layout (set = START_SET_INDEX + 1, binding = 0) buffer PixelColors
+layout (set = START_SET_INDEX + 1, binding = 0) writeonly buffer PixelColors
 {
     vec4[] colors;
 }pixelColors;
@@ -18,7 +18,7 @@ struct PixelInfo
     float depth;
     uint previousPixelIndex;
 };
-layout (set = START_SET_INDEX + 2, binding = 0) buffer PixelInfos
+layout (set = START_SET_INDEX + 2, binding = 0) writeonly buffer PixelInfos
 {
     PixelInfo[] infos;
 }pixelInfos;
@@ -31,7 +31,6 @@ layout (set = START_SET_INDEX + 3, binding = 0) buffer PixelAtomicCounter
 #undef START_SET_INDEX
 #define START_SET_INDEX 8
 
-#define PIXEL_START_INDEX 1
 #define PIXEL_CURRENT_INDEX (pixelAtomicCounter.currentIndex)
 #define PIXEL_MAX_INDEX (pixelAtomicCounter.maxIndex)
 
