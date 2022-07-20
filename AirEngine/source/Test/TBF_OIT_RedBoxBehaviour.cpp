@@ -19,7 +19,8 @@ void AirEngine::Test::TBF_OIT_RedBoxBehaviour::OnAwake()
 void AirEngine::Test::TBF_OIT_RedBoxBehaviour::OnStart()
 {
 	auto boxMesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\Box.ply");
-	auto shader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Shader>("..\\Asset\\Shader\\TBF_OIT_DP_RedShader.shader");
+	//auto shader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Shader>("..\\Asset\\Shader\\TBF_OIT_DP_RedShader.shader");
+	auto shader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Shader>("..\\Asset\\Shader\\TBF_OIT_ALL_RedShader.shader");
 
 	auto material = new AirEngine::Core::Graphic::Material(shader);
 

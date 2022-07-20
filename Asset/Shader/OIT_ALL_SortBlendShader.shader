@@ -1,5 +1,5 @@
 {
-  "renderPass": "TBF_OIT_DepthPeelingBlendRenderPass",
+  "renderPass": "TBF_OIT_ALL_SortBlendRenderPass",
   "subpass": "DrawSubpass",
   "shaderPaths": ["..\\Asset\\Shader\\Spv\\OIT_ALL_SortBlendShader.vert.spv", "..\\Asset\\Shader\\Spv\\OIT_ALL_SortBlendShader.frag.spv"],
   "cullMode": 0,

@@ -107,6 +107,8 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingRenderPass::OnPre
 			}
 		);
 	}
+
+	_needDepthPeelingPass = std::nullopt;
 }
 
 void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
@@ -152,7 +154,7 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingRenderPass::OnPop
 	_renderCommandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
 	///Render to layers
-	if(_needDepthPeelingPass)
+	if(_needDepthPeelingPass.value())
 	{
 		for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
 		{
@@ -275,7 +277,7 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingRenderPass::OnPop
 	}
 
 	///Wait render finish
-	if (_needDepthPeelingPass)
+	if (_needDepthPeelingPass.value())
 	{
 		for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
 		{

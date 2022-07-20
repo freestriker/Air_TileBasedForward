@@ -91,7 +91,7 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_AlphaLinkedListRenderPass::On
 		VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 		VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
 	);
-	auto nodeCount = camera->RenderPassTarget()->Extent().width * camera->RenderPassTarget()->Extent().height * ALPHA_LINKED_LIST_SIZE_FACTOR;
+	auto nodeCount = camera->RenderPassTarget()->Extent().width * camera->RenderPassTarget()->Extent().height * ALPHA_LINKED_LIST_SIZE_FACTOR + 1;
 
 	_pixelColorsBuffer = new Instance::Buffer(
 		sizeof(glm::vec4) * nodeCount,
@@ -150,7 +150,7 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_AlphaLinkedListRenderPass::On
 	_renderCommandBuffer->Reset();
 	_renderCommandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
-	if (_needAlphaLinkedListPass)
+	if (_needAlphaLinkedListPass.value())
 	{
 		///Init current attachment layout
 		{
@@ -247,32 +247,34 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_AlphaLinkedListRenderPass::On
 			_renderCommandBuffer->EndRenderPass();
 		}
 
-		///Wait build finish
-		{
-			Command::ImageMemoryBarrier headImageBarrier = Command::ImageMemoryBarrier
-			(
-				_linkedListHeadImage,
-				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
-				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-			);
-			Command::BufferMemoryBarrier colorsBarrier = Command::BufferMemoryBarrier(
-				_pixelColorsBuffer,
-				VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
-				VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-			);
-			Command::BufferMemoryBarrier infosBarrier = Command::BufferMemoryBarrier(
-				_pixelInfosBuffer,
-				VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
-				VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-			);
-			_renderCommandBuffer->AddPipelineBarrier(
-				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-				{ &headImageBarrier },
-				{ &colorsBarrier , &infosBarrier }
-			);
-		}
+	}
+
+	///Wait build finish
+	if (_needAlphaLinkedListPass.value())
+	{
+		Command::ImageMemoryBarrier headImageBarrier = Command::ImageMemoryBarrier
+		(
+			_linkedListHeadImage,
+			VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+			VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
+			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+		);
+		Command::BufferMemoryBarrier colorsBarrier = Command::BufferMemoryBarrier(
+			_pixelColorsBuffer,
+			VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
+			VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+		);
+		Command::BufferMemoryBarrier infosBarrier = Command::BufferMemoryBarrier(
+			_pixelInfosBuffer,
+			VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
+			VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+		);
+		_renderCommandBuffer->AddPipelineBarrier(
+			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+			{ &headImageBarrier },
+			{ &colorsBarrier , &infosBarrier }
+		);
 	}
 
 	_renderCommandBuffer->EndRecord();
