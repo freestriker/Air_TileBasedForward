@@ -4,12 +4,12 @@
     <ShowAllFiles>true</ShowAllFiles>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <LocalDebuggerEnvironment>path=..\ThirdParty\rttr\debug\bin;..\ThirdParty\assimp\debug\bin;..\ThirdParty\FreeImage\bin;$(LocalDebuggerEnvironment);</LocalDebuggerEnvironment>
+    <LocalDebuggerEnvironment>path=..\ThirdParty\rttr\debug\bin;..\ThirdParty\assimp\debug\bin;..\ThirdParty\OpenAL\debug\bin;..\ThirdParty\FreeImage\bin;$(LocalDebuggerEnvironment);</LocalDebuggerEnvironment>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerWorkingDirectory>$(ProjectDir)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <LocalDebuggerEnvironment>path=..\ThirdParty\rttr\release\bin;..\ThirdParty\assimp\release\bin;..\ThirdParty\FreeImage\bin;PATH=%PATH%;$(QtDllPath)
+    <LocalDebuggerEnvironment>path=..\ThirdParty\rttr\release\bin;..\ThirdParty\assimp\release\bin;..\ThirdParty\OpenAL\release\bin;..\ThirdParty\FreeImage\bin;PATH=%PATH%;$(QtDllPath)
 $(LocalDebuggerEnvironment)
     </LocalDebuggerEnvironment>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
