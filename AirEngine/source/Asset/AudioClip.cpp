@@ -15,6 +15,11 @@ AirEngine::Asset::AudioClip::~AudioClip()
 {
 }
 
+ALuint AirEngine::Asset::AudioClip::AlBuffer()
+{
+    return _buffer;
+}
+
 void AirEngine::Asset::AudioClip::OnLoad(Core::Graphic::Command::CommandBuffer* transferCommandBuffer)
 {
     // open the file:

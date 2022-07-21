@@ -106,6 +106,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="source\Asset\AudioClip.cpp" />
+    <ClCompile Include="source\Audio\AudioSource.cpp" />
     <ClCompile Include="source\Core\Audio\CoreObject\Thread.cpp" />
     <ClCompile Include="source\Core\Audio\CoreObject\Instance.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\PresentRenderPass.cpp" />
@@ -189,6 +190,7 @@
     <ClInclude Include="header\Asset\Mesh.h" />
     <ClInclude Include="header\Asset\Texture2D.h" />
     <ClInclude Include="header\Asset\TextureCube.h" />
+    <ClInclude Include="header\Audio\AudioSource.h" />
     <ClInclude Include="header\Behaviour\Behaviour.h" />
     <ClInclude Include="header\Camera\CameraBase.h" />
     <ClInclude Include="header\Camera\OrthographicCamera.h" />

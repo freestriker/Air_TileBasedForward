@@ -40,6 +40,7 @@
 #include "Core/Graphic/RenderPass/TBF_OIT_AlphaLinkedListRenderPass.h"
 #include "Core/Graphic/RenderPass/TBF_OIT_ALL_SortBlendRenderPass.h"
 #include "Asset/AudioClip.h"
+#include "Audio/AudioSource.h"
 
 AirEngine::Core::Logic::CoreObject::Thread::LogicThread AirEngine::Core::Logic::CoreObject::Thread::_logicThread = AirEngine::Core::Logic::CoreObject::Thread::LogicThread();
 
@@ -395,7 +396,6 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnThreadStart()
 void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 {
 	qDebug() << "AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()";
-	auto audioClip = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::AudioClip>("..\\Asset\\Audio\\IWouldGiveYouAnything.mp3");
 
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::BackgroundRenderPass());
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::F_OpaqueRenderPass());
@@ -437,6 +437,12 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	//Renderers
 	Logic::Object::GameObject* renderers = new Logic::Object::GameObject("Renderers");
 	CoreObject::Instance::rootObject.AddChild(renderers);
+
+	auto audioClip = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::AudioClip>("..\\Asset\\Audio\\IWouldGiveYouAnything.mp3");
+	auto audioSource = new Audio::AudioSource();
+	audioSource->audioClip = audioClip;
+	renderers->AddComponent(audioSource);
+	audioSource->Play();
 
 	Logic::Object::GameObject* opaqueRendererGo = new Logic::Object::GameObject("meshRenderer");
 	renderers->AddChild(opaqueRendererGo);

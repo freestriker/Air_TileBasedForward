@@ -18,6 +18,7 @@ namespace AirEngine
 		public:
 			AudioClip();
 			~AudioClip();
+			ALuint AlBuffer();
 
 			RTTR_ENABLE(AirEngine::Core::IO::Asset::AssetBase)
 		};
