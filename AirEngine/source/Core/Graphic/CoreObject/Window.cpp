@@ -8,6 +8,7 @@
 #include "Utils/Log.h"
 #include "Utils/Condition.h"
 #include "Core/Graphic/CoreObject/Instance.h"
+#include "Core/Audio/CoreObject/Thread.h"
 
 AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow* AirEngine::Core::Graphic::CoreObject::Window::_window = nullptr;
 AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer* AirEngine::Core::Graphic::CoreObject::Window::_windowRenderer = nullptr;
@@ -28,11 +29,15 @@ void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::initRes
 {
     qDebug("AirEngine::Core::Graphic::CoreObject::Thread::VulkanWindowRenderer::initResources()");
     AirEngine::Core::Graphic::CoreObject::Thread::Init();
+    AirEngine::Core::Audio::CoreObject::Thread::Init();
     AirEngine::Core::IO::CoreObject::Thread::Init();
     AirEngine::Core::Logic::CoreObject::Thread::Init();
 
     AirEngine::Core::Graphic::CoreObject::Thread::Start();
     AirEngine::Core::Graphic::CoreObject::Thread::WaitForStartFinish();
+
+    AirEngine::Core::Audio::CoreObject::Thread::Start();
+    AirEngine::Core::Audio::CoreObject::Thread::WaitForStartFinish();
 
     AirEngine::Core::IO::CoreObject::Thread::Start();
     AirEngine::Core::IO::CoreObject::Thread::WaitForStartFinish();

@@ -105,6 +105,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Core\Audio\CoreObject\Thread.cpp" />
+    <ClCompile Include="source\Core\Audio\CoreObject\Instance.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\PresentRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\TBF_OIT_ALL_SortBlendRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\TBF_OIT_AlphaLinkedListRenderPass.cpp" />
@@ -188,6 +190,8 @@
     <ClInclude Include="header\Behaviour\Behaviour.h" />
     <ClInclude Include="header\Camera\CameraBase.h" />
     <ClInclude Include="header\Camera\OrthographicCamera.h" />
+    <ClInclude Include="header\Core\Audio\CoreObject\Instance.h" />
+    <ClInclude Include="header\Core\Audio\CoreObject\Thread.h" />
     <ClInclude Include="header\Core\Graphic\Command\BufferMemoryBarrier.h" />
     <ClInclude Include="header\Core\Graphic\Command\CommandBuffer.h" />
     <ClInclude Include="header\Core\Graphic\Command\CommandPool.h" />
