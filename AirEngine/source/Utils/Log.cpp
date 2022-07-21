@@ -55,7 +55,7 @@ void AirEngine::Utils::Log::Exception(std::string info, ALenum logCondition)
 	if (logCondition != AL_NO_ERROR)
 	{
 		std::unique_lock<std::mutex> lock(_mutex);
-		std::string s = "Message: " + info + " Error code: " + std::to_string(static_cast<int>(logCondition)) + ".";
+		std::string s = "Exception: " + info + " Error code: " + std::to_string(static_cast<int>(logCondition)) + ".";
 		qDebug() << QString::fromStdString(s);
 	}
 }

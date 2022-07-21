@@ -2,6 +2,9 @@
 #include <AL/al.h>
 #include <AL/alext.h>
 #include <al/alc.h>
+#include <mutex>
+#include <functional>
+
 namespace AirEngine
 {
 	namespace Core
@@ -20,7 +23,9 @@ namespace AirEngine
 
 					static ALCdevice* _device;
 					static ALCcontext* _context;
+					static std::mutex _submitMutex;
 				public:
+					static void SubmitCommand(std::function<void()> submitFunction);
 				};
 			}
 		}

@@ -105,6 +105,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Asset\AudioClip.cpp" />
     <ClCompile Include="source\Core\Audio\CoreObject\Thread.cpp" />
     <ClCompile Include="source\Core\Audio\CoreObject\Instance.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\PresentRenderPass.cpp" />
@@ -184,6 +185,7 @@
     <ClCompile Include="source\Utils\Time.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="header\Asset\AudioClip.h" />
     <ClInclude Include="header\Asset\Mesh.h" />
     <ClInclude Include="header\Asset\Texture2D.h" />
     <ClInclude Include="header\Asset\TextureCube.h" />
