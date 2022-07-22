@@ -30,7 +30,7 @@ layout (set = START_SET_INDEX + 3, binding = 0) buffer PixelAtomicCounter
 }pixelAtomicCounter;
 
 #undef START_SET_INDEX
-#define START_SET_INDEX 8
+#define START_SET_INDEX 10
 
 #define PIXEL_CURRENT_INDEX (pixelAtomicCounter.currentIndex)
 #define PIXEL_MAX_INDEX (ALPHA_LINKED_LIST_SIZE_FACTOR * imageSize(linkedListHeadImage).x * imageSize(linkedListHeadImage).y)
