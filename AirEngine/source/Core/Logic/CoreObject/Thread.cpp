@@ -35,7 +35,7 @@
 #include "Core/Graphic/RenderPass/PreZRenderPass.h"
 #include "Core/Graphic/RenderPass/TBF_OIT_DepthPeelingBlendRenderPass.h"
 #include "Core/Graphic/RenderPass/TBF_OIT_DepthPeelingRenderPass.h"
-#include "Test/TBF_OIT_RedBoxBehaviour.h"
+#include "Test/TBF_OIT_RenderBehaviour.h"
 #include "Core/Graphic/RenderPass/PresentRenderPass.h"
 #include "Core/Graphic/RenderPass/TBF_OIT_AlphaLinkedListRenderPass.h"
 #include "Core/Graphic/RenderPass/TBF_OIT_ALL_SortBlendRenderPass.h"
@@ -442,11 +442,11 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	opaqueRendererGo->AddComponent(new Test::F_OpaqueRendererBehaviour());
 	opaqueRendererGo->transform.SetScale(glm::vec3(0.8, 0.8, 0.8));
 
-	Logic::Object::GameObject* glassMeshRendererGo = new Logic::Object::GameObject("GlassMeshRenderer");
-	renderers->AddChild(glassMeshRendererGo);
-	glassMeshRendererGo->AddComponent(new Renderer::Renderer());
-	glassMeshRendererGo->AddComponent(new Test::F_GlassRendererBehaviour());
-	glassMeshRendererGo->transform.SetTranslation(glm::vec3(3, 0, 0));
+	//Logic::Object::GameObject* glassMeshRendererGo = new Logic::Object::GameObject("GlassMeshRenderer");
+	//renderers->AddChild(glassMeshRendererGo);
+	//glassMeshRendererGo->AddComponent(new Renderer::Renderer());
+	//glassMeshRendererGo->AddComponent(new Test::F_GlassRendererBehaviour());
+	//glassMeshRendererGo->transform.SetTranslation(glm::vec3(3, 0, 0));
 
 	Logic::Object::GameObject* mirrorMeshRendererGo = new Logic::Object::GameObject("MirrorMeshRenderer");
 	renderers->AddChild(mirrorMeshRendererGo);
@@ -470,24 +470,6 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		transparentRendererGo->transform.SetScale(glm::vec3(2, 2, 2));
 		transparentRendererGo->transform.SetTranslation(glm::vec3(2, 0, 2));
 	}
-	//{
-	//	Logic::Object::GameObject* transparentRendererGo = new Logic::Object::GameObject("F_TransparentRenderer2");
-	//	transparentRenderers->AddChild(transparentRendererGo);
-	//	transparentRendererGo->AddComponent(new Renderer::Renderer());
-	//	transparentRendererGo->AddComponent(new Test::F_TransparentRendererBehaviour());
-	//	transparentRendererGo->transform.SetScale(glm::vec3(2, 2, 2));
-	//	transparentRendererGo->transform.SetTranslation(glm::vec3(2, 2, 0));
-	//	transparentRendererGo->transform.SetEulerRotation(glm::vec3(90, 0, 0));
-	//}
-	//{
-	//	Logic::Object::GameObject* transparentRendererGo = new Logic::Object::GameObject("F_TransparentRenderer3");
-	//	transparentRenderers->AddChild(transparentRendererGo);
-	//	transparentRendererGo->AddComponent(new Renderer::Renderer());
-	//	transparentRendererGo->AddComponent(new Test::F_TransparentRendererBehaviour());
-	//	transparentRendererGo->transform.SetScale(glm::vec3(2, 2, 2));
-	//	transparentRendererGo->transform.SetTranslation(glm::vec3(-2, 2, 0));
-	//	transparentRendererGo->transform.SetEulerRotation(glm::vec3(90, 0, 0));
-	//}
 	{
 		Logic::Object::GameObject* transparentRendererGo = new Logic::Object::GameObject("TBF_TransparentRenderer1");
 		transparentRenderers->AddChild(transparentRendererGo);
@@ -496,34 +478,17 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		transparentRendererGo->transform.SetScale(glm::vec3(2, 2, 2));
 		transparentRendererGo->transform.SetTranslation(glm::vec3(-2, 0, 2));
 	}
-	//{
-	//	Logic::Object::GameObject* transparentRendererGo = new Logic::Object::GameObject("TBF_TransparentRenderer2");
-	//	transparentRenderers->AddChild(transparentRendererGo);
-	//	transparentRendererGo->AddComponent(new Renderer::Renderer());
-	//	transparentRendererGo->AddComponent(new Test::TBF_TransparentRendererBehaviour());
-	//	transparentRendererGo->transform.SetScale(glm::vec3(2, 2, 2));
-	//	transparentRendererGo->transform.SetTranslation(glm::vec3(4, 0, 0));
-	//	transparentRendererGo->transform.SetEulerRotation(glm::vec3(90, 90, 90));
-	//}
 
 	///OIT
 	Logic::Object::GameObject* oitRenderers = new Logic::Object::GameObject("OitRenderers");
 	renderers->AddChild(oitRenderers);
+	oitRenderers->transform.SetTranslation({3, 0, 0});
 	{
 		Logic::Object::GameObject* oitRendererGo = new Logic::Object::GameObject("OitRenderer1");
 		oitRenderers->AddChild(oitRendererGo);
 		oitRendererGo->AddComponent(new Renderer::Renderer());
-		oitRendererGo->transform.SetScale(glm::vec3(0.85, 0.85, 0.85));
-		oitRendererGo->AddComponent(new Test::TBF_OIT_RedBoxBehaviour());
-		oitRendererGo->AddComponent(new Test::SelfRotateBehaviour(30));
-	}
-	{
-		Logic::Object::GameObject* oitRendererGo = new Logic::Object::GameObject("OitRenderer2");
-		oitRenderers->AddChild(oitRendererGo);
-		oitRendererGo->AddComponent(new Renderer::Renderer());
-		oitRendererGo->transform.SetScale(glm::vec3(1.1, 1.1, 1.1));
-		oitRendererGo->AddComponent(new Test::TBF_OIT_RedBoxBehaviour());
-		oitRendererGo->AddComponent(new Test::SelfRotateBehaviour(45));
+		oitRendererGo->AddComponent(new Test::TBF_OIT_RenderBehaviour("WhiteTexture2D"));
+		oitRendererGo->AddComponent(new Test::SelfRotateBehaviour(35));
 	}
 
 	//Lights
@@ -535,7 +500,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	directionalLightGo->transform.SetEulerRotation(glm::vec3(-30, 70, 0));
 	auto directionalLight = new Light::DirectionalLight();
 	directionalLight->color = { 1, 239.0 / 255, 213.0 / 255, 1 };
-	directionalLight->intensity = 0.8f;
+	directionalLight->intensity = 0.0f;
 	directionalLightGo->AddComponent(directionalLight);
 
 	Logic::Object::GameObject* skyBoxGo = new Logic::Object::GameObject("SkyBox");

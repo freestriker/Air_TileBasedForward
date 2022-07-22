@@ -19,11 +19,11 @@ glslangValidator.exe -t -V GlassShader.frag -IUtils/ -o Spv/GlassShader.frag.spv
 glslangValidator.exe -t -V PreZShader.vert -IUtils/ -o Spv/PreZShader.vert.spv
 glslangValidator.exe -t -V PreZShader.frag -IUtils/ -o Spv/PreZShader.frag.spv
 
-glslangValidator.exe -t -V TBF_OIT_DP_RedShader.vert -IUtils/ -o Spv/TBF_OIT_DP_RedShader.vert.spv
-glslangValidator.exe -t -V TBF_OIT_DP_RedShader.frag -IUtils/ -o Spv/TBF_OIT_DP_RedShader.frag.spv
+glslangValidator.exe -t -V TBF_OIT_DP_Shader.vert -IUtils/ -o Spv/TBF_OIT_DP_Shader.vert.spv
+glslangValidator.exe -t -V TBF_OIT_DP_Shader.frag -IUtils/ -o Spv/TBF_OIT_DP_Shader.frag.spv
 
-glslangValidator.exe -t -V TBF_OIT_ALL_RedShader.vert -IUtils/ -o Spv/TBF_OIT_ALL_RedShader.vert.spv
-glslangValidator.exe -t -V TBF_OIT_ALL_RedShader.frag -IUtils/ -o Spv/TBF_OIT_ALL_RedShader.frag.spv
+glslangValidator.exe -t -V TBF_OIT_ALL_Shader.vert -IUtils/ -o Spv/TBF_OIT_ALL_Shader.vert.spv
+glslangValidator.exe -t -V TBF_OIT_ALL_Shader.frag -IUtils/ -o Spv/TBF_OIT_ALL_Shader.frag.spv
 
 glslangValidator.exe -t -V OIT_DP_BlendShader.vert -IUtils/ -o Spv/OIT_DP_BlendShader.vert.spv
 glslangValidator.exe -t -V OIT_DP_BlendShader.frag -IUtils/ -o Spv/OIT_DP_BlendShader.frag.spv

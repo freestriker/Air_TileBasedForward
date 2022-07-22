@@ -1,7 +1,7 @@
 {
   "renderPass": "TBF_OIT_AlphaLinkedListRenderPass",
   "subpass": "DrawSubpass",
-  "shaderPaths": ["..\\Asset\\Shader\\Spv\\TBF_OIT_ALL_RedShader.vert.spv", "..\\Asset\\Shader\\Spv\\TBF_OIT_ALL_RedShader.frag.spv"],
+  "shaderPaths": ["..\\Asset\\Shader\\Spv\\TBF_OIT_ALL_Shader.vert.spv", "..\\Asset\\Shader\\Spv\\TBF_OIT_ALL_Shader.frag.spv"],
   "cullMode": 0,
   "depthTestEnable": 1,
   "depthWriteEnable": 0,
