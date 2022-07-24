@@ -173,7 +173,7 @@
     <ClCompile Include="source\Test\F_OpaqueRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\SelfRotateBehaviour.cpp" />
     <ClCompile Include="source\Test\F_TransparentRendererBehaviour.cpp" />
-    <ClCompile Include="source\Test\TBF_OIT_RedBoxBehaviour.cpp" />
+    <ClCompile Include="source\Test\TBF_OIT_RenderBehaviour.cpp" />
     <ClCompile Include="source\Test\TBF_TransparentRendererBehaviour.cpp" />
     <ClCompile Include="source\Utils\ChildBrotherTree.cpp" />
     <ClCompile Include="source\Utils\Condition.cpp" />
@@ -252,7 +252,7 @@
     <ClInclude Include="header\Test\F_OpaqueRendererBehaviour.h" />
     <ClInclude Include="header\Test\SelfRotateBehaviour.h" />
     <ClInclude Include="header\Test\F_TransparentRendererBehaviour.h" />
-    <ClInclude Include="header\Test\TBF_OIT_RedBoxBehaviour.h" />
+    <ClInclude Include="header\Test\TBF_OIT_RenderBehaviour.h" />
     <ClInclude Include="header\Test\TBF_TransparentRendererBehaviour.h" />
     <ClInclude Include="header\Utils\ChildBrotherTree.h" />
     <ClInclude Include="header\Utils\Condition.h" />

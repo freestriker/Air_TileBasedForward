@@ -1,7 +1,7 @@
 {
   "renderPass": "TBF_OIT_DepthPeelingRenderPass",
   "subpass": "DrawSubpass",
-  "shaderPaths": ["..\\Asset\\Shader\\Spv\\TBF_OIT_DP_RedShader.vert.spv", "..\\Asset\\Shader\\Spv\\TBF_OIT_DP_RedShader.frag.spv"],
+  "shaderPaths": ["..\\Asset\\Shader\\Spv\\TBF_OIT_DP_Shader.vert.spv", "..\\Asset\\Shader\\Spv\\TBF_OIT_DP_Shader.frag.spv"],
   "cullMode": 0,
   "depthTestEnable": 1,
   "depthWriteEnable": 1,
