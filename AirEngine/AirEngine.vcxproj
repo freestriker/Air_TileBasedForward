@@ -68,7 +68,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ClCompile>
       <PreprocessorDefinitions>_DEBUG;_USE_GRAPHIC_DEBUG;%(PreprocessorDefinitions);RTTR_DLL</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(MY_VULKAN_PATH)\Include;$(MY_GLM_PATH)\;$(MY_GLFW_PATH)\include;..\ThirdParty\rttr\include;..\ThirdParty\assimp\include;..\ThirdParty\FreeImage\include;..\ThirdParty\NlohmannJson\include;..\ThirdParty\OpenAL\include;..\AirEngine\header;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MY_VULKAN_PATH)\Include;$(MY_GLM_PATH)\;$(MY_GLFW_PATH)\include;..\ThirdParty\rttr\include;..\ThirdParty\assimp\include;..\ThirdParty\FreeImage\include;..\ThirdParty\NlohmannJson\include;..\ThirdParty\OpenAL\include;..\ThirdParty\libsndfile\include;..\AirEngine\header;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -80,14 +80,14 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(MY_VULKAN_PATH)\Lib;$(MY_GLFW_PATH)\lib-vc2022;..\ThirdParty\rttr\debug\lib;..\ThirdParty\assimp\debug\lib;..\ThirdParty\FreeImage\lib;..\ThirdParty\OpenAL\debug\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;rttr_core_d.lib;assimp-vc143-mtd.lib;FreeImage.lib;common.lib;ex-common.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(MY_VULKAN_PATH)\Lib;$(MY_GLFW_PATH)\lib-vc2022;..\ThirdParty\rttr\debug\lib;..\ThirdParty\assimp\debug\lib;..\ThirdParty\FreeImage\lib;..\ThirdParty\OpenAL\debug\lib;..\ThirdParty\libsndfile\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;rttr_core_d.lib;assimp-vc143-mtd.lib;FreeImage.lib;common.lib;ex-common.lib;OpenAL32.lib;libsndfile-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="Configuration">
     <ClCompile>
       <PreprocessorDefinitions>_USE_GRAPHIC_DEBUG;%(PreprocessorDefinitions);RTTR_DLL</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>$(MY_VULKAN_PATH)\Include;$(MY_GLM_PATH)\;$(MY_GLFW_PATH)\include;..\ThirdParty\rttr\include;..\ThirdParty\assimp\include;..\ThirdParty\FreeImage\include;..\ThirdParty\NlohmannJson\include;..\ThirdParty\OpenAL\include;..\AirEngine\header;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MY_VULKAN_PATH)\Include;$(MY_GLM_PATH)\;$(MY_GLFW_PATH)\include;..\ThirdParty\rttr\include;..\ThirdParty\assimp\include;..\ThirdParty\FreeImage\include;..\ThirdParty\NlohmannJson\include;..\ThirdParty\OpenAL\include;..\ThirdParty\libsndfile\include;..\AirEngine\header;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ObjectFileName>$(IntDir)/%(RelativeDir)/</ObjectFileName>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
@@ -100,8 +100,8 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalLibraryDirectories>$(MY_VULKAN_PATH)\Lib;$(MY_GLFW_PATH)\lib-vc2022;..\ThirdParty\rttr\release\lib;..\ThirdParty\assimp\release\lib;..\ThirdParty\FreeImage\lib;..\ThirdParty\OpenAL\release\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;rttr_core.lib;assimp-vc143-mt.lib;FreeImage.lib;common.lib;ex-common.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(MY_VULKAN_PATH)\Lib;$(MY_GLFW_PATH)\lib-vc2022;..\ThirdParty\rttr\release\lib;..\ThirdParty\assimp\release\lib;..\ThirdParty\FreeImage\lib;..\ThirdParty\OpenAL\release\lib;..\ThirdParty\libsndfile\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>vulkan-1.lib;glfw3.lib;rttr_core.lib;assimp-vc143-mt.lib;FreeImage.lib;common.lib;ex-common.lib;OpenAL32.lib;libsndfile-1.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
