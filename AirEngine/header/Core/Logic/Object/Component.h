@@ -29,7 +29,9 @@ namespace AirEngine
 						BEHAVIOUR,
 						CAMERA,
 						RENDERER,
-						LIGHT
+						LIGHT,
+						AUDIO_LISTENER,
+						AUDIO_SOURCE
 					};
 				private:
 					bool _active;

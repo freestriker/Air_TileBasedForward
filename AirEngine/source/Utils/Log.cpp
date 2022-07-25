@@ -13,6 +13,16 @@ void AirEngine::Utils::Log::Message(std::string info, VkResult logCondition)
 	}
 }
 
+void AirEngine::Utils::Log::Message(std::string info, ALenum logCondition)
+{
+	if (logCondition != AL_NO_ERROR)
+	{
+		std::unique_lock<std::mutex> lock(_mutex);
+		std::string s = "Message: " + info + " Error code: " + std::to_string(static_cast<int>(logCondition)) + ".";
+		qDebug() << QString::fromStdString(s);
+	}
+}
+
 void AirEngine::Utils::Log::Message(std::string info, bool logCondition)
 {
 	if (logCondition)
@@ -37,6 +47,16 @@ void AirEngine::Utils::Log::Exception(std::string info, VkResult logCondition)
 		std::unique_lock<std::mutex> lock(_mutex);
 		std::string s = "Exception: " + info + " Error code: " + std::to_string(static_cast<int>(logCondition)) + ".";
 		qWarning() << QString::fromStdString(s);
+	}
+}
+
+void AirEngine::Utils::Log::Exception(std::string info, ALenum logCondition)
+{
+	if (logCondition != AL_NO_ERROR)
+	{
+		std::unique_lock<std::mutex> lock(_mutex);
+		std::string s = "Exception: " + info + " Error code: " + std::to_string(static_cast<int>(logCondition)) + ".";
+		qDebug() << QString::fromStdString(s);
 	}
 }
 

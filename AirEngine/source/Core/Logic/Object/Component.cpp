@@ -5,6 +5,8 @@
 #include "Renderer/Renderer.h"
 #include "Behaviour/Behaviour.h"
 #include "Camera/CameraBase.h"
+#include "Audio/AudioListener.h"
+#include "Audio/AudioSource.h"
 
 RTTR_REGISTRATION
 {
@@ -18,6 +20,8 @@ std::map<rttr::type, AirEngine::Core::Logic::Object::Component::ComponentType>
 	{rttr::type::get<Behaviour::Behaviour>(), Component::ComponentType::BEHAVIOUR},
 	{rttr::type::get<Camera::CameraBase>(), Component::ComponentType::CAMERA},
 	{rttr::type::get<Renderer::Renderer>(), Component::ComponentType::RENDERER},
+	{rttr::type::get<Audio::AudioListener>(), Component::ComponentType::AUDIO_LISTENER},
+	{rttr::type::get<Audio::AudioSource>(), Component::ComponentType::AUDIO_SOURCE},
 });
 
 const rttr::type AirEngine::Core::Logic::Object::Component::COMPONENT_TYPE = rttr::type::get< AirEngine::Core::Logic::Object::Component>();
