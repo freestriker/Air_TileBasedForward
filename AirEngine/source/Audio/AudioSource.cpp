@@ -10,7 +10,8 @@ RTTR_REGISTRATION
 }
 
 AirEngine::Audio::AudioSource::AudioSource()
-	: _audioClip(nullptr)
+	: Component(ComponentType::AUDIO_SOURCE)
+    , _audioClip(nullptr)
 	, _loop(false)
 	, _pitch(1)
 	, _gain(1)
@@ -186,6 +187,8 @@ void AirEngine::Audio::AudioSource::OnStart()
 
 void AirEngine::Audio::AudioSource::OnUpdate()
 {
+    if (_audioClip == nullptr) return;
+
     glm::vec3 pos = GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, 0, 1);
 
     Core::Audio::CoreObject::Instance::SubmitCommand(

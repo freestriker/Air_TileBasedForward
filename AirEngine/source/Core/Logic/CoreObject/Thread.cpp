@@ -41,6 +41,8 @@
 #include "Core/Graphic/RenderPass/TBF_OIT_ALL_SortBlendRenderPass.h"
 #include "Asset/AudioClip.h"
 #include "Audio/AudioSource.h"
+#include "Audio/AudioListener.h"
+#include "Test/AudioSourceBehaviour.h"
 
 AirEngine::Core::Logic::CoreObject::Thread::LogicThread AirEngine::Core::Logic::CoreObject::Thread::_logicThread = AirEngine::Core::Logic::CoreObject::Thread::LogicThread();
 
@@ -433,16 +435,22 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	camera->mainCamera = camera;
 	cameraGo->AddComponent(camera);
 	cameraGo->AddComponent(new Test::CameraMoveBehaviour());
+	cameraGo->AddComponent(new Audio::AudioListener());
+
+	///AudioSource
+	Logic::Object::GameObject* audioSources = new Logic::Object::GameObject("AudioSources");
+	CoreObject::Instance::rootObject.AddChild(audioSources);
+	{
+		Logic::Object::GameObject* audioSourceGo = new Logic::Object::GameObject("AudioSource");
+		audioSources->AddChild(audioSourceGo);
+		audioSourceGo->AddComponent(new Audio::AudioSource());
+		audioSourceGo->AddComponent(new Test::AudioSourceBehaviour("..\\Asset\\Audio\\IWouldGiveYouAnything.flac"));
+		audioSourceGo->transform.SetScale(glm::vec3(0.8, 0.8, 0.8));
+	}
 
 	//Renderers
 	Logic::Object::GameObject* renderers = new Logic::Object::GameObject("Renderers");
 	CoreObject::Instance::rootObject.AddChild(renderers);
-
-	auto audioClip = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::AudioClip>("..\\Asset\\Audio\\IWouldGiveYouAnything.flac");
-	auto audioSource = new Audio::AudioSource();
-	audioSource->SetAudioClip(audioClip);
-	renderers->AddComponent(audioSource);
-	audioSource->Play();
 
 	Logic::Object::GameObject* opaqueRendererGo = new Logic::Object::GameObject("meshRenderer");
 	renderers->AddChild(opaqueRendererGo);
@@ -573,7 +581,8 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		IterateByDynamicBfs(Object::Component::ComponentType::BEHAVIOUR);
 		auto cameras = std::vector<Object::Component*>();
 
-		if (Instance::NeedIterateRenderer())
+		bool needIterateRenderer = Instance::NeedIterateRenderer();
+		if (needIterateRenderer)
 		{
 			//Iterate renderer
 			Utils::Log::Message("Iterate renderer");
@@ -586,6 +595,13 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 
 			Utils::Log::Message("Instance::StartRenderCondition().Awake()");
 			Graphic::CoreObject::Instance::StartRenderCondition().Awake();
+		}
+
+		IterateByStaticBfs({ Object::Component::ComponentType::AUDIO_SOURCE, Object::Component::ComponentType::AUDIO_LISTENER });
+
+		if (needIterateRenderer)
+		{
+			//wait render finish
 			Graphic::CoreObject::Instance::EndRenderCondition().Wait();
 			Utils::Log::Message("Instance::EndRenderCondition().Wait()");
 
@@ -593,6 +609,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 			Graphic::CoreObject::Instance::ClearCamera();
 			Graphic::CoreObject::Instance::ClearRenderer();
 		}
+
 		std::this_thread::yield();
 	}
 }

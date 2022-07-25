@@ -51,6 +51,8 @@ namespace AirEngine
 			AudioSource& operator=(const AudioSource&) = delete;
 			AudioSource(AudioSource&&) = delete;
 			AudioSource& operator=(AudioSource&&) = delete;
+
+			RTTR_ENABLE(Core::Logic::Object::Component)
 		};
 	}
 }
