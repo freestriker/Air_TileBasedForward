@@ -438,9 +438,9 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	Logic::Object::GameObject* renderers = new Logic::Object::GameObject("Renderers");
 	CoreObject::Instance::rootObject.AddChild(renderers);
 
-	auto audioClip = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::AudioClip>("..\\Asset\\Audio\\IWouldGiveYouAnything.mp3");
+	auto audioClip = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::AudioClip>("..\\Asset\\Audio\\IWouldGiveYouAnything.flac");
 	auto audioSource = new Audio::AudioSource();
-	audioSource->audioClip = audioClip;
+	audioSource->SetAudioClip(audioClip);
 	renderers->AddComponent(audioSource);
 	audioSource->Play();
 

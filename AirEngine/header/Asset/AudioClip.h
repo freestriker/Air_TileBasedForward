@@ -3,6 +3,7 @@
 #include <rttr/type>
 #include <AL/al.h>
 #include <vector>
+#include <sndfile.hh>
 
 namespace AirEngine
 {
@@ -13,12 +14,19 @@ namespace AirEngine
 		public:
 		private:
 			ALuint _buffer;
-			std::vector<char> _bytes;
+			ALenum _format;
+			SF_INFO _sfInfo;
+			sf_count_t _frameCount;
+			ALsizei _byteCount;
 			void OnLoad(Core::Graphic::Command::CommandBuffer* transferCommandBuffer)override;
 		public:
 			AudioClip();
 			~AudioClip();
-			ALuint AlBuffer();
+			double Duration();
+			ALuint Buffer();
+			ALenum Formart();
+			SF_INFO Info();
+			sf_count_t FrameCount();
 
 			RTTR_ENABLE(AirEngine::Core::IO::Asset::AssetBase)
 		};
