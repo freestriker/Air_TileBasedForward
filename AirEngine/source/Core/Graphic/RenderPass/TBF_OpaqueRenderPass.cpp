@@ -201,7 +201,7 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPopulateComma
 			auto mvMatrix = viewMatrix * renderer->GameObject()->transform.ModelMatrix();
 			if (renderer->enableFrustumCulling && !camera->CheckInFrustum(obbVertexes, mvMatrix))
 			{
-				Utils::Log::Message("AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass cull GameObject called " + renderer->GameObject()->name + ".");
+				//Utils::Log::Message("AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass cull GameObject called " + renderer->GameObject()->name + ".");
 				continue;
 			}
 

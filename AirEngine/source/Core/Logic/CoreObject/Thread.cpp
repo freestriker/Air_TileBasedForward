@@ -43,6 +43,7 @@
 #include "Audio/AudioSource.h"
 #include "Audio/AudioListener.h"
 #include "Test/AudioSourceBehaviour.h"
+#include "Core/Logic/Manager/InputManager.h"
 
 AirEngine::Core::Logic::CoreObject::Thread::LogicThread AirEngine::Core::Logic::CoreObject::Thread::_logicThread = AirEngine::Core::Logic::CoreObject::Thread::LogicThread();
 
@@ -380,25 +381,22 @@ AirEngine::Core::Logic::CoreObject::Thread::LogicThread::~LogicThread()
 
 void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::Init()
 {
-	qDebug() << "AirEngine::Core::Logic::CoreObject::Thread::LogicThread::Init()";
+	_stopped = false;
 }
 
 void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnStart()
 {
 	_stopped = false;
-	Instance::time.Launch();
-	qDebug() << "AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnStart()";
+	Instance::Init();
 }
 
 void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnThreadStart()
 {
-	qDebug() << "AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnThreadStart()";
+
 }
 
 void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 {
-	qDebug() << "AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()";
-
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::BackgroundRenderPass());
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::F_OpaqueRenderPass());
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::PreZRenderPass());
@@ -574,9 +572,18 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		pointLightGo->AddComponent(pointLight);
 	}
 
+	int inputClearFlag = 0;
+	const int INPUT_CLEAR_TIMES = 1;
 	while (!_stopped)
 	{
 		Instance::time.Refresh();
+
+		if (inputClearFlag == 0)
+		{
+			Instance::InputManager().Clear();
+		}
+		inputClearFlag = (inputClearFlag + 1) % INPUT_CLEAR_TIMES;
+		Instance::InputManager().Refresh();
 
 		IterateByDynamicBfs(Object::Component::ComponentType::BEHAVIOUR);
 		auto cameras = std::vector<Object::Component*>();
@@ -585,7 +592,6 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		if (needIterateRenderer)
 		{
 			//Iterate renderer
-			Utils::Log::Message("Iterate renderer");
 			auto targetComponents = std::vector<std::vector<Object::Component*>>();
 			IterateByStaticBfs({ Object::Component::ComponentType::LIGHT, Object::Component::ComponentType::CAMERA, Object::Component::ComponentType::RENDERER }, targetComponents);
 
@@ -593,7 +599,6 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 			Graphic::CoreObject::Instance::AddCamera(targetComponents[1]);
 			Graphic::CoreObject::Instance::AddRenderer(targetComponents[2]);
 
-			Utils::Log::Message("Instance::StartRenderCondition().Awake()");
 			Graphic::CoreObject::Instance::StartRenderCondition().Awake();
 		}
 
@@ -603,7 +608,6 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		{
 			//wait render finish
 			Graphic::CoreObject::Instance::EndRenderCondition().Wait();
-			Utils::Log::Message("Instance::EndRenderCondition().Wait()");
 
 			Graphic::CoreObject::Instance::ClearLight();
 			Graphic::CoreObject::Instance::ClearCamera();

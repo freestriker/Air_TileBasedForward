@@ -157,6 +157,7 @@
     <ClCompile Include="source\Core\IO\Manager\AssetManager.cpp" />
     <ClCompile Include="source\Core\Logic\CoreObject\Instance.cpp" />
     <ClCompile Include="source\Core\Logic\CoreObject\Thread.cpp" />
+    <ClCompile Include="source\Core\Logic\Manager\InputManager.cpp" />
     <ClCompile Include="source\Core\Logic\Object\Component.cpp" />
     <ClCompile Include="source\Core\Logic\Object\GameObject.cpp" />
     <ClCompile Include="source\Core\Logic\Object\Object.cpp" />
@@ -238,6 +239,7 @@
     <ClInclude Include="header\Core\IO\Manager\AssetManager.h" />
     <ClInclude Include="header\Core\Logic\CoreObject\Instance.h" />
     <ClInclude Include="header\Core\Logic\CoreObject\Thread.h" />
+    <ClInclude Include="header\Core\Logic\Manager\InputManager.h" />
     <ClInclude Include="header\Core\Logic\Object\Component.h" />
     <ClInclude Include="header\Core\Logic\Object\GameObject.h" />
     <ClInclude Include="header\Core\Logic\Object\Object.h" />
