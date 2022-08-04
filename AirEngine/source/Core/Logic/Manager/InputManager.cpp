@@ -1,5 +1,7 @@
 #include "Core/Logic/Manager/InputManager.h"
 #include "Utils/Log.h"
+#include <qcursor.h>
+#include "Core/Graphic/CoreObject/Window.h"
 
 AirEngine::Core::Logic::Manager::InputManager::InputManager()
 	: _keyInputBuffer()
@@ -13,6 +15,7 @@ AirEngine::Core::Logic::Manager::InputManager::InputManager()
 	, _wheelInputBuffer()
 	, _wheelDeltaDegree()
 	, _wheelInputMutex()
+	, _cursorPosition()
 {
 }
 
@@ -25,6 +28,7 @@ void AirEngine::Core::Logic::Manager::InputManager::Refresh()
 	RefreshKey();
 	RefreshMouse();
 	RefreshWheel();
+	RefreshCursor();
 }
 
 void AirEngine::Core::Logic::Manager::InputManager::Clear()
@@ -32,6 +36,7 @@ void AirEngine::Core::Logic::Manager::InputManager::Clear()
 	ClearKey();
 	ClearMouse();
 	ClearWheel();
+	ClearCursor();
 }
 
 void AirEngine::Core::Logic::Manager::InputManager::InputKey(InputEventType eventType, InputKeyType key)
@@ -62,7 +67,7 @@ void AirEngine::Core::Logic::Manager::InputManager::RefreshKey()
 				break;
 			}
 			}
-			Utils::Log::Message("Key type: " + std::to_string(event.keyType) + ", event type: " + std::to_string(static_cast<int>(event.eventType)) + ".");
+			//Utils::Log::Message("Key type: " + std::to_string(event.keyType) + ", event type: " + std::to_string(static_cast<int>(event.eventType)) + ".");
 		}
 		_keyInputBuffer.clear();
 	}
@@ -173,7 +178,7 @@ void AirEngine::Core::Logic::Manager::InputManager::RefreshMouse()
 				break;
 			}
 			}
-			Utils::Log::Message("Mouse type: " + std::to_string(event.mouseType) + ", event type: " + std::to_string(static_cast<int>(event.eventType)) + ".");
+			//Utils::Log::Message("Mouse type: " + std::to_string(event.mouseType) + ", event type: " + std::to_string(static_cast<int>(event.eventType)) + ".");
 		}
 		_mouseInputBuffer.clear();
 	}
@@ -269,10 +274,10 @@ void AirEngine::Core::Logic::Manager::InputManager::RefreshWheel()
 		_wheelDeltaDegree = _wheelInputBuffer;
 		_wheelInputBuffer = 0.0f;
 	}
-	if (_wheelDeltaDegree != 0.0f)
-	{
-		Utils::Log::Message("Wheel delta degree: " + std::to_string(_wheelDeltaDegree) + ".");
-	}
+	//if (_wheelDeltaDegree != 0.0f)
+	//{
+	//	Utils::Log::Message("Wheel delta degree: " + std::to_string(_wheelDeltaDegree) + ".");
+	//}
 }
 
 void AirEngine::Core::Logic::Manager::InputManager::ClearWheel()
@@ -289,4 +294,27 @@ float AirEngine::Core::Logic::Manager::InputManager::WheelDeltaDegree()
 bool AirEngine::Core::Logic::Manager::InputManager::WheelScrolled()
 {
 	return _wheelDeltaDegree != 0.0f;
+}
+
+void AirEngine::Core::Logic::Manager::InputManager::SetCursor(glm::ivec2 position)
+{
+	QCursor::setPos(Core::Graphic::CoreObject::Window::VulkanWindow_()->mapToGlobal(QPoint{ position .x, position .y}));
+	_cursorPosition = position;
+}
+
+void AirEngine::Core::Logic::Manager::InputManager::RefreshCursor()
+{
+	auto relativePos = Core::Graphic::CoreObject::Window::VulkanWindow_()->mapFromGlobal(QCursor::pos());
+	_cursorPosition = { relativePos.x(), relativePos.y() };
+	//Utils::Log::Message("Mouse relative position: (" + std::to_string(relativePos.x()) + ", " + std::to_string(relativePos.y()) + ").");
+}
+
+void AirEngine::Core::Logic::Manager::InputManager::ClearCursor()
+{
+	_cursorPosition = { 0, 0 };
+}
+
+glm::ivec2 AirEngine::Core::Logic::Manager::InputManager::Cursor()
+{
+	return _cursorPosition;
 }

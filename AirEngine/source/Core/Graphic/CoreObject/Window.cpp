@@ -21,29 +21,38 @@ QVulkanInstance* AirEngine::Core::Graphic::CoreObject::Window::_qVulkanInstance 
 
 void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow::keyPressEvent(QKeyEvent* keyEvent)
 {
-    if (keyEvent->isAutoRepeat()) return;
-    Logic::CoreObject::Instance::InputManager().InputKey(static_cast<Logic::Manager::InputEventType>(keyEvent->type()), static_cast<Logic::Manager::InputKeyType>(keyEvent->key()));
+    if (!keyEvent->isAutoRepeat()) 
+    {
+        Logic::CoreObject::Instance::InputManager().InputKey(static_cast<Logic::Manager::InputEventType>(keyEvent->type()), static_cast<Logic::Manager::InputKeyType>(keyEvent->key()));
+    }
+    keyEvent->accept();
 }
 
 void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow::keyReleaseEvent(QKeyEvent* keyEvent)
 {
-    if (keyEvent->isAutoRepeat()) return;
-    Logic::CoreObject::Instance::InputManager().InputKey(static_cast<Logic::Manager::InputEventType>(keyEvent->type()), static_cast<Logic::Manager::InputKeyType>(keyEvent->key()));
+    if (!keyEvent->isAutoRepeat())
+    {
+        Logic::CoreObject::Instance::InputManager().InputKey(static_cast<Logic::Manager::InputEventType>(keyEvent->type()), static_cast<Logic::Manager::InputKeyType>(keyEvent->key()));
+    }
+    keyEvent->accept();
 }
 
 void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow::mousePressEvent(QMouseEvent* mouseEvent)
 {
     Logic::CoreObject::Instance::InputManager().InputMouse(static_cast<Logic::Manager::InputEventType>(mouseEvent->type()), mouseEvent->button());
+    mouseEvent->accept();
 }
 
 void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow::mouseReleaseEvent(QMouseEvent* mouseEvent)
 {
     Logic::CoreObject::Instance::InputManager().InputMouse(static_cast<Logic::Manager::InputEventType>(mouseEvent->type()), mouseEvent->button());
+    mouseEvent->accept();
 }
 
 void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow::wheelEvent(QWheelEvent* wheelEvent)
 {
     Logic::CoreObject::Instance::InputManager().InputWheel(static_cast<float>(wheelEvent->angleDelta().y()) * 0.125);
+    wheelEvent->accept();
 }
 
 QVulkanWindowRenderer* AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow::createRenderer()

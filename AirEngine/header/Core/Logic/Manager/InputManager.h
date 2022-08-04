@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <mutex>
 #include <Qt>
+#include <glm/glm.hpp>
 
 namespace AirEngine
 {
@@ -61,6 +62,8 @@ namespace AirEngine
 					float _wheelDeltaDegree;
 					std::mutex _wheelInputMutex;
 
+					glm::ivec2 _cursorPosition;
+
 				private:
 					InputManager();
 					~InputManager();
@@ -97,6 +100,12 @@ namespace AirEngine
 					void ClearWheel();
 					float WheelDeltaDegree();
 					bool WheelScrolled();
+
+					///Cursor
+					void SetCursor(glm::ivec2 position);
+					void RefreshCursor();
+					void ClearCursor();
+					glm::ivec2 Cursor();
 				};
 			}
 		}
