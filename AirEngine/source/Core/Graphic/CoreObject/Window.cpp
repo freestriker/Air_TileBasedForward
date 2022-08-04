@@ -13,6 +13,7 @@
 #include "Core/Logic/Manager/InputManager.h"
 #include "Core/Logic/CoreObject/Instance.h"
 #include <QMouseEvent>
+#include <QWheelEvent>
 
 AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow* AirEngine::Core::Graphic::CoreObject::Window::_window = nullptr;
 AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer* AirEngine::Core::Graphic::CoreObject::Window::_windowRenderer = nullptr;
@@ -38,6 +39,11 @@ void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow::mousePressEvent
 void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow::mouseReleaseEvent(QMouseEvent* mouseEvent)
 {
     Logic::CoreObject::Instance::InputManager().InputMouse(static_cast<Logic::Manager::InputEventType>(mouseEvent->type()), mouseEvent->button());
+}
+
+void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow::wheelEvent(QWheelEvent* wheelEvent)
+{
+    Logic::CoreObject::Instance::InputManager().InputWheel(static_cast<float>(wheelEvent->angleDelta().y()) * 0.125);
 }
 
 QVulkanWindowRenderer* AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow::createRenderer()

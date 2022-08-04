@@ -572,17 +572,11 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		pointLightGo->AddComponent(pointLight);
 	}
 
-	int inputClearFlag = 0;
-	const int INPUT_CLEAR_TIMES = 1;
 	while (!_stopped)
 	{
 		Instance::time.Refresh();
 
-		if (inputClearFlag == 0)
-		{
-			Instance::InputManager().Clear();
-		}
-		inputClearFlag = (inputClearFlag + 1) % INPUT_CLEAR_TIMES;
+		Instance::InputManager().Clear();
 		Instance::InputManager().Refresh();
 
 		IterateByDynamicBfs(Object::Component::ComponentType::BEHAVIOUR);
@@ -620,5 +614,5 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 
 void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnEnd()
 {
-	qDebug() << "AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnEnd()";
+
 }

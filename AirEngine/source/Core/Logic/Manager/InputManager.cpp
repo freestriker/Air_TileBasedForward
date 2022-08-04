@@ -10,6 +10,9 @@ AirEngine::Core::Logic::Manager::InputManager::InputManager()
 	, _mouseStatusTable()
 	, _mouseInputQueue()
 	, _mouseInputMutex()
+	, _wheelInputBuffer()
+	, _wheelDeltaDegree()
+	, _wheelInputMutex()
 {
 }
 
@@ -21,12 +24,14 @@ void AirEngine::Core::Logic::Manager::InputManager::Refresh()
 {
 	RefreshKey();
 	RefreshMouse();
+	RefreshWheel();
 }
 
 void AirEngine::Core::Logic::Manager::InputManager::Clear()
 {
 	ClearKey();
 	ClearMouse();
+	ClearWheel();
 }
 
 void AirEngine::Core::Logic::Manager::InputManager::InputKey(InputEventType eventType, InputKeyType key)
@@ -249,4 +254,39 @@ bool AirEngine::Core::Logic::Manager::InputManager::MouseAny(InputMouseType mous
 AirEngine::Core::Logic::Manager::ButtonStatusType AirEngine::Core::Logic::Manager::InputManager::MouseStatus(InputMouseType mouse)
 {
 	return _mouseStatusTable.count(mouse) > 0 ? _mouseStatusTable[mouse] : ButtonStatusType::Released;
+}
+
+void AirEngine::Core::Logic::Manager::InputManager::InputWheel(float deltaDegree)
+{
+	std::lock_guard<std::mutex> locker(_wheelInputMutex);
+	_wheelInputBuffer += deltaDegree;
+}
+
+void AirEngine::Core::Logic::Manager::InputManager::RefreshWheel()
+{
+	{
+		std::lock_guard<std::mutex> locker(_wheelInputMutex);
+		_wheelDeltaDegree = _wheelInputBuffer;
+		_wheelInputBuffer = 0.0f;
+	}
+	if (_wheelDeltaDegree != 0.0f)
+	{
+		Utils::Log::Message("Wheel delta degree: " + std::to_string(_wheelDeltaDegree) + ".");
+	}
+}
+
+void AirEngine::Core::Logic::Manager::InputManager::ClearWheel()
+{
+	std::lock_guard<std::mutex> locker(_wheelInputMutex);
+	_wheelDeltaDegree = 0.0f;
+}
+
+float AirEngine::Core::Logic::Manager::InputManager::WheelDeltaDegree()
+{
+	return _wheelDeltaDegree;
+}
+
+bool AirEngine::Core::Logic::Manager::InputManager::WheelScrolled()
+{
+	return _wheelDeltaDegree != 0.0f;
 }

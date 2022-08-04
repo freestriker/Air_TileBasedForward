@@ -57,6 +57,10 @@ namespace AirEngine
 					std::vector< ButtonEvent> _mouseInputQueue;
 					std::mutex _mouseInputMutex;
 
+					float _wheelInputBuffer;
+					float _wheelDeltaDegree;
+					std::mutex _wheelInputMutex;
+
 				private:
 					InputManager();
 					~InputManager();
@@ -87,6 +91,12 @@ namespace AirEngine
 					bool MouseAny(InputMouseType mouse);
 					ButtonStatusType MouseStatus(InputMouseType key);
 
+					///Wheel
+					void InputWheel(float deltaDegree);
+					void RefreshWheel();
+					void ClearWheel();
+					float WheelDeltaDegree();
+					bool WheelScrolled();
 				};
 			}
 		}
