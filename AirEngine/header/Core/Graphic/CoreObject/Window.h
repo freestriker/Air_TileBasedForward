@@ -19,6 +19,8 @@ namespace AirEngine
 					private:
 						void keyReleaseEvent(QKeyEvent* keyEvent)override;
 						void keyPressEvent(QKeyEvent* keyEvent)override;
+						void mousePressEvent(QMouseEvent* event)override;
+						void mouseReleaseEvent(QMouseEvent* event)override;
 					public:
 						QVulkanWindowRenderer* createRenderer() override;
 					};

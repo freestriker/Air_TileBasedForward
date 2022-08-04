@@ -20,16 +20,14 @@ namespace AirEngine
 			{
 				enum class InputEventType
 				{
-					None = 0,                               // invalid event
-					//MouseButtonPress = 2,                   // mouse button pressed
-					//MouseButtonRelease = 3,                 // mouse button released
-					//MouseButtonDblClick = 4,                // mouse button double click
-					//MouseMove = 5,                          // mouse move
+					MousePress = 2,							// mouse button pressed
+					MouseRelease = 3,						// mouse button released
 					KeyPress = 6,                           // key pressed
 					KeyRelease = 7,                         // key released
 				};
 				typedef Qt::Key InputKeyType;
-				enum class KeyStatusType
+				typedef Qt::MouseButton InputMouseType;
+				enum class ButtonStatusType
 				{
 					Pressed,
 					Released
@@ -40,15 +38,24 @@ namespace AirEngine
 					friend class CoreObject::Thread;
 					friend class CoreObject::Instance;
 				private:
-					struct KeyEvent
+					struct ButtonEvent
 					{
 						InputEventType eventType;
-						InputKeyType keyType;
+						union
+						{
+							InputKeyType keyType;
+							InputMouseType mouseType;
+						};
 					};
-					std::vector<KeyEvent> _inputBuffer;
-					std::unordered_map< InputKeyType, KeyStatusType> _statusTable;
-					std::vector< KeyEvent> _inputQueue;
-					std::mutex _managerMutex;
+					std::vector<ButtonEvent> _keyInputBuffer;
+					std::unordered_map< InputKeyType, ButtonStatusType> _keyStatusTable;
+					std::vector< ButtonEvent> _keyInputQueue;
+					std::mutex _keyInputMutex;
+
+					std::vector<ButtonEvent> _mouseInputBuffer;
+					std::unordered_map< InputMouseType, ButtonStatusType> _mouseStatusTable;
+					std::vector< ButtonEvent> _mouseInputQueue;
+					std::mutex _mouseInputMutex;
 
 				private:
 					InputManager();
@@ -61,11 +68,25 @@ namespace AirEngine
 				public:
 					void Refresh();
 					void Clear();
+
+					///Key
 					void InputKey(InputEventType eventType, InputKeyType key);
+					void RefreshKey();
+					void ClearKey();
 					bool KeyUp(InputKeyType key);
 					bool KeyDown(InputKeyType key);
 					bool KeyAny(InputKeyType key);
-					KeyStatusType KeyStatus(InputKeyType key);
+					ButtonStatusType KeyStatus(InputKeyType key);
+
+					///Mouse
+					void InputMouse(InputEventType eventType, InputMouseType mouse);
+					void RefreshMouse();
+					void ClearMouse();
+					bool MouseUp(InputMouseType mouse);
+					bool MouseDown(InputMouseType mouse);
+					bool MouseAny(InputMouseType mouse);
+					ButtonStatusType MouseStatus(InputMouseType key);
+
 				};
 			}
 		}

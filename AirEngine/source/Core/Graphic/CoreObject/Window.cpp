@@ -12,6 +12,7 @@
 #include <QKeyEvent>
 #include "Core/Logic/Manager/InputManager.h"
 #include "Core/Logic/CoreObject/Instance.h"
+#include <QMouseEvent>
 
 AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow* AirEngine::Core::Graphic::CoreObject::Window::_window = nullptr;
 AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer* AirEngine::Core::Graphic::CoreObject::Window::_windowRenderer = nullptr;
@@ -27,6 +28,16 @@ void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow::keyReleaseEvent
 {
     if (keyEvent->isAutoRepeat()) return;
     Logic::CoreObject::Instance::InputManager().InputKey(static_cast<Logic::Manager::InputEventType>(keyEvent->type()), static_cast<Logic::Manager::InputKeyType>(keyEvent->key()));
+}
+
+void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow::mousePressEvent(QMouseEvent* mouseEvent)
+{
+    Logic::CoreObject::Instance::InputManager().InputMouse(static_cast<Logic::Manager::InputEventType>(mouseEvent->type()), mouseEvent->button());
+}
+
+void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow::mouseReleaseEvent(QMouseEvent* mouseEvent)
+{
+    Logic::CoreObject::Instance::InputManager().InputMouse(static_cast<Logic::Manager::InputEventType>(mouseEvent->type()), mouseEvent->button());
 }
 
 QVulkanWindowRenderer* AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow::createRenderer()
