@@ -111,13 +111,12 @@ AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::~GraphicThread()
 
 void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::Init()
 {
-	qDebug() << "AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::Init()";
+
 }
 
 void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnStart()
 {
 	Instance::Init();
-	qDebug() << "AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnStart()";
 }
 
 void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnThreadStart()
@@ -139,14 +138,9 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 	while (!_stopped)
 	{
 		Instance::StartPresentCondition().Wait();
-		Utils::Log::Message("Instance::StartPresentCondition().Wait()");
 		Logic::CoreObject::Instance::SetNeedIterateRenderer(true);
 		Instance::StartRenderCondition().Wait();
-		Utils::Log::Message("Instance::StartRenderCondition().Wait()");
 
-
-		//Render
-		Utils::Log::Message("Render()");
 
 		//Lights
 		auto lightCopyTask = AddTask(
@@ -225,11 +219,9 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 		}
 
 		Logic::CoreObject::Instance::SetNeedIterateRenderer(false);
-		Utils::Log::Message("Instance::EndRenderCondition().Awake()");
 		Instance::EndRenderCondition().Awake();
 
 		//Present
-		Utils::Log::Message("Blit to swapchain image");
 		auto mainCamera = Camera::CameraBase::mainCamera;
 		if (mainCamera)
 		{
@@ -246,7 +238,6 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 			presentRenderPass->OnClear();
 		}
 
-		Utils::Log::Message("Instance::EndPresentCondition().Awake()");
 		Instance::EndPresentCondition().Awake();
 
 		Instance::MemoryManager().Collect();
@@ -260,7 +251,7 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 
 void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnEnd()
 {
-	qDebug() << "AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnEnd()";
+
 }
 
 AirEngine::Core::Graphic::CoreObject::Thread::SubGraphicThread::SubGraphicThread()

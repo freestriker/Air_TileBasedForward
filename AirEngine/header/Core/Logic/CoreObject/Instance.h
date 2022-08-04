@@ -17,6 +17,10 @@ namespace AirEngine
 			class GameObject;
 			class Component;
 		}
+		namespace Manager
+		{
+			class InputManager;
+		}
 		namespace CoreObject
 		{
 			class Thread;
@@ -58,8 +62,11 @@ namespace AirEngine
 				static void WaitExit();
 				static bool NeedIterateRenderer();
 				static void SetNeedIterateRenderer(bool needIterateRenderer);
+				static Manager::InputManager& InputManager();
 			private:
+				static void Init();
 				static Utils::Condition* _exitCondition;
+				static Manager::InputManager* _inputManager;
 				static bool _needIterateRenderer;
 				static std::unordered_set< Object::GameObject*> _validGameObjectInIteration;
 				static std::unordered_set< Object::Component*> _validComponentInIteration;

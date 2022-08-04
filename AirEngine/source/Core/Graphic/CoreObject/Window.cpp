@@ -9,10 +9,51 @@
 #include "Utils/Condition.h"
 #include "Core/Graphic/CoreObject/Instance.h"
 #include "Core/Audio/CoreObject/Thread.h"
+#include <QKeyEvent>
+#include "Core/Logic/Manager/InputManager.h"
+#include "Core/Logic/CoreObject/Instance.h"
+#include <QMouseEvent>
+#include <QWheelEvent>
 
 AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow* AirEngine::Core::Graphic::CoreObject::Window::_window = nullptr;
 AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer* AirEngine::Core::Graphic::CoreObject::Window::_windowRenderer = nullptr;
 QVulkanInstance* AirEngine::Core::Graphic::CoreObject::Window::_qVulkanInstance = nullptr;
+
+void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow::keyPressEvent(QKeyEvent* keyEvent)
+{
+    if (!keyEvent->isAutoRepeat()) 
+    {
+        Logic::CoreObject::Instance::InputManager().InputKey(static_cast<Logic::Manager::InputEventType>(keyEvent->type()), static_cast<Logic::Manager::InputKeyType>(keyEvent->key()));
+    }
+    keyEvent->accept();
+}
+
+void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow::keyReleaseEvent(QKeyEvent* keyEvent)
+{
+    if (!keyEvent->isAutoRepeat())
+    {
+        Logic::CoreObject::Instance::InputManager().InputKey(static_cast<Logic::Manager::InputEventType>(keyEvent->type()), static_cast<Logic::Manager::InputKeyType>(keyEvent->key()));
+    }
+    keyEvent->accept();
+}
+
+void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow::mousePressEvent(QMouseEvent* mouseEvent)
+{
+    Logic::CoreObject::Instance::InputManager().InputMouse(static_cast<Logic::Manager::InputEventType>(mouseEvent->type()), mouseEvent->button());
+    mouseEvent->accept();
+}
+
+void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow::mouseReleaseEvent(QMouseEvent* mouseEvent)
+{
+    Logic::CoreObject::Instance::InputManager().InputMouse(static_cast<Logic::Manager::InputEventType>(mouseEvent->type()), mouseEvent->button());
+    mouseEvent->accept();
+}
+
+void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow::wheelEvent(QWheelEvent* wheelEvent)
+{
+    Logic::CoreObject::Instance::InputManager().InputWheel(static_cast<float>(wheelEvent->angleDelta().y()) * 0.125);
+    wheelEvent->accept();
+}
 
 QVulkanWindowRenderer* AirEngine::Core::Graphic::CoreObject::Window::VulkanWindow::createRenderer()
 {
@@ -27,7 +68,6 @@ AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::VulkanWindow
 
 void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::initResources()
 {
-    qDebug("AirEngine::Core::Graphic::CoreObject::Thread::VulkanWindowRenderer::initResources()");
     AirEngine::Core::Graphic::CoreObject::Thread::Init();
     AirEngine::Core::Audio::CoreObject::Thread::Init();
     AirEngine::Core::IO::CoreObject::Thread::Init();
@@ -48,31 +88,28 @@ void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::initRes
 
 void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::initSwapChainResources()
 {
-    qDebug("AirEngine::Core::Graphic::CoreObject::Thread::VulkanWindowRenderer::initSwapChainResources()");
+
 }
 
 void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::releaseSwapChainResources()
 {
-    qDebug("AirEngine::Core::Graphic::CoreObject::Thread::VulkanWindowRenderer::releaseSwapChainResources()");
+
 }
 
 void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::releaseResources()
 {
-    qDebug("AirEngine::Core::Graphic::CoreObject::Thread::VulkanWindowRenderer::releaseResources()");
+
 }
 
 void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::startNextFrame()
 {
-    Utils::Log::Message("------------------------------------------------------------------");
-    Utils::Log::Message("Instance::StartPresentCondition().Awake()");
+    //Utils::Log::Message("------------------------------------------------------------------");
     Instance::StartPresentCondition().Awake();
     Instance::EndPresentCondition().Wait();
-    Utils::Log::Message("Instance::EndPresentCondition().Wait()");
 
-    Utils::Log::Message("FrameReady()");
     _window->frameReady();
     _window->requestUpdate();
-    Utils::Log::Message("------------------------------------------------------------------");
+    //Utils::Log::Message("------------------------------------------------------------------");
 }
 QVulkanInstance* AirEngine::Core::Graphic::CoreObject::Window::QVulkanInstance_()
 {

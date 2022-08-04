@@ -11,11 +11,17 @@ namespace AirEngine
 		{
 			namespace CoreObject
 			{
-				class Window final/* : public AirEngine::Utils::ThreadBase*/
+				class Window final
 				{
 				public:
 					class VulkanWindow : public QVulkanWindow
 					{
+					private:
+						void keyReleaseEvent(QKeyEvent* keyEvent)override;
+						void keyPressEvent(QKeyEvent* keyEvent)override;
+						void mousePressEvent(QMouseEvent* mouseEvent)override;
+						void mouseReleaseEvent(QMouseEvent* mouseEvent)override;
+						void wheelEvent(QWheelEvent* wheelEvent)override;
 					public:
 						QVulkanWindowRenderer* createRenderer() override;
 					};
