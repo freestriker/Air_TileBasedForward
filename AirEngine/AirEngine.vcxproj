@@ -129,7 +129,7 @@
     <ClCompile Include="source\Core\Graphic\Material.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\BackgroundRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\F_OpaqueRenderPass.cpp" />
-    <ClCompile Include="source\Core\Graphic\RenderPass\PreZRenderPass.cpp" />
+    <ClCompile Include="source\Core\Graphic\RenderPass\GeometryRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\RenderPassBase.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\TBF_OpaqueRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\F_TransparentRenderPass.cpp" />
@@ -223,7 +223,7 @@
     <ClInclude Include="header\Core\Graphic\RenderPass\BackgroundRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\F_OpaqueRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\PresentRenderPass.h" />
-    <ClInclude Include="header\Core\Graphic\RenderPass\PreZRenderPass.h" />
+    <ClInclude Include="header\Core\Graphic\RenderPass\GeometryRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\RenderPassBase.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\TBF_OIT_ALL_SortBlendRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\TBF_OIT_AlphaLinkedListRenderPass.h" />

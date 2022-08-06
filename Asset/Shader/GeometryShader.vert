@@ -15,8 +15,13 @@ layout(set = 1, binding = 0) uniform MeshObjectInfo
 } meshObjectInfo;
 
 layout(location = 0) in vec3 vertexPosition;
+layout(location = 1) in vec3 vertexNormal;
+
+layout(location = 0) out vec3 outViewNormal;
 
 void main() 
 {
     gl_Position = PositionO2P(vertexPosition, meshObjectInfo.info, cameraInfo.info);
+
+    outViewNormal = DirectionTransition(vertexNormal, mat3(cameraInfo.info.view * meshObjectInfo.info.model));
 }

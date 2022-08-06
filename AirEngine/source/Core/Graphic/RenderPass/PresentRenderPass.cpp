@@ -114,7 +114,7 @@ void AirEngine::Core::Graphic::RenderPass::PresentRenderPass::OnPopulateCommandB
 	_renderCommandBuffer->BeginRenderPass(
 		this,
 		_renderPassTarget,
-		{ colorClearValue }
+		{ {"ColorAttachment", colorClearValue} }
 	);
 
 	//Blit to swapchain attachment

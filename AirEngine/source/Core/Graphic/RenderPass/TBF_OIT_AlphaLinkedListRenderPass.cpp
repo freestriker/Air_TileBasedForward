@@ -27,7 +27,7 @@
 #include "Core/Graphic/Material.h"
 #include "Core/Graphic/Shader.h"
 #include "Core/Graphic/Instance/ImageSampler.h"
-#include "Core/Graphic/RenderPass/PreZRenderPass.h"
+#include "Core/Graphic/RenderPass/GeometryRenderPass.h"
 #include "Core/Graphic/Instance/Buffer.h"
 #include "glm/glm.hpp"
 
@@ -234,8 +234,7 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_AlphaLinkedListRenderPass::On
 		{
 			_renderCommandBuffer->BeginRenderPass(
 				this,
-				camera->RenderPassTarget(),
-				{ }
+				camera->RenderPassTarget()
 			);
 
 			for (const auto& renderer : targetRenderers)

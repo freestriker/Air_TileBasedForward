@@ -2,6 +2,7 @@
 #include <vulkan/vulkan_core.h>
 #include <string>
 #include <vector>
+#include <map>
 
 namespace AirEngine
 {
@@ -81,7 +82,8 @@ namespace AirEngine
 					void Submit(std::vector<Command::Semaphore*> signalSemaphores);
 					void Submit();
 					void WaitForFinish();
-					void BeginRenderPass(Graphic::RenderPass::RenderPassBase* renderPass, Graphic::Manager::RenderPassTarget* renderPassObject, std::vector<VkClearValue> clearValues);
+					void BeginRenderPass(Graphic::RenderPass::RenderPassBase* renderPass, Graphic::Manager::RenderPassTarget* renderPassObject, std::map<std::string, VkClearValue> clearValues);
+					void BeginRenderPass(Graphic::RenderPass::RenderPassBase* renderPass, Graphic::Manager::RenderPassTarget* renderPassObject);
 					void EndRenderPass();
 					void BindMaterial(Material* material);
 					void DrawMesh(Asset::Mesh* mesh);

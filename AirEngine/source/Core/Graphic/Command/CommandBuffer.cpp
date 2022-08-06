@@ -332,7 +332,49 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::WaitForFinish()
     Utils::Log::Exception("Failed to wait command buffer called: " + _name + ".", vkWaitForFences(Graphic::CoreObject::Instance::VkDevice_(), 1, &_vkFence, VK_TRUE, UINT64_MAX));
 }
 
-void AirEngine::Core::Graphic::Command::CommandBuffer::BeginRenderPass(Graphic::RenderPass::RenderPassBase* renderPass, Graphic::Manager::RenderPassTarget* renderPassObject, std::vector<VkClearValue> clearValues)
+void AirEngine::Core::Graphic::Command::CommandBuffer::BeginRenderPass(Graphic::RenderPass::RenderPassBase* renderPass, Graphic::Manager::RenderPassTarget* renderPassObject, std::map<std::string, VkClearValue> clearValues)
+{
+    std::vector< VkClearValue> attachmentClearValues = std::vector< VkClearValue>(renderPass->Settings().attchmentDescriptors.size());
+    {
+        size_t i = 0;
+        for (const auto& attachment : renderPass->Settings().attchmentDescriptors)
+        {
+            if (clearValues.count(attachment.first))
+            {
+                attachmentClearValues[i++] = clearValues[attachment.first];
+            }
+            else
+            {
+                attachmentClearValues[i++] = {};
+            }
+        }
+    }
+
+    VkRenderPassBeginInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    renderPassInfo.renderPass = renderPass->VkRenderPass_();
+    renderPassInfo.framebuffer = renderPassObject->FrameBuffer(renderPass->Name())->VkFramebuffer_();
+    renderPassInfo.renderArea.offset = { 0, 0 };
+    renderPassInfo.renderArea.extent = renderPassObject->Extent();
+    renderPassInfo.clearValueCount = static_cast<uint32_t>(attachmentClearValues.size());
+    renderPassInfo.pClearValues = attachmentClearValues.data();
+
+    _commandData.viewport.x = 0.0f;
+    _commandData.viewport.y = 0.0f;
+    _commandData.viewport.width = renderPassObject->Extent().width;
+    _commandData.viewport.height = renderPassObject->Extent().height;
+    _commandData.viewport.minDepth = 0.0f;
+    _commandData.viewport.maxDepth = 1.0f;
+
+    _commandData.scissor.offset = { 0, 0 };
+    _commandData.scissor.extent = renderPassObject->Extent();
+
+    vkCmdBeginRenderPass(_vkCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+    vkCmdSetViewport(_vkCommandBuffer, 0, 1, &_commandData.viewport);
+    vkCmdSetScissor(_vkCommandBuffer, 0, 1, &_commandData.scissor);
+}
+
+void AirEngine::Core::Graphic::Command::CommandBuffer::BeginRenderPass(Graphic::RenderPass::RenderPassBase* renderPass, Graphic::Manager::RenderPassTarget* renderPassObject)
 {
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -340,8 +382,8 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::BeginRenderPass(Graphic::
     renderPassInfo.framebuffer = renderPassObject->FrameBuffer(renderPass->Name())->VkFramebuffer_();
     renderPassInfo.renderArea.offset = { 0, 0 };
     renderPassInfo.renderArea.extent = renderPassObject->Extent();
-    renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-    renderPassInfo.pClearValues = clearValues.data();
+    renderPassInfo.clearValueCount = 0;
+    renderPassInfo.pClearValues = nullptr;
 
     _commandData.viewport.x = 0.0f;
     _commandData.viewport.y = 0.0f;

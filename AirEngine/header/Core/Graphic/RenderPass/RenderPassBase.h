@@ -4,7 +4,7 @@
 #include <map>
 #include <vector>
 
-#define PRE_Z_RENDER_INDEX 0
+#define GEOMETRY_RENDER_INDEX 0
 #define F_OPAQUE_RENDER_INDEX 2000
 #define TBF_OPAQUE_RENDER_INDEX 4000
 #define BACKGROUND_RENDER_INDEX 6000

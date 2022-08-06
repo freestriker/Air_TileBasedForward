@@ -20,7 +20,7 @@ namespace AirEngine
 			}
 			namespace RenderPass
 			{
-				class PreZRenderPass final : public RenderPassBase
+				class GeometryRenderPass final : public RenderPassBase
 				{
 				private:
 					Command::CommandBuffer* _renderCommandBuffer;
@@ -33,12 +33,12 @@ namespace AirEngine
 					void OnSubmit()override;
 					void OnClear()override;
 				public:
-					PreZRenderPass();
-					~PreZRenderPass();
-					PreZRenderPass(const PreZRenderPass&) = delete;
-					PreZRenderPass& operator=(const PreZRenderPass&) = delete;
-					PreZRenderPass(PreZRenderPass&&) = delete;
-					PreZRenderPass& operator=(PreZRenderPass&&) = delete;
+					GeometryRenderPass();
+					~GeometryRenderPass();
+					GeometryRenderPass(const GeometryRenderPass&) = delete;
+					GeometryRenderPass& operator=(const GeometryRenderPass&) = delete;
+					GeometryRenderPass(GeometryRenderPass&&) = delete;
+					GeometryRenderPass& operator=(GeometryRenderPass&&) = delete;
 
 					Instance::Image* DepthImage();
 					Instance::Buffer* DepthBuffer();

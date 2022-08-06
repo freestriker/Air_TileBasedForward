@@ -107,8 +107,7 @@ void AirEngine::Core::Graphic::RenderPass::BackgroundRenderPass::OnPopulateComma
 
 		_renderCommandBuffer->BeginRenderPass(
 			this,
-			camera->RenderPassTarget(),
-			{ }
+			camera->RenderPassTarget()
 		);
 
 		_material->SetTextureCube("backgroundTexture", _backgroundTexture);

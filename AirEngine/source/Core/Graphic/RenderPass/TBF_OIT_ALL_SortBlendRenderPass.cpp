@@ -128,8 +128,7 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_ALL_SortBlendRenderPass::OnPo
 		{
 			_renderCommandBuffer->BeginRenderPass(
 				this,
-				camera->RenderPassTarget(),
-				{ }
+				camera->RenderPassTarget()
 			);
 
 			_blendMaterial->SetSlotData("linkedListHeadImage", { 0 }, { {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_NULL_HANDLE, headImage->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL} });
