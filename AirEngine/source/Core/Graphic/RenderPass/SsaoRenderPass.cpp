@@ -1,0 +1,234 @@
+#include "Core/Graphic/RenderPass/SsaoRenderPass.h"
+#include "Core/Graphic/Instance/Image.h"
+#include "Core/Graphic/Command/CommandBuffer.h"
+#include "Core/Graphic/Command/CommandPool.h"
+#include "Core/Graphic/CoreObject/Instance.h"
+#include "Core/Graphic/Manager/RenderPassManager.h"
+#include "Core/Graphic/CoreObject/Window.h"
+#include "Core/Graphic/Command/ImageMemoryBarrier.h"
+#include "Core/Graphic/Instance/FrameBuffer.h"
+#include "Renderer/Renderer.h"
+#include "Core/Graphic/Material.h"
+#include "Core/Graphic/Manager/RenderPassManager.h"
+#include "Core/Graphic/CoreObject/Instance.h"
+#include "Camera/CameraBase.h"
+#include "Utils/Log.h"
+#include "Asset/Mesh.h"
+#include "Utils/OrientedBoundingBox.h"
+#include "Core/Logic/Object/GameObject.h"
+#include "Core/Logic/Object/Transform.h"
+#include "Core/IO/CoreObject/Instance.h"
+#include "Core/IO/Manager/AssetManager.h"
+#include "Core/Graphic/Material.h"
+#include "Core/Graphic/Shader.h"
+#include "Asset/Mesh.h"
+#include "Core/Graphic/Instance/Buffer.h"
+#include "Core/Graphic/Instance/ImageSampler.h"
+#include<random>
+
+AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OcclusionAttachment()
+{
+	return _occlusionAttachment;
+}
+
+void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
+{
+	creator.AddColorAttachment(
+		"ColorAttachment",
+		VK_FORMAT_R8G8B8A8_SRGB,
+		VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT,
+		VK_ATTACHMENT_LOAD_OP_LOAD,
+		VK_ATTACHMENT_STORE_OP_STORE,
+		VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+		VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+	);
+	creator.AddSubpass(
+		"DrawSubpass",
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		{ "ColorAttachment" }
+	);
+	creator.AddDependency(
+		"VK_SUBPASS_EXTERNAL",
+		"DrawSubpass",
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+		VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
+	);
+}
+
+void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnPrepare(Camera::CameraBase* camera)
+{
+	_occlusionAttachment = Graphic::Instance::Image::Create2DImage(
+		camera->RenderPassTarget()->Extent(),
+		VK_FORMAT_R32_SFLOAT,
+		VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
+		VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
+	);
+	_renderPassTarget = CoreObject::Instance::RenderPassManager().GetRenderPassObject(
+			{ "SsaoOcclusionRenderPass" },
+			{
+				{"OcclusionAttachment", _occlusionAttachment}
+			}
+		);
+}
+
+void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
+{
+	_renderCommandPool = commandPool;
+
+	_renderCommandBuffer = commandPool->CreateCommandBuffer("SsaoCommandBuffer", VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+	_renderCommandBuffer->Reset();
+	_renderCommandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+
+	if (_noiseImage == nullptr)
+	{
+		_noiseImage = Graphic::Instance::Image::Create2DImage(
+			{ NOISE_IMAGE_WIDTH, NOISE_IMAGE_WIDTH },
+			VK_FORMAT_R32_SFLOAT,
+			VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
+		);
+		auto temporaryBuffer = new Graphic::Instance::Buffer(
+			sizeof(float) * NOISE_IMAGE_WIDTH * NOISE_IMAGE_WIDTH, 
+			VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
+			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		);
+		{
+			std::array<float, NOISE_IMAGE_WIDTH* NOISE_IMAGE_WIDTH> data = std::array<float, NOISE_IMAGE_WIDTH* NOISE_IMAGE_WIDTH>();
+			std::default_random_engine engine;
+			std::uniform_real_distribution<float> u(0.0f, 1.0f);
+			for (auto& node : data)
+			{
+				node = u(engine);
+			}
+			temporaryBuffer->WriteData(data.data(), sizeof(float) * NOISE_IMAGE_WIDTH * NOISE_IMAGE_WIDTH);
+		}
+
+		{
+			auto barrier = Command::ImageMemoryBarrier
+			(
+				_noiseImage,
+				VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				0,
+				VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT
+			);
+			_renderCommandBuffer->AddPipelineImageBarrier(
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
+				{ &barrier }
+			);
+		}
+
+		_renderCommandBuffer->CopyBufferToImage(temporaryBuffer, _noiseImage, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+		
+		{
+			auto barrier = Command::ImageMemoryBarrier
+			(
+				_noiseImage,
+				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
+				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+			);
+			_renderCommandBuffer->AddPipelineImageBarrier(
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+				{ &barrier }
+			);
+		}
+
+		_renderCommandBuffer->EndRecord();
+		_renderCommandBuffer->Submit();
+		_renderCommandBuffer->WaitForFinish();
+		_renderCommandBuffer->Reset();
+		_renderCommandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+	}
+	_renderCommandBuffer->EndRecord();
+}
+
+void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnSubmit()
+{
+	_renderCommandBuffer->Submit();
+	_renderCommandBuffer->WaitForFinish();
+}
+
+void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnClear()
+{
+	CoreObject::Instance::RenderPassManager().DestroyRenderPassObject(_renderPassTarget);
+	delete _occlusionAttachment;
+
+	_renderCommandPool->DestoryCommandBuffer(_renderCommandBuffer);
+}
+
+AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::SsaoRenderPass()
+	: RenderPassBase("SsaoRenderPass", SSAO_RENDER_INDEX)
+	, _renderCommandBuffer(nullptr)
+	, _renderCommandPool(nullptr)
+	, _fullScreenMesh(nullptr)
+	, _occlusionMaterial(nullptr)
+	, _blendMaterial(nullptr)
+	, _renderPassTarget(nullptr)
+	, _occlusionAttachment(nullptr)
+	, _noiseImage(nullptr)
+{
+	_fullScreenMesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\BackgroundMesh.ply");
+
+	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::SsaoOcclusionRenderPass());
+}
+
+AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::~SsaoRenderPass()
+{
+}
+
+void AirEngine::Core::Graphic::RenderPass::SsaoOcclusionRenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
+{
+	creator.AddColorAttachment(
+		"OcclusionAttachment",
+		VK_FORMAT_R32_SFLOAT,
+		VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT,
+		VK_ATTACHMENT_LOAD_OP_CLEAR,
+		VK_ATTACHMENT_STORE_OP_STORE,
+		VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+		VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+	);
+	creator.AddSubpass(
+		"DrawSubpass",
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		{ "OcclusionAttachment" }
+	);
+	creator.AddDependency(
+		"VK_SUBPASS_EXTERNAL",
+		"DrawSubpass",
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+		VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
+	);
+}
+
+void AirEngine::Core::Graphic::RenderPass::SsaoOcclusionRenderPass::OnPrepare(Camera::CameraBase* camera)
+{
+}
+
+void AirEngine::Core::Graphic::RenderPass::SsaoOcclusionRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
+{
+}
+
+void AirEngine::Core::Graphic::RenderPass::SsaoOcclusionRenderPass::OnSubmit()
+{
+}
+
+void AirEngine::Core::Graphic::RenderPass::SsaoOcclusionRenderPass::OnClear()
+{
+}
+
+AirEngine::Core::Graphic::RenderPass::SsaoOcclusionRenderPass::SsaoOcclusionRenderPass()
+	: RenderPassBase("SsaoOcclusionRenderPass", SSAO_OCCLUSION_RENDER_INDEX)
+{
+}
+
+AirEngine::Core::Graphic::RenderPass::SsaoOcclusionRenderPass::~SsaoOcclusionRenderPass()
+{
+}

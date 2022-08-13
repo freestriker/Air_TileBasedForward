@@ -111,6 +111,7 @@
     <ClCompile Include="source\Core\Audio\CoreObject\Thread.cpp" />
     <ClCompile Include="source\Core\Audio\CoreObject\Instance.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\PresentRenderPass.cpp" />
+    <ClCompile Include="source\Core\Graphic\RenderPass\SsaoRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\TBF_OIT_ALL_SortBlendRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\TBF_OIT_AlphaLinkedListRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\TBF_OIT_DepthPeelingBlendRenderPass.cpp" />
@@ -225,6 +226,7 @@
     <ClInclude Include="header\Core\Graphic\RenderPass\PresentRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\GeometryRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\RenderPassBase.h" />
+    <ClInclude Include="header\Core\Graphic\RenderPass\SsaoRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\TBF_OIT_ALL_SortBlendRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\TBF_OIT_AlphaLinkedListRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\TBF_OIT_DepthPeelingBlendRenderPass.h" />

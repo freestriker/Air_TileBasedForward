@@ -112,7 +112,7 @@ void AirEngine::Core::Graphic::RenderPass::GeometryRenderPass::OnPopulateCommand
 		VkClearValue depthClearValue{};
 		depthClearValue.depthStencil.depth = 1.0f;
 		VkClearValue normalClearValue{};
-		normalClearValue.color = {0.5f, 0.5f, 0.5f, 1.0f};
+		normalClearValue.color = {0.5f, 0.5f, 1.0f, 1.0f};
 		_renderCommandBuffer->BeginRenderPass(
 			this,
 			camera->RenderPassTarget(),
