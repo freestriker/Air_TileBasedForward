@@ -15,7 +15,7 @@ layout(location = 2) in vec3 inWorldNormal;
 layout(location = 3) in vec3 inWorldTangent;
 layout(location = 4) in vec3 inWorldBitangent;
 
-layout(location = 0) out vec4 colorAttachment;
+layout(location = 0) out vec4 ColorAttachment;
 
 void main() 
 {
@@ -42,5 +42,5 @@ void main()
         specular += SpecularLighting(lightInfos.ortherLightInfos[opaqueLightIndexList.indexes[i]], viewDirection, inWorldPosition, worldNormal, 80.0);
     }
 
-    colorAttachment = texture(diffuseTexture, inTexCoords) * vec4(diffuse + specular + ambient, 1);
+    ColorAttachment = texture(diffuseTexture, inTexCoords) * vec4(diffuse + specular + ambient, 1);
 }

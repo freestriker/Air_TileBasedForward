@@ -8,7 +8,7 @@ layout(set = 3, binding = 0) uniform sampler2D srcPeeledColorTexture_3;
 
 layout(location = 0) in vec2 inTexCoords;
 
-layout(location = 0) out vec4 colorAttachment;
+layout(location = 0) out vec4 ColorAttachment;
 
 void main() 
 {
@@ -32,5 +32,5 @@ void main()
     color = vec4(dst.a * src.a * src.rgb + dst.rgb, (1 - src.a) * dst.a);
     dst = color;
 
-    colorAttachment = dst;
+    ColorAttachment = dst;
 }

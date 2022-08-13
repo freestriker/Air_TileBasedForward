@@ -197,7 +197,7 @@ void AirEngine::Core::Graphic::Shader::_CheckAttachmentOutputState(_PipelineData
 		const SpvReflectInterfaceVariable& refl_var = *(output_vars[i_var]);
 		if (refl_var.decoration_flags & SPV_REFLECT_DECORATION_BUILT_IN) continue;
 
-		Utils::Log::Exception("Failed to find right output attachment.", colorAttachments[refl_var.name] != refl_var.location);
+		Utils::Log::Exception("Failed to find right output attachment.", !colorAttachments.count(refl_var.name) || colorAttachments[refl_var.name] != refl_var.location);
 	}
 }
 

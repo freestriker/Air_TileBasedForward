@@ -5,9 +5,9 @@
 
 layout(location = 0) in vec3 inViewNormal;
 
-layout(location = 0) out vec4 normalAttachment;
+layout(location = 0) out vec4 NormalAttachment;
 
 void main() 
 {
-    normalAttachment = vec4(ParseToColor(normalize(inViewNormal)), 1);
+    NormalAttachment = vec4(ParseToColor(normalize(inViewNormal)), 1);
 }

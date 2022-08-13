@@ -10,7 +10,7 @@ layout(location = 1) in vec4 inColor;
 layout(location = 2) in vec3 inWorldPosition;
 layout(location = 3) in vec3 inWorldNormal;
 
-layout(location = 0) out vec4 colorAttachment;
+layout(location = 0) out vec4 ColorAttachment;
 
 void main() 
 {
@@ -30,5 +30,5 @@ void main()
         specular += SpecularLighting(lightInfos.importantLightInfos[i], viewDirection, inWorldPosition, worldNormal, 80.0);
     }
 
-    colorAttachment = texture(diffuseTexture, inTexCoords) * vec4((diffuse + specular + ambient + inColor.xyz) * 0.3, 1);
+    ColorAttachment = texture(diffuseTexture, inTexCoords) * vec4((diffuse + specular + ambient + inColor.xyz) * 0.3, 1);
 }

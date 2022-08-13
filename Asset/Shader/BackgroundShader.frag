@@ -16,7 +16,7 @@ layout(set = 1, binding = 0) uniform samplerCube backgroundTexture;
 
 layout(location = 0) in vec2 inTexCoords;
 
-layout(location = 0) out vec4 colorAttachment;
+layout(location = 0) out vec4 ColorAttachment;
 
 void main() 
 {
@@ -35,6 +35,6 @@ void main()
     // }
     vec3 worldPosition = PositionS2NFW(inTexCoords, cameraInfo.info);
     vec3 worldView = CameraWObserveDirection(worldPosition, cameraInfo.info);
-    colorAttachment = texture(backgroundTexture, worldView);
+    ColorAttachment = texture(backgroundTexture, worldView);
 
 }
