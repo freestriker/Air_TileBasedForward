@@ -185,6 +185,7 @@
     <ClCompile Include="source\Utils\IntersectionChecker.cpp" />
     <ClCompile Include="source\Utils\Log.cpp" />
     <ClCompile Include="source\Utils\OrientedBoundingBox.cpp" />
+    <ClCompile Include="source\Utils\RandomSphericalCoordinateGenerator.cpp" />
     <ClCompile Include="source\Utils\SpirvReflect.cpp" />
     <ClCompile Include="source\Utils\ThreadBase.cpp" />
     <ClCompile Include="source\Utils\Time.cpp" />
@@ -268,6 +269,7 @@
     <ClInclude Include="header\Utils\IntersectionChecker.h" />
     <ClInclude Include="header\Utils\Log.h" />
     <ClInclude Include="header\Utils\OrientedBoundingBox.h" />
+    <ClInclude Include="header\Utils\RandomSphericalCoordinateGenerator.h" />
     <ClInclude Include="header\Utils\SpirvReflect.h" />
     <ClInclude Include="header\Utils\ThreadBase.h" />
     <ClInclude Include="header\Utils\Time.h" />

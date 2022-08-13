@@ -25,6 +25,9 @@
 #include "Core/Graphic/Instance/Buffer.h"
 #include "Core/Graphic/Instance/ImageSampler.h"
 #include<random>
+#include <glm/vec4.hpp>
+#include "Utils/RandomSphericalCoordinateGenerator.h"
+#include "Core/Graphic/Command/BufferMemoryBarrier.h"
 
 AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OcclusionAttachment()
 {
@@ -82,6 +85,7 @@ void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnPopulateCommandBuff
 	_renderCommandBuffer->Reset();
 	_renderCommandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
+	///Create noise texture
 	if (_noiseImage == nullptr)
 	{
 		_noiseImage = Graphic::Instance::Image::Create2DImage(
@@ -145,6 +149,42 @@ void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnPopulateCommandBuff
 		_renderCommandBuffer->Reset();
 		_renderCommandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 	}
+
+	///Create sample kernal buffer
+	if (_sampleKernalBuffer == nullptr)
+	{
+		_sampleKernalBuffer = new Instance::Buffer{
+			sizeof(glm::vec4) * SAMPLE_KERNAL_SIZE,
+			VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+		};
+		auto stagingBuffer = new Instance::Buffer{
+			sizeof(glm::vec4) * SAMPLE_KERNAL_SIZE,
+			VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		};
+		std::array<glm::vec4, SAMPLE_KERNAL_SIZE> sampleKernal = std::array<glm::vec4, SAMPLE_KERNAL_SIZE>();
+
+		Utils::RandomSphericalCoordinateGenerator generator = Utils::RandomSphericalCoordinateGenerator(0, 90 - SAMPLE_BIAS_ANGLE, 0, 360, 1);
+		for (int i = 0; i < SAMPLE_KERNAL_SIZE; i++)
+		{
+			sampleKernal[i] = glm::vec4(generator.Get(), std::clamp(std::pow(static_cast<float>(i) / static_cast<float>(SAMPLE_KERNAL_SIZE), 2.0f), 0.01f, 1.0f));
+		}
+		stagingBuffer->WriteData(sampleKernal.data(), sizeof(glm::vec4) * SAMPLE_KERNAL_SIZE);
+
+		_renderCommandBuffer->CopyBuffer(stagingBuffer, _sampleKernalBuffer);
+
+		Command::BufferMemoryBarrier barrier = Command::BufferMemoryBarrier(_sampleKernalBuffer, VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT, VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT);
+		_renderCommandBuffer->AddPipelineBufferBarrier(VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, { &barrier });
+
+		_renderCommandBuffer->EndRecord();
+		_renderCommandBuffer->Submit();
+		_renderCommandBuffer->WaitForFinish();
+		delete stagingBuffer;
+		_renderCommandBuffer->Reset();
+		_renderCommandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+	}
+
 	_renderCommandBuffer->EndRecord();
 }
 
@@ -159,6 +199,12 @@ void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnClear()
 	CoreObject::Instance::RenderPassManager().DestroyRenderPassObject(_renderPassTarget);
 	delete _occlusionAttachment;
 
+	//delete _noiseImage;
+	//_noiseImage = nullptr;
+
+	//delete _sampleKernalBuffer;
+	//_sampleKernalBuffer = nullptr;
+
 	_renderCommandPool->DestoryCommandBuffer(_renderCommandBuffer);
 }
 
@@ -172,10 +218,43 @@ AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::SsaoRenderPass()
 	, _renderPassTarget(nullptr)
 	, _occlusionAttachment(nullptr)
 	, _noiseImage(nullptr)
+	, _noiseTextureSampler(nullptr)
+	, _normalTextureSampler(nullptr)
+	, _depthTextureSampler(nullptr)
+	, _sampleKernalBuffer(nullptr)
 {
 	_fullScreenMesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\BackgroundMesh.ply");
 
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::SsaoOcclusionRenderPass());
+
+	_noiseTextureSampler = new Instance::ImageSampler
+	(
+		VkFilter::VK_FILTER_NEAREST,
+		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
+		VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
+		0.0f,
+		VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
+	);
+
+	_normalTextureSampler = new Instance::ImageSampler
+	(
+		VkFilter::VK_FILTER_NEAREST,
+		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
+		VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
+		0.0f,
+		VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
+	);
+
+	_depthTextureSampler = new Instance::ImageSampler
+	(
+		VkFilter::VK_FILTER_NEAREST,
+		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
+		VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
+		0.0f,
+		VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
+	);
+
+	
 }
 
 AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::~SsaoRenderPass()
