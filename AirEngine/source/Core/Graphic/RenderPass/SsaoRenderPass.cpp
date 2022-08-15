@@ -28,11 +28,7 @@
 #include <glm/vec4.hpp>
 #include "Utils/RandomSphericalCoordinateGenerator.h"
 #include "Core/Graphic/Command/BufferMemoryBarrier.h"
-
-AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OcclusionAttachment()
-{
-	return _occlusionAttachment;
-}
+#include <Core/Graphic/RenderPass/GeometryRenderPass.h>
 
 void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
 {
@@ -62,19 +58,37 @@ void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnPopulateRenderPassS
 
 void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnPrepare(Camera::CameraBase* camera)
 {
-	_occlusionAttachment = Graphic::Instance::Image::Create2DImage(
+	_occlusionImage = Graphic::Instance::Image::Create2DImage(
 		camera->RenderPassTarget()->Extent(),
 		VK_FORMAT_R32_SFLOAT,
 		VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
 		VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
 	);
-	_renderPassTarget = CoreObject::Instance::RenderPassManager().GetRenderPassObject(
-			{ "SsaoOcclusionRenderPass" },
-			{
-				{"OcclusionAttachment", _occlusionAttachment}
-			}
-		);
+	_sizeInfoBuffer = new Instance::Buffer{
+		sizeof(SizeInfo),
+		VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+	};
+	_sizeInfoBuffer->WriteData(
+		[this](void* ptr)->void
+		{
+			SizeInfo* sizeInfo = reinterpret_cast<SizeInfo*>(ptr);
+			sizeInfo->attachmentSize = glm::vec2(_occlusionImage->VkExtent3D_().width, _occlusionImage->VkExtent3D_().height);
+			sizeInfo->noiseTextureSize = glm::vec2(NOISE_IMAGE_WIDTH, NOISE_IMAGE_WIDTH);
+			sizeInfo->scale = sizeInfo->attachmentSize / sizeInfo->noiseTextureSize;
+		}
+	);
+	_occlusionRenderPassTarget = CoreObject::Instance::RenderPassManager().GetRenderPassObject(
+		{ "SsaoOcclusionRenderPass" },
+		{
+			{"OcclusionAttachment", _occlusionImage}
+		}
+	);
+	if (_occlusionMaterial == nullptr)
+	{
+		_occlusionMaterial = new Core::Graphic::Material(Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Shader>("..\\Asset\\Shader\\SsaoOcclusionShader.shader"));
+	}
 }
 
 void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
@@ -154,23 +168,24 @@ void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnPopulateCommandBuff
 	if (_sampleKernalBuffer == nullptr)
 	{
 		_sampleKernalBuffer = new Instance::Buffer{
-			sizeof(glm::vec4) * SAMPLE_KERNAL_SIZE,
+			sizeof(SampleKernal),
 			VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT,
 			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 		};
 		auto stagingBuffer = new Instance::Buffer{
-			sizeof(glm::vec4) * SAMPLE_KERNAL_SIZE,
+			sizeof(SampleKernal),
 			VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 		};
-		std::array<glm::vec4, SAMPLE_KERNAL_SIZE> sampleKernal = std::array<glm::vec4, SAMPLE_KERNAL_SIZE>();
+		SampleKernal sampleKernal = SampleKernal();
+		sampleKernal.kernalSize = SAMPLE_KERNAL_SIZE;
 
 		Utils::RandomSphericalCoordinateGenerator generator = Utils::RandomSphericalCoordinateGenerator(0, 90 - SAMPLE_BIAS_ANGLE, 0, 360, 1);
 		for (int i = 0; i < SAMPLE_KERNAL_SIZE; i++)
 		{
-			sampleKernal[i] = glm::vec4(generator.Get(), std::clamp(std::pow(static_cast<float>(i) / static_cast<float>(SAMPLE_KERNAL_SIZE), 2.0f), 0.01f, 1.0f));
+			sampleKernal.points[i] = glm::vec4(generator.Get(), std::clamp(std::pow(static_cast<float>(i + 1) / static_cast<float>(SAMPLE_KERNAL_SIZE), 2.0f), 0.01f, 1.0f));
 		}
-		stagingBuffer->WriteData(sampleKernal.data(), sizeof(glm::vec4) * SAMPLE_KERNAL_SIZE);
+		stagingBuffer->WriteData(&sampleKernal, sizeof(SampleKernal));
 
 		_renderCommandBuffer->CopyBuffer(stagingBuffer, _sampleKernalBuffer);
 
@@ -185,6 +200,56 @@ void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnPopulateCommandBuff
 		_renderCommandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 	}
 
+	//Init attachment layout
+	{
+		auto attachmentBarrier = Command::ImageMemoryBarrier
+		(
+			_occlusionImage,
+			VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+			VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			0,
+			VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
+		);
+		_renderCommandBuffer->AddPipelineImageBarrier(
+			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+			{ &attachmentBarrier }
+		);
+	}
+	GeometryRenderPass& geometryRenderPass = dynamic_cast<GeometryRenderPass&>(CoreObject::Instance::RenderPassManager().RenderPass("GeometryRenderPass"));
+
+	_occlusionMaterial->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
+	_occlusionMaterial->SetSlotData("noiseTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _noiseTextureSampler->VkSampler_(), _noiseImage->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}});
+	_occlusionMaterial->SetSlotData("depthTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _depthTextureSampler->VkSampler_(), geometryRenderPass.DepthImage()->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL}});
+	_occlusionMaterial->SetSlotData("normalTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _normalTextureSampler->VkSampler_(), geometryRenderPass.NormalImage()->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL}});
+	_occlusionMaterial->SetUniformBuffer("sizeInfo", _sizeInfoBuffer);
+	_occlusionMaterial->SetUniformBuffer("sampleKernal", _sampleKernalBuffer);
+
+
+	VkClearValue occlusionAttachmentClearValue = {};
+	occlusionAttachmentClearValue.color.float32[0] = 0.0f;
+	_renderCommandBuffer->BeginRenderPass(_occlusionRenderPass, _occlusionRenderPassTarget, { {"OcclusionAttachment", occlusionAttachmentClearValue} });
+
+	_renderCommandBuffer->BindMaterial(_occlusionMaterial);
+	_renderCommandBuffer->DrawMesh(_fullScreenMesh);
+
+	_renderCommandBuffer->EndRenderPass();
+
+	///Change layout
+	{
+		auto attachmentBarrier = Command::ImageMemoryBarrier
+		(
+			_occlusionImage,
+			VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+			VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+			0
+		);
+		_renderCommandBuffer->AddPipelineImageBarrier(
+			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+			{ &attachmentBarrier }
+		);
+	}
+
 	_renderCommandBuffer->EndRecord();
 }
 
@@ -196,8 +261,10 @@ void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnSubmit()
 
 void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnClear()
 {
-	CoreObject::Instance::RenderPassManager().DestroyRenderPassObject(_renderPassTarget);
-	delete _occlusionAttachment;
+	CoreObject::Instance::RenderPassManager().DestroyRenderPassObject(_occlusionRenderPassTarget);
+
+	delete _occlusionImage;
+	delete _sizeInfoBuffer;
 
 	//delete _noiseImage;
 	//_noiseImage = nullptr;
@@ -215,17 +282,19 @@ AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::SsaoRenderPass()
 	, _fullScreenMesh(nullptr)
 	, _occlusionMaterial(nullptr)
 	, _blendMaterial(nullptr)
-	, _renderPassTarget(nullptr)
-	, _occlusionAttachment(nullptr)
+	, _occlusionRenderPassTarget(nullptr)
+	, _occlusionImage(nullptr)
 	, _noiseImage(nullptr)
 	, _noiseTextureSampler(nullptr)
 	, _normalTextureSampler(nullptr)
 	, _depthTextureSampler(nullptr)
 	, _sampleKernalBuffer(nullptr)
+	, _occlusionRenderPass(nullptr)
 {
 	_fullScreenMesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\BackgroundMesh.ply");
 
-	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::SsaoOcclusionRenderPass());
+	_occlusionRenderPass = new Graphic::RenderPass::SsaoOcclusionRenderPass();
+	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(_occlusionRenderPass);
 
 	_noiseTextureSampler = new Instance::ImageSampler
 	(
@@ -253,8 +322,6 @@ AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::SsaoRenderPass()
 		0.0f,
 		VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
 	);
-
-	
 }
 
 AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::~SsaoRenderPass()

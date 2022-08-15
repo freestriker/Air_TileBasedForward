@@ -26,6 +26,7 @@ namespace AirEngine
 					Command::CommandBuffer* _renderCommandBuffer;
 					Command::CommandPool* _renderCommandPool;
 					Instance::Image* _depthImage;
+					Instance::Image* _normalImage;
 					Instance::Buffer* _depthBuffer;
 					void OnPopulateRenderPassSettings(RenderPassSettings& creator)override;
 					void OnPrepare(Camera::CameraBase* camera)override;
@@ -41,6 +42,7 @@ namespace AirEngine
 					GeometryRenderPass& operator=(GeometryRenderPass&&) = delete;
 
 					Instance::Image* DepthImage();
+					Instance::Image* NormalImage();
 					Instance::Buffer* DepthBuffer();
 				};
 			}

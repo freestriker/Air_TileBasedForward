@@ -31,6 +31,9 @@ glslangValidator.exe -t -V OIT_DP_BlendShader.frag -IUtils/ -o Spv/OIT_DP_BlendS
 glslangValidator.exe -t -V OIT_ALL_SortBlendShader.vert -IUtils/ -o Spv/OIT_ALL_SortBlendShader.vert.spv
 glslangValidator.exe -t -V OIT_ALL_SortBlendShader.frag -IUtils/ -o Spv/OIT_ALL_SortBlendShader.frag.spv
 
+glslangValidator.exe -t -V SsaoOcclusionShader.vert -IUtils/ -o Spv/SsaoOcclusionShader.vert.spv
+glslangValidator.exe -t -V SsaoOcclusionShader.frag -IUtils/ -o Spv/SsaoOcclusionShader.frag.spv
+
 glslangValidator.exe -t -V PresentShader.vert -IUtils/ -o Spv/PresentShader.vert.spv
 glslangValidator.exe -t -V PresentShader.frag -IUtils/ -o Spv/PresentShader.frag.spv
 
