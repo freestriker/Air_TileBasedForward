@@ -4,6 +4,7 @@
 #define NOISE_IMAGE_WIDTH 64
 #define SAMPLE_KERNAL_SIZE 64
 #define SAMPLE_BIAS_ANGLE 20
+#define SAMPLE_KERNAL_RADIUS 1.5f
 
 namespace AirEngine
 {
@@ -60,7 +61,7 @@ namespace AirEngine
 					};
 					struct SampleKernal
 					{
-						alignas(4) int kernalSize;
+						alignas(4) float radius;
 						alignas(16) glm::vec4 points[SAMPLE_KERNAL_SIZE];
 					};
 					RenderPass::RenderPassBase* _occlusionRenderPass;

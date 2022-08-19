@@ -31,6 +31,10 @@ vec3 ParseToColor(in vec3 src)
 {
     return src / 2.0 + vec3(0.5, 0.5, 0.5);
 }
+vec3 ParseFromColor(in vec3 color)
+{
+    return color * 2 - vec3(1, 1, 1);
+}
 
 mat3 TBNMatrix(in vec3 tangent, in vec3 bitangent, in vec3 normal)
 {

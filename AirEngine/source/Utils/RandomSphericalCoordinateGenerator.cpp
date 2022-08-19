@@ -5,7 +5,7 @@ const float AirEngine::Utils::RandomSphericalCoordinateGenerator::pi = std::acos
 
 AirEngine::Utils::RandomSphericalCoordinateGenerator::RandomSphericalCoordinateGenerator(float minTheta, float maxTheta, float minPhi, float maxPhi, float radius)
 	: _engine()
-	, _thetaDistribution(std::clamp(std::cos(maxTheta / 180.0f * pi), 0.0f, 1.0f), std::clamp(std::cos(minTheta / 180.0f * pi), 0.0f, 1.0f))
+	, _thetaDistribution(std::clamp(std::cos(maxTheta / 180.0f * pi) * 0.5f + 0.5f, 0.0f, 1.0f), std::clamp(std::cos(minTheta / 180.0f * pi) * 0.5f + 0.5f, 0.0f, 1.0f))
 	, _phiDistribution(std::clamp(minPhi / 360.0f, 0.0f, 1.0f), std::clamp(maxPhi / 360.0f, 0.0f, 1.0f))
 	, radius(radius)
 {

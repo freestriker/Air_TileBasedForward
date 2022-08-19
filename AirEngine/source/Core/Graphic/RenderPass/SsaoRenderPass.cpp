@@ -178,7 +178,7 @@ void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnPopulateCommandBuff
 			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 		};
 		SampleKernal sampleKernal = SampleKernal();
-		sampleKernal.kernalSize = SAMPLE_KERNAL_SIZE;
+		sampleKernal.radius = SAMPLE_KERNAL_RADIUS;
 
 		Utils::RandomSphericalCoordinateGenerator generator = Utils::RandomSphericalCoordinateGenerator(0, 90 - SAMPLE_BIAS_ANGLE, 0, 360, 1);
 		for (int i = 0; i < SAMPLE_KERNAL_SIZE; i++)
@@ -220,7 +220,7 @@ void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnPopulateCommandBuff
 	_occlusionMaterial->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
 	_occlusionMaterial->SetSlotData("noiseTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _noiseTextureSampler->VkSampler_(), _noiseImage->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}});
 	_occlusionMaterial->SetSlotData("depthTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _depthTextureSampler->VkSampler_(), geometryRenderPass.DepthImage()->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL}});
-	_occlusionMaterial->SetSlotData("normalTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _normalTextureSampler->VkSampler_(), geometryRenderPass.NormalImage()->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL}});
+	_occlusionMaterial->SetSlotData("normalTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _normalTextureSampler->VkSampler_(), geometryRenderPass.NormalImage()->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}});
 	_occlusionMaterial->SetUniformBuffer("sizeInfo", _sizeInfoBuffer);
 	_occlusionMaterial->SetUniformBuffer("sampleKernal", _sampleKernalBuffer);
 
