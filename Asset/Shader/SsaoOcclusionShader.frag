@@ -46,15 +46,16 @@ void main()
     float occlusion = 0;
     for(int i = 0; i < SAMPLE_KERNAL_SIZE; i++)
     {
-        vec3 noisedSamplePoint = sampleKernal.points[i].xyz * sampleKernal.points[i].w * sampleKernal.radius * noiseRotation;
+        vec3 noisedSamplePoint = normalize(sampleKernal.points[i].xyz * noiseRotation) * sampleKernal.points[i].w * sampleKernal.radius;
         vec3 vSamplePoint = rotationMatrix * noisedSamplePoint + vPosition;
         vec4 pSamplePoint = cameraInfo.info.projection * vec4(vSamplePoint, 1);
+        vec3 ndcSamplePoint = pSamplePoint.xyz / pSamplePoint.w;
 
-        vec2 samplePointTexCoords = PositionN2S(pSamplePoint.xy / pSamplePoint.w);
-        float samplePointNdcDepth = pSamplePoint.z;
-        float eyeSamplePointNdcDepth = texture(depthTexture, samplePointTexCoords).r;
+        vec2 samplePointTexCoords = PositionN2S(ndcSamplePoint.xy);
+        float samplePointNdcDepth = ndcSamplePoint.z;
+        float visiableSamplePointNdcDepth = texture(depthTexture, samplePointTexCoords).r;
         
-        occlusion += (eyeSamplePointNdcDepth < samplePointNdcDepth ? 1.0f : 0.0f);
+        occlusion += (visiableSamplePointNdcDepth < samplePointNdcDepth ? 1.0f : 0.0f);
     }
 
     OcclusionAttachment = occlusion / SAMPLE_KERNAL_SIZE;

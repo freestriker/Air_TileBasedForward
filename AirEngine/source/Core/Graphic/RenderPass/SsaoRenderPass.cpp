@@ -183,7 +183,7 @@ void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnPopulateCommandBuff
 		Utils::RandomSphericalCoordinateGenerator generator = Utils::RandomSphericalCoordinateGenerator(0, 90 - SAMPLE_BIAS_ANGLE, 0, 360, 1);
 		for (int i = 0; i < SAMPLE_KERNAL_SIZE; i++)
 		{
-			sampleKernal.points[i] = glm::vec4(generator.Get(), std::clamp(std::pow(static_cast<float>(i + 1) / static_cast<float>(SAMPLE_KERNAL_SIZE), 2.0f), 0.01f, 1.0f));
+			sampleKernal.points[i] = glm::vec4(generator.Get(), std::clamp(std::pow(static_cast<float>(i + 1) / static_cast<float>(SAMPLE_KERNAL_SIZE), 2.0f), 0.1f, 1.0f));
 		}
 		stagingBuffer->WriteData(&sampleKernal, sizeof(SampleKernal));
 

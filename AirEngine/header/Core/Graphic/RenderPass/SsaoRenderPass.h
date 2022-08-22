@@ -4,7 +4,7 @@
 #define NOISE_IMAGE_WIDTH 64
 #define SAMPLE_KERNAL_SIZE 64
 #define SAMPLE_BIAS_ANGLE 20
-#define SAMPLE_KERNAL_RADIUS 1.5f
+#define SAMPLE_KERNAL_RADIUS 0.02f
 
 namespace AirEngine
 {
