@@ -470,6 +470,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	renderers->AddChild(mirrorMeshRendererGo);
 	mirrorMeshRendererGo->AddComponent(new Renderer::Renderer());
 	mirrorMeshRendererGo->AddComponent(new Test::F_MirrorRendererBehaviour());
+	mirrorMeshRendererGo->AddComponent(new Test::SelfRotateBehaviour(60));
 	mirrorMeshRendererGo->transform.SetTranslation(glm::vec3(-3, 0, 0));
 
 	Logic::Object::GameObject* culledRendererGo = new Logic::Object::GameObject("MeshRendererCulled");

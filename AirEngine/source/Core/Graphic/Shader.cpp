@@ -198,6 +198,8 @@ void AirEngine::Core::Graphic::Shader::_CheckAttachmentOutputState(_PipelineData
 		if (refl_var.decoration_flags & SPV_REFLECT_DECORATION_BUILT_IN) continue;
 
 		Utils::Log::Exception("Failed to find right output attachment.", !colorAttachments.count(refl_var.name) || colorAttachments[refl_var.name] != refl_var.location);
+
+		_attachmentNames.emplace_back(refl_var.name);
 	}
 }
 
@@ -251,12 +253,13 @@ void AirEngine::Core::Graphic::Shader::_PopulateGraphicPipelineSettings(_Pipelin
 	pipelineData.colorBlendAttachment.dstAlphaBlendFactor = _shaderSettings.dstAlphaBlendFactor;
 	pipelineData.colorBlendAttachment.alphaBlendOp = _shaderSettings.alphaBlendOp;
 	pipelineData.colorBlendAttachment.colorWriteMask = _shaderSettings.colorWriteMask;
+	pipelineData.pColorBlendAttachments = std::vector< VkPipelineColorBlendAttachmentState>(_attachmentNames.size(), pipelineData.colorBlendAttachment);
 
 	pipelineData.colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
 	pipelineData.colorBlending.logicOpEnable = VK_FALSE;
 	pipelineData.colorBlending.logicOp = VK_LOGIC_OP_COPY;
-	pipelineData.colorBlending.attachmentCount = 1;
-	pipelineData.colorBlending.pAttachments = &pipelineData.colorBlendAttachment;
+	pipelineData.colorBlending.attachmentCount = static_cast<uint32_t>(_attachmentNames.size());
+	pipelineData.colorBlending.pAttachments = pipelineData.pColorBlendAttachments.data();
 	pipelineData.colorBlending.blendConstants[0] = 0.0f;
 	pipelineData.colorBlending.blendConstants[1] = 0.0f;
 	pipelineData.colorBlending.blendConstants[2] = 0.0f;
@@ -570,6 +573,7 @@ AirEngine::Core::Graphic::Shader::Shader()
 	, _slotDescriptors()
 	, _vkPipeline(VK_NULL_HANDLE)
 	, _vkPipelineLayout(VK_NULL_HANDLE)
+	, _attachmentNames()
 {
 }
 

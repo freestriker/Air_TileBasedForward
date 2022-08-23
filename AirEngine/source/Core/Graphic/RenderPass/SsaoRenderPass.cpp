@@ -65,6 +65,13 @@ void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnPrepare(Camera::Cam
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
 		VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
 	);
+	_colorImage = Graphic::Instance::Image::Create2DImage(
+		camera->RenderPassTarget()->Extent(),
+		VK_FORMAT_R32G32B32A32_SFLOAT,
+		VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 
+		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
+		VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
+	);
 	_sizeInfoBuffer = new Instance::Buffer{
 		sizeof(SizeInfo),
 		VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
@@ -82,7 +89,8 @@ void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnPrepare(Camera::Cam
 	_occlusionRenderPassTarget = CoreObject::Instance::RenderPassManager().GetRenderPassObject(
 		{ "SsaoOcclusionRenderPass" },
 		{
-			{"OcclusionAttachment", _occlusionImage}
+			{"OcclusionAttachment", _occlusionImage},
+			{"ColorAttachment", _colorImage}
 		}
 	);
 	if (_occlusionMaterial == nullptr)
@@ -215,6 +223,20 @@ void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnPopulateCommandBuff
 			{ &attachmentBarrier }
 		);
 	}
+	{
+		auto attachmentBarrier = Command::ImageMemoryBarrier
+		(
+			_colorImage,
+			VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+			VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			0,
+			VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
+		);
+		_renderCommandBuffer->AddPipelineImageBarrier(
+			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+			{ &attachmentBarrier }
+		);
+	}
 	GeometryRenderPass& geometryRenderPass = dynamic_cast<GeometryRenderPass&>(CoreObject::Instance::RenderPassManager().RenderPass("GeometryRenderPass"));
 
 	_occlusionMaterial->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
@@ -227,7 +249,9 @@ void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnPopulateCommandBuff
 
 	VkClearValue occlusionAttachmentClearValue = {};
 	occlusionAttachmentClearValue.color.float32[0] = 0.0f;
-	_renderCommandBuffer->BeginRenderPass(_occlusionRenderPass, _occlusionRenderPassTarget, { {"OcclusionAttachment", occlusionAttachmentClearValue} });
+	VkClearValue colorAttachmentClearValue = {};
+	colorAttachmentClearValue.color = { {0.0f, 0.0f, 0.0f, 1.0f} };
+	_renderCommandBuffer->BeginRenderPass(_occlusionRenderPass, _occlusionRenderPassTarget, { {"OcclusionAttachment", occlusionAttachmentClearValue}, {"ColorAttachment", colorAttachmentClearValue} });
 
 	_renderCommandBuffer->BindMaterial(_occlusionMaterial);
 	_renderCommandBuffer->DrawMesh(_fullScreenMesh);
@@ -264,6 +288,7 @@ void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnClear()
 	CoreObject::Instance::RenderPassManager().DestroyRenderPassObject(_occlusionRenderPassTarget);
 
 	delete _occlusionImage;
+	delete _colorImage;
 	delete _sizeInfoBuffer;
 
 	//delete _noiseImage;
@@ -299,7 +324,7 @@ AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::SsaoRenderPass()
 	_noiseTextureSampler = new Instance::ImageSampler
 	(
 		VkFilter::VK_FILTER_NEAREST,
-		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
+		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_LINEAR,
 		VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
 		0.0f,
 		VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
@@ -308,7 +333,7 @@ AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::SsaoRenderPass()
 	_normalTextureSampler = new Instance::ImageSampler
 	(
 		VkFilter::VK_FILTER_NEAREST,
-		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
+		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_LINEAR,
 		VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
 		0.0f,
 		VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
@@ -317,7 +342,7 @@ AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::SsaoRenderPass()
 	_depthTextureSampler = new Instance::ImageSampler
 	(
 		VkFilter::VK_FILTER_NEAREST,
-		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
+		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_LINEAR,
 		VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
 		0.0f,
 		VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
@@ -339,10 +364,19 @@ void AirEngine::Core::Graphic::RenderPass::SsaoOcclusionRenderPass::OnPopulateRe
 		VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 		VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
 	);
+	creator.AddColorAttachment(
+		"ColorAttachment",
+		VK_FORMAT_R32G32B32A32_SFLOAT,
+		VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT,
+		VK_ATTACHMENT_LOAD_OP_CLEAR,
+		VK_ATTACHMENT_STORE_OP_STORE,
+		VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+		VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+	);
 	creator.AddSubpass(
 		"DrawSubpass",
 		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		{ "OcclusionAttachment" }
+		{ "OcclusionAttachment", "ColorAttachment" }
 	);
 	creator.AddDependency(
 		"VK_SUBPASS_EXTERNAL",
