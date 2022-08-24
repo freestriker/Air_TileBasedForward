@@ -324,8 +324,8 @@ AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::SsaoRenderPass()
 	_noiseTextureSampler = new Instance::ImageSampler
 	(
 		VkFilter::VK_FILTER_NEAREST,
-		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_LINEAR,
-		VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
+		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
+		VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
 		0.0f,
 		VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
 	);
@@ -333,8 +333,8 @@ AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::SsaoRenderPass()
 	_normalTextureSampler = new Instance::ImageSampler
 	(
 		VkFilter::VK_FILTER_NEAREST,
-		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_LINEAR,
-		VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
+		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
+		VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
 		0.0f,
 		VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
 	);
@@ -342,7 +342,7 @@ AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::SsaoRenderPass()
 	_depthTextureSampler = new Instance::ImageSampler
 	(
 		VkFilter::VK_FILTER_NEAREST,
-		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_LINEAR,
+		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
 		VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
 		0.0f,
 		VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_WHITE

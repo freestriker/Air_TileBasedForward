@@ -33,8 +33,7 @@ void main()
 {
     vec2 aPosition = gl_FragCoord.xy / sizeInfo.attachmentSize;
 
-    float ndcDepth = texture(depthTexture, aPosition).r;
-    vec3 ndcPosition = vec3(PositionA2N(aPosition), ndcDepth);
+    vec3 ndcPosition = vec3(PositionA2N(aPosition), texture(depthTexture, aPosition).r);
     vec3 vPosition = PositionN2V(ndcPosition, cameraInfo.info);
     vec3 vNormal = ParseFromColor(texture(normalTexture, aPosition).rgb);
 
@@ -54,13 +53,16 @@ void main()
         vec3 ndcSamplePoint = pSamplePoint.xyz / pSamplePoint.w;
 
         vec2 samplePointTexCoords = PositionN2A(ndcSamplePoint.xy);
-        float samplePointNdcDepth = ndcSamplePoint.z;
-        // float samplePointVDepth = DepthN2V(samplePointNdcDepth, cameraInfo.info);
-        float visiableSamplePointNdcDepth = texture(depthTexture, samplePointTexCoords).r;
-        // float visiableSamplePointVDepth = DepthN2V(visiableSamplePointNdcDepth, cameraInfo.info);
+        if(samplePointTexCoords.x != 0 && samplePointTexCoords.x != 1 && samplePointTexCoords.y != 0 && samplePointTexCoords.y != 1)
+        {
+            float samplePointNdcDepth = ndcSamplePoint.z;
+            float visiableSamplePointNdcDepth = texture(depthTexture, samplePointTexCoords).r;
+            vec3 visiableSamplePointVPosition = vec3(vSamplePoint.xy, DepthN2V(visiableSamplePointNdcDepth, cameraInfo.info));
 
-        occlusion += (visiableSamplePointNdcDepth < samplePointNdcDepth ? 1.0f : 0.0f);
-        // occlusion += (samplePointVDepth < visiableSamplePointVDepth ? 1.0f : 0.0f);
+            bool isInRadius = length(visiableSamplePointVPosition - vPosition) <= sampleKernal.radius;
+
+            occlusion += ((visiableSamplePointNdcDepth < samplePointNdcDepth && isInRadius) ? 1.0f : 0.0f);
+        }
     }
 
     OcclusionAttachment = occlusion / SAMPLE_KERNAL_SIZE;
