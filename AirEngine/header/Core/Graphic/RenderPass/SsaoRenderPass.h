@@ -3,8 +3,8 @@
 #include "Asset/TextureCube.h"
 #define NOISE_IMAGE_WIDTH 64
 #define SAMPLE_KERNAL_SIZE 64
-#define SAMPLE_BIAS_ANGLE 35
-#define SAMPLE_KERNAL_RADIUS 0.1f
+#define SAMPLE_BIAS_ANGLE 25
+#define SAMPLE_KERNAL_RADIUS 0.2f
 
 namespace AirEngine
 {

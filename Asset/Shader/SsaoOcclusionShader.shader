@@ -4,7 +4,7 @@
   "alphaBlendOp": 0,
   "blendEnable": 0,
   "colorBlendOp": 0,
-  "colorWriteMask": 7,
+  "colorWriteMask": 15,
   "cullMode": 0,
   "dstAlphaBlendFactor": 0,
   "dstColorBlendFactor": 0,

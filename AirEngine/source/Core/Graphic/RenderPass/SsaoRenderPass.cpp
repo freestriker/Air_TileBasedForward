@@ -345,7 +345,7 @@ AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::SsaoRenderPass()
 		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_LINEAR,
 		VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
 		0.0f,
-		VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
+		VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_WHITE
 	);
 }
 
