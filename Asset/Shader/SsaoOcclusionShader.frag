@@ -27,7 +27,6 @@ layout(set = 5, binding = 0) uniform SampleKernal
 } sampleKernal;
 
 layout(location = 0) out float OcclusionAttachment;
-layout(location = 1) out vec4 ColorAttachment;
 
 void main()
 {

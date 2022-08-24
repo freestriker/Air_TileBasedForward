@@ -71,7 +71,6 @@ namespace AirEngine
 					Material* _occlusionMaterial;
 					Material* _blendMaterial;
 					Instance::Image* _occlusionImage;
-					Instance::Image* _colorImage;
 					Instance::Image* _noiseImage;
 					Instance::ImageSampler* _noiseTextureSampler;
 					Instance::ImageSampler* _normalTextureSampler;
