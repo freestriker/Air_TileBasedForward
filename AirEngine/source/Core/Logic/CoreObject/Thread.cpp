@@ -32,7 +32,7 @@
 #include "Core/Graphic/RenderPass/TBF_OpaqueRenderPass.h"
 #include "Core/Graphic/RenderPass/F_TransparentRenderPass.h"
 #include "Core/Graphic/RenderPass/TBF_TransparentRenderPass.h"
-#include "Core/Graphic/RenderPass/PreZRenderPass.h"
+#include "Core/Graphic/RenderPass/GeometryRenderPass.h"
 #include "Core/Graphic/RenderPass/TBF_OIT_DepthPeelingBlendRenderPass.h"
 #include "Core/Graphic/RenderPass/TBF_OIT_DepthPeelingRenderPass.h"
 #include "Test/TBF_OIT_RenderBehaviour.h"
@@ -44,6 +44,7 @@
 #include "Audio/AudioListener.h"
 #include "Test/AudioSourceBehaviour.h"
 #include "Core/Logic/Manager/InputManager.h"
+#include "Core/Graphic/RenderPass/SsaoRenderPass.h"
 
 AirEngine::Core::Logic::CoreObject::Thread::LogicThread AirEngine::Core::Logic::CoreObject::Thread::_logicThread = AirEngine::Core::Logic::CoreObject::Thread::LogicThread();
 
@@ -399,7 +400,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 {
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::BackgroundRenderPass());
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::F_OpaqueRenderPass());
-	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::PreZRenderPass());
+	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::GeometryRenderPass());
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::F_TransparentRenderPass());
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::TBF_OpaqueRenderPass());
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::TBF_TransparentRenderPass());
@@ -408,13 +409,14 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::TBF_OIT_AlphaLinkedListRenderPass());
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::TBF_OIT_ALL_SortBlendRenderPass());
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::PresentRenderPass());
+	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::SsaoRenderPass());
 
 	//Camera
 	Object::GameObject* cameraGo = new Logic::Object::GameObject("Camera");
 	CoreObject::Instance::rootObject.AddChild(cameraGo);
 	auto camera = new Camera::PerspectiveCamera(
 		{ 
-			"PreZRenderPass",
+			"GeometryRenderPass",
 			"F_OpaqueRenderPass",
 			"F_TransparentRenderPass",
 			"BackgroundRenderPass", 
@@ -423,11 +425,13 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 			"TBF_OIT_DepthPeelingRenderPass", 
 			"TBF_OIT_DepthPeelingBlendRenderPass",
 			"TBF_OIT_AlphaLinkedListRenderPass",
-			"TBF_OIT_ALL_SortBlendRenderPass"
+			"TBF_OIT_ALL_SortBlendRenderPass",
+			"SsaoRenderPass"
 		},
 		{
-			{"ColorAttachment", Graphic::Instance::Image::Create2DImage({800, 450}, VK_FORMAT_R8G8B8A8_SRGB, VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT)},
-			{"DepthAttachment", Graphic::Instance::Image::Create2DImage({800, 450}, VK_FORMAT_D32_SFLOAT, VkImageUsageFlagBits::VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT)}
+			{"ColorAttachment", Graphic::Instance::Image::Create2DImage({1600, 900}, VK_FORMAT_R8G8B8A8_SRGB, VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT)},
+			{"NormalAttachment", Graphic::Instance::Image::Create2DImage({1600, 900}, VK_FORMAT_R16G16B16A16_SFLOAT, VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT)},
+			{"DepthAttachment", Graphic::Instance::Image::Create2DImage({1600, 900}, VK_FORMAT_D32_SFLOAT, VkImageUsageFlagBits::VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT)}
 		}
 	);
 	camera->mainCamera = camera;
@@ -466,6 +470,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	renderers->AddChild(mirrorMeshRendererGo);
 	mirrorMeshRendererGo->AddComponent(new Renderer::Renderer());
 	mirrorMeshRendererGo->AddComponent(new Test::F_MirrorRendererBehaviour());
+	mirrorMeshRendererGo->AddComponent(new Test::SelfRotateBehaviour(60));
 	mirrorMeshRendererGo->transform.SetTranslation(glm::vec3(-3, 0, 0));
 
 	Logic::Object::GameObject* culledRendererGo = new Logic::Object::GameObject("MeshRendererCulled");

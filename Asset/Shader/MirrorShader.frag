@@ -7,7 +7,7 @@ layout(location = 0) in vec4 inColor;
 layout(location = 1) in vec3 inWorldPosition;
 layout(location = 2) in vec3 inWorldNormal;
 
-layout(location = 0) out vec4 colorAttachment;
+layout(location = 0) out vec4 ColorAttachment;
 
 layout(set = START_SET_INDEX + 0, binding = 0) uniform samplerCube backgroundTexture;
 
@@ -31,5 +31,5 @@ void main()
     }
     vec3 background = texture(backgroundTexture, normalize(reflect(viewDirection, worldNormal))).xyz;
 
-    colorAttachment = vec4(background + ambient * 0.2 + diffuse * 0.2 + specular * 0.2, 1);
+    ColorAttachment = vec4(background + ambient * 0.2 + diffuse * 0.2 + specular * 0.2, 1);
 }

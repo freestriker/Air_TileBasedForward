@@ -25,7 +25,7 @@ void AirEngine::Test::F_MirrorRendererBehaviour::OnAwake()
 void AirEngine::Test::F_MirrorRendererBehaviour::OnStart()
 {
 	auto renderer = GameObject()->GetComponent<Renderer::Renderer>();
-	auto mesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\Sphere.ply");
+	auto mesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\RingSphere.ply");
 	renderer->mesh = mesh;
 
 	{
@@ -37,7 +37,7 @@ void AirEngine::Test::F_MirrorRendererBehaviour::OnStart()
 	}
 
 	{
-		auto preZShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Shader>("..\\Asset\\Shader\\PreZShader.shader");
+		auto preZShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Shader>("..\\Asset\\Shader\\GeometryShader.shader");
 		auto preZMaterial = new Core::Graphic::Material(preZShader);
 		renderer->AddMaterial(preZMaterial);
 	}

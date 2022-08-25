@@ -111,6 +111,7 @@
     <ClCompile Include="source\Core\Audio\CoreObject\Thread.cpp" />
     <ClCompile Include="source\Core\Audio\CoreObject\Instance.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\PresentRenderPass.cpp" />
+    <ClCompile Include="source\Core\Graphic\RenderPass\SsaoRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\TBF_OIT_ALL_SortBlendRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\TBF_OIT_AlphaLinkedListRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\TBF_OIT_DepthPeelingBlendRenderPass.cpp" />
@@ -129,7 +130,7 @@
     <ClCompile Include="source\Core\Graphic\Material.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\BackgroundRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\F_OpaqueRenderPass.cpp" />
-    <ClCompile Include="source\Core\Graphic\RenderPass\PreZRenderPass.cpp" />
+    <ClCompile Include="source\Core\Graphic\RenderPass\GeometryRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\RenderPassBase.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\TBF_OpaqueRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\F_TransparentRenderPass.cpp" />
@@ -184,6 +185,7 @@
     <ClCompile Include="source\Utils\IntersectionChecker.cpp" />
     <ClCompile Include="source\Utils\Log.cpp" />
     <ClCompile Include="source\Utils\OrientedBoundingBox.cpp" />
+    <ClCompile Include="source\Utils\RandomSphericalCoordinateGenerator.cpp" />
     <ClCompile Include="source\Utils\SpirvReflect.cpp" />
     <ClCompile Include="source\Utils\ThreadBase.cpp" />
     <ClCompile Include="source\Utils\Time.cpp" />
@@ -223,8 +225,9 @@
     <ClInclude Include="header\Core\Graphic\RenderPass\BackgroundRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\F_OpaqueRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\PresentRenderPass.h" />
-    <ClInclude Include="header\Core\Graphic\RenderPass\PreZRenderPass.h" />
+    <ClInclude Include="header\Core\Graphic\RenderPass\GeometryRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\RenderPassBase.h" />
+    <ClInclude Include="header\Core\Graphic\RenderPass\SsaoRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\TBF_OIT_ALL_SortBlendRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\TBF_OIT_AlphaLinkedListRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\TBF_OIT_DepthPeelingBlendRenderPass.h" />
@@ -266,6 +269,7 @@
     <ClInclude Include="header\Utils\IntersectionChecker.h" />
     <ClInclude Include="header\Utils\Log.h" />
     <ClInclude Include="header\Utils\OrientedBoundingBox.h" />
+    <ClInclude Include="header\Utils\RandomSphericalCoordinateGenerator.h" />
     <ClInclude Include="header\Utils\SpirvReflect.h" />
     <ClInclude Include="header\Utils\ThreadBase.h" />
     <ClInclude Include="header\Utils\Time.h" />

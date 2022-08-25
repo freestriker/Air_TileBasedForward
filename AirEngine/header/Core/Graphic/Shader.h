@@ -114,6 +114,7 @@ namespace AirEngine
 					VkPipelineMultisampleStateCreateInfo multisampling{};
 					VkPipelineDepthStencilStateCreateInfo depthStencil{};
 					VkPipelineColorBlendAttachmentState colorBlendAttachment{};
+					std::vector< VkPipelineColorBlendAttachmentState> pColorBlendAttachments;
 					VkPipelineColorBlendStateCreateInfo colorBlending{};
 
 					std::vector<VkDescriptorSetLayout> descriptorSetLayouts{};
@@ -125,6 +126,7 @@ namespace AirEngine
 				VkPipeline _vkPipeline;
 				VkPipelineLayout _vkPipelineLayout;
 				ShaderType _shaderType;
+				std::vector<std::string> _attachmentNames;
 
 				void _ParseShaderData(_PipelineData& pipelineData);
 				void _LoadSpirvs(_PipelineData& pipelineData);

@@ -30,7 +30,7 @@
 #include "Core/IO/CoreObject/Instance.h"
 #include "Core/IO/Manager/AssetManager.h"
 #include "Core/Graphic/Manager/LightManager.h"
-#include "Core/Graphic/RenderPass/PreZRenderPass.h"
+#include "Core/Graphic/RenderPass/GeometryRenderPass.h"
 
 void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
 {
@@ -120,7 +120,7 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPopulateComma
 		);
 	}
 
-	auto depthImage = dynamic_cast<PreZRenderPass&>(CoreObject::Instance::RenderPassManager().RenderPass("PreZRenderPass")).DepthImage();
+	auto depthImage = dynamic_cast<GeometryRenderPass&>(CoreObject::Instance::RenderPassManager().RenderPass("GeometryRenderPass")).DepthImage();
 
 	_buildLightListsMaterial->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
 	_buildLightListsMaterial->SetUniformBuffer("lightBoundingBoxInfos", CoreObject::Instance::LightManager().TileBasedForwardLightBoundindBoxInfosBuffer());
@@ -186,8 +186,7 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OpaqueRenderPass::OnPopulateComma
 	{
 		_renderCommandBuffer->BeginRenderPass(
 			this,
-			camera->RenderPassTarget(),
-			{ }
+			camera->RenderPassTarget()
 		);
 
 		auto viewMatrix = camera->ViewMatrix();

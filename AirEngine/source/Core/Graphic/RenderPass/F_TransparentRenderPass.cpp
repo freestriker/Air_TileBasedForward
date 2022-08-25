@@ -117,8 +117,7 @@ void AirEngine::Core::Graphic::RenderPass::F_TransparentRenderPass::OnPopulateCo
 	{
 		_renderCommandBuffer->BeginRenderPass(
 			this,
-			camera->RenderPassTarget(),
-			{ }
+			camera->RenderPassTarget()
 		);
 
 		auto viewMatrix = camera->ViewMatrix();

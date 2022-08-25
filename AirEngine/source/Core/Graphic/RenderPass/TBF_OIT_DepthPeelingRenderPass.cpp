@@ -27,7 +27,7 @@
 #include "Core/Graphic/Material.h"
 #include "Core/Graphic/Shader.h"
 #include "Core/Graphic/Instance/ImageSampler.h"
-#include "Core/Graphic/RenderPass/PreZRenderPass.h"
+#include "Core/Graphic/RenderPass/GeometryRenderPass.h"
 
 #define DEPTH_PEELING_STEP_COUNT 4
 
@@ -118,7 +118,7 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingRenderPass::OnPop
 	{
 		auto viewMatrix = camera->ViewMatrix();
 		auto transparentLightListsBuffer = dynamic_cast<TBF_OpaqueRenderPass&>(CoreObject::Instance::RenderPassManager().RenderPass("TBF_OpaqueRenderPass")).TransparentLightIndexListsBuffer();
-		auto depthImage = dynamic_cast<PreZRenderPass&>(CoreObject::Instance::RenderPassManager().RenderPass("PreZRenderPass")).DepthImage();
+		auto depthImage = dynamic_cast<GeometryRenderPass&>(CoreObject::Instance::RenderPassManager().RenderPass("GeometryRenderPass")).DepthImage();
 		for (const auto& rendererPair : renderDistanceTable)
 		{
 			auto& renderer = rendererPair.second;
@@ -262,7 +262,7 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingRenderPass::OnPop
 				_renderCommandBuffer->BeginRenderPass(
 					this,
 					_renderPassTargets[i],
-					{ colorClearValue, depthClearValue }
+					{ {"ColorAttachment", colorClearValue}, {"DepthAttachment", depthClearValue} }
 				);
 
 				for (const auto& renderer : targetRenderers)

@@ -18,7 +18,7 @@ layout (set = 2, binding = 0) buffer PixelInfos
     PixelInfo[] infos;
 }pixelInfos;
 
-layout(location = 0) out vec4 colorAttachment;
+layout(location = 0) out vec4 ColorAttachment;
 
 void SwapPixel(uint i, uint j)
 {
@@ -63,5 +63,5 @@ void main()
         dst = color;
     }
 
-    colorAttachment = dst;
+    ColorAttachment = dst;
 }

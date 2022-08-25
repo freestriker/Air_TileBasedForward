@@ -37,7 +37,7 @@ void AirEngine::Test::F_GlassRendererBehaviour::OnStart()
 	}
 
 	{
-		auto preZShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Shader>("..\\Asset\\Shader\\PreZShader.shader");
+		auto preZShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Shader>("..\\Asset\\Shader\\GeometryShader.shader");
 		auto preZMaterial = new Core::Graphic::Material(preZShader);
 		renderer->AddMaterial(preZMaterial);
 	}

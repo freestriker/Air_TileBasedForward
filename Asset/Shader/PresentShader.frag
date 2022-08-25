@@ -5,9 +5,9 @@ layout(set = 0, binding = 0) uniform sampler2D srcColorTexture;
 
 layout(location = 0) in vec2 outTexCoords;
 
-layout(location = 0) out vec4 colorAttachment;
+layout(location = 0) out vec4 ColorAttachment;
 
 void main() 
 {
-    colorAttachment = vec4(texture(srcColorTexture, outTexCoords.xy).xyz, 1);
+    ColorAttachment = vec4(texture(srcColorTexture, outTexCoords.xy).xyz, 1);
 }

@@ -17,9 +17,23 @@ vec3 DirectionO2W(in vec3 direction, in ObjectInfo objectInfo)
     return normalize(mat3(objectInfo.itModel) * direction);
 }
 
+vec3 DirectionTransition(in vec3 direction, mat3 matrix)
+{
+    return normalize(transpose(inverse(matrix)) * direction);
+}
+
 vec3 NormalC2T(in vec4 normalColor)
 {
     return (normalColor.xyz - vec3(0.5, 0.5, 0.5)) * 2;
+}
+
+vec3 ParseToColor(in vec3 src)
+{
+    return src / 2.0 + vec3(0.5, 0.5, 0.5);
+}
+vec3 ParseFromColor(in vec3 color)
+{
+    return color * 2 - vec3(1, 1, 1);
 }
 
 mat3 TBNMatrix(in vec3 tangent, in vec3 bitangent, in vec3 normal)

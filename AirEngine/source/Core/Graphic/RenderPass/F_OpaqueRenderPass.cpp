@@ -94,7 +94,7 @@ void AirEngine::Core::Graphic::RenderPass::F_OpaqueRenderPass::OnPopulateCommand
 	_renderCommandBuffer->BeginRenderPass(
 		this,
 		camera->RenderPassTarget(),
-		{ colorClearValue }
+		{ {"ColorAttachment", colorClearValue} }
 	);
 
 	auto viewMatrix = camera->ViewMatrix();

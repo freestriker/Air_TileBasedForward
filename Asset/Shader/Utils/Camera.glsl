@@ -113,6 +113,27 @@ vec2 PositionS2N(in vec2 imagePosition)
     return vec2(x, y);
 }
 
+vec2 PositionN2S(in vec2 ndcPosition)
+{
+    float x = (clamp(ndcPosition.x, -1, 1) + 1) / 2;
+    float y = (clamp(ndcPosition.y, -1, 1) - 1) / -2;
+    return vec2(x, y);
+}
+
+vec2 PositionA2N(in vec2 attachmentPosition)
+{
+    float x = clamp((2 * attachmentPosition.x  - 1), -1, 1);
+    float y = clamp((2 * attachmentPosition.y  - 1), -1, 1);
+    return vec2(x, y);
+}
+
+vec2 PositionN2A(in vec2 ndcPosition)
+{
+    float x = (clamp(ndcPosition.x, -1, 1) + 1) / 2;
+    float y = (clamp(ndcPosition.y, -1, 1) + 1) / 2;
+    return vec2(x, y);
+}
+
 vec3 PositionS2NFW(in vec2 screenPosition, in CameraInfo cameraInfo)
 {
     vec2 ndcPos = PositionS2N(screenPosition);

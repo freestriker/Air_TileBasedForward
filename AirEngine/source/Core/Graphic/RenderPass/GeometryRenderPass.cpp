@@ -1,4 +1,4 @@
-#include "Core/Graphic/RenderPass/PreZRenderPass.h"
+#include "Core/Graphic/RenderPass/GeometryRenderPass.h"
 #include "Core/Graphic/Command/CommandBuffer.h"
 #include "Core/Graphic/Command/CommandPool.h"
 #include "Core/Graphic/CoreObject/Instance.h"
@@ -21,8 +21,17 @@
 #include "Core/Graphic/Instance/Image.h"
 #include "Core/Graphic/Command/BufferMemoryBarrier.h"
 
-void AirEngine::Core::Graphic::RenderPass::PreZRenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
+void AirEngine::Core::Graphic::RenderPass::GeometryRenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
 {
+	creator.AddColorAttachment(
+		"NormalAttachment",
+		VK_FORMAT_R16G16B16A16_SFLOAT,
+		VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT,
+		VK_ATTACHMENT_LOAD_OP_CLEAR,
+		VK_ATTACHMENT_STORE_OP_STORE,
+		VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+		VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+	);
 	creator.AddDepthAttachment(
 		"DepthAttachment",
 		VK_FORMAT_D32_SFLOAT,
@@ -35,7 +44,7 @@ void AirEngine::Core::Graphic::RenderPass::PreZRenderPass::OnPopulateRenderPassS
 	creator.AddSubpass(
 		"DrawSubpass",
 		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		{ },
+		{ "NormalAttachment"},
 		"DepthAttachment"
 	);
 	creator.AddDependency(
@@ -48,7 +57,7 @@ void AirEngine::Core::Graphic::RenderPass::PreZRenderPass::OnPopulateRenderPassS
 	);
 }
 
-void AirEngine::Core::Graphic::RenderPass::PreZRenderPass::OnPrepare(Camera::CameraBase* camera)
+void AirEngine::Core::Graphic::RenderPass::GeometryRenderPass::OnPrepare(Camera::CameraBase* camera)
 {
 	auto attachmentSize = camera->RenderPassTarget()->Extent();
 
@@ -64,18 +73,33 @@ void AirEngine::Core::Graphic::RenderPass::PreZRenderPass::OnPrepare(Camera::Cam
 		VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 		VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
 	);
+	_normalImage = Instance::Image::Create2DImage(
+		attachmentSize,
+		VkFormat::VK_FORMAT_R16G16B16A16_SFLOAT,
+		VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT,
+		VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
+	);
 }
 
-void AirEngine::Core::Graphic::RenderPass::PreZRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
+void AirEngine::Core::Graphic::RenderPass::GeometryRenderPass::OnPopulateCommandBuffer(Command::CommandPool* commandPool, std::multimap<float, Renderer::Renderer*>& renderDistanceTable, Camera::CameraBase* camera)
 {
 	_renderCommandPool = commandPool;
 
-	_renderCommandBuffer = commandPool->CreateCommandBuffer("PreZCommandBuffer", VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+	_renderCommandBuffer = commandPool->CreateCommandBuffer("GeometryCommandBuffer", VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 	_renderCommandBuffer->Reset();
 	_renderCommandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
 	//Init attachment layout
 	{
+		auto normalAttachmentFinishBarrier = Command::ImageMemoryBarrier
+		(
+			camera->RenderPassTarget()->Attachment("NormalAttachment"),
+			VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+			VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			0,
+			0
+		);
 		auto depthAttachmentFinishBarrier = Command::ImageMemoryBarrier
 		(
 			camera->RenderPassTarget()->Attachment("DepthAttachment"),
@@ -86,7 +110,7 @@ void AirEngine::Core::Graphic::RenderPass::PreZRenderPass::OnPopulateCommandBuff
 		);
 		_renderCommandBuffer->AddPipelineImageBarrier(
 			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-			{ &depthAttachmentFinishBarrier }
+			{ &normalAttachmentFinishBarrier, &depthAttachmentFinishBarrier }
 		);
 	}
 
@@ -94,10 +118,15 @@ void AirEngine::Core::Graphic::RenderPass::PreZRenderPass::OnPopulateCommandBuff
 	{
 		VkClearValue depthClearValue{};
 		depthClearValue.depthStencil.depth = 1.0f;
+		VkClearValue normalClearValue{};
+		normalClearValue.color = {0.5f, 0.5f, 1.0f, 1.0f};
 		_renderCommandBuffer->BeginRenderPass(
 			this,
 			camera->RenderPassTarget(),
-			{ depthClearValue }
+			{
+				{"NormalAttachment", normalClearValue},
+				{"DepthAttachment", depthClearValue}
+			}
 		);
 
 		auto viewMatrix = camera->ViewMatrix();
@@ -136,6 +165,19 @@ void AirEngine::Core::Graphic::RenderPass::PreZRenderPass::OnPopulateCommandBuff
 			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
 			{ &depthAttachmentBarrier }
 		);
+		Command::ImageMemoryBarrier normalAttachmentBarrier = Command::ImageMemoryBarrier
+		(
+			camera->RenderPassTarget()->Attachment("NormalAttachment"),
+			VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+			VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+			VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT
+		);
+
+		_renderCommandBuffer->AddPipelineImageBarrier(
+			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
+			{ &normalAttachmentBarrier }
+		);
 	}
 
 	//Copy depth to buffer
@@ -151,6 +193,14 @@ void AirEngine::Core::Graphic::RenderPass::PreZRenderPass::OnPopulateCommandBuff
 			0,
 			VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT
 		);
+		Command::ImageMemoryBarrier normalImageLayoutBarrier = Command::ImageMemoryBarrier
+		(
+			_normalImage,
+			VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+			VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			0,
+			VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT
+		);
 		Command::BufferMemoryBarrier depthBufferBarrier = Command::BufferMemoryBarrier
 		(
 			_depthBuffer,
@@ -160,13 +210,14 @@ void AirEngine::Core::Graphic::RenderPass::PreZRenderPass::OnPopulateCommandBuff
 
 		_renderCommandBuffer->AddPipelineBarrier(
 			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-			{ &depthImageLayoutBarrier },
+			{ &depthImageLayoutBarrier, &normalImageLayoutBarrier },
 			{ &depthBufferBarrier }
 		);
 	}
 
 	///Copy buffer to color
 	_renderCommandBuffer->CopyBufferToImage(_depthBuffer, _depthImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+	_renderCommandBuffer->CopyImage(camera->RenderPassTarget()->Attachment("NormalAttachment"), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, _normalImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
 	///Wait copy buffer to color finish
 	{
@@ -186,48 +237,72 @@ void AirEngine::Core::Graphic::RenderPass::PreZRenderPass::OnPopulateCommandBuff
 			VK_ACCESS_TRANSFER_WRITE_BIT,
 			0
 		);
+		Command::ImageMemoryBarrier normalAttachmentBarrier = Command::ImageMemoryBarrier
+		(
+			camera->RenderPassTarget()->Attachment("NormalAttachment"),
+			VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+			VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+			VK_ACCESS_TRANSFER_READ_BIT,
+			0
+		);
+		Command::ImageMemoryBarrier normalImageBarrier = Command::ImageMemoryBarrier
+		(
+			_normalImage,
+			VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+			VK_ACCESS_TRANSFER_WRITE_BIT,
+			0
+		);
 
 		_renderCommandBuffer->AddPipelineImageBarrier(
 			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-			{ &depthAttachmentBarrier, &depthImageBarrier }
+			{ &depthAttachmentBarrier, &depthImageBarrier, &normalAttachmentBarrier, &normalImageBarrier }
 		);
 	}
 
 	_renderCommandBuffer->EndRecord();
 }
 
-void AirEngine::Core::Graphic::RenderPass::PreZRenderPass::OnSubmit()
+void AirEngine::Core::Graphic::RenderPass::GeometryRenderPass::OnSubmit()
 {
 	_renderCommandBuffer->Submit();
 	_renderCommandBuffer->WaitForFinish();
 }
 
-void AirEngine::Core::Graphic::RenderPass::PreZRenderPass::OnClear()
+void AirEngine::Core::Graphic::RenderPass::GeometryRenderPass::OnClear()
 {
 	delete _depthBuffer;
 	delete _depthImage;
+	delete _normalImage;
+
 	_renderCommandPool->DestoryCommandBuffer(_renderCommandBuffer);
 }
 
-AirEngine::Core::Graphic::RenderPass::PreZRenderPass::PreZRenderPass()
-	: RenderPassBase("PreZRenderPass", PRE_Z_RENDER_INDEX)
+AirEngine::Core::Graphic::RenderPass::GeometryRenderPass::GeometryRenderPass()
+	: RenderPassBase("GeometryRenderPass", GEOMETRY_RENDER_INDEX)
 	, _renderCommandBuffer(nullptr)
 	, _renderCommandPool(nullptr)
 	, _depthBuffer(nullptr)
 	, _depthImage(nullptr)
+	, _normalImage(nullptr)
 {
 }
 
-AirEngine::Core::Graphic::RenderPass::PreZRenderPass::~PreZRenderPass()
+AirEngine::Core::Graphic::RenderPass::GeometryRenderPass::~GeometryRenderPass()
 {
 }
 
-AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::RenderPass::PreZRenderPass::DepthImage()
+AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::RenderPass::GeometryRenderPass::DepthImage()
 {
 	return _depthImage;
 }
 
-AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::RenderPass::PreZRenderPass::DepthBuffer()
+AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::RenderPass::GeometryRenderPass::NormalImage()
+{
+	return _normalImage;
+}
+
+AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::RenderPass::GeometryRenderPass::DepthBuffer()
 {
 	return _depthBuffer;
 }

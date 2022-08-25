@@ -131,8 +131,7 @@ void AirEngine::Core::Graphic::RenderPass::TBF_TransparentRenderPass::OnPopulate
 	{
 		_renderCommandBuffer->BeginRenderPass(
 			this,
-			camera->RenderPassTarget(),
-			{ }
+			camera->RenderPassTarget()
 		);
 
 		Command::ImageMemoryBarrier drawBarrier = Command::ImageMemoryBarrier

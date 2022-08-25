@@ -48,24 +48,24 @@ AirEngine::Core::Audio::CoreObject::Thread::AudioThread::~AudioThread()
 
 void AirEngine::Core::Audio::CoreObject::Thread::AudioThread::Init()
 {
-	Utils::Log::Message("AirEngine::Core::Audio::CoreObject::Thread::AudioThread::Init()");
+
 }
 
 void AirEngine::Core::Audio::CoreObject::Thread::AudioThread::OnStart()
 {
 	_stopped = false;
 	Instance::Init();
-	Utils::Log::Message("AirEngine::Core::Audio::CoreObject::Thread::AudioThread::OnStart()");
+
 }
 
 void AirEngine::Core::Audio::CoreObject::Thread::AudioThread::OnThreadStart()
 {
-	Utils::Log::Message("AirEngine::Core::Audio::CoreObject::Thread::AudioThread::OnThreadStart()");
+
 }
 
 void AirEngine::Core::Audio::CoreObject::Thread::AudioThread::OnRun()
 {
-	Utils::Log::Message("AirEngine::Core::Audio::CoreObject::Thread::AudioThread::OnRun()");
+
 	//while (!_stopped)
 	//{
 
@@ -74,5 +74,5 @@ void AirEngine::Core::Audio::CoreObject::Thread::AudioThread::OnRun()
 
 void AirEngine::Core::Audio::CoreObject::Thread::AudioThread::OnEnd()
 {
-	Utils::Log::Message("AirEngine::Core::Audio::CoreObject::Thread::AudioThread::OnEnd()");
+
 }

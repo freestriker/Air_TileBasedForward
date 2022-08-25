@@ -103,8 +103,7 @@ void AirEngine::Core::Graphic::RenderPass::TBF_OIT_DepthPeelingBlendRenderPass::
 		{
 			_renderCommandBuffer->BeginRenderPass(
 				this,
-				camera->RenderPassTarget(),
-				{ }
+				camera->RenderPassTarget()
 			);
 
 			auto peeledColorImages = dynamic_cast<TBF_OIT_DepthPeelingRenderPass&>(CoreObject::Instance::RenderPassManager().RenderPass("TBF_OIT_DepthPeelingRenderPass")).PeeledColorImages();

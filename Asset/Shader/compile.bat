@@ -16,8 +16,8 @@ glslangValidator.exe -t -V MirrorShader.frag -IUtils/ -o Spv/MirrorShader.frag.s
 glslangValidator.exe -t -V GlassShader.vert -IUtils/ -o Spv/GlassShader.vert.spv
 glslangValidator.exe -t -V GlassShader.frag -IUtils/ -o Spv/GlassShader.frag.spv
 
-glslangValidator.exe -t -V PreZShader.vert -IUtils/ -o Spv/PreZShader.vert.spv
-glslangValidator.exe -t -V PreZShader.frag -IUtils/ -o Spv/PreZShader.frag.spv
+glslangValidator.exe -t -V GeometryShader.vert -IUtils/ -o Spv/GeometryShader.vert.spv
+glslangValidator.exe -t -V GeometryShader.frag -IUtils/ -o Spv/GeometryShader.frag.spv
 
 glslangValidator.exe -t -V TBF_OIT_DP_Shader.vert -IUtils/ -o Spv/TBF_OIT_DP_Shader.vert.spv
 glslangValidator.exe -t -V TBF_OIT_DP_Shader.frag -IUtils/ -o Spv/TBF_OIT_DP_Shader.frag.spv
@@ -30,6 +30,15 @@ glslangValidator.exe -t -V OIT_DP_BlendShader.frag -IUtils/ -o Spv/OIT_DP_BlendS
 
 glslangValidator.exe -t -V OIT_ALL_SortBlendShader.vert -IUtils/ -o Spv/OIT_ALL_SortBlendShader.vert.spv
 glslangValidator.exe -t -V OIT_ALL_SortBlendShader.frag -IUtils/ -o Spv/OIT_ALL_SortBlendShader.frag.spv
+
+glslangValidator.exe -t -V SsaoOcclusionShader.vert -IUtils/ -o Spv/SsaoOcclusionShader.vert.spv
+glslangValidator.exe -t -V SsaoOcclusionShader.frag -IUtils/ -o Spv/SsaoOcclusionShader.frag.spv
+
+glslangValidator.exe -t -V SsaoBlurShader.vert -IUtils/ -o Spv/SsaoBlurShader.vert.spv
+glslangValidator.exe -t -V SsaoBlurShader.frag -IUtils/ -o Spv/SsaoBlurShader.frag.spv
+
+glslangValidator.exe -t -V SsaoShader.vert -IUtils/ -o Spv/SsaoShader.vert.spv
+glslangValidator.exe -t -V SsaoShader.frag -IUtils/ -o Spv/SsaoShader.frag.spv
 
 glslangValidator.exe -t -V PresentShader.vert -IUtils/ -o Spv/PresentShader.vert.spv
 glslangValidator.exe -t -V PresentShader.frag -IUtils/ -o Spv/PresentShader.frag.spv

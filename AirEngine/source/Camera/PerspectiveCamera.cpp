@@ -47,6 +47,7 @@ AirEngine::Camera::PerspectiveCamera::PerspectiveCamera(std::vector<std::string>
     , fovAngle(60)
 {
     nearFlat = 0.5f;
+
 }
 
 AirEngine::Camera::PerspectiveCamera::~PerspectiveCamera()
