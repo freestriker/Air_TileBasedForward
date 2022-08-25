@@ -2,10 +2,10 @@
 #include "Core/Graphic/RenderPass/RenderPassBase.h"
 #include "Asset/TextureCube.h"
 #define NOISE_IMAGE_WIDTH 64
-#define SAMPLE_KERNAL_SIZE 64
+#define SAMPLE_KERNAL_SIZE 32
 #define SAMPLE_BIAS_ANGLE 20
-#define SAMPLE_KERNAL_RADIUS 0.6f
-#define BLUR_SAMPLE_OFFSET_FACTOR 1.7f
+#define SAMPLE_KERNAL_RADIUS 1.0f
+#define BLUR_SAMPLE_OFFSET_FACTOR 1.5f
 
 namespace AirEngine
 {
@@ -87,6 +87,11 @@ namespace AirEngine
 						alignas(4) float radius;
 						alignas(16) glm::vec4 points[SAMPLE_KERNAL_SIZE];
 					};
+					struct BlendInfo
+					{
+						alignas(8)	glm::vec2 attachmentSize;
+						alignas(8)	glm::vec2 attachmentTexelSize;
+					};
 					RenderPass::RenderPassBase* _occlusionRenderPass;
 					RenderPass::RenderPassBase* _blurRenderPass;
 					Command::CommandBuffer* _renderCommandBuffer;
@@ -108,6 +113,7 @@ namespace AirEngine
 					Manager::RenderPassTarget* _verticalBlurRenderPassTarget;
 					Instance::Buffer* _sampleKernalBuffer;
 					Instance::Buffer* _sizeInfoBuffer;
+					Instance::Buffer* _blendInfoBuffer;
 					Instance::Buffer* _horizontalBlurInfoBuffer;
 					Instance::Buffer* _verticalBlurInfoBuffer;
 					void OnPopulateRenderPassSettings(RenderPassSettings& creator)override;

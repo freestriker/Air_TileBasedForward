@@ -78,6 +78,11 @@ void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnPrepare(Camera::Cam
 		VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 		VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 	};
+	_blendInfoBuffer = new Instance::Buffer{
+		sizeof(BlendInfo),
+		VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+	};
 	_horizontalBlurInfoBuffer = new Instance::Buffer{
 		sizeof(BlurInfo),
 		VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
@@ -97,6 +102,14 @@ void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnPrepare(Camera::Cam
 			sizeInfo->scale = sizeInfo->attachmentSize / sizeInfo->noiseTextureSize;
 		}
 	);
+	_blendInfoBuffer->WriteData(
+		[extent](void* ptr)->void
+		{
+			BlendInfo* sizeInfo = reinterpret_cast<BlendInfo*>(ptr);
+			sizeInfo->attachmentSize = glm::vec2(extent.width, extent.height);
+			sizeInfo->attachmentTexelSize = glm::vec2(1.0 / extent.width, 1.0 / extent.height);
+		}
+	);
 	_horizontalBlurInfoBuffer->WriteData(
 		[this](void* ptr)->void
 		{
@@ -109,7 +122,7 @@ void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnPrepare(Camera::Cam
 	_verticalBlurInfoBuffer->WriteData(
 		[this](void* ptr)->void
 		{
-		BlurInfo* sizeInfo = reinterpret_cast<BlurInfo*>(ptr);
+			BlurInfo* sizeInfo = reinterpret_cast<BlurInfo*>(ptr);
 			sizeInfo->attachmentSize = glm::vec2(_occlusionImage->VkExtent3D_().width, _occlusionImage->VkExtent3D_().height);
 			sizeInfo->attachmentTexelSize = glm::vec2(1.0 / _occlusionImage->VkExtent3D_().width, 1.0 / _occlusionImage->VkExtent3D_().height);
 			sizeInfo->sampleOffset = glm::vec2(0, 1) * BLUR_SAMPLE_OFFSET_FACTOR;
@@ -136,6 +149,7 @@ void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnPrepare(Camera::Cam
 	if (_occlusionMaterial == nullptr)
 	{
 		_occlusionMaterial = new Core::Graphic::Material(Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Shader>("..\\Asset\\Shader\\SsaoOcclusionShader.shader"));
+		_blendMaterial = new Core::Graphic::Material(Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Shader>("..\\Asset\\Shader\\SsaoShader.shader"));
 		_verticalBlurMaterial = new Core::Graphic::Material(Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Shader>("..\\Asset\\Shader\\SsaoBlurShader.shader"));
 		_horizontalBlurMaterial = new Core::Graphic::Material(Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Shader>("..\\Asset\\Shader\\SsaoBlurShader.shader"));
 	}
@@ -402,6 +416,35 @@ void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnPopulateCommandBuff
 		}
 	}
 
+	///Blend
+	{
+		///Change layout
+		{
+			auto attachmentBarrier = Command::ImageMemoryBarrier
+			(
+				camera->RenderPassTarget()->Attachment("ColorAttachment"),
+				VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+				VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+				VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+				VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
+			);
+			_renderCommandBuffer->AddPipelineImageBarrier(
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+				{ &attachmentBarrier }
+			);
+		}
+
+		_blendMaterial->SetUniformBuffer("blendInfo", _blendInfoBuffer);
+		_blendMaterial->SetSlotData("occlusionTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _occlusionTextureSampler->VkSampler_(), _occlusionImage->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
+
+		_renderCommandBuffer->BeginRenderPass(this, camera->RenderPassTarget());
+
+		_renderCommandBuffer->BindMaterial(_blendMaterial);
+		_renderCommandBuffer->DrawMesh(_fullScreenMesh);
+
+		_renderCommandBuffer->EndRenderPass();
+	}
+
 	_renderCommandBuffer->EndRecord();
 }
 
@@ -420,6 +463,7 @@ void AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::OnClear()
 	delete _occlusionImage;
 	delete _temporaryOcclusionImage;
 	delete _sizeInfoBuffer;
+	delete _blendInfoBuffer;
 	delete _horizontalBlurInfoBuffer;
 	delete _verticalBlurInfoBuffer;
 
@@ -452,6 +496,7 @@ AirEngine::Core::Graphic::RenderPass::SsaoRenderPass::SsaoRenderPass()
 	, _verticalBlurInfoBuffer(nullptr)
 	, _temporaryOcclusionImage(nullptr)
 	, _occlusionTextureSampler(nullptr)
+	, _blendInfoBuffer(nullptr)
 {
 	_fullScreenMesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\BackgroundMesh.ply");
 

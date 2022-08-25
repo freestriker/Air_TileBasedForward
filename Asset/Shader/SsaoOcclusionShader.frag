@@ -4,7 +4,7 @@
 #include "Camera.glsl"
 #include "Object.glsl"
 
-#define SAMPLE_KERNAL_SIZE 64
+#define SAMPLE_KERNAL_SIZE 32
 #define PI (acos(-1.0))
 
 layout(set = 0, binding = 0) uniform _CameraInfo
