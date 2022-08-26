@@ -387,8 +387,8 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::BeginRenderPass(Graphic::
 
     _commandData.viewport.x = 0.0f;
     _commandData.viewport.y = 0.0f;
-    _commandData.viewport.width = renderPassObject->Extent().width;
-    _commandData.viewport.height = renderPassObject->Extent().height;
+    _commandData.viewport.width = static_cast<float>(renderPassObject->Extent().width);
+    _commandData.viewport.height = static_cast<float>(renderPassObject->Extent().height);
     _commandData.viewport.minDepth = 0.0f;
     _commandData.viewport.maxDepth = 1.0f;
 

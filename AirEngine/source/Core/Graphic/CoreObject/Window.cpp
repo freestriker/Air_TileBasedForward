@@ -157,6 +157,7 @@ void AirEngine::Core::Graphic::CoreObject::Window::Start()
     _window->setVulkanInstance(_qVulkanInstance);
     _window->setDeviceExtensions(QByteArrayList()
         << "VK_EXT_shader_atomic_float"
+        << VK_KHR_MAINTENANCE1_EXTENSION_NAME
     );
     auto queuePrioritieMapPtr = new std::map<uint32_t, std::vector<float>>();
     _window->setQueueCreateInfoModifier([](const VkQueueFamilyProperties* properties, uint32_t queueFamilyCount, QList<VkDeviceQueueCreateInfo>& infos)->void
