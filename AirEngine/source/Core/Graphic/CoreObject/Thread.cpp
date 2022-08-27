@@ -243,10 +243,11 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 		Instance::MemoryManager().Collect();
 		Instance::DescriptorSetManager().Collect();
 
-		
+		Instance::NewRenderPassManager().Collect();
 	}
 	Instance::MemoryManager().Collect();
 	Instance::DescriptorSetManager().Collect();
+	Instance::NewRenderPassManager().Collect();
 }
 
 void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnEnd()

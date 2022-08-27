@@ -37,13 +37,14 @@ namespace AirEngine
 			namespace Manager
 			{
 				class RenderPassManager;
+				class NewRenderPassManager;
 				class RenderPassTarget;
 			}
 			namespace Rendering
 			{
 				class RenderPassBase: public Core::Logic::Object::Object
 				{
-					friend class Manager::RenderPassManager;
+					friend class Manager::NewRenderPassManager;
 					friend class CoreObject::Instance;
 					friend class CoreObject::Thread;
 				public:
@@ -101,7 +102,6 @@ namespace AirEngine
 					std::map<std::string, uint32_t> _subPassIndexMap;
 					std::map<std::string, std::map<std::string, uint32_t>> _colorAttachmentIndexMaps;
 					std::map<std::string, std::map<std::string, uint32_t>> _depthAttachmentMap;
-					void CreateRenderPass();
 				protected:
 					RenderPassBase();
 					virtual ~RenderPassBase();

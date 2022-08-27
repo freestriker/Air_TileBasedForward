@@ -28,6 +28,7 @@ namespace AirEngine
 			{
 				class MemoryManager;
 				class RenderPassManager;
+				class NewRenderPassManager;
 				class DescriptorSetManager;
 				class LightManager;
 			}
@@ -59,6 +60,7 @@ namespace AirEngine
 
 					static Manager::MemoryManager* _memoryManager;
 					static Manager::RenderPassManager* _renderPassManager;
+					static Manager::NewRenderPassManager* _newRenderPassManager;
 					static Manager::DescriptorSetManager* _descriptorSetManager;
 					static Manager::LightManager* _lightManager;
 
@@ -83,6 +85,7 @@ namespace AirEngine
 
 					static Manager::MemoryManager& MemoryManager();
 					static Manager::RenderPassManager& RenderPassManager();
+					static Manager::NewRenderPassManager& NewRenderPassManager();
 					static Manager::DescriptorSetManager& DescriptorSetManager();
 					static Manager::LightManager& LightManager();
 

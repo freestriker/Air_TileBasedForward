@@ -170,6 +170,7 @@
     <ClCompile Include="source\Light\AmbientLight.cpp" />
     <ClCompile Include="source\Light\SpotLight.cpp" />
     <ClCompile Include="source\Renderer\Renderer.cpp" />
+    <ClCompile Include="source\Rendering\RenderPass\GeometryRenderPass.cpp" />
     <ClCompile Include="source\Test\AudioSourceBehaviour.cpp" />
     <ClCompile Include="source\Test\BackgroundRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\CameraMoveBehaviour.cpp" />
@@ -255,6 +256,7 @@
     <ClInclude Include="header\Light\AmbientLight.h" />
     <ClInclude Include="header\Light\SpotLight.h" />
     <ClInclude Include="header\Renderer\Renderer.h" />
+    <ClInclude Include="header\Rendering\RenderPass\GeometryRenderPass.h" />
     <ClInclude Include="header\Test\AudioSourceBehaviour.h" />
     <ClInclude Include="header\Test\BackgroundRendererBehaviour.h" />
     <ClInclude Include="header\Test\CameraMoveBehaviour.h" />

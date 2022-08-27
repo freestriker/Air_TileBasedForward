@@ -45,6 +45,7 @@
 #include "Test/AudioSourceBehaviour.h"
 #include "Core/Logic/Manager/InputManager.h"
 #include "Core/Graphic/RenderPass/SsaoRenderPass.h"
+#include "Rendering/RenderPass/GeometryRenderPass.h"
 
 AirEngine::Core::Logic::CoreObject::Thread::LogicThread AirEngine::Core::Logic::CoreObject::Thread::_logicThread = AirEngine::Core::Logic::CoreObject::Thread::LogicThread();
 
@@ -410,6 +411,12 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::TBF_OIT_ALL_SortBlendRenderPass());
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::PresentRenderPass());
 	Graphic::CoreObject::Instance::RenderPassManager().AddRenderPass(new Graphic::RenderPass::SsaoRenderPass());
+
+	//Graphic::CoreObject::Instance::NewRenderPassManager().LoadRenderPass("AirEngine::Rendering::RenderPass::GeometryRenderPass");
+	//Graphic::CoreObject::Instance::NewRenderPassManager().UnloadRenderPass("AirEngine::Rendering::RenderPass::GeometryRenderPass");
+
+	//Graphic::CoreObject::Instance::NewRenderPassManager().LoadRenderPass<Rendering::RenderPass::GeometryRenderPass>();
+	//Graphic::CoreObject::Instance::NewRenderPassManager().UnloadRenderPass<Rendering::RenderPass::GeometryRenderPass>();
 
 	//Camera
 	Object::GameObject* cameraGo = new Logic::Object::GameObject("Camera");
