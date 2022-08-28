@@ -92,6 +92,7 @@ namespace AirEngine
 			std::string RendererName();
 			void RefreshRenderer();
 		protected:
+			void InitRenderer(std::string rendererName);
 			CameraBase(CameraType cameraType, std::vector<std::string> renderPassNames, std::map<std::string, Core::Graphic::Instance::Image*> attachments);
 			virtual ~CameraBase();
 			virtual void OnSetParameter(glm::vec4& parameter);

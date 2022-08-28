@@ -98,7 +98,13 @@ std::string AirEngine::Camera::CameraBase::RendererName()
 
 void AirEngine::Camera::CameraBase::RefreshRenderer()
 {
-	Core::Graphic::CoreObject::Instance::RenderPipelineManager().DestroyRendererData(this);
+	Core::Graphic::CoreObject::Instance::RenderPipelineManager().RefreshRendererData(this);
+}
+
+void AirEngine::Camera::CameraBase::InitRenderer(std::string rendererName)
+{
+	_rendererName = rendererName;
+
 	Core::Graphic::CoreObject::Instance::RenderPipelineManager().CreateRendererData(this);
 }
 

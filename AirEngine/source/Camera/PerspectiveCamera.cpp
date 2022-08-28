@@ -50,6 +50,14 @@ AirEngine::Camera::PerspectiveCamera::PerspectiveCamera(std::vector<std::string>
 
 }
 
+AirEngine::Camera::PerspectiveCamera::PerspectiveCamera(std::vector<std::string> renderPassNames, std::map<std::string, Core::Graphic::Instance::Image*> attachments, std::string rendererName)
+    : CameraBase(CameraType::PERSPECTIVE, renderPassNames, attachments)
+    , fovAngle(60)
+{
+    nearFlat = 0.5f;
+    InitRenderer(rendererName);
+}
+
 AirEngine::Camera::PerspectiveCamera::~PerspectiveCamera()
 {
 }

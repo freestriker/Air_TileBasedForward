@@ -42,6 +42,13 @@ AirEngine::Camera::OrthographicCamera::OrthographicCamera(std::vector<std::strin
 {
 }
 
+AirEngine::Camera::OrthographicCamera::OrthographicCamera(std::vector<std::string> renderPassNames, std::map<std::string, Core::Graphic::Instance::Image*> attachments, std::string rendererName)
+	: CameraBase(CameraType::ORTHOGRAPHIC, renderPassNames, attachments)
+	, size(2.25f)
+{
+	InitRenderer(rendererName);
+}
+
 AirEngine::Camera::OrthographicCamera::~OrthographicCamera()
 {
 }
