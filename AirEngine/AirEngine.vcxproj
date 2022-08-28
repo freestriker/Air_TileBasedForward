@@ -110,6 +110,7 @@
     <ClCompile Include="source\Audio\AudioSource.cpp" />
     <ClCompile Include="source\Core\Audio\CoreObject\Thread.cpp" />
     <ClCompile Include="source\Core\Audio\CoreObject\Instance.cpp" />
+    <ClCompile Include="source\Core\Graphic\Rendering\FrameBuffer.cpp" />
     <ClCompile Include="source\Core\Graphic\Rendering\RenderPassBase.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\PresentRenderPass.cpp" />
     <ClCompile Include="source\Core\Graphic\RenderPass\SsaoRenderPass.cpp" />
@@ -224,6 +225,7 @@
     <ClInclude Include="header\Core\Graphic\Manager\MemoryManager.h" />
     <ClInclude Include="header\Core\Graphic\Manager\RenderPassManager.h" />
     <ClInclude Include="header\Core\Graphic\Material.h" />
+    <ClInclude Include="header\Core\Graphic\Rendering\FrameBuffer.h" />
     <ClInclude Include="header\Core\Graphic\Rendering\RenderPassBase.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\BackgroundRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\F_OpaqueRenderPass.h" />

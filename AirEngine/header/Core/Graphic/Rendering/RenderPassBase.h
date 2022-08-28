@@ -112,7 +112,7 @@ namespace AirEngine
 
 					virtual void OnPopulateRenderPassSettings(RenderPassSettings& creator) = 0;
 				public:
-					const RenderPassSettings& Settings();
+					const RenderPassSettings* Settings();
 					VkRenderPass VkRenderPass_();
 					uint32_t SubPassIndex(std::string subPassName);
 					const std::map<std::string, uint32_t>* ColorAttachmentIndexMap(std::string subPassName);

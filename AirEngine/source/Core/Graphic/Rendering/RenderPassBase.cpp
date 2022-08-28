@@ -89,6 +89,11 @@ AirEngine::Core::Graphic::Rendering::RenderPassBase::~RenderPassBase()
     vkDestroyRenderPass(CoreObject::Instance::VkDevice_(), _vkRenderPass, nullptr);
 }
 
+const AirEngine::Core::Graphic::Rendering::RenderPassBase::RenderPassSettings* AirEngine::Core::Graphic::Rendering::RenderPassBase::Settings()
+{
+    return &_settings;
+}
+
 VkRenderPass AirEngine::Core::Graphic::Rendering::RenderPassBase::VkRenderPass_()
 {
     return _vkRenderPass;
