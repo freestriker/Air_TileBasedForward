@@ -31,6 +31,7 @@ namespace AirEngine
 				class NewRenderPassManager;
 				class DescriptorSetManager;
 				class LightManager;
+				class RenderPipelineManager;
 			}
 			namespace CoreObject
 			{
@@ -63,6 +64,7 @@ namespace AirEngine
 					static Manager::NewRenderPassManager* _newRenderPassManager;
 					static Manager::DescriptorSetManager* _descriptorSetManager;
 					static Manager::LightManager* _lightManager;
+					static Manager::RenderPipelineManager* _renderPipelineManager;
 
 					static Utils::Condition* _startPresentCondition;
 					static Utils::Condition* _endPresentCondition;
@@ -88,6 +90,7 @@ namespace AirEngine
 					static Manager::NewRenderPassManager& NewRenderPassManager();
 					static Manager::DescriptorSetManager& DescriptorSetManager();
 					static Manager::LightManager& LightManager();
+					static Manager::RenderPipelineManager& RenderPipelineManager();
 
 					static Utils::Condition& StartPresentCondition();
 					static Utils::Condition& EndPresentCondition();

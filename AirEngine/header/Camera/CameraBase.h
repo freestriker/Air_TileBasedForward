@@ -71,6 +71,7 @@ namespace AirEngine
 			float aspectRatio;
 		protected:
 		private:
+			std::string _rendererName;
 			Core::Graphic::Instance::Buffer* _buffer;
 			CameraData _cameraInfo;
 			glm::mat4 _projectionMatrix;
@@ -86,6 +87,10 @@ namespace AirEngine
 			void RefreshRenderPassObject();
 			bool CheckInFrustum(std::array<glm::vec3, 8>& vertexes, glm::mat4& matrix);
 			Core::Graphic::Manager::RenderPassTarget* RenderPassTarget();
+
+			void SetRendererName(std::string rendererName);
+			std::string RendererName();
+			void RefreshRenderer();
 		protected:
 			CameraBase(CameraType cameraType, std::vector<std::string> renderPassNames, std::map<std::string, Core::Graphic::Instance::Image*> attachments);
 			virtual ~CameraBase();

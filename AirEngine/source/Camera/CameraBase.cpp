@@ -12,6 +12,7 @@
 #include "Core/Graphic/Instance/ImageSampler.h"
 #include "Core/Graphic/CoreObject/Instance.h"
 #include "Core/Graphic/Manager/RenderPassManager.h"
+#include "Core/Graphic/Manager/RenderPipelineManager.h"
 
 AirEngine::Camera::CameraBase* AirEngine::Camera::CameraBase::mainCamera = nullptr;
 
@@ -82,6 +83,25 @@ AirEngine::Core::Graphic::Manager::RenderPassTarget* AirEngine::Camera::CameraBa
 	return _renderPassTarget;
 }
 
+void AirEngine::Camera::CameraBase::SetRendererName(std::string rendererName)
+{
+	_rendererName = rendererName;
+
+	Core::Graphic::CoreObject::Instance::RenderPipelineManager().DestroyRendererData(this);
+	Core::Graphic::CoreObject::Instance::RenderPipelineManager().CreateRendererData(this);
+}
+
+std::string AirEngine::Camera::CameraBase::RendererName()
+{
+	return _rendererName;
+}
+
+void AirEngine::Camera::CameraBase::RefreshRenderer()
+{
+	Core::Graphic::CoreObject::Instance::RenderPipelineManager().DestroyRendererData(this);
+	Core::Graphic::CoreObject::Instance::RenderPipelineManager().CreateRendererData(this);
+}
+
 AirEngine::Camera::CameraBase::CameraBase(CameraType cameraType, std::vector<std::string> renderPassNames, std::map<std::string, Core::Graphic::Instance::Image*> attachments)
 	: Component(ComponentType::CAMERA)
 	, attachments(attachments)
@@ -95,6 +115,7 @@ AirEngine::Camera::CameraBase::CameraBase(CameraType cameraType, std::vector<std
 	, _projectionMatrix(glm::mat4(1.0f))
 	, _intersectionChecker()
 	, _buffer(new Core::Graphic::Instance::Buffer(sizeof(CameraData), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
+	, _rendererName()
 {
 	RefreshRenderPassObject();
 }

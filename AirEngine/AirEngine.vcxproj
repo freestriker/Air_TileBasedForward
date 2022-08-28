@@ -105,6 +105,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Core\Graphic\Manager\RenderPipelineManager.cpp" />
+    <ClCompile Include="source\Core\Graphic\Rendering\RendererBase.cpp" />
+    <ClCompile Include="source\Core\Graphic\Rendering\RenderFeatureBase.cpp" />
+    <ClCompile Include="source\Core\Graphic\Rendering\RenderPipelineBase.cpp" />
     <ClCompile Include="source\Asset\AudioClip.cpp" />
     <ClCompile Include="source\Audio\AudioListener.cpp" />
     <ClCompile Include="source\Audio\AudioSource.cpp" />
@@ -224,9 +228,13 @@
     <ClInclude Include="header\Core\Graphic\Manager\LightManager.h" />
     <ClInclude Include="header\Core\Graphic\Manager\MemoryManager.h" />
     <ClInclude Include="header\Core\Graphic\Manager\RenderPassManager.h" />
+    <ClInclude Include="header\Core\Graphic\Manager\RenderPipelineManager.h" />
     <ClInclude Include="header\Core\Graphic\Material.h" />
     <ClInclude Include="header\Core\Graphic\Rendering\FrameBuffer.h" />
+    <ClInclude Include="header\Core\Graphic\Rendering\RendererBase.h" />
+    <ClInclude Include="header\Core\Graphic\Rendering\RenderFeatureBase.h" />
     <ClInclude Include="header\Core\Graphic\Rendering\RenderPassBase.h" />
+    <ClInclude Include="header\Core\Graphic\Rendering\RenderPipelineBase.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\BackgroundRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\F_OpaqueRenderPass.h" />
     <ClInclude Include="header\Core\Graphic\RenderPass\PresentRenderPass.h" />
