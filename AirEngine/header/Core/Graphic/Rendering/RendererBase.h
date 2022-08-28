@@ -47,7 +47,7 @@ namespace AirEngine
 					RendererBase(RendererBase&&) = delete;
 					RendererBase& operator=(RendererBase&&) = delete; 
 
-					virtual RendererDataBase* OnCreateRendererData() = 0;
+					virtual RendererDataBase* OnCreateRendererData(Camera::CameraBase* camera) = 0;
 					virtual void OnResolveRendererData(RendererDataBase* rendererData, Camera::CameraBase* camera) = 0;
 					virtual void OnDestroyRendererData(RendererDataBase* rendererData) = 0;
 

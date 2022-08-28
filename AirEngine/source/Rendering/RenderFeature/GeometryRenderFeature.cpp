@@ -88,12 +88,32 @@ AirEngine::Rendering::RenderFeature::GeometryRenderFeature::~GeometryRenderFeatu
 {
 }
 
-AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering::RenderFeature::GeometryRenderFeature::OnCreateRenderFeatureData()
+AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering::RenderFeature::GeometryRenderFeature::OnCreateRenderFeatureData(Camera::CameraBase* camera)
 {
 	return new GeometryRenderFeatureData();
+}
+
+void AirEngine::Rendering::RenderFeature::GeometryRenderFeature::OnResolveRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera)
+{
 }
 
 void AirEngine::Rendering::RenderFeature::GeometryRenderFeature::OnDestroyRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)
 {
 	delete static_cast<GeometryRenderFeatureData*>(renderFeatureData);
+}
+
+void AirEngine::Rendering::RenderFeature::GeometryRenderFeature::OnPrepare(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)
+{
+}
+
+void AirEngine::Rendering::RenderFeature::GeometryRenderFeature::OnExcute(Camera::CameraBase* camera, Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer, std::vector<Renderer::Renderer*> const* rendererComponents)
+{
+}
+
+void AirEngine::Rendering::RenderFeature::GeometryRenderFeature::OnSubmit(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer)
+{
+}
+
+void AirEngine::Rendering::RenderFeature::GeometryRenderFeature::OnFinish(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)
+{
 }

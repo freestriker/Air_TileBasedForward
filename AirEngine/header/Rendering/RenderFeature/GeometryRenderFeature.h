@@ -46,8 +46,15 @@ namespace AirEngine
 				GeometryRenderFeature(GeometryRenderFeature&&) = delete;
 				GeometryRenderFeature& operator=(GeometryRenderFeature&&) = delete;
 
-				virtual Core::Graphic::Rendering::RenderFeatureDataBase* OnCreateRenderFeatureData()override;
-				virtual void OnDestroyRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)override;
+			private:
+				Core::Graphic::Rendering::RenderFeatureDataBase* OnCreateRenderFeatureData(Camera::CameraBase* camera)override;
+				void OnResolveRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera)override;
+				void OnDestroyRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)override;
+
+				void OnPrepare(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)override;
+				void OnExcute(Camera::CameraBase* camera, Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer, std::vector<AirEngine::Renderer::Renderer*>const* rendererComponents)override;
+				void OnSubmit(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer)override;
+				void OnFinish(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)override;
 
 				RTTR_ENABLE(Core::Graphic::Rendering::RenderFeatureBase)
 			};

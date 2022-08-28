@@ -37,7 +37,7 @@ AirEngine::Rendering::Renderer::ForwardRenderer::ForwardRendererData::~ForwardRe
 {
 }
 
-AirEngine::Core::Graphic::Rendering::RendererDataBase* AirEngine::Rendering::Renderer::ForwardRenderer::OnCreateRendererData()
+AirEngine::Core::Graphic::Rendering::RendererDataBase* AirEngine::Rendering::Renderer::ForwardRenderer::OnCreateRendererData(Camera::CameraBase* camera)
 {
 	return new ForwardRendererData();
 }

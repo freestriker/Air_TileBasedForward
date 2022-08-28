@@ -31,7 +31,7 @@ namespace AirEngine
 				ForwardRenderer& operator=(ForwardRenderer&&) = delete;
 
 			private:
-				virtual Core::Graphic::Rendering::RendererDataBase* OnCreateRendererData()override;
+				virtual Core::Graphic::Rendering::RendererDataBase* OnCreateRendererData(Camera::CameraBase* camera)override;
 				virtual void OnResolveRendererData(Core::Graphic::Rendering::RendererDataBase* rendererData, Camera::CameraBase* camera)override;
 				virtual void OnDestroyRendererData(Core::Graphic::Rendering::RendererDataBase* rendererData)override;
 

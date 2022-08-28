@@ -40,14 +40,17 @@ void AirEngine::Core::Graphic::Rendering::RendererBase::UseRenderFeature(std::st
 
 AirEngine::Core::Graphic::Rendering::RendererDataBase* AirEngine::Core::Graphic::Rendering::RendererBase::CreateRendererData(Camera::CameraBase* camera)
 {
-	AirEngine::Core::Graphic::Rendering::RendererDataBase* rendererData = OnCreateRendererData();
+	AirEngine::Core::Graphic::Rendering::RendererDataBase* rendererData = OnCreateRendererData(camera);
 	for (const auto& renderFeaturePair : _renderFeatures)
 	{
-		rendererData->_renderFeatureDatas[renderFeaturePair.first] = renderFeaturePair.second->OnCreateRenderFeatureData();
+		rendererData->_renderFeatureDatas[renderFeaturePair.first] = renderFeaturePair.second->OnCreateRenderFeatureData(camera);
 	}
 
 	OnResolveRendererData(rendererData, camera);
-
+	for (const auto& renderFeaturePair : _renderFeatures)
+	{
+		renderFeaturePair.second->OnResolveRenderFeatureData(rendererData->_renderFeatureDatas[renderFeaturePair.first], camera);
+	}
 	return rendererData;
 }
 
