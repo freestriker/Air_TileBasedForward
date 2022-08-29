@@ -37,14 +37,12 @@ namespace AirEngine
 			namespace Manager
 			{
 				class RenderPassManager;
-				class NewRenderPassManager;
-				class RenderPassTarget;
 			}
 			namespace Rendering
 			{
 				class RenderPassBase: public Core::Logic::Object::Object
 				{
-					friend class Manager::NewRenderPassManager;
+					friend class Manager::RenderPassManager;
 					friend class CoreObject::Instance;
 					friend class CoreObject::Thread;
 				public:

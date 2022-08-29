@@ -16,7 +16,6 @@ VkDevice AirEngine::Core::Graphic::CoreObject::Instance::_vkDevice = VK_NULL_HAN
 
 AirEngine::Core::Graphic::Manager::MemoryManager* AirEngine::Core::Graphic::CoreObject::Instance::_memoryManager = nullptr;
 AirEngine::Core::Graphic::Manager::RenderPassManager* AirEngine::Core::Graphic::CoreObject::Instance::_renderPassManager = nullptr;
-AirEngine::Core::Graphic::Manager::NewRenderPassManager* AirEngine::Core::Graphic::CoreObject::Instance::_newRenderPassManager = nullptr;
 AirEngine::Core::Graphic::Manager::DescriptorSetManager* AirEngine::Core::Graphic::CoreObject::Instance::_descriptorSetManager = nullptr;
 AirEngine::Core::Graphic::Manager::LightManager* AirEngine::Core::Graphic::CoreObject::Instance::_lightManager = nullptr;
 AirEngine::Core::Graphic::Manager::RenderPipelineManager* AirEngine::Core::Graphic::CoreObject::Instance::_renderPipelineManager = nullptr;
@@ -68,11 +67,6 @@ AirEngine::Core::Graphic::Manager::MemoryManager& AirEngine::Core::Graphic::Core
 AirEngine::Core::Graphic::Manager::RenderPassManager& AirEngine::Core::Graphic::CoreObject::Instance::RenderPassManager()
 {
 	return *_renderPassManager;
-}
-
-AirEngine::Core::Graphic::Manager::NewRenderPassManager& AirEngine::Core::Graphic::CoreObject::Instance::NewRenderPassManager()
-{
-	return *_newRenderPassManager;
 }
 
 AirEngine::Core::Graphic::Manager::DescriptorSetManager& AirEngine::Core::Graphic::CoreObject::Instance::DescriptorSetManager()
@@ -168,7 +162,6 @@ void AirEngine::Core::Graphic::CoreObject::Instance::Init()
 
 	_memoryManager = new AirEngine::Core::Graphic::Manager::MemoryManager(32 * 1024 * 1024);
 	_renderPassManager = new AirEngine::Core::Graphic::Manager::RenderPassManager();
-	_newRenderPassManager = new AirEngine::Core::Graphic::Manager::NewRenderPassManager();
 	_descriptorSetManager = new AirEngine::Core::Graphic::Manager::DescriptorSetManager();
 	_lightManager = new AirEngine::Core::Graphic::Manager::LightManager();
 	_renderPipelineManager = new AirEngine::Core::Graphic::Manager::RenderPipelineManager();
@@ -177,6 +170,8 @@ void AirEngine::Core::Graphic::CoreObject::Instance::Init()
 	_endPresentCondition = new Utils::Condition();
 	_startRenderCondition = new Utils::Condition();
 	_endRenderCondition = new Utils::Condition();
+
+
 }
 
 AirEngine::Core::Graphic::CoreObject::Queue::Queue(std::string name, uint32_t queueFamilyIndex, VkQueue queue)

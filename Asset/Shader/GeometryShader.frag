@@ -5,9 +5,11 @@
 
 layout(location = 0) in vec3 inViewNormal;
 
-layout(location = 0) out vec4 NormalAttachment;
+layout(location = 0) out float DepthTexture;
+layout(location = 1) out vec3 NormalTexture;
 
 void main() 
 {
-    NormalAttachment = vec4(ParseToColor(normalize(inViewNormal)), 1);
+    DepthTexture = gl_FragCoord.z;
+    NormalTexture = ParseToColor(normalize(inViewNormal)).rgb;
 }

@@ -29,10 +29,6 @@ namespace AirEngine
 				class CommandBuffer;
 				class CommandPool;
 			}
-			namespace Manager
-			{
-				class RenderPassTarget;
-			}
 			namespace RenderPass
 			{
 				class SsaoOcclusionRenderPass final : public RenderPassBase
@@ -108,9 +104,6 @@ namespace AirEngine
 					Instance::ImageSampler* _normalTextureSampler;
 					Instance::ImageSampler* _depthTextureSampler;
 					Instance::ImageSampler* _occlusionTextureSampler;
-					Manager::RenderPassTarget* _occlusionRenderPassTarget;
-					Manager::RenderPassTarget* _horizontalBlurRenderPassTarget;
-					Manager::RenderPassTarget* _verticalBlurRenderPassTarget;
 					Instance::Buffer* _sampleKernalBuffer;
 					Instance::Buffer* _sizeInfoBuffer;
 					Instance::Buffer* _blendInfoBuffer;

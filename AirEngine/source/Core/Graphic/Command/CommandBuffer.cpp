@@ -5,14 +5,15 @@
 #include "Core/Graphic/Instance/Buffer.h"
 #include "Core/Graphic/Instance/Image.h"
 #include "Core/Graphic/Command/Semaphore.h"
-#include "Core/Graphic/Shader.h"
-#include "Core/Graphic/Material.h"
 #include "Core/Graphic/Command/ImageMemoryBarrier.h"
 #include "Core/Graphic/Command/BufferMemoryBarrier.h"
 #include "Asset/Mesh.h"
 #include "Core/Graphic/RenderPass/RenderPassBase.h"
 #include "Core/Graphic/Manager/RenderPassManager.h"
-#include "Core/Graphic/Instance/FrameBuffer.h"
+#include "Core/Graphic/Rendering/FrameBuffer.h"
+#include "Core/Graphic/Rendering/RenderPassBase.h"
+#include "Core/Graphic/Rendering/Material.h"
+#include "Core/Graphic/Rendering/Shader.h"
 
 AirEngine::Core::Graphic::Command::CommandBuffer::CommandBuffer(std::string name, CommandPool* parentCommandPool, VkCommandBufferLevel level)
     : _name(name)
@@ -332,12 +333,12 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::WaitForFinish()
     Utils::Log::Exception("Failed to wait command buffer called: " + _name + ".", vkWaitForFences(Graphic::CoreObject::Instance::VkDevice_(), 1, &_vkFence, VK_TRUE, UINT64_MAX));
 }
 
-void AirEngine::Core::Graphic::Command::CommandBuffer::BeginRenderPass(Graphic::RenderPass::RenderPassBase* renderPass, Graphic::Manager::RenderPassTarget* renderPassObject, std::map<std::string, VkClearValue> clearValues)
+void AirEngine::Core::Graphic::Command::CommandBuffer::BeginRenderPass(Graphic::Rendering::RenderPassBase* renderPass, Graphic::Rendering::FrameBuffer* frameBuffer, std::map<std::string, VkClearValue> clearValues)
 {
-    std::vector< VkClearValue> attachmentClearValues = std::vector< VkClearValue>(renderPass->Settings().attchmentDescriptors.size());
+    std::vector< VkClearValue> attachmentClearValues = std::vector< VkClearValue>(renderPass->Settings()->attchmentDescriptors.size());
     {
         size_t i = 0;
-        for (const auto& attachment : renderPass->Settings().attchmentDescriptors)
+        for (const auto& attachment : renderPass->Settings()->attchmentDescriptors)
         {
             if (clearValues.count(attachment.first))
             {
@@ -349,51 +350,51 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::BeginRenderPass(Graphic::
             }
         }
     }
-
+    
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = renderPass->VkRenderPass_();
-    renderPassInfo.framebuffer = renderPassObject->FrameBuffer(renderPass->Name())->VkFramebuffer_();
+    renderPassInfo.framebuffer = frameBuffer->VkFramebuffer_();
     renderPassInfo.renderArea.offset = { 0, 0 };
-    renderPassInfo.renderArea.extent = renderPassObject->Extent();
+    renderPassInfo.renderArea.extent = frameBuffer->Extent2D();
     renderPassInfo.clearValueCount = static_cast<uint32_t>(attachmentClearValues.size());
     renderPassInfo.pClearValues = attachmentClearValues.data();
 
     _commandData.viewport.x = 0.0f;
-    _commandData.viewport.y = 0.0f;
-    _commandData.viewport.width = renderPassObject->Extent().width;
-    _commandData.viewport.height = renderPassObject->Extent().height;
+    _commandData.viewport.y = static_cast<float>(frameBuffer->Extent2D().height);
+    _commandData.viewport.width = static_cast<float>(frameBuffer->Extent2D().width);
+    _commandData.viewport.height = -static_cast<float>(frameBuffer->Extent2D().height);
     _commandData.viewport.minDepth = 0.0f;
     _commandData.viewport.maxDepth = 1.0f;
 
     _commandData.scissor.offset = { 0, 0 };
-    _commandData.scissor.extent = renderPassObject->Extent();
+    _commandData.scissor.extent = frameBuffer->Extent2D();
 
     vkCmdBeginRenderPass(_vkCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
     vkCmdSetViewport(_vkCommandBuffer, 0, 1, &_commandData.viewport);
     vkCmdSetScissor(_vkCommandBuffer, 0, 1, &_commandData.scissor);
 }
 
-void AirEngine::Core::Graphic::Command::CommandBuffer::BeginRenderPass(Graphic::RenderPass::RenderPassBase* renderPass, Graphic::Manager::RenderPassTarget* renderPassObject)
+void AirEngine::Core::Graphic::Command::CommandBuffer::BeginRenderPass(Graphic::Rendering::RenderPassBase* renderPass, Graphic::Rendering::FrameBuffer* frameBuffer)
 {
     VkRenderPassBeginInfo renderPassInfo{};
     renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
     renderPassInfo.renderPass = renderPass->VkRenderPass_();
-    renderPassInfo.framebuffer = renderPassObject->FrameBuffer(renderPass->Name())->VkFramebuffer_();
+    renderPassInfo.framebuffer = frameBuffer->VkFramebuffer_();
     renderPassInfo.renderArea.offset = { 0, 0 };
-    renderPassInfo.renderArea.extent = renderPassObject->Extent();
+    renderPassInfo.renderArea.extent = frameBuffer->Extent2D();
     renderPassInfo.clearValueCount = 0;
     renderPassInfo.pClearValues = nullptr;
 
     _commandData.viewport.x = 0.0f;
-    _commandData.viewport.y = 0.0f;
-    _commandData.viewport.width = static_cast<float>(renderPassObject->Extent().width);
-    _commandData.viewport.height = static_cast<float>(renderPassObject->Extent().height);
+    _commandData.viewport.y = static_cast<float>(frameBuffer->Extent2D().height);
+    _commandData.viewport.width = static_cast<float>(frameBuffer->Extent2D().width);
+    _commandData.viewport.height = -static_cast<float>(frameBuffer->Extent2D().height);
     _commandData.viewport.minDepth = 0.0f;
     _commandData.viewport.maxDepth = 1.0f;
 
     _commandData.scissor.offset = { 0, 0 };
-    _commandData.scissor.extent = renderPassObject->Extent();
+    _commandData.scissor.extent = frameBuffer->Extent2D();
 
     vkCmdBeginRenderPass(_vkCommandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
     vkCmdSetViewport(_vkCommandBuffer, 0, 1, &_commandData.viewport);
@@ -405,8 +406,19 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::EndRenderPass()
     vkCmdEndRenderPass(_vkCommandBuffer);
 }
 
-void AirEngine::Core::Graphic::Command::CommandBuffer::DrawMesh(Asset::Mesh* mesh)
+void AirEngine::Core::Graphic::Command::CommandBuffer::DrawMesh(Asset::Mesh* mesh, Rendering::Material* material)
 {
+    auto sets = material->VkDescriptorSets();
+    if (material->Shader()->ShaderType_() == Rendering::Shader::ShaderType::GRAPHIC)
+    {
+        vkCmdBindPipeline(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->Shader()->VkPipeline_());
+        vkCmdBindDescriptorSets(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->PipelineLayout(), 0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
+    }
+    else if (material->Shader()->ShaderType_() == Rendering::Shader::ShaderType::COMPUTE)
+    {
+        vkCmdBindPipeline(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, material->Shader()->VkPipeline_());
+        vkCmdBindDescriptorSets(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, material->PipelineLayout(), 0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
+    }
     VkBuffer vertexBuffers[] = { mesh->VertexBuffer().VkBuffer_() };
     VkDeviceSize offsets[] = { 0 };
     vkCmdBindVertexBuffers(_vkCommandBuffer, 0, 1, vertexBuffers, offsets);
@@ -417,21 +429,6 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::DrawMesh(Asset::Mesh* mes
 void AirEngine::Core::Graphic::Command::CommandBuffer::Dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ)
 {
     vkCmdDispatch(_vkCommandBuffer, groupCountX, groupCountY, groupCountZ);
-}
-
-void AirEngine::Core::Graphic::Command::CommandBuffer::BindMaterial(Material* material)
-{
-    auto sets = material->VkDescriptorSets();
-    if (material->Shader()->ShaderType_() == Shader::ShaderType::GRAPHIC)
-    {
-        vkCmdBindPipeline(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->Shader()->VkPipeline_());
-        vkCmdBindDescriptorSets(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->PipelineLayout(), 0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
-    }
-    else if (material->Shader()->ShaderType_() == Shader::ShaderType::COMPUTE)
-    {
-        vkCmdBindPipeline(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, material->Shader()->VkPipeline_());
-        vkCmdBindDescriptorSets(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, material->PipelineLayout(), 0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
-    }
 }
 
 void AirEngine::Core::Graphic::Command::CommandBuffer::Blit(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Image* dstImage, VkImageLayout dstImageLayout, VkFilter filter)

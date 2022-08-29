@@ -47,7 +47,7 @@ void AirEngine::Core::Graphic::Rendering::RendererBase::PrepareRenderFeature(std
 	_renderFeatures[renderFeatureName]->OnPrepare(rendererData->RenderFeatureData(renderFeatureName));
 }
 
-void AirEngine::Core::Graphic::Rendering::RendererBase::ExcuteRenderFeature(std::string renderFeatureName, Camera::CameraBase* camera, RendererDataBase* rendererData, std::vector<Renderer::Renderer*> const* rendererComponents)
+void AirEngine::Core::Graphic::Rendering::RendererBase::ExcuteRenderFeature(std::string renderFeatureName, RendererDataBase* rendererData, Camera::CameraBase* camera, std::vector<Renderer::Renderer*> const* rendererComponents)
 {
 	RendererDataBase::RenderFeatureWrapper* wrapper = &rendererData->_renderFeatureWrappers[renderFeatureName];
 	auto renderFeature = _renderFeatures[renderFeatureName];
@@ -56,7 +56,7 @@ void AirEngine::Core::Graphic::Rendering::RendererBase::ExcuteRenderFeature(std:
 		[camera, rendererComponents, renderFeature, wrapper](Command::CommandPool* graphicCommandPool, Command::CommandPool* computeCommandPool) -> void 
 		{
 			wrapper->commandBuffer = graphicCommandPool->CreateCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
-			renderFeature->OnExcute(camera, wrapper->renderFeatureData, wrapper->commandBuffer, rendererComponents);
+			renderFeature->OnExcute(wrapper->renderFeatureData, wrapper->commandBuffer, camera, rendererComponents);
 		}
 	);
 }

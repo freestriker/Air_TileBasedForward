@@ -53,16 +53,21 @@ void AirEngine::Rendering::Renderer::ForwardRenderer::OnDestroyRendererData(Core
 
 void AirEngine::Rendering::Renderer::ForwardRenderer::PrepareRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
 {
+	PrepareRenderFeature("GeometryRenderFeature", rendererData);
 }
 
 void AirEngine::Rendering::Renderer::ForwardRenderer::ExcuteRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*> const* rendererComponents)
 {
+	ExcuteRenderFeature("GeometryRenderFeature", rendererData, camera, rendererComponents);
 }
 
 void AirEngine::Rendering::Renderer::ForwardRenderer::SubmitRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
 {
+	SubmitRenderFeature("GeometryRenderFeature", rendererData);
 }
 
 void AirEngine::Rendering::Renderer::ForwardRenderer::FinishRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
 {
+	FinishRenderFeature("GeometryRenderFeature", rendererData);
 }
+ 

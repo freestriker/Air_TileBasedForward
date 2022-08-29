@@ -18,10 +18,6 @@ namespace AirEngine
 				class CommandPool;
 			}
 			class Material;
-			namespace Manager
-			{
-				class RenderPassTarget;
-			}
 			namespace Instance
 			{
 				class ImageSampler;
@@ -35,7 +31,6 @@ namespace AirEngine
 					Command::CommandPool* _renderCommandPool;
 					Asset::Mesh* _fullScreenMesh;
 					Material* _material;
-					Manager::RenderPassTarget* _renderPassTarget;
 					Instance::ImageSampler* _imageSampler;
 					void OnPopulateRenderPassSettings(RenderPassSettings& creator)override;
 					void OnPrepare(Camera::CameraBase* camera)override;

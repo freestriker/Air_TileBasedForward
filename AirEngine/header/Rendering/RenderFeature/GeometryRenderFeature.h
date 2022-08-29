@@ -1,6 +1,8 @@
 #pragma once
 #include "Core/Graphic/Rendering/RenderFeatureBase.h"
 #include "Core/Graphic/Rendering/RenderPassBase.h"
+#include "Core/Graphic/Instance/Buffer.h"
+#include "Core/Graphic/Instance/Image.h"
 
 namespace AirEngine
 {
@@ -22,7 +24,6 @@ namespace AirEngine
 					GeometryRenderPass& operator=(const GeometryRenderPass&) = delete;
 					GeometryRenderPass(GeometryRenderPass&&) = delete;
 					GeometryRenderPass& operator=(GeometryRenderPass&&) = delete;
-
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderPassBase)
 				};
 
@@ -35,6 +36,10 @@ namespace AirEngine
 					GeometryRenderFeatureData& operator=(const GeometryRenderFeatureData&) = delete;
 					GeometryRenderFeatureData(GeometryRenderFeatureData&&) = delete;
 					GeometryRenderFeatureData& operator=(GeometryRenderFeatureData&&) = delete;
+				public:
+					Core::Graphic::Rendering::FrameBuffer* frameBuffer;
+					Core::Graphic::Instance::Image* depthTexture;
+					Core::Graphic::Instance::Image* normalTexture;
 
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderFeatureDataBase)
 				};
@@ -47,12 +52,15 @@ namespace AirEngine
 				GeometryRenderFeature& operator=(GeometryRenderFeature&&) = delete;
 
 			private:
+				Core::Graphic::Rendering::RenderPassBase* _geometryRenderPass;
+				std::string _geometryRenderPassName;
+
 				Core::Graphic::Rendering::RenderFeatureDataBase* OnCreateRenderFeatureData(Camera::CameraBase* camera)override;
 				void OnResolveRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera)override;
 				void OnDestroyRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)override;
 
 				void OnPrepare(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)override;
-				void OnExcute(Camera::CameraBase* camera, Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer, std::vector<AirEngine::Renderer::Renderer*>const* rendererComponents)override;
+				void OnExcute(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*>const* rendererComponents)override;
 				void OnSubmit(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer)override;
 				void OnFinish(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)override;
 

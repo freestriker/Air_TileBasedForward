@@ -14,7 +14,10 @@ namespace AirEngine
 	{
 		namespace Graphic
 		{
-			class Material;
+			namespace Rendering
+			{
+				class Material;
+			}
 			namespace Instance
 			{
 				class Buffer;
@@ -36,9 +39,9 @@ namespace AirEngine
 			void RefreshObjectInfo();
 			Core::Graphic::Instance::Buffer* ObjectInfoBuffer();
 
-			void AddMaterial(Core::Graphic::Material* material);
-			Core::Graphic::Material* GetMaterial(std::string pass);
-			const std::map<std::string, Core::Graphic::Material*>* GetMaterials();
+			void AddMaterial(Core::Graphic::Rendering::Material* material);
+			Core::Graphic::Rendering::Material* GetMaterial(std::string pass);
+			const std::map<std::string, Core::Graphic::Rendering::Material*>* GetMaterials();
 
 			Renderer();
 			virtual ~Renderer();
@@ -50,7 +53,7 @@ namespace AirEngine
 		private:
 			ObjectInfo _objectInfo;
 			Core::Graphic::Instance::Buffer* _objectInfoBuffer;
-			std::map<std::string, Core::Graphic::Material*> _materials;
+			std::map<std::string, Core::Graphic::Rendering::Material*> _materials;
 			RTTR_ENABLE(Core::Logic::Object::Component)
 
 		};

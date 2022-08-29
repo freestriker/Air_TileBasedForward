@@ -23,10 +23,6 @@ namespace AirEngine
 				class Image;
 				class ImageSampler;
 			}
-			namespace Manager
-			{
-				class RenderPassTarget;
-			}
 			class Material;
 			namespace RenderPass
 			{
@@ -38,7 +34,6 @@ namespace AirEngine
 					Instance::Image* _thresholdDepthTexture;
 					Instance::Image* _depthAttachment;
 					std::array<Instance::Image*, DEPTH_PEELING_STEP_COUNT> _colorAttachments;
-					std::array<Manager::RenderPassTarget*, DEPTH_PEELING_STEP_COUNT> _renderPassTargets;
 					Instance::ImageSampler* _depthTextureSampler;
 
 					std::optional<bool> _needDepthPeelingPass;

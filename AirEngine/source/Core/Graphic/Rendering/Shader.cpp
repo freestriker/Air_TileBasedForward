@@ -1,13 +1,13 @@
-﻿#include "Core/Graphic/Shader.h"
+﻿#include "Core/Graphic/Rendering/Shader.h"
 #include <filesystem>
 #include <fstream>
 #include <set>
 #include "Core/Graphic/CoreObject/Instance.h"
 #include "Core/Graphic/Manager/RenderPassManager.h"
 #include "Utils/Log.h"
-#include "Core/Graphic/RenderPass/RenderPassBase.h"
+#include "Core/Graphic/Rendering/RenderPassBase.h"
 
-void AirEngine::Core::Graphic::Shader::_ParseShaderData(_PipelineData& pipelineData)
+void AirEngine::Core::Graphic::Rendering::Shader::_ParseShaderData(_PipelineData& pipelineData)
 {
 	std::ifstream input_file(Path());
 	Utils::Log::Exception("Failed to open shader file.", !input_file.is_open());
@@ -15,9 +15,10 @@ void AirEngine::Core::Graphic::Shader::_ParseShaderData(_PipelineData& pipelineD
 	std::string text = std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
 	nlohmann::json j = nlohmann::json::parse(text);
 	this->_shaderSettings = j.get<ShaderSettings>();
+	this->_renderPass = Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass(this->_shaderSettings.renderPass);
 }
 
-void AirEngine::Core::Graphic::Shader::_LoadSpirvs(_PipelineData& pipelineData)
+void AirEngine::Core::Graphic::Rendering::Shader::_LoadSpirvs(_PipelineData& pipelineData)
 {
 	for (const auto& spirvPath : _shaderSettings.shaderPaths)
 	{
@@ -35,7 +36,7 @@ void AirEngine::Core::Graphic::Shader::_LoadSpirvs(_PipelineData& pipelineData)
 	}
 }
 
-void AirEngine::Core::Graphic::Shader::_CreateShaderModules(_PipelineData& pipelineData)
+void AirEngine::Core::Graphic::Rendering::Shader::_CreateShaderModules(_PipelineData& pipelineData)
 {
 	std::set<VkShaderStageFlagBits> stageSet = std::set<VkShaderStageFlagBits>();
 
@@ -65,7 +66,7 @@ void AirEngine::Core::Graphic::Shader::_CreateShaderModules(_PipelineData& pipel
 	}
 }
 
-void AirEngine::Core::Graphic::Shader::_PopulateShaderStages(_PipelineData& pipelineData)
+void AirEngine::Core::Graphic::Rendering::Shader::_PopulateShaderStages(_PipelineData& pipelineData)
 {
 	pipelineData.stageInfos.resize(pipelineData.shaderModuleWrappers.size());
 	size_t i = 0;
@@ -81,7 +82,7 @@ void AirEngine::Core::Graphic::Shader::_PopulateShaderStages(_PipelineData& pipe
 	}
 }
 
-void AirEngine::Core::Graphic::Shader::_PopulateVertexInputState(_PipelineData& pipelineData)
+void AirEngine::Core::Graphic::Rendering::Shader::_PopulateVertexInputState(_PipelineData& pipelineData)
 {
 	pipelineData.vertexInputBindingDescription.binding = 0;
 	pipelineData.vertexInputBindingDescription.stride = sizeof(VertexData);
@@ -169,7 +170,7 @@ void AirEngine::Core::Graphic::Shader::_PopulateVertexInputState(_PipelineData& 
 	pipelineData.vertexInputInfo.pVertexAttributeDescriptions = pipelineData.vertexInputAttributeDescriptions.data();
 }
 
-void AirEngine::Core::Graphic::Shader::_CheckAttachmentOutputState(_PipelineData& pipelineData)
+void AirEngine::Core::Graphic::Rendering::Shader::_CheckAttachmentOutputState(_PipelineData& pipelineData)
 {
 	_ShaderModuleWrapper fragmentShaderWrapper;
 	bool containsFragmentShader = false;
@@ -191,19 +192,20 @@ void AirEngine::Core::Graphic::Shader::_CheckAttachmentOutputState(_PipelineData
 	result = spvReflectEnumerateOutputVariables(&fragmentShaderWrapper.reflectModule, &ioutputCount, output_vars.data());
 	Utils::Log::Exception("Failed to enumerate shader output variables.", result);
 
-	auto colorAttachments = Graphic::CoreObject::Instance::RenderPassManager().RenderPass(_shaderSettings.renderPass).ColorAttachmentMap(_shaderSettings.subpass);
+	auto& colorAttachments = *this->_renderPass->ColorAttachmentIndexMap(_shaderSettings.subpass);
 	for (size_t i_var = 0; i_var < output_vars.size(); ++i_var)
 	{
 		const SpvReflectInterfaceVariable& refl_var = *(output_vars[i_var]);
 		if (refl_var.decoration_flags & SPV_REFLECT_DECORATION_BUILT_IN) continue;
 
-		Utils::Log::Exception("Failed to find right output attachment.", !colorAttachments.count(refl_var.name) || colorAttachments[refl_var.name] != refl_var.location);
+		auto iterator = colorAttachments.find(refl_var.name);
+		Utils::Log::Exception("Failed to find right output attachment.", iterator == std::end(colorAttachments) || iterator->second != refl_var.location);
 
 		_attachmentNames.emplace_back(refl_var.name);
 	}
 }
 
-void AirEngine::Core::Graphic::Shader::_PopulateGraphicPipelineSettings(_PipelineData& pipelineData)
+void AirEngine::Core::Graphic::Rendering::Shader::_PopulateGraphicPipelineSettings(_PipelineData& pipelineData)
 {
 	pipelineData.inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 	pipelineData.inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
@@ -266,7 +268,7 @@ void AirEngine::Core::Graphic::Shader::_PopulateGraphicPipelineSettings(_Pipelin
 	pipelineData.colorBlending.blendConstants[3] = 0.0f;
 }
 
-void AirEngine::Core::Graphic::Shader::_CreateDescriptorLayouts(_PipelineData& pipelineData)
+void AirEngine::Core::Graphic::Rendering::Shader::_CreateDescriptorLayouts(_PipelineData& pipelineData)
 {
 	std::map<uint32_t, SlotDescriptor> slotLayoutMap = std::map<uint32_t, SlotDescriptor>();
 	std::map<uint32_t, std::map<uint32_t, VkDescriptorSetLayoutBinding>> setBindings = std::map<uint32_t, std::map<uint32_t, VkDescriptorSetLayoutBinding>>();
@@ -427,7 +429,7 @@ void AirEngine::Core::Graphic::Shader::_CreateDescriptorLayouts(_PipelineData& p
 	}
 }
 
-void AirEngine::Core::Graphic::Shader::_PopulateDescriptorLayouts(_PipelineData& pipelineData)
+void AirEngine::Core::Graphic::Rendering::Shader::_PopulateDescriptorLayouts(_PipelineData& pipelineData)
 {
 	pipelineData.descriptorSetLayouts.resize(_slotDescriptors.size());
 	for (auto& slotDescriptorPair : _slotDescriptors)
@@ -436,7 +438,7 @@ void AirEngine::Core::Graphic::Shader::_PopulateDescriptorLayouts(_PipelineData&
 	}
 }
 
-void AirEngine::Core::Graphic::Shader::_CreateGraphicPipeline(_PipelineData& pipelineData)
+void AirEngine::Core::Graphic::Rendering::Shader::_CreateGraphicPipeline(_PipelineData& pipelineData)
 {
 	std::vector<VkDynamicState> dynamicStateEnables = {
 		VK_DYNAMIC_STATE_VIEWPORT, 				//设置动态状态  视口矩阵
@@ -467,15 +469,15 @@ void AirEngine::Core::Graphic::Shader::_CreateGraphicPipeline(_PipelineData& pip
 	pipelineInfo.pDepthStencilState = &pipelineData.depthStencil;
 	pipelineInfo.pColorBlendState = &pipelineData.colorBlending;
 	pipelineInfo.layout = _vkPipelineLayout;
-	pipelineInfo.renderPass = Graphic::CoreObject::Instance::RenderPassManager().RenderPass(_shaderSettings.renderPass).VkRenderPass_();
-	pipelineInfo.subpass = Graphic::CoreObject::Instance::RenderPassManager().RenderPass(_shaderSettings.renderPass).SubPassIndex(_shaderSettings.subpass);
+	pipelineInfo.renderPass = this->_renderPass->VkRenderPass_();
+	pipelineInfo.subpass = this->_renderPass->SubPassIndex(_shaderSettings.subpass);
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 	pipelineInfo.pDynamicState = &pipelineDynamicStateCreateInfo;
 
 	Utils::Log::Exception("Failed to create pipeline.", vkCreateGraphicsPipelines(CoreObject::Instance::VkDevice_(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &_vkPipeline));
 }
 
-void AirEngine::Core::Graphic::Shader::_CreateComputePipeline(_PipelineData& pipelineData)
+void AirEngine::Core::Graphic::Rendering::Shader::_CreateComputePipeline(_PipelineData& pipelineData)
 {
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -496,7 +498,7 @@ void AirEngine::Core::Graphic::Shader::_CreateComputePipeline(_PipelineData& pip
 	Utils::Log::Exception("Failed to create pipeline.", vkCreateComputePipelines(CoreObject::Instance::VkDevice_(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &_vkPipeline));
 }
 
-void AirEngine::Core::Graphic::Shader::_DestroyData(_PipelineData& pipelineData)
+void AirEngine::Core::Graphic::Rendering::Shader::_DestroyData(_PipelineData& pipelineData)
 {
 	for (auto& warp : pipelineData.shaderModuleWrappers)
 	{
@@ -505,11 +507,12 @@ void AirEngine::Core::Graphic::Shader::_DestroyData(_PipelineData& pipelineData)
 	}
 }
 
-void AirEngine::Core::Graphic::Shader::OnLoad(Core::Graphic::Command::CommandBuffer* transferCommandBuffer)
+void AirEngine::Core::Graphic::Rendering::Shader::OnLoad(Core::Graphic::Command::CommandBuffer* transferCommandBuffer)
 {
 	_PipelineData pipelineData = _PipelineData();
 
 	_ParseShaderData(pipelineData);
+
 	_LoadSpirvs(pipelineData);
 
 	_CreateShaderModules(pipelineData);
@@ -542,43 +545,46 @@ void AirEngine::Core::Graphic::Shader::OnLoad(Core::Graphic::Command::CommandBuf
 	_DestroyData(pipelineData);
 }
 
-const std::map<std::string, AirEngine::Core::Graphic::Shader::SlotDescriptor>* AirEngine::Core::Graphic::Shader::SlotDescriptors()
+const std::map<std::string, AirEngine::Core::Graphic::Rendering::Shader::SlotDescriptor>* AirEngine::Core::Graphic::Rendering::Shader::SlotDescriptors()
 {
 	return &_slotDescriptors;
 }
 
-VkPipeline AirEngine::Core::Graphic::Shader::VkPipeline_()
+VkPipeline AirEngine::Core::Graphic::Rendering::Shader::VkPipeline_()
 {
 	return _vkPipeline;
 }
 
-VkPipelineLayout AirEngine::Core::Graphic::Shader::VkPipelineLayout_()
+VkPipelineLayout AirEngine::Core::Graphic::Rendering::Shader::VkPipelineLayout_()
 {
 	return _vkPipelineLayout;
 }
 
-const AirEngine::Core::Graphic::Shader::ShaderSettings* AirEngine::Core::Graphic::Shader::Settings()
+const AirEngine::Core::Graphic::Rendering::Shader::ShaderSettings* AirEngine::Core::Graphic::Rendering::Shader::Settings()
 {
 	return &_shaderSettings;
 }
 
-AirEngine::Core::Graphic::Shader::ShaderType AirEngine::Core::Graphic::Shader::ShaderType_()
+AirEngine::Core::Graphic::Rendering::Shader::ShaderType AirEngine::Core::Graphic::Rendering::Shader::ShaderType_()
 {
 	return _shaderType;
 }
 
-AirEngine::Core::Graphic::Shader::Shader()
+AirEngine::Core::Graphic::Rendering::Shader::Shader()
 	: AssetBase(true)
 	, _shaderSettings()
 	, _slotDescriptors()
 	, _vkPipeline(VK_NULL_HANDLE)
 	, _vkPipelineLayout(VK_NULL_HANDLE)
 	, _attachmentNames()
+	, _renderPass(nullptr)
 {
 }
 
-AirEngine::Core::Graphic::Shader::~Shader()
+AirEngine::Core::Graphic::Rendering::Shader::~Shader()
 {
+	Graphic::CoreObject::Instance::RenderPassManager().UnloadRenderPass(this->_shaderSettings.renderPass);
+
 	vkDestroyPipeline(CoreObject::Instance::VkDevice_(), _vkPipeline, nullptr);
 	vkDestroyPipelineLayout(CoreObject::Instance::VkDevice_(), _vkPipelineLayout, nullptr);
 

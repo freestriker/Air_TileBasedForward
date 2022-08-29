@@ -23,10 +23,6 @@ namespace AirEngine
 				class Image;
 				class ImageSampler;
 			}
-			namespace Manager
-			{
-				class RenderPassTarget;
-			}
 			class Material;
 			namespace RenderPass
 			{

@@ -1,4 +1,4 @@
-#include "Core/Graphic/Material.h"
+#include "Core/Graphic/Rendering/Material.h"
 #include "Asset/Mesh.h"
 #include "Asset/Texture2D.h"
 #include "Asset/TextureCube.h"
@@ -6,12 +6,12 @@
 #include "Core/Graphic/Instance/DescriptorSet.h"
 #include "Core/Graphic/Instance/Image.h"
 #include "Core/Graphic/Instance/ImageSampler.h"
-#include "Core/Graphic/Shader.h"
+#include "Core/Graphic/Rendering/Shader.h"
 #include "Core/Graphic/Manager/DescriptorSetManager.h"
 #include "Core/Graphic/CoreObject/Instance.h"
 #include "Utils/Log.h"
 
-AirEngine::Asset::TextureCube* AirEngine::Core::Graphic::Material::GetTextureCube(std::string name)
+AirEngine::Asset::TextureCube* AirEngine::Core::Graphic::Rendering::Material::GetTextureCube(std::string name)
 {
 	if (_slots.count(name) && (_slots[name].slotType == ShaderSlotType::TEXTURE_CUBE))
 	{
@@ -24,7 +24,7 @@ AirEngine::Asset::TextureCube* AirEngine::Core::Graphic::Material::GetTextureCub
 	}
 }
 
-void AirEngine::Core::Graphic::Material::SetTextureCube(std::string name, Asset::TextureCube* textureCube)
+void AirEngine::Core::Graphic::Rendering::Material::SetTextureCube(std::string name, Asset::TextureCube* textureCube)
 {
 	if (_slots.count(name) && _slots[name].slotType == ShaderSlotType::TEXTURE_CUBE)
 	{
@@ -42,7 +42,7 @@ void AirEngine::Core::Graphic::Material::SetTextureCube(std::string name, Asset:
 	}
 }
 
-AirEngine::Asset::Texture2D* AirEngine::Core::Graphic::Material::GetTexture2D(std::string name)
+AirEngine::Asset::Texture2D* AirEngine::Core::Graphic::Rendering::Material::GetTexture2D(std::string name)
 {
 	if (_slots.count(name) && (_slots[name].slotType == ShaderSlotType::TEXTURE2D || _slots[name].slotType == ShaderSlotType::TEXTURE2D_WITH_INFO))
 	{
@@ -55,7 +55,7 @@ AirEngine::Asset::Texture2D* AirEngine::Core::Graphic::Material::GetTexture2D(st
 	}
 }
 
-void AirEngine::Core::Graphic::Material::SetTexture2D(std::string name, Asset::Texture2D* texture2d)
+void AirEngine::Core::Graphic::Rendering::Material::SetTexture2D(std::string name, Asset::Texture2D* texture2d)
 {
 	if (_slots.count(name) && _slots[name].slotType == ShaderSlotType::TEXTURE2D)
 	{
@@ -82,7 +82,7 @@ void AirEngine::Core::Graphic::Material::SetTexture2D(std::string name, Asset::T
 	}
 }
 
-AirEngine::Asset::Texture2D* AirEngine::Core::Graphic::Material::GetStorageTexture2D(std::string name)
+AirEngine::Asset::Texture2D* AirEngine::Core::Graphic::Rendering::Material::GetStorageTexture2D(std::string name)
 {
 	if (_slots.count(name) && (_slots[name].slotType == ShaderSlotType::STORAGE_TEXTURE2D || _slots[name].slotType == ShaderSlotType::STORAGE_TEXTURE2D_WITH_INFO))
 	{
@@ -95,7 +95,7 @@ AirEngine::Asset::Texture2D* AirEngine::Core::Graphic::Material::GetStorageTextu
 	}
 }
 
-void AirEngine::Core::Graphic::Material::SetStorgeTexture2D(std::string name, Asset::Texture2D* texture2d)
+void AirEngine::Core::Graphic::Rendering::Material::SetStorgeTexture2D(std::string name, Asset::Texture2D* texture2d)
 {
 	if (_slots.count(name) && _slots[name].slotType == ShaderSlotType::STORAGE_TEXTURE2D)
 	{
@@ -122,7 +122,7 @@ void AirEngine::Core::Graphic::Material::SetStorgeTexture2D(std::string name, As
 	}
 }
 
-AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Material::GetUniformBuffer(std::string name)
+AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Rendering::Material::GetUniformBuffer(std::string name)
 {
 	if (_slots.count(name) && _slots[name].slotType == ShaderSlotType::UNIFORM_BUFFER)
 	{
@@ -135,7 +135,7 @@ AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Material::
 	}
 }
 
-void AirEngine::Core::Graphic::Material::SetUniformBuffer(std::string name, Instance::Buffer* buffer)
+void AirEngine::Core::Graphic::Rendering::Material::SetUniformBuffer(std::string name, Instance::Buffer* buffer)
 {
 	if (_slots.count(name) && _slots[name].slotType == ShaderSlotType::UNIFORM_BUFFER)
 	{
@@ -153,7 +153,7 @@ void AirEngine::Core::Graphic::Material::SetUniformBuffer(std::string name, Inst
 	}
 }
 
-AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Material::GetStorageBuffer(std::string name)
+AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Rendering::Material::GetStorageBuffer(std::string name)
 {
 	if (_slots.count(name) && _slots[name].slotType == ShaderSlotType::STORAGE_BUFFER)
 	{
@@ -166,7 +166,7 @@ AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Material::
 	}
 }
 
-void AirEngine::Core::Graphic::Material::SetStorageBuffer(std::string name, Instance::Buffer* buffer)
+void AirEngine::Core::Graphic::Rendering::Material::SetStorageBuffer(std::string name, Instance::Buffer* buffer)
 {
 	if (_slots.count(name) && _slots[name].slotType == ShaderSlotType::STORAGE_BUFFER)
 	{
@@ -184,7 +184,7 @@ void AirEngine::Core::Graphic::Material::SetStorageBuffer(std::string name, Inst
 	}
 }
 
-AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Material::GetUniformTexelBuffer(std::string name)
+AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Rendering::Material::GetUniformTexelBuffer(std::string name)
 {
 	if (_slots.count(name) && _slots[name].slotType == ShaderSlotType::UNIFORM_TEXEL_BUFFER)
 	{
@@ -197,7 +197,7 @@ AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Material::
 	}
 }
 
-void AirEngine::Core::Graphic::Material::SetUniformTexelBuffer(std::string name, Instance::Buffer* buffer)
+void AirEngine::Core::Graphic::Rendering::Material::SetUniformTexelBuffer(std::string name, Instance::Buffer* buffer)
 {
 	if (_slots.count(name) && _slots[name].slotType == ShaderSlotType::UNIFORM_TEXEL_BUFFER)
 	{
@@ -215,7 +215,7 @@ void AirEngine::Core::Graphic::Material::SetUniformTexelBuffer(std::string name,
 	}
 }
 
-AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Material::GetStorgeTexelBuffer(std::string name)
+AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Rendering::Material::GetStorgeTexelBuffer(std::string name)
 {
 	if (_slots.count(name) && _slots[name].slotType == ShaderSlotType::STORAGE_TEXEL_BUFFER)
 	{
@@ -228,7 +228,7 @@ AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Material::
 	}
 }
 
-void AirEngine::Core::Graphic::Material::SetStorgeTexelBuffer(std::string name, Instance::Buffer* buffer)
+void AirEngine::Core::Graphic::Rendering::Material::SetStorgeTexelBuffer(std::string name, Instance::Buffer* buffer)
 {
 	if (_slots.count(name) && _slots[name].slotType == ShaderSlotType::STORAGE_TEXEL_BUFFER)
 	{
@@ -246,12 +246,12 @@ void AirEngine::Core::Graphic::Material::SetStorgeTexelBuffer(std::string name, 
 	}
 }
 
-VkPipelineLayout AirEngine::Core::Graphic::Material::PipelineLayout()
+VkPipelineLayout AirEngine::Core::Graphic::Rendering::Material::PipelineLayout()
 {
 	return this->_shader->VkPipelineLayout_();
 }
 
-std::vector<VkDescriptorSet> AirEngine::Core::Graphic::Material::VkDescriptorSets()
+std::vector<VkDescriptorSet> AirEngine::Core::Graphic::Rendering::Material::VkDescriptorSets()
 {
 	std::vector<VkDescriptorSet> sets = std::vector<VkDescriptorSet>(_slots.size());
 
@@ -262,12 +262,12 @@ std::vector<VkDescriptorSet> AirEngine::Core::Graphic::Material::VkDescriptorSet
 	return sets;
 }
 
-AirEngine::Core::Graphic::Shader* AirEngine::Core::Graphic::Material::Shader()
+AirEngine::Core::Graphic::Rendering::Shader* AirEngine::Core::Graphic::Rendering::Material::Shader()
 {
 	return _shader;
 }
 
-void AirEngine::Core::Graphic::Material::RefreshSlotData(std::vector<std::string> slotNames)
+void AirEngine::Core::Graphic::Rendering::Material::RefreshSlotData(std::vector<std::string> slotNames)
 {
 	for (const auto& slotName : slotNames)
 	{
@@ -336,17 +336,17 @@ void AirEngine::Core::Graphic::Material::RefreshSlotData(std::vector<std::string
 	}
 }
 
-void AirEngine::Core::Graphic::Material::SetSlotData(std::string name, std::vector<uint32_t> bindingIndex, std::vector<Graphic::Instance::DescriptorSet::DescriptorSetWriteData> data)
+void AirEngine::Core::Graphic::Rendering::Material::SetSlotData(std::string name, std::vector<uint32_t> bindingIndex, std::vector<Graphic::Instance::DescriptorSet::DescriptorSetWriteData> data)
 {
 	_slots[name].asset = nullptr;
 	_slots[name].descriptorSet->UpdateBindingData(bindingIndex, data);
 }
 
-void AirEngine::Core::Graphic::Material::OnDestroy()
+void AirEngine::Core::Graphic::Rendering::Material::OnDestroy()
 {
 }
 
-AirEngine::Core::Graphic::Material::Material(AirEngine::Core::Graphic::Shader* shader)
+AirEngine::Core::Graphic::Rendering::Material::Material(AirEngine::Core::Graphic::Rendering::Shader* shader)
 	: _shader(shader)
 	, _slots()
 {
@@ -362,7 +362,7 @@ AirEngine::Core::Graphic::Material::Material(AirEngine::Core::Graphic::Shader* s
 	}
 }
 
-AirEngine::Core::Graphic::Material::~Material()
+AirEngine::Core::Graphic::Rendering::Material::~Material()
 {
 
 }

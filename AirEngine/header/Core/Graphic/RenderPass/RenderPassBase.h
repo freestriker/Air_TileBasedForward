@@ -51,7 +51,6 @@ namespace AirEngine
 			namespace Manager
 			{
 				class RenderPassManager;
-				class RenderPassTarget;
 			}
 			namespace RenderPass
 			{

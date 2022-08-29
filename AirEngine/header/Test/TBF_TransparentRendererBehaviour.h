@@ -2,9 +2,9 @@
 #include "Behaviour/Behaviour.h"
 #include <string>
 #include "Asset/Mesh.h"
-#include "Core/Graphic/Shader.h"
+#include "Core/Graphic/Rendering/Shader.h"
 #include "Asset/Texture2D.h"
-#include "Core/Graphic/Material.h"
+#include "Core/Graphic/Rendering/Material.h"
 #include <future>
 
 namespace AirEngine

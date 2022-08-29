@@ -19,7 +19,6 @@ namespace AirEngine
 					friend class CommandBuffer;
 				private:
 					VkCommandPool  _vkCommandPool;
-					std::map<std::string, CommandBuffer*> _namedCommandBuffers;
 					std::set< CommandBuffer*> _commandBuffers;
 					std::string _queueName;
 				public:
@@ -33,10 +32,7 @@ namespace AirEngine
 
 					VkCommandPool VkCommandPool_();
 
-
-					CommandBuffer* CreateCommandBuffer(std::string name, VkCommandBufferLevel level);
 					CommandBuffer* CreateCommandBuffer(VkCommandBufferLevel level);
-					CommandBuffer* GetCommandBuffer(std::string name);
 					void DestoryCommandBuffer(CommandBuffer* commandBuffer);
 
 					void Reset();

@@ -47,6 +47,11 @@ VkImageView AirEngine::Core::Graphic::Instance::Image::VkImageView_()
 	return _vkImageView;
 }
 
+VkExtent2D AirEngine::Core::Graphic::Instance::Image::VkExtent2D_()
+{
+	return { _extent.width, _extent .height};
+}
+
 VkExtent3D AirEngine::Core::Graphic::Instance::Image::VkExtent3D_()
 {
 	return _extent;

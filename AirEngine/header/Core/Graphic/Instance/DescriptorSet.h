@@ -7,7 +7,10 @@ namespace AirEngine
 	{
 		namespace Graphic
 		{
-			enum class ShaderSlotType;
+			namespace Rendering
+			{
+				enum class ShaderSlotType;
+			}
 			namespace Manager
 			{
 				class DescriptorSetManager;
@@ -35,10 +38,10 @@ namespace AirEngine
 					VkDescriptorSet VkDescriptorSet_();
 					void UpdateBindingData(std::vector<uint32_t> bindingIndex, std::vector<Graphic::Instance::DescriptorSet::DescriptorSetWriteData> data);
 				private:
-					ShaderSlotType _slotType;
+					Rendering::ShaderSlotType _slotType;
 					VkDescriptorSet _vkDescriptorSet;
 					VkDescriptorPool _sourceVkDescriptorChunk;
-					DescriptorSet(ShaderSlotType slotType, VkDescriptorSet descriptorSet, VkDescriptorPool sourceDescriptorChunk);
+					DescriptorSet(Rendering::ShaderSlotType slotType, VkDescriptorSet descriptorSet, VkDescriptorPool sourceDescriptorChunk);
 					~DescriptorSet();
 					DescriptorSet(const DescriptorSet&) = delete;
 					DescriptorSet& operator=(const DescriptorSet&) = delete;

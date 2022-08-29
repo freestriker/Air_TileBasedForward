@@ -1,9 +1,9 @@
 #include "Renderer/Renderer.h"
 #include "Core/Graphic/Instance/Buffer.h"
 #include "Core/Logic/Object/GameObject.h"
-#include "Core/Graphic/Material.h"
+#include "Core/Graphic/Rendering/Material.h"
 #include <Utils/Log.h>
-#include "Core/Graphic/Shader.h"
+#include "Core/Graphic/Rendering/Shader.h"
 
 RTTR_REGISTRATION
 {
@@ -22,17 +22,17 @@ AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Renderer::Renderer::Objec
 	return _objectInfoBuffer;
 }
 
-void AirEngine::Renderer::Renderer::AddMaterial(Core::Graphic::Material* material)
+void AirEngine::Renderer::Renderer::AddMaterial(Core::Graphic::Rendering::Material* material)
 {
 	_materials[material->Shader()->Settings()->renderPass] = material;
 }
 
-AirEngine::Core::Graphic::Material* AirEngine::Renderer::Renderer::GetMaterial(std::string pass)
+AirEngine::Core::Graphic::Rendering::Material* AirEngine::Renderer::Renderer::GetMaterial(std::string pass)
 {
 	return _materials[pass];
 }
 
-const std::map<std::string, AirEngine::Core::Graphic::Material*>* AirEngine::Renderer::Renderer::GetMaterials()
+const std::map<std::string, AirEngine::Core::Graphic::Rendering::Material*>* AirEngine::Renderer::Renderer::GetMaterials()
 {
 	return &_materials;
 }

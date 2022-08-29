@@ -11,7 +11,7 @@ namespace AirEngine
 		{
 			namespace Manager
 			{
-				class NewRenderPassManager;
+				class RenderPassManager;
 			}
 			namespace Instance
 			{
@@ -22,7 +22,7 @@ namespace AirEngine
 				class RenderPassBase;
 				class FrameBuffer final
 				{
-					friend class Manager::NewRenderPassManager;
+					friend class Manager::RenderPassManager;
 				private:
 					VkFramebuffer _vkFrameBuffer;
 					std::map<std::string, Instance::Image*> _attachments;

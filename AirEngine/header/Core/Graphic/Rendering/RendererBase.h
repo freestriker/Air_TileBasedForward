@@ -68,7 +68,7 @@ namespace AirEngine
 
 					void UseRenderFeature(std::string renderFeatureName, RenderFeatureBase* renderFeature);
 					void PrepareRenderFeature(std::string renderFeatureName, RendererDataBase* rendererData);
-					void ExcuteRenderFeature(std::string renderFeatureName, Camera::CameraBase* camera, RendererDataBase* rendererData, std::vector<Renderer::Renderer*>const* rendererComponents);
+					void ExcuteRenderFeature(std::string renderFeatureName, RendererDataBase* rendererData, Camera::CameraBase* camera, std::vector<Renderer::Renderer*>const* rendererComponents);
 					void SubmitRenderFeature(std::string renderFeatureName, RendererDataBase* rendererData);
 					void FinishRenderFeature(std::string renderFeatureName, RendererDataBase* rendererData);
 

@@ -22,6 +22,7 @@ namespace AirEngine
 			}
 			namespace Rendering
 			{
+				class FrameBuffer;
 				class RendererBase;
 				class RendererDataBase;
 				class RenderFeatureDataBase : public Core::Logic::Object::Object
@@ -52,7 +53,7 @@ namespace AirEngine
 					virtual void OnDestroyRenderFeatureData(RenderFeatureDataBase* renderFeatureData) = 0;
 
 					virtual void OnPrepare(RenderFeatureDataBase* renderFeatureData) = 0;
-					virtual void OnExcute(Camera::CameraBase* camera, RenderFeatureDataBase* renderFeatureData, Command::CommandBuffer* commandBuffer, std::vector<Renderer::Renderer*>const * rendererComponents) = 0;
+					virtual void OnExcute(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*>const* rendererComponents) = 0;
 					virtual void OnSubmit(RenderFeatureDataBase* renderFeatureData, Command::CommandBuffer* commandBuffer) = 0;
 					virtual void OnFinish(RenderFeatureDataBase* renderFeatureData) = 0;
 

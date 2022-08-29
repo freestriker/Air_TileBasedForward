@@ -42,16 +42,8 @@ void AirEngine::Camera::PerspectiveCamera::OnSetProjectionMatrix(glm::mat4& matr
     );
 }
 
-AirEngine::Camera::PerspectiveCamera::PerspectiveCamera(std::vector<std::string> renderPassNames, std::map<std::string, Core::Graphic::Instance::Image*> attachments)
-    : CameraBase(CameraType::PERSPECTIVE, renderPassNames, attachments)
-    , fovAngle(60)
-{
-    nearFlat = 0.5f;
-
-}
-
-AirEngine::Camera::PerspectiveCamera::PerspectiveCamera(std::vector<std::string> renderPassNames, std::map<std::string, Core::Graphic::Instance::Image*> attachments, std::string rendererName)
-    : CameraBase(CameraType::PERSPECTIVE, renderPassNames, attachments)
+AirEngine::Camera::PerspectiveCamera::PerspectiveCamera(std::map<std::string, Core::Graphic::Instance::Image*> attachments, std::string rendererName)
+    : CameraBase(CameraType::PERSPECTIVE, attachments)
     , fovAngle(60)
 {
     nearFlat = 0.5f;
