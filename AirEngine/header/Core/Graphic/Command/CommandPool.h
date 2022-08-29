@@ -3,6 +3,8 @@
 #include <map>
 #include <string>
 #include <memory>
+#include <set>
+
 namespace AirEngine
 {
 	namespace Core
@@ -17,7 +19,8 @@ namespace AirEngine
 					friend class CommandBuffer;
 				private:
 					VkCommandPool  _vkCommandPool;
-					std::map<std::string, CommandBuffer*> _commandBuffers;
+					std::map<std::string, CommandBuffer*> _namedCommandBuffers;
+					std::set< CommandBuffer*> _commandBuffers;
 					std::string _queueName;
 				public:
 					CommandPool(std::string queueName, VkCommandPoolCreateFlags flag);
@@ -32,9 +35,10 @@ namespace AirEngine
 
 
 					CommandBuffer* CreateCommandBuffer(std::string name, VkCommandBufferLevel level);
+					CommandBuffer* CreateCommandBuffer(VkCommandBufferLevel level);
 					CommandBuffer* GetCommandBuffer(std::string name);
-					void DestoryCommandBuffer(std::string name);
 					void DestoryCommandBuffer(CommandBuffer* commandBuffer);
+
 					void Reset();
 				};
 			}

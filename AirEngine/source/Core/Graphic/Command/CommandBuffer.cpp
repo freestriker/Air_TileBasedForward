@@ -477,3 +477,8 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::Blit(Instance::Image* src
 
     vkCmdBlitImage(_vkCommandBuffer, srcImage->VkImage_(), srcImageLayout, dstImage, dstImageLayout, static_cast<uint32_t>(layerCount), infos.data(), filter);
 }
+
+AirEngine::Core::Graphic::Command::CommandPool* AirEngine::Core::Graphic::Command::CommandBuffer::ParentCommandPool()
+{
+    return _parentCommandPool;
+}

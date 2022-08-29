@@ -4,7 +4,7 @@
 #include "Utils/Log.h"
 
 AirEngine::Core::Graphic::Command::CommandPool::CommandPool(std::string queueName, VkCommandPoolCreateFlags flag)
-    : _commandBuffers()
+    : _namedCommandBuffers()
     , _queueName(queueName)
 {
     VkCommandPoolCreateInfo poolInfo{};
@@ -17,7 +17,7 @@ AirEngine::Core::Graphic::Command::CommandPool::CommandPool(std::string queueNam
 
 AirEngine::Core::Graphic::Command::CommandPool::~CommandPool()
 {
-    for (auto& commandBuffer : _commandBuffers)
+    for (auto& commandBuffer : _namedCommandBuffers)
     {
         delete commandBuffer.second;
     }
@@ -32,33 +32,42 @@ VkCommandPool AirEngine::Core::Graphic::Command::CommandPool::VkCommandPool_()
 AirEngine::Core::Graphic::Command::CommandBuffer* AirEngine::Core::Graphic::Command::CommandPool::CreateCommandBuffer(std::string name, VkCommandBufferLevel level)
 {
     auto p = new Graphic::Command::CommandBuffer(name, this, level);
-    _commandBuffers.emplace(std::string(name), p);
+    _namedCommandBuffers.emplace(std::string(name), p);
+    return p;
+}
+
+AirEngine::Core::Graphic::Command::CommandBuffer* AirEngine::Core::Graphic::Command::CommandPool::CreateCommandBuffer(VkCommandBufferLevel level)
+{
+    auto p = new Graphic::Command::CommandBuffer("TemporaryCommandBuffer", this, level);
+    _commandBuffers.emplace(p);
     return p;
 }
 
 AirEngine::Core::Graphic::Command::CommandBuffer* AirEngine::Core::Graphic::Command::CommandPool::GetCommandBuffer(std::string name)
 {
-    return _commandBuffers[name];
-}
-
-void AirEngine::Core::Graphic::Command::CommandPool::DestoryCommandBuffer(std::string name)
-{
-    delete _commandBuffers[name];
-    _commandBuffers.erase(name);
+    return _namedCommandBuffers[name];
 }
 
 void AirEngine::Core::Graphic::Command::CommandPool::DestoryCommandBuffer(CommandBuffer* commandBuffer)
 {
-    _commandBuffers.erase(commandBuffer->_name);
-    delete commandBuffer;
+    if (_commandBuffers.count(commandBuffer))
+    {
+        _commandBuffers.erase(commandBuffer);
+        delete commandBuffer;
+    }
+    else
+    {
+        _namedCommandBuffers.erase(commandBuffer->_name);
+        delete commandBuffer;
+    }
 }
 
 void AirEngine::Core::Graphic::Command::CommandPool::Reset()
 {
-    for (const auto& commandBuffer : _commandBuffers)
+    for (const auto& commandBuffer : _namedCommandBuffers)
     {
         delete commandBuffer.second;
     }
-    _commandBuffers.clear();
+    _namedCommandBuffers.clear();
     vkResetCommandPool(Graphic::CoreObject::Instance::VkDevice_(), _vkCommandPool, VkCommandPoolResetFlagBits::VK_COMMAND_POOL_RESET_RELEASE_RESOURCES_BIT);
 }
