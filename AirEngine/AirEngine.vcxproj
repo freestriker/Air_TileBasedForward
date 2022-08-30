@@ -105,6 +105,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Rendering\RenderFeature\Background_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\Forward_Opaque_RenderFeature.cpp" />
     <ClCompile Include="source\Core\Graphic\Manager\RenderPipelineManager.cpp" />
     <ClCompile Include="source\Core\Graphic\Rendering\Material.cpp" />
@@ -167,6 +168,7 @@
     <ClCompile Include="source\Rendering\RenderFeature\GeometryRenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderPipeline\ForwardRenderPipeline.cpp" />
     <ClCompile Include="source\Test\AudioSourceBehaviour.cpp" />
+    <ClCompile Include="source\Test\Background_SkyboxRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\CameraMoveBehaviour.cpp" />
     <ClCompile Include="source\Test\F_GlassRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\F_MirrorRendererBehaviour.cpp" />
@@ -241,10 +243,12 @@
     <ClInclude Include="header\Renderer\Renderer.h" />
     <ClInclude Include="header\Rendering\PresentRenderPass.h" />
     <ClInclude Include="header\Rendering\Renderer\ForwardRenderer.h" />
+    <ClInclude Include="header\Rendering\RenderFeature\Background_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\Forward_Opaque_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\GeometryRenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderPipeline\ForwardRenderPipeline.h" />
     <ClInclude Include="header\Test\AudioSourceBehaviour.h" />
+    <ClInclude Include="header\Test\Background_SkyboxRendererBehaviour.h" />
     <ClInclude Include="header\Test\CameraMoveBehaviour.h" />
     <ClInclude Include="header\Test\F_GlassRendererBehaviour.h" />
     <ClInclude Include="header\Test\F_MirrorRendererBehaviour.h" />

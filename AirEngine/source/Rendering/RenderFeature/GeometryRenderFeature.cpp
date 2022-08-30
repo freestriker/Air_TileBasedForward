@@ -185,6 +185,9 @@ void AirEngine::Rendering::RenderFeature::GeometryRenderFeature::OnExcute(Core::
 		auto viewMatrix = camera->ViewMatrix();
 		for (const auto& rendererComponent : *rendererComponents)
 		{
+			auto material = rendererComponent->GetMaterial(_geometryRenderPassName);
+			if (material == nullptr) continue;
+
 			auto obbVertexes = rendererComponent->mesh->OrientedBoundingBox().BoundryVertexes();
 			auto mvMatrix = viewMatrix * rendererComponent->GameObject()->transform.ModelMatrix();
 			if (rendererComponent->enableFrustumCulling && !camera->CheckInFrustum(obbVertexes, mvMatrix))
@@ -192,7 +195,6 @@ void AirEngine::Rendering::RenderFeature::GeometryRenderFeature::OnExcute(Core::
 				continue;
 			}
 
-			auto material = rendererComponent->GetMaterial(_geometryRenderPassName);
 			material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
 			material->SetUniformBuffer("meshObjectInfo", rendererComponent->ObjectInfoBuffer());
 

@@ -17,7 +17,7 @@
 #include "Light/PointLight.h"
 #include "Light/AmbientLight.h"
 #include "Test/SelfRotateBehaviour.h"
-#include "Test/BackgroundRendererBehaviour.h"
+#include "Test/Background_SkyboxRendererBehaviour.h"
 #include "Test/F_GlassRendererBehaviour.h"
 #include "Test/F_MirrorRendererBehaviour.h"
 #include "Test/F_OpaqueRendererBehaviour.h"
@@ -434,30 +434,41 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	Logic::Object::GameObject* renderers = new Logic::Object::GameObject("Renderers");
 	CoreObject::Instance::rootObject.AddChild(renderers);
 
-	Logic::Object::GameObject* opaqueRendererGo = new Logic::Object::GameObject("WallRenderer");
-	renderers->AddChild(opaqueRendererGo);
-	opaqueRendererGo->AddComponent(new Renderer::Renderer());
-	opaqueRendererGo->AddComponent(new Test::F_WallRendererBehaviour());
-	opaqueRendererGo->AddComponent(new Test::SelfRotateBehaviour(60));
-	opaqueRendererGo->transform.SetScale(glm::vec3(0.8, 0.8, 0.8));
+	///Background
+	{
+		Logic::Object::GameObject* backgroundRendererGo = new Logic::Object::GameObject("BackgroundRenderer");
+		renderers->AddChild(backgroundRendererGo);
+		backgroundRendererGo->AddComponent(new Renderer::Renderer());
+		backgroundRendererGo->AddComponent(new Test::Background_SkyboxRendererBehaviour());
+	}
 
-	Logic::Object::GameObject* glassMeshRendererGo = new Logic::Object::GameObject("GlassRenderer");
-	renderers->AddChild(glassMeshRendererGo);
-	glassMeshRendererGo->AddComponent(new Renderer::Renderer());
-	glassMeshRendererGo->AddComponent(new Test::F_GlassRendererBehaviour());
-	glassMeshRendererGo->transform.SetTranslation(glm::vec3(3, 0, 0));
+	///Forward
+	{
+		Logic::Object::GameObject* opaqueRendererGo = new Logic::Object::GameObject("WallRenderer");
+		renderers->AddChild(opaqueRendererGo);
+		opaqueRendererGo->AddComponent(new Renderer::Renderer());
+		opaqueRendererGo->AddComponent(new Test::F_WallRendererBehaviour());
+		opaqueRendererGo->AddComponent(new Test::SelfRotateBehaviour(60));
+		opaqueRendererGo->transform.SetScale(glm::vec3(0.8, 0.8, 0.8));
 
-	Logic::Object::GameObject* mirrorMeshRendererGo = new Logic::Object::GameObject("MirrorRenderer");
-	renderers->AddChild(mirrorMeshRendererGo);
-	mirrorMeshRendererGo->AddComponent(new Renderer::Renderer());
-	mirrorMeshRendererGo->AddComponent(new Test::F_MirrorRendererBehaviour());
-	mirrorMeshRendererGo->transform.SetTranslation(glm::vec3(-3, 0, 0));
+		Logic::Object::GameObject* glassMeshRendererGo = new Logic::Object::GameObject("GlassRenderer");
+		renderers->AddChild(glassMeshRendererGo);
+		glassMeshRendererGo->AddComponent(new Renderer::Renderer());
+		glassMeshRendererGo->AddComponent(new Test::F_GlassRendererBehaviour());
+		glassMeshRendererGo->transform.SetTranslation(glm::vec3(3, 0, 0));
 
-	Logic::Object::GameObject* culledRendererGo = new Logic::Object::GameObject("MeshRendererCulled");
-	renderers->AddChild(culledRendererGo);
-	culledRendererGo->AddComponent(new Renderer::Renderer());
-	culledRendererGo->AddComponent(new Test::F_WallRendererBehaviour());
-	culledRendererGo->transform.SetTranslation(glm::vec3(2000, 2000, 2000));
+		Logic::Object::GameObject* mirrorMeshRendererGo = new Logic::Object::GameObject("MirrorRenderer");
+		renderers->AddChild(mirrorMeshRendererGo);
+		mirrorMeshRendererGo->AddComponent(new Renderer::Renderer());
+		mirrorMeshRendererGo->AddComponent(new Test::F_MirrorRendererBehaviour());
+		mirrorMeshRendererGo->transform.SetTranslation(glm::vec3(-3, 0, 0));
+
+		Logic::Object::GameObject* culledRendererGo = new Logic::Object::GameObject("MeshRendererCulled");
+		renderers->AddChild(culledRendererGo);
+		culledRendererGo->AddComponent(new Renderer::Renderer());
+		culledRendererGo->AddComponent(new Test::F_WallRendererBehaviour());
+		culledRendererGo->transform.SetTranslation(glm::vec3(2000, 2000, 2000));
+	}
 
 	//Logic::Object::GameObject* transparentRenderers = new Logic::Object::GameObject("TransparentRenderers");
 	//renderers->AddChild(transparentRenderers);
