@@ -167,6 +167,7 @@
     <ClCompile Include="source\Rendering\Renderer\ForwardRenderer.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\Forward_Transparent_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\GeometryRenderFeature.cpp" />
+    <ClCompile Include="source\Rendering\RenderFeature\SSAO_Occlusion_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderPipeline\ForwardRenderPipeline.cpp" />
     <ClCompile Include="source\Test\AudioSourceBehaviour.cpp" />
     <ClCompile Include="source\Test\Background_SkyboxRendererBehaviour.cpp" />
@@ -249,6 +250,7 @@
     <ClInclude Include="header\Rendering\RenderFeature\Forward_Opaque_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\Forward_Transparent_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\GeometryRenderFeature.h" />
+    <ClInclude Include="header\Rendering\RenderFeature\SSAO_Occlusion_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderPipeline\ForwardRenderPipeline.h" />
     <ClInclude Include="header\Test\AudioSourceBehaviour.h" />
     <ClInclude Include="header\Test\Background_SkyboxRendererBehaviour.h" />
