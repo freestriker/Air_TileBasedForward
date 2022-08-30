@@ -15,12 +15,7 @@ namespace AirEngine
 		class F_MirrorRendererBehaviour : public AirEngine::Behaviour::Behaviour
 		{
 		public:
-			F_MirrorRendererBehaviour();
-			~F_MirrorRendererBehaviour();
-			F_MirrorRendererBehaviour(const F_MirrorRendererBehaviour&) = delete;
-			F_MirrorRendererBehaviour& operator=(const F_MirrorRendererBehaviour&) = delete;
-			F_MirrorRendererBehaviour(F_MirrorRendererBehaviour&&) = delete;
-			F_MirrorRendererBehaviour& operator=(F_MirrorRendererBehaviour&&) = delete;
+			CONSTRUCTOR(F_MirrorRendererBehaviour)
 			void OnAwake()override;
 			void OnStart()override;
 			void OnUpdate()override;

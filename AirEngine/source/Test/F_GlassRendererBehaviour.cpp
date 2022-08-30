@@ -28,13 +28,13 @@ void AirEngine::Test::F_GlassRendererBehaviour::OnStart()
 	auto mesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\Sphere.ply");
 	renderer->mesh = mesh;
 
-	//{
-	//	auto background = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");
-	//	auto shader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\GlassShader.shader");
-	//	auto material = new Core::Graphic::Rendering::Material(shader);
-	//	material->SetTextureCube("backgroundTexture", background);
-	//	renderer->AddMaterial(material);
-	//}
+	{
+		auto background = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");
+		auto shader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\F_Opaque_Glass_Shader.shader");
+		auto material = new Core::Graphic::Rendering::Material(shader);
+		material->SetTextureCube("backgroundTexture", background);
+		renderer->AddMaterial(material);
+	}
 
 	{
 		auto preZShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\GeometryShader.shader");

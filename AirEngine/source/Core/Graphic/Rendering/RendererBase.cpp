@@ -71,7 +71,7 @@ void AirEngine::Core::Graphic::Rendering::RendererBase::SubmitRenderFeature(std:
 void AirEngine::Core::Graphic::Rendering::RendererBase::FinishRenderFeature(std::string renderFeatureName, RendererDataBase* rendererData)
 {
 	RendererDataBase::RenderFeatureWrapper* wrapper = &rendererData->_renderFeatureWrappers[renderFeatureName];
-	_renderFeatures[renderFeatureName]->OnFinish(wrapper->renderFeatureData);
+	_renderFeatures[renderFeatureName]->OnFinish(wrapper->renderFeatureData, wrapper->commandBuffer);
 	wrapper->commandBuffer->ParentCommandPool()->DestoryCommandBuffer(wrapper->commandBuffer);
 }
 

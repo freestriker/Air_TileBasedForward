@@ -245,7 +245,7 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 					VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
 				);
 				auto frameBuffer = new Rendering::FrameBuffer(prp, { {"SwapchainAttachment", ai} });
-				glm::vec2 attachmentSize = { extent.width, extent.height };
+				glm::vec2 attachmentSize = { windowExtent.width, windowExtent.height };
 				attachmentSizeBuffer->WriteData(&attachmentSize, sizeof(glm::vec2));
 				pm->SetUniformBuffer("attachmentSizeInfo", attachmentSizeBuffer);
 				pm->SetSlotData("colorTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, ps->VkSampler_(), mainCamera->attachments["ColorAttachment"]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
@@ -255,10 +255,18 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 						auto commandBuffer = graphicCommandPool->CreateCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 						commandBuffer->Reset();
 						commandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-
+						auto colorAttachmentBarrier = Command::ImageMemoryBarrier
+						(
+							mainCamera->attachments["ColorAttachment"],
+							VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+							VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+							VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+							VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+						);
+						commandBuffer->AddPipelineImageBarrier(VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, { &colorAttachmentBarrier });
 						VkClearValue cv = { 0, 0, 0, 0 };
 						commandBuffer->BeginRenderPass(prp, frameBuffer, { {"SwapchainAttachment", cv} });
-						//commandBuffer->DrawMesh(fm, pm);
+						commandBuffer->DrawMesh(fm, pm);
 						commandBuffer->EndRenderPass();
 
 						commandBuffer->EndRecord();

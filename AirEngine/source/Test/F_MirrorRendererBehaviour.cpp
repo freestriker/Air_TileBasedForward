@@ -25,16 +25,16 @@ void AirEngine::Test::F_MirrorRendererBehaviour::OnAwake()
 void AirEngine::Test::F_MirrorRendererBehaviour::OnStart()
 {
 	auto renderer = GameObject()->GetComponent<Renderer::Renderer>();
-	auto mesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\RingSphere.ply");
+	auto mesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\Sphere.ply");
 	renderer->mesh = mesh;
 
-	//{
-	//	auto background = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");
-	//	auto shader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\MirrorShader.shader");
-	//	auto material = new Core::Graphic::Rendering::Material(shader);
-	//	material->SetTextureCube("backgroundTexture", background);
-	//	renderer->AddMaterial(material);
-	//}
+	{
+		auto background = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");
+		auto shader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\F_Opaque_Mirror_Shader.shader");
+		auto material = new Core::Graphic::Rendering::Material(shader);
+		material->SetTextureCube("backgroundTexture", background);
+		renderer->AddMaterial(material);
+	}
 
 	{
 		auto preZShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\GeometryShader.shader");

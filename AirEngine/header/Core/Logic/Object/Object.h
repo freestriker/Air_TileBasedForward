@@ -4,6 +4,14 @@
 #include <rttr/type>
 #include <rttr/registration>
 
+#define CONSTRUCTOR(T) \
+	T();\
+	virtual ~T();\
+	T(const T&) = delete;\
+	T& operator=(const T&) = delete;\
+	T(T&&) = delete;\
+	T& operator=(T&&) = delete;
+
 namespace AirEngine
 {
 	namespace Core

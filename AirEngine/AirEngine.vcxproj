@@ -105,6 +105,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Rendering\RenderFeature\Forward_Opaque_RenderFeature.cpp" />
     <ClCompile Include="source\Core\Graphic\Manager\RenderPipelineManager.cpp" />
     <ClCompile Include="source\Core\Graphic\Rendering\Material.cpp" />
     <ClCompile Include="source\Core\Graphic\Rendering\RendererBase.cpp" />
@@ -170,6 +171,7 @@
     <ClCompile Include="source\Test\F_GlassRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\F_MirrorRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\F_OpaqueRendererBehaviour.cpp" />
+    <ClCompile Include="source\Test\F_WallRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\SelfRotateBehaviour.cpp" />
     <ClCompile Include="source\Utils\ChildBrotherTree.cpp" />
     <ClCompile Include="source\Utils\Condition.cpp" />
@@ -239,6 +241,7 @@
     <ClInclude Include="header\Renderer\Renderer.h" />
     <ClInclude Include="header\Rendering\PresentRenderPass.h" />
     <ClInclude Include="header\Rendering\Renderer\ForwardRenderer.h" />
+    <ClInclude Include="header\Rendering\RenderFeature\Forward_Opaque_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\GeometryRenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderPipeline\ForwardRenderPipeline.h" />
     <ClInclude Include="header\Test\AudioSourceBehaviour.h" />
@@ -246,6 +249,7 @@
     <ClInclude Include="header\Test\F_GlassRendererBehaviour.h" />
     <ClInclude Include="header\Test\F_MirrorRendererBehaviour.h" />
     <ClInclude Include="header\Test\F_OpaqueRendererBehaviour.h" />
+    <ClInclude Include="header\Test\F_WallRendererBehaviour.h" />
     <ClInclude Include="header\Test\SelfRotateBehaviour.h" />
     <ClInclude Include="header\Utils\ChildBrotherTree.h" />
     <ClInclude Include="header\Utils\Condition.h" />

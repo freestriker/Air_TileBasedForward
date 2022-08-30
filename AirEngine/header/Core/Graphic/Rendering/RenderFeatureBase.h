@@ -55,7 +55,7 @@ namespace AirEngine
 					virtual void OnPrepare(RenderFeatureDataBase* renderFeatureData) = 0;
 					virtual void OnExcute(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*>const* rendererComponents) = 0;
 					virtual void OnSubmit(RenderFeatureDataBase* renderFeatureData, Command::CommandBuffer* commandBuffer) = 0;
-					virtual void OnFinish(RenderFeatureDataBase* renderFeatureData) = 0;
+					virtual void OnFinish(RenderFeatureDataBase* renderFeatureData, Command::CommandBuffer* commandBuffer) = 0;
 
 					RTTR_ENABLE(Core::Logic::Object::Object)
 				};

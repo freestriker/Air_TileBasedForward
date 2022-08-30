@@ -31,11 +31,6 @@ void main()
     ambient += AmbinentLighting(normalize(reflect(viewDirection, worldNormal)));
     diffuse += DiffuseLighting(lightInfos.mainLightInfo, worldNormal, inWorldPosition);
     specular += SpecularLighting(lightInfos.mainLightInfo, viewDirection, inWorldPosition, worldNormal, 50.0);
-    // for(int i = 0; i < lightInfos.importantLightCount; i++)
-    // {
-    //     diffuse += DiffuseLighting(lightInfos.importantLightInfos[i], worldNormal, inWorldPosition);
-    //     specular += SpecularLighting(lightInfos.importantLightInfos[i], viewDirection, inWorldPosition, worldNormal, 80.0);
-    // }
     for(int i = 0; i < opaqueLightIndexList.count; i++)
     {
         diffuse += DiffuseLighting(lightInfos.ortherLightInfos[opaqueLightIndexList.indexes[i]], worldNormal, inWorldPosition);

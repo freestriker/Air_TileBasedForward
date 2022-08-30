@@ -10,34 +10,33 @@ namespace AirEngine
 	{
 		namespace RenderFeature
 		{
-			class GeometryRenderFeature final : public Core::Graphic::Rendering::RenderFeatureBase
+			class Forward_Opaque_RenderFeature final : public Core::Graphic::Rendering::RenderFeatureBase
 			{
 			public:
-				class GeometryRenderPass final : public Core::Graphic::Rendering::RenderPassBase
+				class Forward_Opaque_RenderPass final : public Core::Graphic::Rendering::RenderPassBase
 				{
 				private:
 					void OnPopulateRenderPassSettings(RenderPassSettings& settings)override;
 				public:
-					CONSTRUCTOR(GeometryRenderPass)
+					CONSTRUCTOR(Forward_Opaque_RenderPass)
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderPassBase)
 				};
 
-				class GeometryRenderFeatureData final : public Core::Graphic::Rendering::RenderFeatureDataBase
+				class Forward_Opaque_RenderFeatureData final : public Core::Graphic::Rendering::RenderFeatureDataBase
 				{
 				public:
 					Core::Graphic::Rendering::FrameBuffer* frameBuffer;
-					Core::Graphic::Instance::Image* depthTexture;
-					Core::Graphic::Instance::Image* normalTexture;
+					bool needClearColorAttachment;
 
-					CONSTRUCTOR(GeometryRenderFeatureData)
+					CONSTRUCTOR(Forward_Opaque_RenderFeatureData)
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderFeatureDataBase)
 				};
 
-				CONSTRUCTOR(GeometryRenderFeature)
+				CONSTRUCTOR(Forward_Opaque_RenderFeature)
 
 			private:
-				Core::Graphic::Rendering::RenderPassBase* _geometryRenderPass;
-				std::string _geometryRenderPassName;
+				Core::Graphic::Rendering::RenderPassBase* _renderPass;
+				std::string _renderPassName;
 
 				Core::Graphic::Rendering::RenderFeatureDataBase* OnCreateRenderFeatureData(Camera::CameraBase* camera)override;
 				void OnResolveRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera)override;

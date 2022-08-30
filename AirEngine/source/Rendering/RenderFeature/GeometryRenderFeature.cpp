@@ -207,9 +207,9 @@ void AirEngine::Rendering::RenderFeature::GeometryRenderFeature::OnExcute(Core::
 void AirEngine::Rendering::RenderFeature::GeometryRenderFeature::OnSubmit(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer)
 {
 	commandBuffer->Submit();
-	commandBuffer->WaitForFinish();
 }
 
-void AirEngine::Rendering::RenderFeature::GeometryRenderFeature::OnFinish(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)
+void AirEngine::Rendering::RenderFeature::GeometryRenderFeature::OnFinish(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer)
 {
+	commandBuffer->WaitForFinish();
 }

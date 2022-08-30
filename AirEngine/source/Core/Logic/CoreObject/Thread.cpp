@@ -47,6 +47,7 @@
 #include "Core/Graphic/RenderPass/SsaoRenderPass.h"
 #include "Rendering/RenderPipeline/ForwardRenderPipeline.h"
 #include "Core/Graphic/Manager/RenderPipelineManager.h"
+#include "Test/F_WallRendererBehaviour.h"
 
 AirEngine::Core::Logic::CoreObject::Thread::LogicThread AirEngine::Core::Logic::CoreObject::Thread::_logicThread = AirEngine::Core::Logic::CoreObject::Thread::LogicThread();
 
@@ -407,8 +408,8 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	CoreObject::Instance::rootObject.AddChild(cameraGo);
 	auto camera = new Camera::PerspectiveCamera(
 		{
-			{"ColorAttachment", Graphic::Instance::Image::Create2DImage({1600, 900}, VK_FORMAT_R8G8B8A8_SRGB, VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT)},
-			{"NormalAttachment", Graphic::Instance::Image::Create2DImage({1600, 900}, VK_FORMAT_R16G16B16A16_SFLOAT, VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT)},
+			{"ColorAttachment", Graphic::Instance::Image::Create2DImage({1600, 900}, VK_FORMAT_R8G8B8A8_SRGB, VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT)},
+			{"NormalAttachment", Graphic::Instance::Image::Create2DImage({1600, 900}, VK_FORMAT_R16G16B16A16_SFLOAT, VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_STORAGE_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT)},
 			{"DepthAttachment", Graphic::Instance::Image::Create2DImage({1600, 900}, VK_FORMAT_D32_SFLOAT, VkImageUsageFlagBits::VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT)}
 		},
 		"ForwardRenderer"
@@ -433,29 +434,29 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	Logic::Object::GameObject* renderers = new Logic::Object::GameObject("Renderers");
 	CoreObject::Instance::rootObject.AddChild(renderers);
 
-	Logic::Object::GameObject* opaqueRendererGo = new Logic::Object::GameObject("meshRenderer");
+	Logic::Object::GameObject* opaqueRendererGo = new Logic::Object::GameObject("WallRenderer");
 	renderers->AddChild(opaqueRendererGo);
 	opaqueRendererGo->AddComponent(new Renderer::Renderer());
-	opaqueRendererGo->AddComponent(new Test::F_OpaqueRendererBehaviour());
+	opaqueRendererGo->AddComponent(new Test::F_WallRendererBehaviour());
+	opaqueRendererGo->AddComponent(new Test::SelfRotateBehaviour(60));
 	opaqueRendererGo->transform.SetScale(glm::vec3(0.8, 0.8, 0.8));
 
-	//Logic::Object::GameObject* glassMeshRendererGo = new Logic::Object::GameObject("GlassMeshRenderer");
-	//renderers->AddChild(glassMeshRendererGo);
-	//glassMeshRendererGo->AddComponent(new Renderer::Renderer());
-	//glassMeshRendererGo->AddComponent(new Test::F_GlassRendererBehaviour());
-	//glassMeshRendererGo->transform.SetTranslation(glm::vec3(3, 0, 0));
+	Logic::Object::GameObject* glassMeshRendererGo = new Logic::Object::GameObject("GlassRenderer");
+	renderers->AddChild(glassMeshRendererGo);
+	glassMeshRendererGo->AddComponent(new Renderer::Renderer());
+	glassMeshRendererGo->AddComponent(new Test::F_GlassRendererBehaviour());
+	glassMeshRendererGo->transform.SetTranslation(glm::vec3(3, 0, 0));
 
-	Logic::Object::GameObject* mirrorMeshRendererGo = new Logic::Object::GameObject("MirrorMeshRenderer");
+	Logic::Object::GameObject* mirrorMeshRendererGo = new Logic::Object::GameObject("MirrorRenderer");
 	renderers->AddChild(mirrorMeshRendererGo);
 	mirrorMeshRendererGo->AddComponent(new Renderer::Renderer());
 	mirrorMeshRendererGo->AddComponent(new Test::F_MirrorRendererBehaviour());
-	mirrorMeshRendererGo->AddComponent(new Test::SelfRotateBehaviour(60));
 	mirrorMeshRendererGo->transform.SetTranslation(glm::vec3(-3, 0, 0));
 
 	Logic::Object::GameObject* culledRendererGo = new Logic::Object::GameObject("MeshRendererCulled");
 	renderers->AddChild(culledRendererGo);
 	culledRendererGo->AddComponent(new Renderer::Renderer());
-	culledRendererGo->AddComponent(new Test::F_OpaqueRendererBehaviour());
+	culledRendererGo->AddComponent(new Test::F_WallRendererBehaviour());
 	culledRendererGo->transform.SetTranslation(glm::vec3(2000, 2000, 2000));
 
 	//Logic::Object::GameObject* transparentRenderers = new Logic::Object::GameObject("TransparentRenderers");

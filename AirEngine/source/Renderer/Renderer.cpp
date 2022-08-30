@@ -29,7 +29,8 @@ void AirEngine::Renderer::Renderer::AddMaterial(Core::Graphic::Rendering::Materi
 
 AirEngine::Core::Graphic::Rendering::Material* AirEngine::Renderer::Renderer::GetMaterial(std::string pass)
 {
-	return _materials[pass];
+	auto iterator = _materials.find(pass);
+	return iterator == std::end(_materials) ? nullptr : iterator->second;
 }
 
 const std::map<std::string, AirEngine::Core::Graphic::Rendering::Material*>* AirEngine::Renderer::Renderer::GetMaterials()

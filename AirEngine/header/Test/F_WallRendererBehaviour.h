@@ -12,10 +12,10 @@ namespace AirEngine
 {
 	namespace Test
 	{
-		class F_GlassRendererBehaviour : public AirEngine::Behaviour::Behaviour
+		class F_WallRendererBehaviour : public AirEngine::Behaviour::Behaviour
 		{
 		public:
-			CONSTRUCTOR(F_GlassRendererBehaviour)
+			CONSTRUCTOR(F_WallRendererBehaviour)
 			void OnAwake()override;
 			void OnStart()override;
 			void OnUpdate()override;
