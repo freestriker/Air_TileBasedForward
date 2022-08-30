@@ -2,6 +2,7 @@
 #include "Rendering/RenderFeature/GeometryRenderFeature.h"
 #include "Rendering/RenderFeature/Forward_Opaque_RenderFeature.h"
 #include "Rendering/RenderFeature/Background_RenderFeature.h"
+#include "Rendering/RenderFeature/Forward_Transparent_RenderFeature.h"
 
 
 RTTR_REGISTRATION
@@ -25,6 +26,7 @@ AirEngine::Rendering::Renderer::ForwardRenderer::ForwardRenderer()
 {
 	UseRenderFeature("GeometryRenderFeature", new RenderFeature::GeometryRenderFeature());
 	UseRenderFeature("Forward_Opaque_RenderFeature", new RenderFeature::Forward_Opaque_RenderFeature());
+	UseRenderFeature("Forward_Transparent_RenderFeature", new RenderFeature::Forward_Transparent_RenderFeature());
 	UseRenderFeature("Background_RenderFeature", new RenderFeature::Background_RenderFeature());
 }
 
@@ -63,6 +65,7 @@ void AirEngine::Rendering::Renderer::ForwardRenderer::PrepareRenderer(Core::Grap
 	PrepareRenderFeature("Background_RenderFeature", rendererData);
 	PrepareRenderFeature("GeometryRenderFeature", rendererData);
 	PrepareRenderFeature("Forward_Opaque_RenderFeature", rendererData);
+	PrepareRenderFeature("Forward_Transparent_RenderFeature", rendererData);
 }
 
 void AirEngine::Rendering::Renderer::ForwardRenderer::ExcuteRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*> const* rendererComponents)
@@ -70,6 +73,7 @@ void AirEngine::Rendering::Renderer::ForwardRenderer::ExcuteRenderer(Core::Graph
 	ExcuteRenderFeature("Background_RenderFeature", rendererData, camera, rendererComponents);
 	ExcuteRenderFeature("GeometryRenderFeature", rendererData, camera, rendererComponents);
 	ExcuteRenderFeature("Forward_Opaque_RenderFeature", rendererData, camera, rendererComponents);
+	ExcuteRenderFeature("Forward_Transparent_RenderFeature", rendererData, camera, rendererComponents);
 }
 
 void AirEngine::Rendering::Renderer::ForwardRenderer::SubmitRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -77,6 +81,7 @@ void AirEngine::Rendering::Renderer::ForwardRenderer::SubmitRenderer(Core::Graph
 	SubmitRenderFeature("Background_RenderFeature", rendererData);
 	SubmitRenderFeature("GeometryRenderFeature", rendererData);
 	SubmitRenderFeature("Forward_Opaque_RenderFeature", rendererData);
+	SubmitRenderFeature("Forward_Transparent_RenderFeature", rendererData);
 }
 
 void AirEngine::Rendering::Renderer::ForwardRenderer::FinishRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -84,5 +89,6 @@ void AirEngine::Rendering::Renderer::ForwardRenderer::FinishRenderer(Core::Graph
 	FinishRenderFeature("Background_RenderFeature", rendererData);
 	FinishRenderFeature("GeometryRenderFeature", rendererData);
 	FinishRenderFeature("Forward_Opaque_RenderFeature", rendererData);
+	FinishRenderFeature("Forward_Transparent_RenderFeature", rendererData);
 }
  

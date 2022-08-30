@@ -165,6 +165,7 @@
     <ClCompile Include="source\Renderer\Renderer.cpp" />
     <ClCompile Include="source\Rendering\PresentRenderPass.cpp" />
     <ClCompile Include="source\Rendering\Renderer\ForwardRenderer.cpp" />
+    <ClCompile Include="source\Rendering\RenderFeature\Forward_Transparent_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\GeometryRenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderPipeline\ForwardRenderPipeline.cpp" />
     <ClCompile Include="source\Test\AudioSourceBehaviour.cpp" />
@@ -173,6 +174,7 @@
     <ClCompile Include="source\Test\F_GlassRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\F_MirrorRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\F_OpaqueRendererBehaviour.cpp" />
+    <ClCompile Include="source\Test\F_BrokenGlassRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\F_WallRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\SelfRotateBehaviour.cpp" />
     <ClCompile Include="source\Utils\ChildBrotherTree.cpp" />
@@ -245,11 +247,13 @@
     <ClInclude Include="header\Rendering\Renderer\ForwardRenderer.h" />
     <ClInclude Include="header\Rendering\RenderFeature\Background_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\Forward_Opaque_RenderFeature.h" />
+    <ClInclude Include="header\Rendering\RenderFeature\Forward_Transparent_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\GeometryRenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderPipeline\ForwardRenderPipeline.h" />
     <ClInclude Include="header\Test\AudioSourceBehaviour.h" />
     <ClInclude Include="header\Test\Background_SkyboxRendererBehaviour.h" />
     <ClInclude Include="header\Test\CameraMoveBehaviour.h" />
+    <ClInclude Include="header\Test\F_BrokenGlassRendererBehaviour.h" />
     <ClInclude Include="header\Test\F_GlassRendererBehaviour.h" />
     <ClInclude Include="header\Test\F_MirrorRendererBehaviour.h" />
     <ClInclude Include="header\Test\F_OpaqueRendererBehaviour.h" />

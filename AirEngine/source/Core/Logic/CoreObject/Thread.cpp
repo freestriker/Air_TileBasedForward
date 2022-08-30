@@ -21,7 +21,7 @@
 #include "Test/F_GlassRendererBehaviour.h"
 #include "Test/F_MirrorRendererBehaviour.h"
 #include "Test/F_OpaqueRendererBehaviour.h"
-#include "Test/F_TransparentRendererBehaviour.h"
+#include "Test/F_BrokenGlassRendererBehaviour.h"
 #include "Test/TBF_TransparentRendererBehaviour.h"
 #include "Renderer/Renderer.h"
 #include "Core/Graphic/CoreObject/Instance.h"
@@ -442,7 +442,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		backgroundRendererGo->AddComponent(new Test::Background_SkyboxRendererBehaviour());
 	}
 
-	///Forward
+	///Forward opaque
 	{
 		Logic::Object::GameObject* opaqueRendererGo = new Logic::Object::GameObject("WallRenderer");
 		renderers->AddChild(opaqueRendererGo);
@@ -462,32 +462,56 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		mirrorMeshRendererGo->AddComponent(new Renderer::Renderer());
 		mirrorMeshRendererGo->AddComponent(new Test::F_MirrorRendererBehaviour());
 		mirrorMeshRendererGo->transform.SetTranslation(glm::vec3(-3, 0, 0));
-
-		Logic::Object::GameObject* culledRendererGo = new Logic::Object::GameObject("MeshRendererCulled");
-		renderers->AddChild(culledRendererGo);
-		culledRendererGo->AddComponent(new Renderer::Renderer());
-		culledRendererGo->AddComponent(new Test::F_WallRendererBehaviour());
-		culledRendererGo->transform.SetTranslation(glm::vec3(2000, 2000, 2000));
 	}
 
-	//Logic::Object::GameObject* transparentRenderers = new Logic::Object::GameObject("TransparentRenderers");
-	//renderers->AddChild(transparentRenderers);
-	//{
-	//	Logic::Object::GameObject* transparentRendererGo = new Logic::Object::GameObject("F_TransparentRenderer1");
-	//	transparentRenderers->AddChild(transparentRendererGo);
-	//	transparentRendererGo->AddComponent(new Renderer::Renderer());
-	//	transparentRendererGo->AddComponent(new Test::F_TransparentRendererBehaviour());
-	//	transparentRendererGo->transform.SetScale(glm::vec3(2, 2, 2));
-	//	transparentRendererGo->transform.SetTranslation(glm::vec3(2, 0, 2));
-	//}
-	//{
-	//	Logic::Object::GameObject* transparentRendererGo = new Logic::Object::GameObject("TBF_TransparentRenderer1");
-	//	transparentRenderers->AddChild(transparentRendererGo);
-	//	transparentRendererGo->AddComponent(new Renderer::Renderer());
-	//	transparentRendererGo->AddComponent(new Test::TBF_TransparentRendererBehaviour());
-	//	transparentRendererGo->transform.SetScale(glm::vec3(2, 2, 2));
-	//	transparentRendererGo->transform.SetTranslation(glm::vec3(-2, 0, 2));
-	//}
+	///Forward transparent
+	{
+		Logic::Object::GameObject* transparentRenderers = new Logic::Object::GameObject("TransparentRenderers");
+		renderers->AddChild(transparentRenderers);
+		{
+			Logic::Object::GameObject* transparentRendererGo = new Logic::Object::GameObject("F_TransparentRenderer1");
+			transparentRenderers->AddChild(transparentRendererGo);
+			transparentRendererGo->AddComponent(new Renderer::Renderer());
+			transparentRendererGo->AddComponent(new Test::F_BrokenGlassRendererBehaviour());
+			transparentRendererGo->transform.SetScale(glm::vec3(2, 2, 2));
+			transparentRendererGo->transform.SetTranslation(glm::vec3(2, 0, 2));
+		}
+		{
+			Logic::Object::GameObject* transparentRendererGo = new Logic::Object::GameObject("F_TransparentRenderer2");
+			transparentRenderers->AddChild(transparentRendererGo);
+			transparentRendererGo->AddComponent(new Renderer::Renderer());
+			transparentRendererGo->AddComponent(new Test::F_BrokenGlassRendererBehaviour());
+			transparentRendererGo->transform.SetScale(glm::vec3(2, 2, 2));
+			transparentRendererGo->transform.SetTranslation(glm::vec3(-2, 0, 2));
+		}
+		{
+			Logic::Object::GameObject* transparentRendererGo = new Logic::Object::GameObject("F_TransparentRenderer3");
+			transparentRenderers->AddChild(transparentRendererGo);
+			transparentRendererGo->AddComponent(new Renderer::Renderer());
+			transparentRendererGo->AddComponent(new Test::F_BrokenGlassRendererBehaviour());
+			transparentRendererGo->transform.SetScale(glm::vec3(2, 2, 2));
+			transparentRendererGo->transform.SetEulerRotation(glm::vec3(90, 0, 0));
+			transparentRendererGo->transform.SetTranslation(glm::vec3(-2, 2, 0));
+		}
+		{
+			Logic::Object::GameObject* transparentRendererGo = new Logic::Object::GameObject("F_TransparentRenderer4");
+			transparentRenderers->AddChild(transparentRendererGo);
+			transparentRendererGo->AddComponent(new Renderer::Renderer());
+			transparentRendererGo->AddComponent(new Test::F_BrokenGlassRendererBehaviour());
+			transparentRendererGo->transform.SetScale(glm::vec3(2, 2, 2));
+			transparentRendererGo->transform.SetEulerRotation(glm::vec3(90, 0, 0));
+			transparentRendererGo->transform.SetTranslation(glm::vec3(2, 2, 0));
+		}
+		{
+			Logic::Object::GameObject* transparentRendererGo = new Logic::Object::GameObject("F_TransparentRenderer5");
+			transparentRenderers->AddChild(transparentRendererGo);
+			transparentRendererGo->AddComponent(new Renderer::Renderer());
+			transparentRendererGo->AddComponent(new Test::F_BrokenGlassRendererBehaviour());
+			transparentRendererGo->transform.SetScale(glm::vec3(2, 2, 2));
+			transparentRendererGo->transform.SetEulerRotation(glm::vec3(90, 90, 90));
+			transparentRendererGo->transform.SetTranslation(glm::vec3(4, 0, 0));
+		}
+	}
 
 	/////OIT
 	//Logic::Object::GameObject* oitRenderers = new Logic::Object::GameObject("OitRenderers");

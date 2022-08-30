@@ -1,7 +1,7 @@
 {
-  "renderPass": "F_TransparentRenderPass",
+  "renderPass": "AirEngine::Rendering::RenderFeature::Forward_Transparent_RenderFeature::Forward_Transparent_RenderPass",
   "subpass": "DrawSubpass",
-  "shaderPaths": ["..\\Asset\\Shader\\Spv\\F_TransparentShader.vert.spv", "..\\Asset\\Shader\\Spv\\F_TransparentShader.frag.spv"],
+  "shaderPaths": ["..\\Asset\\Shader\\Spv\\F_Transparent_BrokenGlass_Shader.vert.spv", "..\\Asset\\Shader\\Spv\\F_Transparent_BrokenGlass_Shader.frag.spv"],
   "cullMode": 0,
   "depthTestEnable": 1,
   "depthWriteEnable": 0,

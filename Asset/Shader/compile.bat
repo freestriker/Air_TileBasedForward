@@ -10,8 +10,8 @@ glslangValidator.exe -t -V F_Opaque_Glass_Shader.frag -IUtils/ -o Spv/F_Opaque_G
 glslangValidator.exe -t -V Background_Skybox_Shader.vert -IUtils/ -o Spv/Background_Skybox_Shader.vert.spv
 glslangValidator.exe -t -V Background_Skybox_Shader.frag -IUtils/ -o Spv/Background_Skybox_Shader.frag.spv
 
-glslangValidator.exe -t -V F_TransparentShader.vert -IUtils/ -o Spv/F_TransparentShader.vert.spv
-glslangValidator.exe -t -V F_TransparentShader.frag -IUtils/ -o Spv/F_TransparentShader.frag.spv
+glslangValidator.exe -t -V F_Transparent_BrokenGlass_Shader.vert -IUtils/ -o Spv/F_Transparent_BrokenGlass_Shader.vert.spv
+glslangValidator.exe -t -V F_Transparent_BrokenGlass_Shader.frag -IUtils/ -o Spv/F_Transparent_BrokenGlass_Shader.frag.spv
 
 glslangValidator.exe -t -V TBF_TransparentShader.vert -IUtils/ -o Spv/TBF_TransparentShader.vert.spv
 glslangValidator.exe -t -V TBF_TransparentShader.frag -IUtils/ -o Spv/TBF_TransparentShader.frag.spv
