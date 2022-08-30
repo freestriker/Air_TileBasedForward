@@ -58,10 +58,10 @@ AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::SSAO_Occlusio
 void AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::SSAO_Occlusion_RenderPass::OnPopulateRenderPassSettings(RenderPassSettings& settings)
 {
 	settings.AddColorAttachment(
-		"ColorAttachment",
+		"OcclusionTexture",
 		VK_FORMAT_R16_SFLOAT,
 		VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT,
-		VK_ATTACHMENT_LOAD_OP_CLEAR,
+		VK_ATTACHMENT_LOAD_OP_DONT_CARE,
 		VK_ATTACHMENT_STORE_OP_STORE,
 		VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
 		VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
@@ -69,7 +69,7 @@ void AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::SSAO_Occ
 	settings.AddSubpass(
 		"DrawSubpass",
 		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		{ "ColorAttachment" }
+		{ "OcclusionTexture" }
 	);
 	settings.AddDependency(
 		"VK_SUBPASS_EXTERNAL",
@@ -88,8 +88,7 @@ AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::SSAO_Occlusio
 	, occlusionTexture(nullptr)
 	, occlusionTextureSizeInfoBuffer(nullptr)
 	, samplePointInfoBuffer(nullptr)
-	, noiseInfoBuffer(nullptr)
-	, occlusionTextureSize({-1, -1})
+	, occlusionTextureSize({0, 0})
 	, samplePointRadius(1.0f)
 	, samplePointBiasAngle(25.0f)
 	, depthTexture(nullptr)
@@ -118,8 +117,21 @@ AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::SSAO_Occlusio
 			VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
 		)
 	)
+	, _noiseInfoBuffer(nullptr)
 {
-
+	_noiseInfoBuffer = new Core::Graphic::Instance::Buffer{
+			sizeof(float) * NOISE_COUNT,
+			VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+	};
+	std::array<float, NOISE_COUNT> noiseInfo = std::array<float, NOISE_COUNT>();
+	std::default_random_engine engine;
+	std::uniform_real_distribution<float> u(0.0f, 1.0f);
+	for (auto& noise : noiseInfo)
+	{
+		noise = u(engine);
+	}
+	_noiseInfoBuffer->WriteData(noiseInfo.data(), sizeof(float) * NOISE_COUNT);
 }
 
 AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::~SSAO_Occlusion_RenderFeature()
@@ -128,21 +140,18 @@ AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::~SSAO_Occlusi
 	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Mesh\\BackgroundMesh.ply");
 	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\SSAO_Occlusion_Shader.shader");
 	delete _textureSampler;
+	delete _noiseInfoBuffer;
 }
 
 AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::OnCreateRenderFeatureData(Camera::CameraBase* camera)
 {
-	return new SSAO_Occlusion_RenderFeatureData();
-}
-
-void AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::OnResolveRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera)
-{
-	auto featureData = static_cast<SSAO_Occlusion_RenderFeatureData*>(renderFeatureData);
-
+	auto featureData = new SSAO_Occlusion_RenderFeatureData();
+	
 	///Occlusion texture
 	{
+		featureData->occlusionTextureSize = { camera->attachments["ColorAttachment"]->VkExtent2D_().width / 2, camera->attachments["ColorAttachment"]->VkExtent2D_().height / 2 };
 		featureData->occlusionTexture = Core::Graphic::Instance::Image::Create2DImage(
-			{ static_cast<uint32_t>(featureData->occlusionTextureSize.x), static_cast<uint32_t>(featureData->occlusionTextureSize.y) },
+			featureData->occlusionTextureSize,
 			VK_FORMAT_R16_SFLOAT,
 			VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
@@ -162,26 +171,16 @@ void AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::OnResolv
 			VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 		};
-		auto occlusionTextureSize = AttachmentSizeInfo{ glm::vec2(featureData->occlusionTextureSize) , glm::vec2(1, 1) / glm::vec2(featureData->occlusionTextureSize) };
+		auto occlusionTextureSize = AttachmentSizeInfo{ glm::vec2(featureData->occlusionTextureSize.width, featureData->occlusionTextureSize.height) , glm::vec2(1, 1) / glm::vec2(featureData->occlusionTextureSize.width, featureData->occlusionTextureSize.height) };
 		featureData->occlusionTextureSizeInfoBuffer->WriteData(&occlusionTextureSize, sizeof(AttachmentSizeInfo));
 	}
 
-	///Noise info
-	{
-		featureData->noiseInfoBuffer = new Core::Graphic::Instance::Buffer{
-			sizeof(float) * NOISE_COUNT,
-			VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-		};
-		std::array<float, NOISE_COUNT> noiseInfo = std::array<float, NOISE_COUNT>();
-		std::default_random_engine engine;
-		std::uniform_real_distribution<float> u(0.0f, 1.0f);
-		for (auto& noise : noiseInfo)
-		{
-			noise = u(engine);
-		}
-		featureData->noiseInfoBuffer->WriteData(noiseInfo.data(), sizeof(float) * NOISE_COUNT);
-	}
+	return featureData;
+}
+
+void AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::OnResolveRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera)
+{
+	auto featureData = static_cast<SSAO_Occlusion_RenderFeatureData*>(renderFeatureData);
 
 	///Sample point info
 	{
@@ -194,7 +193,7 @@ void AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::OnResolv
 		std::array<glm::vec4, SAMPLE_POINT_COUNT> samplePointInfo = std::array<glm::vec4, SAMPLE_POINT_COUNT>();
 		for (int i = 0; i < SAMPLE_POINT_COUNT; i++)
 		{
-			samplePointInfo[i] = glm::vec4(generator.Get(), std::clamp(std::pow(static_cast<float>(i + 1) / static_cast<float>(SAMPLE_POINT_COUNT), 2.0f), 0.1f, 1.0f) * featureData->samplePointRadius);
+			samplePointInfo[i] = glm::vec4(generator.Get() * std::clamp(std::pow(static_cast<float>(i + 1) / static_cast<float>(SAMPLE_POINT_COUNT), 2.0f), 0.1f, 1.0f), featureData->samplePointRadius);
 		}
 		featureData->samplePointInfoBuffer->WriteData(samplePointInfo.data(), sizeof(glm::vec4) * SAMPLE_POINT_COUNT);
 	}
@@ -204,7 +203,7 @@ void AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::OnResolv
 		featureData->material = new Core::Graphic::Rendering::Material(_ssaoShader);
 		featureData->material->SetUniformBuffer("occlusionTextureSizeInfo", featureData->occlusionTextureSizeInfoBuffer);
 		featureData->material->SetUniformBuffer("samplePointInfo", featureData->samplePointInfoBuffer);
-		featureData->material->SetUniformBuffer("noiseInfo", featureData->noiseInfoBuffer);
+		featureData->material->SetUniformBuffer("noiseInfo", _noiseInfoBuffer);
 		featureData->material->SetSlotData("depthTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), featureData->depthTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
 		featureData->material->SetSlotData("normalTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), featureData->normalTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
 	}
@@ -217,7 +216,6 @@ void AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::OnDestro
 	delete featureData->occlusionTexture;
 	delete featureData->occlusionTextureSizeInfoBuffer;
 	delete featureData->samplePointInfoBuffer;
-	delete featureData->noiseInfoBuffer;
 
 	delete featureData->material;
 }
@@ -264,6 +262,7 @@ void AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::OnExcute
 			featureData->frameBuffer
 		);
 
+		featureData->material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
 		commandBuffer->DrawMesh(_fullScreenMesh, featureData->material);
 
 		commandBuffer->EndRenderPass();

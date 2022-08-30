@@ -51,14 +51,13 @@ namespace AirEngine
 				private:
 					Core::Graphic::Rendering::Material* material;
 					Core::Graphic::Rendering::FrameBuffer* frameBuffer;
-					Core::Graphic::Instance::Image* occlusionTexture;
 					Core::Graphic::Instance::Buffer* occlusionTextureSizeInfoBuffer;
 					Core::Graphic::Instance::Buffer* samplePointInfoBuffer;
-					Core::Graphic::Instance::Buffer* noiseInfoBuffer;
+					VkExtent2D occlusionTextureSize;
 				public:
-					glm::ivec2 occlusionTextureSize;
 					float samplePointRadius;
 					float samplePointBiasAngle;
+					Core::Graphic::Instance::Image* occlusionTexture;
 					Core::Graphic::Instance::Image* depthTexture;
 					Core::Graphic::Instance::Image* normalTexture;
 
@@ -78,6 +77,7 @@ namespace AirEngine
 				Asset::Mesh* _fullScreenMesh;
 				Core::Graphic::Rendering::Shader* _ssaoShader;
 				Core::Graphic::Instance::ImageSampler* _textureSampler;
+				Core::Graphic::Instance::Buffer* noiseInfoBuffer;
 
 				Core::Graphic::Rendering::RenderFeatureDataBase* OnCreateRenderFeatureData(Camera::CameraBase* camera)override;
 				void OnResolveRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera)override;
