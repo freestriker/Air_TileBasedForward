@@ -1,27 +1,20 @@
 #version 450
 #extension GL_GOOGLE_include_directive: enable
-#extension GL_EXT_shader_atomic_float: enable
 
-#include "TileBasedForwardLighting.glsl"
+#include "TBForwardLighting.glsl"
 
-layout(origin_upper_left) in vec4 gl_FragCoord;
-
-layout(set = START_SET_INDEX + 0, binding = 0) uniform sampler2D diffuseTexture;
-layout(set = START_SET_INDEX + 1, binding = 0) uniform sampler2D normalTexture;
-
-layout(location = 0) in vec2 inTexCoords;
-layout(location = 1) in vec3 inWorldPosition;
-layout(location = 2) in vec3 inWorldNormal;
-layout(location = 3) in vec3 inWorldTangent;
-layout(location = 4) in vec3 inWorldBitangent;
+layout(location = 0) in vec3 inWorldPosition;
+layout(location = 1) in vec3 inWorldNormal;
 
 layout(location = 0) out vec4 ColorAttachment;
 
+layout(set = START_SET_INDEX + 0, binding = 0) uniform samplerCube backgroundTexture;
+
+const float refractRatio = 1.0 / 1.52;
+
 void main() 
 {
-    vec3 wDisturbance = TBNMatrix(inWorldTangent, inWorldBitangent, inWorldNormal) * NormalC2T(texture(normalTexture, inTexCoords));
-    vec3 worldNormal = normalize(normalize(inWorldNormal) + wDisturbance);
-
+    vec3 worldNormal = normalize(inWorldNormal);
     vec3 viewDirection = CameraWObserveDirection(inWorldPosition, cameraInfo.info);
 
     vec3 ambient = vec3(0, 0, 0);
@@ -37,5 +30,7 @@ void main()
         specular += SpecularLighting(lightInfos.ortherLightInfos[opaqueLightIndexList.indexes[i]], viewDirection, inWorldPosition, worldNormal, 80.0);
     }
 
-    ColorAttachment = texture(diffuseTexture, inTexCoords) * vec4(diffuse + specular + ambient, 1);
+    vec3 background = texture(backgroundTexture, -normalize(reflect(viewDirection, worldNormal))).xyz;
+
+    ColorAttachment = vec4(background + ambient * 0.2 + diffuse * 0.2 + specular * 0.2, 1);
 }

@@ -1,12 +1,12 @@
-#ifndef _TILE_BASED_FORWARD_LIGHTING_GLSL_
-#define _TILE_BASED_FORWARD_LIGHTING_GLSL_
+#ifndef _TBFORWARD_LIGHTING_GLSL_
+#define _TBFORWARD_LIGHTING_GLSL_
 
 #include "Camera.glsl"
 #include "Object.glsl"
 #include "Light.glsl"
 
 #ifndef LIGHTING_MODE
-#define LIGHTING_MODE TILE_BASED_FORWARD_LIGHTING
+#define LIGHTING_MODE TBFORWARD_LIGHTING
 
 #define START_SET_INDEX 6
 
@@ -39,13 +39,13 @@ struct LightIndexList
 	int count;
 	int[MAX_LIGHT_INDEX_COUNT] indexes;
 };
-layout (set = 4, binding = 0) buffer OpaqueLightIndexLists
+layout (set = 4, binding = 0) readonly buffer OpaqueLightIndexLists
 {
 	ivec2 tileCount;
     LightIndexList[] lists;
 }opaqueLightIndexLists;
 
-layout (set = 5, binding = 0) buffer TransparentLightIndexLists
+layout (set = 5, binding = 0) readonly buffer TransparentLightIndexLists
 {
 	ivec2 tileCount;
     LightIndexList[] lists;
@@ -68,4 +68,4 @@ vec3 AmbinentLighting(in vec3 direction)
 
 #endif ///#ifndef LIGHTING_MODE
 
-#endif ///#ifndef _TILE_BASED_FORWARD_LIGHTING_GLSL_
+#endif ///#ifndef _TBFORWARD_LIGHTING_GLSL_

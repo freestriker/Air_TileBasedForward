@@ -1,7 +1,7 @@
 #version 450
 #extension GL_GOOGLE_include_directive: enable
 
-#include "TileBasedForwardLighting.glsl"
+#include "TBForwardLighting.glsl"
 
 layout(location = 0) in vec3 vertexPosition;
 layout(location = 1) in vec2 vertexTexCoords;
