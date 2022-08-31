@@ -44,7 +44,12 @@ layout (set = 3, binding = 0) buffer TransparentLightIndexLists
 	LightIndexList[] lists;
 }transparentLightIndexLists;
 
-layout (set = 4, binding = 0, r32f) uniform readonly image2D depthImage;
+layout (set = 4, binding = 0) uniform sampler2D depthTexture;
+layout (set = 5, binding = 0) uniform DepthTextureInfo
+{
+	ivec2 size;
+	vec2 texelSize;
+}depthTextureInfo;
 
 int Iterater = 0;
 
@@ -57,8 +62,6 @@ int threadLocalIndex = int(gl_LocalInvocationID.y * LOCAL_GROUP_WIDTH + gl_Local
 #define globalGroupID (ivec2(gl_WorkGroupID.xy))
 #define globalGroupSize (ivec2(gl_NumWorkGroups.xy))
 #define globalGroup1DID (globalGroupID.y * globalGroupSize.x + globalGroupID.x)
-
-#define depthImageSize (imageSize(depthImage))
 
 shared float minNdcDepth;
 shared float maxNdcDepth;
@@ -89,15 +92,15 @@ void main()
 		for(Iterater = 0; Iterater < ITERATER_END; Iterater++)
 		{
 			vec2 po = pixelOffset;
-			if(po.x >= depthImageSize.x || po.y >= depthImageSize.y) continue;
-			float pixelNdcDepth = imageLoad(depthImage, ivec2(po)).r;
+			if(po.x >= depthTextureInfo.size.x || po.y >= depthTextureInfo.size.y) continue;
+			float pixelNdcDepth = texture(depthTexture, (po + vec2(0.5, 0.5)) * depthTextureInfo.texelSize).r;
 			minLocalDepth = minLocalDepth <= pixelNdcDepth ? minLocalDepth : pixelNdcDepth;
 			maxLocalDepth = maxLocalDepth >= pixelNdcDepth ? maxLocalDepth : pixelNdcDepth;
 		}
 		localMinNdcDepths[threadLocalIndex] = minLocalDepth;
 		localMaxNdcDepths[threadLocalIndex] = maxLocalDepth;
-		barrier();
 	}
+	barrier();
 
 	///Find group's max min depth
 	if(localGroupOffset == ivec2(0, 0))
@@ -117,14 +120,14 @@ void main()
 	///Build ggo bounding box
 	if(localGroupOffset == ivec2(0, 0))
 	{
-		int boundingBoxPixelWidth = depthImageSize.x - globalGroupOffset.x >= TILE_WIDTH ? TILE_WIDTH : depthImageSize.x % TILE_WIDTH;
-		int boundingBoxPixelHeight = depthImageSize.y - globalGroupOffset.y >= TILE_WIDTH ? TILE_WIDTH : depthImageSize.y % TILE_WIDTH;
+		int boundingBoxPixelWidth = depthTextureInfo.size.x - globalGroupOffset.x >= TILE_WIDTH ? TILE_WIDTH : depthTextureInfo.size.x % TILE_WIDTH;
+		int boundingBoxPixelHeight = depthTextureInfo.size.y - globalGroupOffset.y >= TILE_WIDTH ? TILE_WIDTH : depthTextureInfo.size.y % TILE_WIDTH;
 	
 		vec2[4] NPositions;
-		NPositions[0] = PositionS2N(vec2(globalGroupOffset + ivec2(0, 0)) / depthImageSize);
-		NPositions[1] = PositionS2N(vec2(globalGroupOffset + ivec2(0, boundingBoxPixelHeight)) / depthImageSize);
-		NPositions[2] = PositionS2N(vec2(globalGroupOffset + ivec2(boundingBoxPixelWidth, boundingBoxPixelHeight)) / depthImageSize);
-		NPositions[3] = PositionS2N(vec2(globalGroupOffset + ivec2(boundingBoxPixelWidth, 0)) / depthImageSize);
+		NPositions[0] = PositionA2N(vec2(globalGroupOffset + ivec2(0, 0)) / vec2(depthTextureInfo.size));
+		NPositions[1] = PositionA2N(vec2(globalGroupOffset + ivec2(0, boundingBoxPixelHeight)) / vec2(depthTextureInfo.size));
+		NPositions[2] = PositionA2N(vec2(globalGroupOffset + ivec2(boundingBoxPixelWidth, boundingBoxPixelHeight)) / vec2(depthTextureInfo.size));
+		NPositions[3] = PositionA2N(vec2(globalGroupOffset + ivec2(boundingBoxPixelWidth, 0)) / vec2(depthTextureInfo.size));
 
 		vec3[4] nearVPositions;
 		nearVPositions[0] = PositionN2V(vec3(NPositions[0], minNdcDepth), cameraInfo.info);
@@ -170,7 +173,6 @@ void main()
 		///top
 		transparentFrustumPlanes[3] = BuildPlane(nearVPositions[0], farVPositions[0], farVPositions[3]);
 		///near
-		// transparentFrustumPlanes[4] = vec4(0, 0, -1, -cameraInfo.info.nearFlat);
 		transparentFrustumPlanes[4] = BuildPlane(nearVPositions[0], nearVPositions[3], nearVPositions[2]);
 		///far
 		transparentFrustumPlanes[5] = BuildPlane(farVPositions[3], farVPositions[0], farVPositions[1]);
@@ -185,7 +187,7 @@ void main()
 		{
 			if(transparentLightIndexCount >= MAX_LIGHT_INDEX_COUNT) break;
 			int storeIndex = atomicAdd(transparentLightIndexCount, 1);
-			if(storeIndex >= MAX_LIGHT_INDEX_COUNT) break;
+			if(storeIndex >= MAX_LIGHT_INDEX_COUNT) { atomicExchange(transparentLightIndexCount, MAX_LIGHT_INDEX_COUNT); break;}
 			transparentLightIndexLists.lists[globalGroup1DID].indexes[storeIndex] = i;
 		}
 	}
@@ -198,7 +200,7 @@ void main()
 		{
 			if(opaqueLightIndexCount >= MAX_LIGHT_INDEX_COUNT) break;
 			int storeIndex = atomicAdd(opaqueLightIndexCount, 1);
-			if(storeIndex >= MAX_LIGHT_INDEX_COUNT) break;
+			if(storeIndex >= MAX_LIGHT_INDEX_COUNT) { atomicExchange(opaqueLightIndexCount, MAX_LIGHT_INDEX_COUNT); break;}
 			opaqueLightIndexLists.lists[globalGroup1DID].indexes[storeIndex] = i;
 		}
 	}
@@ -207,10 +209,10 @@ void main()
 	///Set size
 	if(localGroupOffset == ivec2(0, 0))
 	{
-		opaqueLightIndexLists.tileCount = (depthImageSize + ivec2(TILE_WIDTH - 1, TILE_WIDTH - 1)) / TILE_WIDTH;
+		opaqueLightIndexLists.tileCount = (depthTextureInfo.size + ivec2(TILE_WIDTH - 1, TILE_WIDTH - 1)) / TILE_WIDTH;
 		opaqueLightIndexLists.lists[globalGroup1DID].count = opaqueLightIndexCount;
 
-		transparentLightIndexLists.tileCount = (depthImageSize + ivec2(TILE_WIDTH - 1, TILE_WIDTH - 1)) / TILE_WIDTH;
+		transparentLightIndexLists.tileCount = (depthTextureInfo.size + ivec2(TILE_WIDTH - 1, TILE_WIDTH - 1)) / TILE_WIDTH;
 		transparentLightIndexLists.lists[globalGroup1DID].count = transparentLightIndexCount;
 	}
 }

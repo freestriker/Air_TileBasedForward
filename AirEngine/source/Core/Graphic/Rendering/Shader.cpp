@@ -15,7 +15,6 @@ void AirEngine::Core::Graphic::Rendering::Shader::_ParseShaderData(_PipelineData
 	std::string text = std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
 	nlohmann::json j = nlohmann::json::parse(text);
 	this->_shaderSettings = j.get<ShaderSettings>();
-	this->_renderPass = Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass(this->_shaderSettings.renderPass);
 }
 
 void AirEngine::Core::Graphic::Rendering::Shader::_LoadSpirvs(_PipelineData& pipelineData)
@@ -532,6 +531,8 @@ void AirEngine::Core::Graphic::Rendering::Shader::OnLoad(Core::Graphic::Command:
 	{
 		_shaderType = ShaderType::GRAPHIC;
 
+		this->_renderPass = Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass(this->_shaderSettings.renderPass);
+
 		_PopulateVertexInputState(pipelineData);
 		_CheckAttachmentOutputState(pipelineData);
 
@@ -583,7 +584,10 @@ AirEngine::Core::Graphic::Rendering::Shader::Shader()
 
 AirEngine::Core::Graphic::Rendering::Shader::~Shader()
 {
-	Graphic::CoreObject::Instance::RenderPassManager().UnloadRenderPass(this->_shaderSettings.renderPass);
+	if (_shaderType == ShaderType::GRAPHIC)
+	{
+		Graphic::CoreObject::Instance::RenderPassManager().UnloadRenderPass(this->_shaderSettings.renderPass);
+	}
 
 	vkDestroyPipeline(CoreObject::Instance::VkDevice_(), _vkPipeline, nullptr);
 	vkDestroyPipelineLayout(CoreObject::Instance::VkDevice_(), _vkPipelineLayout, nullptr);

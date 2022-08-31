@@ -82,7 +82,7 @@ namespace AirEngine
 					void BeginRenderPass(Graphic::Rendering::RenderPassBase* renderPass, Graphic::Rendering::FrameBuffer* frameBuffer);
 					void EndRenderPass();
 					void DrawMesh(Asset::Mesh* mesh, Rendering::Material* material);
-					void Dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ);
+					void Dispatch(Rendering::Material* material, uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ);
 					void Blit(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Image* dstImage, VkImageLayout dstImageLayout, VkFilter filter);
 					void Blit(Instance::Image* srcImage, VkImageLayout srcImageLayout, VkImage dstImage, VkImageLayout dstImageLayout, VkOffset3D offset1, VkOffset3D offset2, VkFilter filter);
 					

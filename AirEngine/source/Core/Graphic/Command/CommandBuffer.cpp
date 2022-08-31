@@ -426,8 +426,19 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::DrawMesh(Asset::Mesh* mes
     vkCmdDrawIndexed(_vkCommandBuffer, static_cast<uint32_t>(mesh->Indices().size()), 1, 0, 0, 0);
 }
 
-void AirEngine::Core::Graphic::Command::CommandBuffer::Dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ)
+void AirEngine::Core::Graphic::Command::CommandBuffer::Dispatch(Rendering::Material* material, uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ)
 {
+    auto sets = material->VkDescriptorSets();
+    if (material->Shader()->ShaderType_() == Rendering::Shader::ShaderType::GRAPHIC)
+    {
+        vkCmdBindPipeline(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->Shader()->VkPipeline_());
+        vkCmdBindDescriptorSets(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->PipelineLayout(), 0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
+    }
+    else if (material->Shader()->ShaderType_() == Rendering::Shader::ShaderType::COMPUTE)
+    {
+        vkCmdBindPipeline(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, material->Shader()->VkPipeline_());
+        vkCmdBindDescriptorSets(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, material->PipelineLayout(), 0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
+    }
     vkCmdDispatch(_vkCommandBuffer, groupCountX, groupCountY, groupCountZ);
 }
 

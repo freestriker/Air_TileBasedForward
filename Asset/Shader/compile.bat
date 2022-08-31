@@ -43,6 +43,6 @@ glslangValidator.exe -t -V AO_Cover_Shader.frag -IUtils/ -o Spv/AO_Cover_Shader.
 glslangValidator.exe -t -V PresentShader.vert -IUtils/ -o Spv/PresentShader.vert.spv
 glslangValidator.exe -t -V PresentShader.frag -IUtils/ -o Spv/PresentShader.frag.spv
 
-glslangValidator.exe -t -V BuildTBFLightListsShader.comp -IUtils/ -o Spv/BuildTBFLightListsShader.comp.spv
+glslangValidator.exe -t -V TBForward_LightList_Shader.comp -IUtils/ -o Spv/TBForward_LightList_Shader.comp.spv
 
 cmd
