@@ -1,16 +1,26 @@
 #version 450
 #extension GL_GOOGLE_include_directive: enable
 
-#include "Utils/BlurAmbientOcclusion.glsl"
 #include "Utils/Object.glsl"
 
-layout(location = 0) in vec2 texcoordOffset;
+#define MAX_GAUSSION_KERNAL_RADIUS 4
 
-layout(location = 0) out float OcclusionAttachment;
+const float GAUSSION_WEIGHT[MAX_GAUSSION_KERNAL_RADIUS] = {0.324, 0.232, 0.0855, 0.0205};
+
+layout(set = 0, binding = 0) uniform BlurInfo
+{
+    vec2 size;
+    vec2 texelSize;
+    vec2 sampleOffset;
+} blurInfo;
+layout(set = 1, binding = 0) uniform sampler2D normalTexture;
+layout(set = 2, binding = 0) uniform sampler2D occlusionTexture;
+
+layout(location = 0) out float OcclusionTexture;
 
 void main()
 {
-    vec2 aPosition = gl_FragCoord.xy * blurInfo.attachmentTexelSize;
+    vec2 aPosition = gl_FragCoord.xy * blurInfo.texelSize;
     vec3 vNormal = ParseFromColor(texture(normalTexture, aPosition).rgb);
 
     float occlusion = 0;
@@ -19,10 +29,10 @@ void main()
     occlusion += texture(occlusionTexture, aPosition).r * GAUSSION_WEIGHT[0];
     weightSum += GAUSSION_WEIGHT[0];
 
-
+    vec2 texcoordSampleOffset = blurInfo.texelSize * blurInfo.sampleOffset;
     for(int i = 1; i < MAX_GAUSSION_KERNAL_RADIUS; i++)
     {
-        vec2 offsetAPosition = aPosition + texcoordOffset * i;
+        vec2 offsetAPosition = aPosition + texcoordSampleOffset * i;
         if(0 < offsetAPosition.x && offsetAPosition.x < 1 && 0 < offsetAPosition.y && offsetAPosition.y < 1)
         {
             vec3 offsetVNormal = ParseFromColor(texture(normalTexture, offsetAPosition).rgb);
@@ -32,7 +42,7 @@ void main()
             weightSum += weight;
         }
 
-        offsetAPosition = aPosition - texcoordOffset * i;
+        offsetAPosition = aPosition - texcoordSampleOffset * i;
         if(0 < offsetAPosition.x && offsetAPosition.x < 1 && 0 < offsetAPosition.y && offsetAPosition.y < 1)
         {
             vec3 offsetVNormal = ParseFromColor(texture(normalTexture, offsetAPosition).rgb);
@@ -43,5 +53,5 @@ void main()
         }
     }
 
-    OcclusionAttachment = occlusion / weightSum;
+    OcclusionTexture = occlusion / weightSum;
 }

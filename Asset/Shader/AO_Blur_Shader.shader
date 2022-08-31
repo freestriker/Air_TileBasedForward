@@ -1,5 +1,5 @@
 {
-  "renderPass": "SsaoBlurRenderPass",
+  "renderPass": "AirEngine::Rendering::RenderFeature::AO_Blur_RenderFeature::AO_Blur_RenderPass",
   "subpass": "DrawSubpass",
   "alphaBlendOp": 0,
   "blendEnable": 0,
@@ -8,9 +8,9 @@
   "cullMode": 0,
   "dstAlphaBlendFactor": 0,
   "dstColorBlendFactor": 0,
-  "shaderPaths": ["..\\Asset\\Shader\\Spv\\SsaoBlurShader.vert.spv", "..\\Asset\\Shader\\Spv\\SsaoBlurShader.frag.spv"],
+  "shaderPaths": ["..\\Asset\\Shader\\Spv\\AO_Blur_Shader.vert.spv", "..\\Asset\\Shader\\Spv\\AO_Blur_Shader.frag.spv"],
   "srcAlphaBlendFactor": 0,
-  "srcColorBlendFactor": 6,
+  "srcColorBlendFactor": 0,
   "depthTestEnable": 0,
   "depthWriteEnable": 0,
   "depthCompareOp": 0

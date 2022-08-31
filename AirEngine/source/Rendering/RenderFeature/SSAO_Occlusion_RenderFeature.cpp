@@ -218,6 +218,8 @@ void AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::OnDestro
 	delete featureData->samplePointInfoBuffer;
 
 	delete featureData->material;
+
+	delete featureData;
 }
 
 void AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::OnPrepare(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)
@@ -251,7 +253,7 @@ void AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::OnExcute
 		);
 		commandBuffer->AddPipelineImageBarrier(
 			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-			{ &depthTextureBarrier }
+			{ &depthTextureBarrier, &normalTextureBarrier }
 		);
 	}
 

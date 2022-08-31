@@ -33,51 +33,52 @@ namespace AirEngine
 	{
 		namespace RenderFeature
 		{
-			class SSAO_Occlusion_RenderFeature final : public Core::Graphic::Rendering::RenderFeatureBase
+			class AO_Blur_RenderFeature final : public Core::Graphic::Rendering::RenderFeatureBase
 			{
 			public:
-				class SSAO_Occlusion_RenderPass final : public Core::Graphic::Rendering::RenderPassBase
+				class AO_Blur_RenderPass final : public Core::Graphic::Rendering::RenderPassBase
 				{
 				private:
 					void OnPopulateRenderPassSettings(RenderPassSettings& settings)override;
 				public:
-					CONSTRUCTOR(SSAO_Occlusion_RenderPass)
+					CONSTRUCTOR(AO_Blur_RenderPass)
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderPassBase)
 				};
 
-				class SSAO_Occlusion_RenderFeatureData final : public Core::Graphic::Rendering::RenderFeatureDataBase
+				class AO_Blur_RenderFeatureData final : public Core::Graphic::Rendering::RenderFeatureDataBase
 				{
-					friend class SSAO_Occlusion_RenderFeature;
+					friend class AO_Blur_RenderFeature;
 				private:
-					Core::Graphic::Rendering::Material* material;
-					Core::Graphic::Rendering::FrameBuffer* frameBuffer;
-					Core::Graphic::Instance::Buffer* occlusionTextureSizeInfoBuffer;
-					Core::Graphic::Instance::Buffer* samplePointInfoBuffer;
-					VkExtent2D occlusionTextureSize;
+					Core::Graphic::Rendering::Material* horizontalMaterial;
+					Core::Graphic::Rendering::Material* verticalMaterial;
+					Core::Graphic::Rendering::FrameBuffer* horizontalFrameBuffer;
+					Core::Graphic::Rendering::FrameBuffer* verticalFrameBuffer;
+					Core::Graphic::Instance::Buffer* horizontalBlurInfoBuffer;
+					Core::Graphic::Instance::Buffer* verticalBlurInfoBuffer;
+					Core::Graphic::Instance::Image* temporaryOcclusionTexture;
 				public:
-					float samplePointRadius;
-					float samplePointBiasAngle;
+					float sampleOffsetFactor;
+					int iterateCount;
 					Core::Graphic::Instance::Image* occlusionTexture;
-					Core::Graphic::Instance::Image* depthTexture;
 					Core::Graphic::Instance::Image* normalTexture;
 
-					CONSTRUCTOR(SSAO_Occlusion_RenderFeatureData)
+					CONSTRUCTOR(AO_Blur_RenderFeatureData)
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderFeatureDataBase)
 				};
 
-				CONSTRUCTOR(SSAO_Occlusion_RenderFeature)
+				CONSTRUCTOR(AO_Blur_RenderFeature)
 
 			private:
-				struct AttachmentSizeInfo
+				struct BlurInfo
 				{
 					alignas(8) glm::vec2 size;
 					alignas(8) glm::vec2 texelSize;
+					alignas(8) glm::vec2 sampleOffset;
 				};
 				Core::Graphic::Rendering::RenderPassBase* _renderPass;
 				Asset::Mesh* _fullScreenMesh;
-				Core::Graphic::Rendering::Shader* _ssaoShader;
+				Core::Graphic::Rendering::Shader* _blurShader;
 				Core::Graphic::Instance::ImageSampler* _textureSampler;
-				Core::Graphic::Instance::Buffer* _noiseInfoBuffer;
 
 				Core::Graphic::Rendering::RenderFeatureDataBase* OnCreateRenderFeatureData(Camera::CameraBase* camera)override;
 				void OnResolveRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera)override;
