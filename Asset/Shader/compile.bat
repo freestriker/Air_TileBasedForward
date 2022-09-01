@@ -28,14 +28,14 @@ glslangValidator.exe -t -V F_Transparent_BrokenGlass_Shader.frag -IUtils/ -o Spv
 glslangValidator.exe -t -V GeometryShader.vert -IUtils/ -o Spv/GeometryShader.vert.spv
 glslangValidator.exe -t -V GeometryShader.frag -IUtils/ -o Spv/GeometryShader.frag.spv
 
-@REM glslangValidator.exe -t -V TBF_OIT_DP_Shader.vert -IUtils/ -o Spv/TBF_OIT_DP_Shader.vert.spv
-@REM glslangValidator.exe -t -V TBF_OIT_DP_Shader.frag -IUtils/ -o Spv/TBF_OIT_DP_Shader.frag.spv
+glslangValidator.exe -t -V TBF_OIT_DepthPeeling_Shader.vert -IUtils/ -o Spv/TBF_OIT_DepthPeeling_Shader.vert.spv
+glslangValidator.exe -t -V TBF_OIT_DepthPeeling_Shader.frag -IUtils/ -o Spv/TBF_OIT_DepthPeeling_Shader.frag.spv
 
 @REM glslangValidator.exe -t -V TBF_OIT_ALL_Shader.vert -IUtils/ -o Spv/TBF_OIT_ALL_Shader.vert.spv
 @REM glslangValidator.exe -t -V TBF_OIT_ALL_Shader.frag -IUtils/ -o Spv/TBF_OIT_ALL_Shader.frag.spv
 
-@REM glslangValidator.exe -t -V OIT_DP_BlendShader.vert -IUtils/ -o Spv/OIT_DP_BlendShader.vert.spv
-@REM glslangValidator.exe -t -V OIT_DP_BlendShader.frag -IUtils/ -o Spv/OIT_DP_BlendShader.frag.spv
+glslangValidator.exe -t -V TBF_OIT_DepthPeelingBlend_Shader.vert -IUtils/ -o Spv/TBF_OIT_DepthPeelingBlend_Shader.vert.spv
+glslangValidator.exe -t -V TBF_OIT_DepthPeelingBlend_Shader.frag -IUtils/ -o Spv/TBF_OIT_DepthPeelingBlend_Shader.frag.spv
 
 @REM glslangValidator.exe -t -V OIT_ALL_SortBlendShader.vert -IUtils/ -o Spv/OIT_ALL_SortBlendShader.vert.spv
 @REM glslangValidator.exe -t -V OIT_ALL_SortBlendShader.frag -IUtils/ -o Spv/OIT_ALL_SortBlendShader.frag.spv

@@ -172,6 +172,7 @@
     <ClCompile Include="source\Rendering\RenderFeature\GeometryRenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\SSAO_Occlusion_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\TBForward_LightList_RenderFeature.cpp" />
+    <ClCompile Include="source\Rendering\RenderFeature\TBForward_OIT_DepthPeeling_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\TBForward_Opaque_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderPipeline\ForwardRenderPipeline.cpp" />
     <ClCompile Include="source\Test\AudioSourceBehaviour.cpp" />
@@ -263,6 +264,7 @@
     <ClInclude Include="header\Rendering\RenderFeature\GeometryRenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\SSAO_Occlusion_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\TBForward_LightList_RenderFeature.h" />
+    <ClInclude Include="header\Rendering\RenderFeature\TBForward_OIT_DepthPeeling_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\TBForward_Opaque_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderPipeline\ForwardRenderPipeline.h" />
     <ClInclude Include="header\Test\AudioSourceBehaviour.h" />

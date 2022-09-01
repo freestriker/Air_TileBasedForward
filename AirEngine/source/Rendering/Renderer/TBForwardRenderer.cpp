@@ -5,6 +5,7 @@
 #include "Camera/CameraBase.h"
 #include "Rendering/RenderFeature/TBForward_LightList_RenderFeature.h"
 #include "Rendering/RenderFeature/TBForward_Opaque_RenderFeature.h"
+#include "Rendering/RenderFeature/TBForward_OIT_DepthPeeling_RenderFeature.h"
 
 RTTR_REGISTRATION
 {
@@ -29,6 +30,7 @@ AirEngine::Rendering::Renderer::TBForwardRenderer::TBForwardRenderer()
 	UseRenderFeature("TBForward_LightList_RenderFeature", new RenderFeature::TBForward_LightList_RenderFeature());
 	UseRenderFeature("TBForward_Opaque_RenderFeature", new RenderFeature::TBForward_Opaque_RenderFeature());
 	UseRenderFeature("Background_RenderFeature", new RenderFeature::Background_RenderFeature());
+	UseRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", new RenderFeature::TBForward_OIT_DepthPeeling_RenderFeature());
 }
 
 AirEngine::Rendering::Renderer::TBForwardRenderer::~TBForwardRenderer()
@@ -56,8 +58,14 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::OnResolveRendererData(Co
 	auto geometryFeatureData = static_cast<RenderFeature::GeometryRenderFeature::GeometryRenderFeatureData*>(rendererData->RenderFeatureData("GeometryRenderFeature"));
 	auto lightListFeatureData = static_cast<RenderFeature::TBForward_LightList_RenderFeature::TBForward_LightList_RenderFeatureData*>(rendererData->RenderFeatureData("TBForward_LightList_RenderFeature"));
 	auto opaqueFeatureData = static_cast<RenderFeature::TBForward_Opaque_RenderFeature::TBForward_Opaque_RenderFeatureData*>(rendererData->RenderFeatureData("TBForward_Opaque_RenderFeature"));
+	auto depthPeelingFeatureData = static_cast<RenderFeature::TBForward_OIT_DepthPeeling_RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatureData*>(rendererData->RenderFeatureData("TBForward_OIT_DepthPeeling_RenderFeature"));
+	
 	lightListFeatureData->depthTexture = geometryFeatureData->depthTexture;
+
 	opaqueFeatureData->opaqueLightIndexListsBuffer = lightListFeatureData->opaqueLightIndexListsBuffer;
+
+	depthPeelingFeatureData->transparentLightIndexListsBuffer = lightListFeatureData->transparentLightIndexListsBuffer;
+	depthPeelingFeatureData->depthTexture = geometryFeatureData->depthTexture;
 }
 
 void AirEngine::Rendering::Renderer::TBForwardRenderer::OnDestroyRendererData(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -71,6 +79,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::PrepareRenderer(Core::Gr
 	PrepareRenderFeature("GeometryRenderFeature", rendererData);
 	PrepareRenderFeature("TBForward_LightList_RenderFeature", rendererData);
 	PrepareRenderFeature("TBForward_Opaque_RenderFeature", rendererData);
+	PrepareRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", rendererData);
 }
 
 void AirEngine::Rendering::Renderer::TBForwardRenderer::ExcuteRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*> const* rendererComponents)
@@ -79,6 +88,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::ExcuteRenderer(Core::Gra
 	ExcuteRenderFeature("GeometryRenderFeature", rendererData, camera, rendererComponents);
 	ExcuteRenderFeature("TBForward_LightList_RenderFeature", rendererData, camera, rendererComponents);
 	ExcuteRenderFeature("TBForward_Opaque_RenderFeature", rendererData, camera, rendererComponents);
+	ExcuteRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", rendererData, camera, rendererComponents);
 }
 
 void AirEngine::Rendering::Renderer::TBForwardRenderer::SubmitRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -87,6 +97,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::SubmitRenderer(Core::Gra
 	SubmitRenderFeature("GeometryRenderFeature", rendererData);
 	SubmitRenderFeature("TBForward_LightList_RenderFeature", rendererData);
 	SubmitRenderFeature("TBForward_Opaque_RenderFeature", rendererData);
+	SubmitRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", rendererData);
 }
 
 void AirEngine::Rendering::Renderer::TBForwardRenderer::FinishRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -95,4 +106,5 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::FinishRenderer(Core::Gra
 	FinishRenderFeature("GeometryRenderFeature", rendererData);
 	FinishRenderFeature("TBForward_LightList_RenderFeature", rendererData);
 	FinishRenderFeature("TBForward_Opaque_RenderFeature", rendererData);
+	FinishRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", rendererData);
 }
