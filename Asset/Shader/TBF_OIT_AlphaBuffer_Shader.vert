@@ -3,7 +3,7 @@
 
 #define VERTEX_STAGE
 
-#include "TBF_OIT_AlphaLinkedListLighting.glsl"
+#include "TBF_OIT_AlphaBuffer_Lighting.glsl"
 
 layout(location = 0) in vec3 vertexPosition;
 layout(location = 1) in vec2 vertexTexCoords;

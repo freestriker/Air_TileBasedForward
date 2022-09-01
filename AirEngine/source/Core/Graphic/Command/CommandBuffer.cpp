@@ -8,7 +8,6 @@
 #include "Core/Graphic/Command/ImageMemoryBarrier.h"
 #include "Core/Graphic/Command/BufferMemoryBarrier.h"
 #include "Asset/Mesh.h"
-#include "Core/Graphic/RenderPass/RenderPassBase.h"
 #include "Core/Graphic/Manager/RenderPassManager.h"
 #include "Core/Graphic/Rendering/FrameBuffer.h"
 #include "Core/Graphic/Rendering/RenderPassBase.h"

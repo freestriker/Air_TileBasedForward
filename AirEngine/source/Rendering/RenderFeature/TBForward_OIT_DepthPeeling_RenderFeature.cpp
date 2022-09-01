@@ -268,6 +268,7 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatu
 	}
 	delete featureData->thresholdDepthTexture;
 	delete featureData->blendMaterial;
+	delete featureData->blendFrameBuffer;
 	delete featureData->attachmentSizeInfoBuffer;
 
 	delete featureData;
@@ -325,7 +326,7 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatu
 
 		///Wait depth texture ready
 		{
-			auto colorAttachmentBarrier = Core::Graphic::Command::ImageMemoryBarrier
+			auto depthTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
 			(
 				featureData->depthTexture,
 				VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
@@ -335,7 +336,7 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatu
 			);
 			commandBuffer->AddPipelineImageBarrier(
 				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-				{ &colorAttachmentBarrier }
+				{ &depthTextureBarrier }
 			);
 		}
 
@@ -488,15 +489,9 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatu
 
 		///Blend
 		{
-			commandBuffer->BeginRenderPass(
-				_blendRenderPass,
-				featureData->blendFrameBuffer
-			);
+			commandBuffer->BeginRenderPass(_blendRenderPass, featureData->blendFrameBuffer);
 
-			for (const auto& wrapper : wrappers)
-			{
-				commandBuffer->DrawMesh(_fullScreenMesh, featureData->blendMaterial);
-			}
+			commandBuffer->DrawMesh(_fullScreenMesh, featureData->blendMaterial);
 
 			commandBuffer->EndRenderPass();
 		}

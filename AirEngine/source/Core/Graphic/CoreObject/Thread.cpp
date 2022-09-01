@@ -11,7 +11,6 @@
 #include "Core/Logic/CoreObject/Instance.h"
 #include "Core/Graphic/Manager/RenderPassManager.h"
 #include "Core/Graphic/CoreObject/Instance.h"
-#include "Core/Graphic/RenderPass/BackgroundRenderPass.h"
 #include "Core/Graphic/Rendering/Shader.h"
 #include "Utils/IntersectionChecker.h"
 #include <future>
@@ -26,8 +25,6 @@
 #include "Core/Graphic/Rendering/Material.h"
 #include "Core/Graphic/CoreObject/Window.h"
 #include "Core/Graphic/Command/ImageMemoryBarrier.h"
-#include "Core/Graphic/RenderPass/PresentRenderPass.h"
-#include "Core/Graphic/RenderPass/RenderPassBase.h"
 #include "Core/Graphic/Manager/RenderPipelineManager.h"
 #include "Core/Graphic/Rendering/RenderPipelineBase.h"
 #include "Core/Graphic/Rendering/RendererBase.h"

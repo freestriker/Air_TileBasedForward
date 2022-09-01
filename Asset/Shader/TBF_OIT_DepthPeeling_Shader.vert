@@ -1,7 +1,7 @@
 #version 450
 #extension GL_GOOGLE_include_directive: enable
 
-#include "TBF_OIT_DepthPeelingLighting.glsl"
+#include "TBF_OIT_DepthPeeling_Lighting.glsl"
 
 layout(location = 0) in vec3 vertexPosition;
 layout(location = 1) in vec2 vertexTexCoords;

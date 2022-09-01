@@ -3,7 +3,7 @@
 
 #define FRAGMENT_STAGE
 
-#include "TBF_OIT_AlphaLinkedListLighting.glsl"
+#include "TBF_OIT_AlphaBuffer_Lighting.glsl"
 
 layout(set = START_SET_INDEX + 0, binding = 0) uniform sampler2D diffuseTexture;
 
@@ -31,5 +31,5 @@ void main()
 
     vec4 color = texture(diffuseTexture, inTexCoords) * vec4(diffuse + specular + ambient * 0.5, 1);
 
-    AddColorToAlphaLinkedList(color);
+    AddColorToAlphaBuffer(color);
 }

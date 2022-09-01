@@ -1,7 +1,7 @@
 #version 450
 #extension GL_GOOGLE_include_directive: enable
 
-#include "TBF_OIT_DepthPeelingLighting.glsl"
+#include "TBF_OIT_DepthPeeling_Lighting.glsl"
 
 layout(set = START_SET_INDEX + 0, binding = 0) uniform sampler2D diffuseTexture;
 

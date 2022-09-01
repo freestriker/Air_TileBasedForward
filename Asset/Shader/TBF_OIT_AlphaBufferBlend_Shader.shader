@@ -1,7 +1,7 @@
 {
-  "renderPass": "TBF_OIT_ALL_SortBlendRenderPass",
+  "renderPass": "AirEngine::Rendering::RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeature::TBForward_OIT_AlphaBufferBlend_RenderPass",
   "subpass": "DrawSubpass",
-  "shaderPaths": ["..\\Asset\\Shader\\Spv\\OIT_ALL_SortBlendShader.vert.spv", "..\\Asset\\Shader\\Spv\\OIT_ALL_SortBlendShader.frag.spv"],
+  "shaderPaths": ["..\\Asset\\Shader\\Spv\\TBF_OIT_AlphaBufferBlend_Shader.vert.spv", "..\\Asset\\Shader\\Spv\\TBF_OIT_AlphaBufferBlend_Shader.frag.spv"],
   "cullMode": 0,
   "depthTestEnable": 0,
   "depthWriteEnable": 0,

@@ -1,5 +1,4 @@
 #include "Core/Graphic/Manager/RenderPassManager.h"
-#include "Core/Graphic/RenderPass/RenderPassBase.h"
 #include "Utils/Log.h"
 #include "Core/Graphic/CoreObject/Instance.h"
 #include <map>
