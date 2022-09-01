@@ -186,6 +186,7 @@
     <ClCompile Include="source\Test\SelfRotateBehaviour.cpp" />
     <ClCompile Include="source\Test\TBF_GlassRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\TBF_MirrorRendererBehaviour.cpp" />
+    <ClCompile Include="source\Test\TBF_OIT_DP_RenderBehaviour.cpp" />
     <ClCompile Include="source\Test\TBF_WallRendererBehaviour.cpp" />
     <ClCompile Include="source\Utils\ChildBrotherTree.cpp" />
     <ClCompile Include="source\Utils\Condition.cpp" />
@@ -278,6 +279,7 @@
     <ClInclude Include="header\Test\SelfRotateBehaviour.h" />
     <ClInclude Include="header\Test\TBF_GlassRendererBehaviour.h" />
     <ClInclude Include="header\Test\TBF_MirrorRendererBehaviour.h" />
+    <ClInclude Include="header\Test\TBF_OIT_DP_RenderBehaviour.h" />
     <ClInclude Include="header\Test\TBF_WallRendererBehaviour.h" />
     <ClInclude Include="header\Utils\ChildBrotherTree.h" />
     <ClInclude Include="header\Utils\Condition.h" />

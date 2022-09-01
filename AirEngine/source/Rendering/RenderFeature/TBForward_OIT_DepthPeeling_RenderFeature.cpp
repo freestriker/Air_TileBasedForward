@@ -188,7 +188,7 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 
 void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeature::OnResolveRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera)
 {
-	auto featureData = new TBForward_OIT_DepthPeeling_RenderFeatureData();
+	auto featureData = static_cast<TBForward_OIT_DepthPeeling_RenderFeatureData*>(renderFeatureData);
 	
 	auto cameraColorImage = camera->attachments["ColorAttachment"];
 	auto cameraDepthImage = camera->attachments["DepthAttachment"];
@@ -281,9 +281,6 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatu
 {
 	auto featureData = static_cast<TBForward_OIT_DepthPeeling_RenderFeatureData*>(renderFeatureData);
 
-	commandBuffer->Reset();
-	commandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-
 	struct TransparentRendererWrapper
 	{
 		Core::Graphic::Rendering::Material* material;
@@ -315,115 +312,22 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatu
 			material->SetUniformBuffer("lightInfos", Core::Graphic::CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
 			material->SetTextureCube("ambientLightTexture", Core::Graphic::CoreObject::Instance::LightManager().AmbientTextureCube());
 			material->SetStorageBuffer("transparentLightIndexLists", featureData->transparentLightIndexListsBuffer);
-			material->SetSlotData("thresholdDepthTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), featureData->thresholdDepthTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL} });
-			material->SetSlotData("depthTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_NULL_HANDLE, featureData->depthTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
+			material->SetSlotData("thresholdDepthTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), featureData->thresholdDepthTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
+			material->SetSlotData("depthTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), featureData->depthTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
 			material->SetUniformBuffer("attachmentSizeInfo", featureData->attachmentSizeInfoBuffer);
 		}
 	}
 
-	///Wait depth texture ready
+	commandBuffer->Reset();
+	commandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+	if (wrappers.size())
 	{
-		auto colorAttachmentBarrier = Core::Graphic::Command::ImageMemoryBarrier
-		(
-			featureData->depthTexture,
-			VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-		);
-		commandBuffer->AddPipelineImageBarrier(
-			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-			{ &colorAttachmentBarrier }
-		);
-	}
 
-	///Wait light lists buffer ready
-	{
-		Core::Graphic::Command::BufferMemoryBarrier opaqueLightListsBarrier = Core::Graphic::Command::BufferMemoryBarrier
-		(
-			featureData->transparentLightIndexListsBuffer,
-			VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
-			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-		);
-		commandBuffer->AddPipelineBufferBarrier(
-			VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-			{ &opaqueLightListsBarrier }
-		);
-	}
-
-	///Render to color attachments
-	for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
-	{
-		///Copy threshold depth texture
-		if (i == 0)
-		{
-			commandBuffer->ClearDepthImage(featureData->thresholdDepthTexture, VK_IMAGE_LAYOUT_GENERAL, 0);
-		}
-		else
-		{
-			///Wait depth ready
-			{
-				auto thresholdDepthTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
-				(
-					featureData->depthAttachments[i - 1],
-					VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-					VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-					VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-					VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT
-				);
-				commandBuffer->AddPipelineImageBarrier(
-					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-					{ &thresholdDepthTextureBarrier }
-				);
-			}
-
-			commandBuffer->CopyImage(featureData->depthAttachments[i - 1], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, featureData->thresholdDepthTexture, VK_IMAGE_LAYOUT_GENERAL);
-		}
-
-		///Wait threshold depth texture ready
-		{
-			auto thresholdDepthTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
-			(
-				featureData->thresholdDepthTexture,
-				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-				VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
-				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-			);
-			commandBuffer->AddPipelineImageBarrier(
-				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-				{ &thresholdDepthTextureBarrier }
-			);
-		}
-
-		///Render
-		{
-			VkClearValue colorClearValue{};
-			VkClearValue depthClearValue{};
-			colorClearValue.color = { {0.0f, 0.0f, 0.0f, 0.0f} };
-			depthClearValue.depthStencil = { 1.0f, 0 };
-			commandBuffer->BeginRenderPass(
-				_renderPass,
-				featureData->frameBuffers[i],
-				{ {"ColorAttachment", colorClearValue}, {"DepthAttachment", depthClearValue} }
-			);
-
-			for (const auto& wrapper : wrappers)
-			{
-				commandBuffer->DrawMesh(wrapper.second.mesh, wrapper.second.material);
-			}
-
-			commandBuffer->EndRenderPass();
-		}
-	}
-
-	///Wait color attachments ready
-	{
-		for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
+		///Wait depth texture ready
 		{
 			auto colorAttachmentBarrier = Core::Graphic::Command::ImageMemoryBarrier
 			(
-				featureData->colorAttachments[i],
+				featureData->depthTexture,
 				VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 				VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
 				VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
@@ -434,39 +338,170 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatu
 				{ &colorAttachmentBarrier }
 			);
 		}
-	}
 
-	///Wait camera color attachment ready
-	{
-		auto colorAttachmentBarrier = Core::Graphic::Command::ImageMemoryBarrier
-		(
-			featureData->blendFrameBuffer->Attachment("ColorAttachment"),
-			VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-			VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-			VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-			VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
-		);
-		commandBuffer->AddPipelineImageBarrier(
-			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			{ &colorAttachmentBarrier }
-		);
-	}
-
-	///Blend
-	{
-		commandBuffer->BeginRenderPass(
-			_blendRenderPass,
-			featureData->blendFrameBuffer
-		);
-
-		for (const auto& wrapper : wrappers)
+		///Wait light lists buffer ready
 		{
-			commandBuffer->DrawMesh(_fullScreenMesh, featureData->blendMaterial);
+			Core::Graphic::Command::BufferMemoryBarrier opaqueLightListsBarrier = Core::Graphic::Command::BufferMemoryBarrier
+			(
+				featureData->transparentLightIndexListsBuffer,
+				VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
+				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+			);
+			commandBuffer->AddPipelineBufferBarrier(
+				VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+				{ &opaqueLightListsBarrier }
+			);
 		}
 
-		commandBuffer->EndRenderPass();
-	}
+		///Render to color attachments
+		for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
+		{
+			///Copy threshold depth texture
+			if (i == 0)
+			{
+				///Init threshold depth texture layout
+				{
+					auto thresholdDepthTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
+					(
+						featureData->thresholdDepthTexture,
+						VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+						VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+						0,
+						VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT
+					);
+					commandBuffer->AddPipelineImageBarrier(
+						VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
+						{ &thresholdDepthTextureBarrier }
+					);
+				}
 
+				commandBuffer->ClearDepthImage(featureData->thresholdDepthTexture, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 0);
+			}
+			else
+			{
+				///Wait depth attachment ready
+				{
+					auto depthAttachmentBarrier = Core::Graphic::Command::ImageMemoryBarrier
+					(
+						featureData->depthAttachments[i - 1],
+						VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+						VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+						VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+						VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT
+					);
+					commandBuffer->AddPipelineImageBarrier(
+						VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
+						{ &depthAttachmentBarrier }
+					);
+				}
+
+				///Wait threshold depth ready
+				{
+					auto thresholdDepthTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
+					(
+						featureData->thresholdDepthTexture,
+						VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+						VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+						VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT,
+						VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT
+					);
+					commandBuffer->AddPipelineImageBarrier(
+						VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
+						{ &thresholdDepthTextureBarrier }
+					);
+				}
+
+				commandBuffer->CopyImage(featureData->depthAttachments[i - 1], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, featureData->thresholdDepthTexture, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+			}
+
+			///Wait threshold depth texture ready
+			{
+				auto thresholdDepthTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
+				(
+					featureData->thresholdDepthTexture,
+					VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+					VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+					VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
+					VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+				);
+				commandBuffer->AddPipelineImageBarrier(
+					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+					{ &thresholdDepthTextureBarrier }
+				);
+			}
+
+			///Render
+			{
+				VkClearValue colorClearValue{};
+				VkClearValue depthClearValue{};
+				colorClearValue.color = { {0.0f, 0.0f, 0.0f, 0.0f} };
+				depthClearValue.depthStencil = { 1.0f, 0 };
+				commandBuffer->BeginRenderPass(
+					_renderPass,
+					featureData->frameBuffers[i],
+					{ {"ColorAttachment", colorClearValue}, {"DepthAttachment", depthClearValue} }
+				);
+
+				for (const auto& wrapper : wrappers)
+				{
+					commandBuffer->DrawMesh(wrapper.second.mesh, wrapper.second.material);
+				}
+
+				commandBuffer->EndRenderPass();
+			}
+		}
+
+		///Wait color attachments ready
+		{
+			for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
+			{
+				auto colorAttachmentBarrier = Core::Graphic::Command::ImageMemoryBarrier
+				(
+					featureData->colorAttachments[i],
+					VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+					VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+					VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+					VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+				);
+				commandBuffer->AddPipelineImageBarrier(
+					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+					{ &colorAttachmentBarrier }
+				);
+			}
+		}
+
+		///Wait camera color attachment ready
+		{
+			auto colorAttachmentBarrier = Core::Graphic::Command::ImageMemoryBarrier
+			(
+				featureData->blendFrameBuffer->Attachment("ColorAttachment"),
+				VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+				VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+				VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+				VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
+			);
+			commandBuffer->AddPipelineImageBarrier(
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+				{ &colorAttachmentBarrier }
+			);
+		}
+
+		///Blend
+		{
+			commandBuffer->BeginRenderPass(
+				_blendRenderPass,
+				featureData->blendFrameBuffer
+			);
+
+			for (const auto& wrapper : wrappers)
+			{
+				commandBuffer->DrawMesh(_fullScreenMesh, featureData->blendMaterial);
+			}
+
+			commandBuffer->EndRenderPass();
+		}
+
+	}
 	commandBuffer->EndRecord();
 }
 

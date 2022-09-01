@@ -35,7 +35,7 @@
 #include "Core/Graphic/RenderPass/GeometryRenderPass.h"
 #include "Core/Graphic/RenderPass/TBF_OIT_DepthPeelingBlendRenderPass.h"
 #include "Core/Graphic/RenderPass/TBF_OIT_DepthPeelingRenderPass.h"
-#include "Test/TBF_OIT_RenderBehaviour.h"
+#include "Test/TBF_OIT_DP_RenderBehaviour.h"
 #include "Core/Graphic/RenderPass/PresentRenderPass.h"
 #include "Core/Graphic/RenderPass/TBF_OIT_AlphaLinkedListRenderPass.h"
 #include "Core/Graphic/RenderPass/TBF_OIT_ALL_SortBlendRenderPass.h"
@@ -478,11 +478,11 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		opaqueRendererGo->AddComponent(new Test::SelfRotateBehaviour(60));
 		opaqueRendererGo->transform.SetScale(glm::vec3(0.8, 0.8, 0.8));
 
-		Logic::Object::GameObject* glassMeshRendererGo = new Logic::Object::GameObject("GlassRenderer");
-		renderers->AddChild(glassMeshRendererGo);
-		glassMeshRendererGo->AddComponent(new Renderer::Renderer());
-		glassMeshRendererGo->AddComponent(new Test::TBF_GlassRendererBehaviour());
-		glassMeshRendererGo->transform.SetTranslation(glm::vec3(3, 0, 0));
+		//Logic::Object::GameObject* glassMeshRendererGo = new Logic::Object::GameObject("GlassRenderer");
+		//renderers->AddChild(glassMeshRendererGo);
+		//glassMeshRendererGo->AddComponent(new Renderer::Renderer());
+		//glassMeshRendererGo->AddComponent(new Test::TBF_GlassRendererBehaviour());
+		//glassMeshRendererGo->transform.SetTranslation(glm::vec3(3, 0, 0));
 
 		Logic::Object::GameObject* mirrorMeshRendererGo = new Logic::Object::GameObject("MirrorRenderer");
 		renderers->AddChild(mirrorMeshRendererGo);
@@ -540,17 +540,17 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		}
 	}
 
-	/////OIT
-	//Logic::Object::GameObject* oitRenderers = new Logic::Object::GameObject("OitRenderers");
-	//renderers->AddChild(oitRenderers);
-	//oitRenderers->transform.SetTranslation({3, 0, 0});
-	//{
-	//	Logic::Object::GameObject* oitRendererGo = new Logic::Object::GameObject("OitRenderer1");
-	//	oitRenderers->AddChild(oitRendererGo);
-	//	oitRendererGo->AddComponent(new Renderer::Renderer());
-	//	oitRendererGo->AddComponent(new Test::TBF_OIT_RenderBehaviour("WhiteTexture2D"));
-	//	oitRendererGo->AddComponent(new Test::SelfRotateBehaviour(35));
-	//}
+	///OIT
+	Logic::Object::GameObject* oitRenderers = new Logic::Object::GameObject("OitRenderers");
+	renderers->AddChild(oitRenderers);
+	oitRenderers->transform.SetTranslation({3, 0, 0});
+	{
+		Logic::Object::GameObject* oitRendererGo = new Logic::Object::GameObject("OitDepthPeelingRenderer");
+		oitRenderers->AddChild(oitRendererGo);
+		oitRendererGo->AddComponent(new Renderer::Renderer());
+		oitRendererGo->AddComponent(new Test::TBF_OIT_DP_RenderBehaviour("WhiteTexture2D"));
+		oitRendererGo->AddComponent(new Test::SelfRotateBehaviour(35));
+	}
 
 	//Lights
 	Logic::Object::GameObject* lights = new Logic::Object::GameObject("Lights");

@@ -11,17 +11,12 @@ namespace AirEngine
 {
 	namespace Test
 	{
-		class TBF_OIT_RenderBehaviour : public AirEngine::Behaviour::Behaviour
+		class TBF_OIT_DP_RenderBehaviour : public AirEngine::Behaviour::Behaviour
 		{
 			std::string _diffuseTextureName;
 		public:
-			TBF_OIT_RenderBehaviour(std::string diffuseTextureName);
-			TBF_OIT_RenderBehaviour();
-			~TBF_OIT_RenderBehaviour();
-			TBF_OIT_RenderBehaviour(const TBF_OIT_RenderBehaviour&) = delete;
-			TBF_OIT_RenderBehaviour& operator=(const TBF_OIT_RenderBehaviour&) = delete;
-			TBF_OIT_RenderBehaviour(TBF_OIT_RenderBehaviour&&) = delete;
-			TBF_OIT_RenderBehaviour& operator=(TBF_OIT_RenderBehaviour&&) = delete;
+			TBF_OIT_DP_RenderBehaviour(std::string diffuseTextureName);
+			CONSTRUCTOR(TBF_OIT_DP_RenderBehaviour)
 			void OnAwake()override;
 			void OnStart()override;
 			void OnUpdate()override;

@@ -60,7 +60,7 @@ AirEngine::Rendering::RenderFeature::TBForward_LightList_RenderFeature::TBForwar
 
 AirEngine::Rendering::RenderFeature::TBForward_LightList_RenderFeature::TBForward_LightList_RenderFeature()
 	: RenderFeatureBase()
-	, _shader(Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\TBForward_LightList_Shader.shader"))
+	, _shader(Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\TBF_LightList_Shader.shader"))
 	, _depthTextureSampler(
 		new Core::Graphic::Instance::ImageSampler(
 			VkFilter::VK_FILTER_NEAREST,
@@ -76,7 +76,7 @@ AirEngine::Rendering::RenderFeature::TBForward_LightList_RenderFeature::TBForwar
 
 AirEngine::Rendering::RenderFeature::TBForward_LightList_RenderFeature::~TBForward_LightList_RenderFeature()
 {
-	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\TBForward_LightList_Shader.shader");
+	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\TBF_LightList_Shader.shader");
 	delete _depthTextureSampler;
 }
 
