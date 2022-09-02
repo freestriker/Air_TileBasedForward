@@ -18,7 +18,7 @@ namespace AirEngine
 			OrthographicCamera& operator=(OrthographicCamera&&) = delete;
 		public:
 			float size;
-			OrthographicCamera(std::map<std::string, Core::Graphic::Instance::Image*> attachments, std::string rendererName);
+			OrthographicCamera(std::string rendererName, std::map<std::string, Core::Graphic::Instance::Image*> attachments);
 			virtual ~OrthographicCamera();
 
 			RTTR_ENABLE(Camera::CameraBase)

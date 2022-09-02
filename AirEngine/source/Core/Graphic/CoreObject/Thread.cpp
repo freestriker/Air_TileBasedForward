@@ -175,25 +175,25 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 			if(!(camera)) continue;
 			camera->RefreshCameraInfo();
 
-			Core::Graphic::CoreObject::Instance::RenderPipelineManager().Renderer(camera)->PrepareRenderer(Core::Graphic::CoreObject::Instance::RenderPipelineManager().RendererData(camera));
+			Core::Graphic::CoreObject::Instance::RenderPipelineManager().Renderer(camera->RendererName())->PrepareRenderer(Core::Graphic::CoreObject::Instance::RenderPipelineManager().RendererData(camera));
 		}
 		for (auto& component : Instance::_cameras)
 		{
 			auto camera = dynamic_cast<Camera::CameraBase*>(component);
 			if(!(camera)) continue;
-			Core::Graphic::CoreObject::Instance::RenderPipelineManager().Renderer(camera)->ExcuteRenderer(Core::Graphic::CoreObject::Instance::RenderPipelineManager().RendererData(camera), camera, &rendererComponents);
+			Core::Graphic::CoreObject::Instance::RenderPipelineManager().Renderer(camera->RendererName())->ExcuteRenderer(Core::Graphic::CoreObject::Instance::RenderPipelineManager().RendererData(camera), camera, &rendererComponents);
 		}
 		for (auto& component : Instance::_cameras)
 		{
 			auto camera = dynamic_cast<Camera::CameraBase*>(component);
 			if(!(camera)) continue;
-			Core::Graphic::CoreObject::Instance::RenderPipelineManager().Renderer(camera)->SubmitRenderer(Core::Graphic::CoreObject::Instance::RenderPipelineManager().RendererData(camera));
+			Core::Graphic::CoreObject::Instance::RenderPipelineManager().Renderer(camera->RendererName())->SubmitRenderer(Core::Graphic::CoreObject::Instance::RenderPipelineManager().RendererData(camera));
 		}
 		for (auto& component : Instance::_cameras)
 		{
 			auto camera = dynamic_cast<Camera::CameraBase*>(component);
 			if(!(camera)) continue;
-			Core::Graphic::CoreObject::Instance::RenderPipelineManager().Renderer(camera)->FinishRenderer(Core::Graphic::CoreObject::Instance::RenderPipelineManager().RendererData(camera));
+			Core::Graphic::CoreObject::Instance::RenderPipelineManager().Renderer(camera->RendererName())->FinishRenderer(Core::Graphic::CoreObject::Instance::RenderPipelineManager().RendererData(camera));
 		}
 
 		Logic::CoreObject::Instance::SetNeedIterateRenderer(false);

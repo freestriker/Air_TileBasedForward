@@ -89,17 +89,14 @@ void AirEngine::Camera::CameraBase::RefreshRenderer()
 	Core::Graphic::CoreObject::Instance::RenderPipelineManager().RefreshRendererData(this);
 }
 
-void AirEngine::Camera::CameraBase::InitRenderer(std::string rendererName)
+AirEngine::Core::Graphic::Rendering::RendererDataBase* AirEngine::Camera::CameraBase::RendererData()
 {
-	_rendererName = rendererName;
-
-	Core::Graphic::CoreObject::Instance::RenderPipelineManager().CreateRendererData(this);
+	return Core::Graphic::CoreObject::Instance::RenderPipelineManager().RendererData(this);
 }
 
-AirEngine::Camera::CameraBase::CameraBase(CameraType cameraType, std::map<std::string, Core::Graphic::Instance::Image*> attachments)
+AirEngine::Camera::CameraBase::CameraBase(CameraType cameraType, std::string rendererName, std::map<std::string, Core::Graphic::Instance::Image*> attachments)
 	: Component(ComponentType::CAMERA)
 	, attachments(attachments)
-	, renderPassNames(renderPassNames)
 	, cameraType(cameraType)
 	, nearFlat(3.0f)
 	, farFlat(100.0f)
@@ -108,11 +105,10 @@ AirEngine::Camera::CameraBase::CameraBase(CameraType cameraType, std::map<std::s
 	, _projectionMatrix(glm::mat4(1.0f))
 	, _intersectionChecker()
 	, _buffer(new Core::Graphic::Instance::Buffer(sizeof(CameraData), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT))
-	, _rendererName()
+	, _rendererName(rendererName)
 {
-
+	Core::Graphic::CoreObject::Instance::RenderPipelineManager().CreateRendererData(this);
 }
-
 
 AirEngine::Camera::CameraBase::~CameraBase()
 {

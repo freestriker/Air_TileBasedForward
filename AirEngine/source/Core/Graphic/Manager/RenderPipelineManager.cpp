@@ -80,13 +80,11 @@ AirEngine::Core::Graphic::Rendering::RenderPipelineBase* AirEngine::Core::Graphi
 	return _renderPipeline;
 }
 
-AirEngine::Core::Graphic::Rendering::RendererBase* AirEngine::Core::Graphic::Manager::RenderPipelineManager::Renderer(Camera::CameraBase* camera)
+AirEngine::Core::Graphic::Rendering::RendererBase* AirEngine::Core::Graphic::Manager::RenderPipelineManager::Renderer(std::string rendererName)
 {
-	if (camera == nullptr) return nullptr;
-
 	std::lock_guard<std::mutex> locker(_managerMutex);
 
-	return _renderPipeline->Renderer(camera->RendererName());
+	return _renderPipeline->Renderer(rendererName);
 }
 
 AirEngine::Core::Graphic::Rendering::RendererDataBase* AirEngine::Core::Graphic::Manager::RenderPipelineManager::RendererData(Camera::CameraBase* camera)

@@ -35,7 +35,7 @@ namespace AirEngine
 					void RefreshRendererData(Camera::CameraBase* camera);
 					void DestroyRendererData(Camera::CameraBase* camera);
 					Rendering::RenderPipelineBase* RenderPipeline();
-					Rendering::RendererBase* Renderer(Camera::CameraBase* camera);
+					Rendering::RendererBase* Renderer(std::string rendererName);
 					Rendering::RendererDataBase* RendererData(Camera::CameraBase* camera);
 
 				private:

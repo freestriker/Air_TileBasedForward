@@ -62,15 +62,15 @@ AirEngine::Core::Graphic::Rendering::RendererDataBase* AirEngine::Rendering::Ren
 
 void AirEngine::Rendering::Renderer::TBForwardRenderer::OnResolveRendererData(Core::Graphic::Rendering::RendererDataBase* rendererData, Camera::CameraBase* camera)
 {
-	static_cast<RenderFeature::Background_RenderFeature::Background_RenderFeatureData*>(rendererData->RenderFeatureData("Background_RenderFeature"))->needClearColorAttachment = true;
-	auto geometryFeatureData = static_cast<RenderFeature::GeometryRenderFeature::GeometryRenderFeatureData*>(rendererData->RenderFeatureData("GeometryRenderFeature"));
-	auto lightListFeatureData = static_cast<RenderFeature::TBForward_LightList_RenderFeature::TBForward_LightList_RenderFeatureData*>(rendererData->RenderFeatureData("TBForward_LightList_RenderFeature"));
-	auto opaqueFeatureData = static_cast<RenderFeature::TBForward_Opaque_RenderFeature::TBForward_Opaque_RenderFeatureData*>(rendererData->RenderFeatureData("TBForward_Opaque_RenderFeature"));
-	auto depthPeelingFeatureData = static_cast<RenderFeature::TBForward_OIT_DepthPeeling_RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatureData*>(rendererData->RenderFeatureData("TBForward_OIT_DepthPeeling_RenderFeature"));
-	//auto alphaBufferFeatureData = static_cast<RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeatureData*>(rendererData->RenderFeatureData("TBForward_OIT_AlphaBuffer_RenderFeature"));
-	auto ssaoFeatureData = static_cast<RenderFeature::SSAO_Occlusion_RenderFeature::SSAO_Occlusion_RenderFeatureData*>(rendererData->RenderFeatureData("SSAO_Occlusion_RenderFeature"));
-	auto aoBlurFeatureData = static_cast<RenderFeature::AO_Blur_RenderFeature::AO_Blur_RenderFeatureData*>(rendererData->RenderFeatureData("AO_Blur_RenderFeature"));
-	auto aoCoverFeatureData = static_cast<RenderFeature::AO_Cover_RenderFeature::AO_Cover_RenderFeatureData*>(rendererData->RenderFeatureData("AO_Cover_RenderFeature"));
+	rendererData->RenderFeatureData<RenderFeature::Background_RenderFeature::Background_RenderFeatureData>("Background_RenderFeature")->needClearColorAttachment = true;
+	auto geometryFeatureData = rendererData->RenderFeatureData<RenderFeature::GeometryRenderFeature::GeometryRenderFeatureData>("GeometryRenderFeature");
+	auto lightListFeatureData = rendererData->RenderFeatureData<RenderFeature::TBForward_LightList_RenderFeature::TBForward_LightList_RenderFeatureData>("TBForward_LightList_RenderFeature");
+	auto opaqueFeatureData = rendererData->RenderFeatureData<RenderFeature::TBForward_Opaque_RenderFeature::TBForward_Opaque_RenderFeatureData>("TBForward_Opaque_RenderFeature");
+	auto depthPeelingFeatureData = rendererData->RenderFeatureData<RenderFeature::TBForward_OIT_DepthPeeling_RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatureData>("TBForward_OIT_DepthPeeling_RenderFeature");
+	//auto alphaBufferFeatureData = rendererData->RenderFeatureData<RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeatureData>("TBForward_OIT_AlphaBuffer_RenderFeature");
+	auto ssaoFeatureData = rendererData->RenderFeatureData<RenderFeature::SSAO_Occlusion_RenderFeature::SSAO_Occlusion_RenderFeatureData>("SSAO_Occlusion_RenderFeature");
+	auto aoBlurFeatureData = rendererData->RenderFeatureData<RenderFeature::AO_Blur_RenderFeature::AO_Blur_RenderFeatureData>("AO_Blur_RenderFeature");
+	auto aoCoverFeatureData = rendererData->RenderFeatureData<RenderFeature::AO_Cover_RenderFeature::AO_Cover_RenderFeatureData>("AO_Cover_RenderFeature");
 
 	ssaoFeatureData->depthTexture = geometryFeatureData->depthTexture;
 	ssaoFeatureData->normalTexture = geometryFeatureData->normalTexture;

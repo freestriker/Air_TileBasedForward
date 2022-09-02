@@ -30,6 +30,10 @@ namespace AirEngine
 		{
 			class Thread;
 		}
+		namespace Rendering
+		{
+			class RendererDataBase;
+		}
 	}
 	namespace Camera
 	{
@@ -60,7 +64,6 @@ namespace AirEngine
 		public:
 			static CameraBase* mainCamera;
 			const CameraType cameraType;
-			std::vector<std::string> renderPassNames;
 			std::map<std::string, Core::Graphic::Instance::Image*> attachments;
 			float nearFlat;
 			float farFlat;
@@ -84,9 +87,9 @@ namespace AirEngine
 			void SetRendererName(std::string rendererName);
 			std::string RendererName();
 			void RefreshRenderer();
+			Core::Graphic::Rendering::RendererDataBase* RendererData();
 		protected:
-			void InitRenderer(std::string rendererName);
-			CameraBase(CameraType cameraType, std::map<std::string, Core::Graphic::Instance::Image*> attachments);
+			CameraBase(CameraType cameraType, std::string rendererName, std::map<std::string, Core::Graphic::Instance::Image*> attachments);
 			virtual ~CameraBase();
 			virtual void OnSetParameter(glm::vec4& parameter);
 			virtual void OnSetSize(glm::vec2& parameter) = 0;

@@ -18,7 +18,7 @@ namespace AirEngine
 			PerspectiveCamera& operator=(PerspectiveCamera&&) = delete;
 		public:
 			float fovAngle;
-			PerspectiveCamera(std::map<std::string, Core::Graphic::Instance::Image*> attachments, std::string rendererName);
+			PerspectiveCamera(std::string rendererName, std::map<std::string, Core::Graphic::Instance::Image*> attachments);
 			virtual ~PerspectiveCamera();
 
 			RTTR_ENABLE(Camera::CameraBase)

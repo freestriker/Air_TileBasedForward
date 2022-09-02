@@ -46,6 +46,8 @@ namespace AirEngine
 					RendererDataBase& operator=(RendererDataBase&&) = delete;
 				public:
 					RenderFeatureDataBase* RenderFeatureData(std::string renderFeatureName);
+					template<typename TRenderFeatureData>
+					TRenderFeatureData* RenderFeatureData(std::string renderFeatureName);
 
 					RTTR_ENABLE(Core::Logic::Object::Object)
 				};
@@ -87,4 +89,10 @@ namespace AirEngine
 			}
 		}
 	}
+}
+
+template<typename TRenderFeatureData>
+TRenderFeatureData* AirEngine::Core::Graphic::Rendering::RendererDataBase::RenderFeatureData(std::string renderFeatureName)
+{
+	return static_cast<TRenderFeatureData*>(RenderFeatureData(renderFeatureName));
 }

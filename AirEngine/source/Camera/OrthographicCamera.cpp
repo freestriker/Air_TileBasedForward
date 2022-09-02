@@ -36,11 +36,10 @@ void AirEngine::Camera::OrthographicCamera::OnSetProjectionMatrix(glm::mat4& mat
 	);
 }
 
-AirEngine::Camera::OrthographicCamera::OrthographicCamera(std::map<std::string, Core::Graphic::Instance::Image*> attachments, std::string rendererName)
-	: CameraBase(CameraType::ORTHOGRAPHIC, attachments)
+AirEngine::Camera::OrthographicCamera::OrthographicCamera(std::string rendererName, std::map<std::string, Core::Graphic::Instance::Image*> attachments)
+	: CameraBase(CameraType::ORTHOGRAPHIC, rendererName, attachments)
 	, size(2.25f)
 {
-	InitRenderer(rendererName);
 }
 
 AirEngine::Camera::OrthographicCamera::~OrthographicCamera()
