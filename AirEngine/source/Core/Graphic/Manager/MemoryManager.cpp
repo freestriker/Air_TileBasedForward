@@ -132,6 +132,7 @@ AirEngine::Core::Graphic::Instance::Memory AirEngine::Core::Graphic::Manager::Me
 	}
 
 	Utils::Log::Exception("Failed to allocate memory.");
+	return AirEngine::Core::Graphic::Instance::Memory(false, VK_NULL_HANDLE, -1, 0, nullptr, 0);
 }
 
 AirEngine::Core::Graphic::Instance::Memory AirEngine::Core::Graphic::Manager::MemoryManager::AcquireExclusiveMemory(VkMemoryRequirements& requirement, VkMemoryPropertyFlags properties)
@@ -155,6 +156,7 @@ AirEngine::Core::Graphic::Instance::Memory AirEngine::Core::Graphic::Manager::Me
 	}
 
 	Utils::Log::Exception("Failed to allocate exculsive memory.");
+	return AirEngine::Core::Graphic::Instance::Memory(true, VK_NULL_HANDLE, -1, 0, nullptr, 0);
 }
 
 void AirEngine::Core::Graphic::Manager::MemoryManager::ReleaseMemory(Instance::Memory& memory)

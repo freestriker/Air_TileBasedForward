@@ -5,7 +5,7 @@ VkDescriptorSet AirEngine::Core::Graphic::Instance::DescriptorSet::VkDescriptorS
 	return _vkDescriptorSet;
 }
 
-AirEngine::Core::Graphic::Instance::DescriptorSet::DescriptorSet(ShaderSlotType slotType, VkDescriptorSet descriptorSet, VkDescriptorPool sourceDescriptorChunk)
+AirEngine::Core::Graphic::Instance::DescriptorSet::DescriptorSet(Rendering::ShaderSlotType slotType, VkDescriptorSet descriptorSet, VkDescriptorPool sourceDescriptorChunk)
 	: _slotType(slotType)
 	, _vkDescriptorSet(descriptorSet)
 	, _sourceVkDescriptorChunk(sourceDescriptorChunk)

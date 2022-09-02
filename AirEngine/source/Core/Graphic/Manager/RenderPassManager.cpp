@@ -1,140 +1,197 @@
 #include "Core/Graphic/Manager/RenderPassManager.h"
-#include "Core/Graphic/RenderPass/RenderPassBase.h"
 #include "Utils/Log.h"
 #include "Core/Graphic/CoreObject/Instance.h"
-#include "Core/Graphic/Instance/FrameBuffer.h"
 #include <map>
 #include <string>
 #include "Core/Graphic/Instance/Image.h"
+#include "Core/Graphic/Rendering/RenderPassBase.h"
 
 AirEngine::Core::Graphic::Manager::RenderPassManager::RenderPassManager()
     : _managerMutex()
-    , _renderPasss()
-    , _objects()
+    , _renderPassWrappers()
 {
 }
 
 AirEngine::Core::Graphic::Manager::RenderPassManager::~RenderPassManager()
 {
-
 }
 
-void AirEngine::Core::Graphic::Manager::RenderPassManager::AddRenderPass(RenderPass::RenderPassBase* renderPass)
+void AirEngine::Core::Graphic::Manager::RenderPassManager::CreateRenderPass(Rendering::RenderPassBase* renderPass)
 {
-    std::unique_lock<std::mutex> lock(_managerMutex);
+    renderPass->OnPopulateRenderPassSettings(renderPass->_settings);
 
-    _renderPasss.emplace(renderPass->_name, renderPass);
-    renderPass->CreateRenderPass();
-}
-
-void AirEngine::Core::Graphic::Manager::RenderPassManager::RemoveRenderPass(std::string name)
-{
-    std::unique_lock<std::mutex> lock(_managerMutex);
-
-    _renderPasss.erase(name);
-}
-
-AirEngine::Core::Graphic::RenderPass::RenderPassBase& AirEngine::Core::Graphic::Manager::RenderPassManager::RenderPass(std::string name)
-{
-    std::unique_lock<std::mutex> lock(_managerMutex);
-    return *_renderPasss[name];
-}
-
-AirEngine::Core::Graphic::Manager::RenderPassTarget* AirEngine::Core::Graphic::Manager::RenderPassManager::GetRenderPassObject(std::vector<std::string> renderPassNames, std::map<std::string, Instance::Image*> availableAttachments)
-{
-    std::unique_lock<std::mutex> lock(_managerMutex);
-
-    std::vector<RenderPass::RenderPassBase*> passes = std::vector<RenderPass::RenderPassBase*>(renderPassNames.size());
-    std::vector<Instance::FrameBuffer*> frameBuffers = std::vector<Instance::FrameBuffer*>(renderPassNames.size());
-    std::map<std::string, size_t> indexMap = std::map<std::string, size_t>();
-    for (size_t i = 0; i < renderPassNames.size(); i++)
+    std::map<std::string, uint32_t> attachmentIndexes;
+    std::vector<VkAttachmentDescription> attachments = std::vector<VkAttachmentDescription>(renderPass->_settings.attchmentDescriptors.size());
+    std::vector<VkAttachmentReference> attachmentReferences = std::vector<VkAttachmentReference>(renderPass->_settings.attchmentDescriptors.size());
     {
-        passes[i] = _renderPasss[renderPassNames[i]];
-    }
-    std::sort(std::begin(passes), std::end(passes),
-        [](RenderPass::RenderPassBase*& a, RenderPass::RenderPassBase*& b)
+        uint32_t attachmentIndex = 0;
+        for (const auto& pair : renderPass->_settings.attchmentDescriptors)
         {
-            return a->RenderIndex() < b->RenderIndex();
-        }
-    );
+            const auto& attachmentDescriptor = pair.second;
 
-    VkExtent2D extent{ 0, 0 };
-    for (auto& attachment : availableAttachments)
-    {
-        extent.width = extent.width >= attachment.second->VkExtent3D_().width ? extent.width : attachment.second->VkExtent3D_().width;
-        extent.height = extent.height >= attachment.second->VkExtent3D_().height ? extent.height : attachment.second->VkExtent3D_().height;
-    }
+            VkAttachmentDescription colorAttachment{};
+            colorAttachment.format = attachmentDescriptor.format;
+            colorAttachment.samples = static_cast<VkSampleCountFlagBits>(attachmentDescriptor.sampleCount);
+            colorAttachment.loadOp = attachmentDescriptor.loadOp;
+            colorAttachment.storeOp = attachmentDescriptor.storeOp;
+            colorAttachment.stencilLoadOp = attachmentDescriptor.stencilLoadOp;
+            colorAttachment.stencilStoreOp = attachmentDescriptor.stencilStoreOp;
+            colorAttachment.initialLayout = attachmentDescriptor.initialLayout;
+            colorAttachment.finalLayout = attachmentDescriptor.finalLayout;
 
-    for (size_t i = 0; i < passes.size(); i++)
-    {
-        frameBuffers[i] = new Instance::FrameBuffer(passes[i], availableAttachments, extent);
-        indexMap.emplace(passes[i]->Name(), i);
-    }
+            VkAttachmentReference attachmentReference{};
+            attachmentReference.attachment = attachmentIndex;
+            attachmentReference.layout = attachmentDescriptor.layout;
 
-    std::map<std::string, Instance::Image*> attachments = std::map<std::string, Instance::Image*>();
-    for (const auto& frameBuffer : frameBuffers)
-    {
-        for (const auto& attachmentPair : frameBuffer->_attachments)
-        {
-            attachments[attachmentPair.first] = attachmentPair.second;
+            attachments[attachmentIndex] = colorAttachment;
+            attachmentReferences[attachmentIndex] = attachmentReference;
+            attachmentIndexes[attachmentDescriptor.name] = attachmentIndex;
+
+            ++attachmentIndex;
         }
     }
 
-    RenderPassTarget* object = new RenderPassTarget();
-    object->_passes = passes;
-    object->_frameBuffers = frameBuffers;
-    object->_indexMap = indexMap;
-    object->_extent = extent;
-    object->_attachments = std::move(attachments);
-
-    _objects.emplace(object);
-    return object;
-}
-
-void AirEngine::Core::Graphic::Manager::RenderPassManager::DestroyRenderPassObject(RenderPassTarget*& renderPassObject)
-{
-    if (renderPassObject)
+    std::map<std::string, uint32_t> subpassMap;
+    std::map<std::string, std::map<std::string, uint32_t>> colorAttachmentMap;
+    std::vector<VkSubpassDescription> subpasss = std::vector<VkSubpassDescription>(renderPass->_settings.subpassDescriptors.size());
+    std::vector<std::vector<VkAttachmentReference>> colorAttachments = std::vector<std::vector<VkAttachmentReference>>(renderPass->_settings.subpassDescriptors.size());
+    std::vector<VkAttachmentReference> depthStencilAttachments = std::vector<VkAttachmentReference>(renderPass->_settings.subpassDescriptors.size());
     {
-        std::unique_lock<std::mutex> lock(_managerMutex);
-        for (const auto& frameBuffer : renderPassObject->_frameBuffers)
+        uint32_t subpassIndex = 0;
+        for (const auto& pair : renderPass->_settings.subpassDescriptors)
         {
-            delete frameBuffer;
+            const auto& subpassDescriptor = pair.second;
+
+            subpassMap[subpassDescriptor.name] = subpassIndex;
+            colorAttachmentMap[subpassDescriptor.name] = std::map<std::string, uint32_t>();
+
+            colorAttachments[subpassIndex].resize(subpassDescriptor.colorAttachmentNames.size());
+            for (uint32_t i = 0; i < subpassDescriptor.colorAttachmentNames.size(); i++)
+            {
+                colorAttachments[subpassIndex][i] = attachmentReferences[attachmentIndexes[subpassDescriptor.colorAttachmentNames[i]]];
+                colorAttachmentMap[subpassDescriptor.name][subpassDescriptor.colorAttachmentNames[i]] = i;
+            }
+
+            if (subpassDescriptor.useDepthStencilAttachment)
+            {
+                depthStencilAttachments[subpassIndex] = attachmentReferences[attachmentIndexes[subpassDescriptor.depthStencilAttachmentName]];
+            }
+
+
+            ++subpassIndex;
         }
-        _objects.erase(renderPassObject);
-        delete renderPassObject;
-        renderPassObject = nullptr;
+
+        for (const auto& pair : renderPass->_settings.subpassDescriptors)
+        {
+            const auto& subpassDescriptor = pair.second;
+
+            VkSubpassDescription subpass{};
+            subpass.pipelineBindPoint = subpassDescriptor.pipelineBindPoint;
+            subpass.colorAttachmentCount = static_cast<uint32_t>(colorAttachments[subpassMap[subpassDescriptor.name]].size());
+            subpass.pColorAttachments = colorAttachments[subpassMap[subpassDescriptor.name]].data();
+            if (subpassDescriptor.useDepthStencilAttachment)
+            {
+                subpass.pDepthStencilAttachment = &(depthStencilAttachments[subpassMap[subpassDescriptor.name]]);
+            }
+
+            subpasss[subpassMap[subpassDescriptor.name]] = subpass;
+        }
     }
+
+    std::vector< VkSubpassDependency> dependencys = std::vector< VkSubpassDependency>(renderPass->_settings.dependencyDescriptors.size());
+    uint32_t dependencyIndex = 0;
+    for (const auto& dependencyDescriptor : renderPass->_settings.dependencyDescriptors)
+    {
+        VkSubpassDependency dependency{};
+        dependency.srcSubpass = dependencyDescriptor.srcSubpassName == "VK_SUBPASS_EXTERNAL" ? VK_SUBPASS_EXTERNAL : subpassMap[dependencyDescriptor.srcSubpassName];
+        dependency.dstSubpass = subpassMap[dependencyDescriptor.dstSubpassName];
+        dependency.srcStageMask = dependencyDescriptor.srcStageMask;
+        dependency.srcAccessMask = dependencyDescriptor.srcAccessMask;
+        dependency.dstStageMask = dependencyDescriptor.dstStageMask;
+        dependency.dstAccessMask = dependencyDescriptor.dstAccessMask;
+        dependency.dependencyFlags = dependency.srcSubpass == dependency.dstSubpass ? VK_DEPENDENCY_BY_REGION_BIT : 0;
+
+        dependencys[dependencyIndex] = dependency;
+
+        ++dependencyIndex;
+    }
+
+    VkRenderPassCreateInfo renderPassInfo{};
+    renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+    renderPassInfo.attachmentCount = static_cast<uint32_t>(attachments.size());
+    renderPassInfo.pAttachments = attachments.data();
+    renderPassInfo.subpassCount = static_cast<uint32_t>(subpasss.size());
+    renderPassInfo.pSubpasses = subpasss.data();
+    renderPassInfo.dependencyCount = static_cast<uint32_t>(dependencys.size());
+    renderPassInfo.pDependencies = dependencys.data();
+
+    VkRenderPass newVkRenderPass{};
+    Utils::Log::Exception("Failed to create render pass", vkCreateRenderPass(CoreObject::Instance::VkDevice_(), &renderPassInfo, nullptr, &newVkRenderPass));
+
+    renderPass->_vkRenderPass = newVkRenderPass;
+    renderPass->_subPassIndexMap = subpassMap;
+    renderPass->_colorAttachmentIndexMaps = colorAttachmentMap;
 }
 
-AirEngine::Core::Graphic::Instance::FrameBuffer* AirEngine::Core::Graphic::Manager::RenderPassTarget::FrameBuffer(std::string name)
+AirEngine::Core::Graphic::Rendering::RenderPassBase* AirEngine::Core::Graphic::Manager::RenderPassManager::LoadRenderPass(std::string renderPassName)
 {
-    return _frameBuffers[_indexMap[name]];
+    std::lock_guard<std::mutex> locker(_managerMutex);
+
+    auto iterator = _renderPassWrappers.find(renderPassName);
+    if (iterator == std::end(_renderPassWrappers))
+    {
+        rttr::type renderPassType = rttr::type::get_by_name(renderPassName);
+        Utils::Log::Exception("Do not have render pass type named: " + renderPassName + ".", !renderPassType.is_valid());
+
+        rttr::variant renderPassVariant = renderPassType.create();
+        Utils::Log::Exception("Can not create render pass variant named: " + renderPassName + ".", !renderPassVariant.is_valid());
+
+        AirEngine::Core::Graphic::Rendering::RenderPassBase* renderPass = renderPassVariant.get_value<AirEngine::Core::Graphic::Rendering::RenderPassBase*>();
+        Utils::Log::Exception("Can not cast render pass named: " + renderPassName + ".", renderPass == nullptr);
+
+        CreateRenderPass(renderPass);
+
+        _renderPassWrappers.emplace(renderPassName, RenderPassWrapper{ 0, renderPass });
+        iterator = _renderPassWrappers.find(renderPassName);
+    }
+    iterator->second.refrenceCount++;
+    return iterator->second.renderPass;
 }
 
-AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Manager::RenderPassTarget::Attachment(std::string name)
+void AirEngine::Core::Graphic::Manager::RenderPassManager::UnloadRenderPass(std::string renderPassName)
 {
-    return _attachments[name];
+    std::lock_guard<std::mutex> locker(_managerMutex);
+
+    auto iterator = _renderPassWrappers.find(renderPassName);
+    Utils::Log::Exception("Do not have render pass instance named: " + renderPassName + ".", iterator == std::end(_renderPassWrappers));
+    iterator->second.refrenceCount--;
 }
 
-VkExtent2D AirEngine::Core::Graphic::Manager::RenderPassTarget::Extent()
+void AirEngine::Core::Graphic::Manager::RenderPassManager::UnloadRenderPass(Rendering::RenderPassBase* renderPass)
 {
-    return _extent;
+    std::lock_guard<std::mutex> locker(_managerMutex);
+    
+    std::string renderPassName = renderPass->Type().get_name().to_string();
+
+    auto iterator = _renderPassWrappers.find(renderPassName);
+    Utils::Log::Exception("Do not have render pass instance named: " + renderPassName + ".", iterator == std::end(_renderPassWrappers));
+    iterator->second.refrenceCount--;
 }
 
-std::vector<AirEngine::Core::Graphic::RenderPass::RenderPassBase*>* AirEngine::Core::Graphic::Manager::RenderPassTarget::RenderPasses()
+void AirEngine::Core::Graphic::Manager::RenderPassManager::Collect()
 {
-    return &_passes;
-}
+    std::lock_guard<std::mutex> locker(_managerMutex);
 
-AirEngine::Core::Graphic::Manager::RenderPassTarget::RenderPassTarget()
-    : _passes()
-    , _frameBuffers()
-    , _indexMap()
-    , _extent()
-    , _attachments()
-{
-}
-
-AirEngine::Core::Graphic::Manager::RenderPassTarget::~RenderPassTarget()
-{
+    for (auto iterator = _renderPassWrappers.begin(); iterator != _renderPassWrappers.end(); )
+    {
+        if (iterator->second.refrenceCount == 0)
+        {
+            delete iterator->second.renderPass;
+            iterator = _renderPassWrappers.erase(iterator);
+        }
+        else
+        {
+            iterator++;
+        }
+    }
 }

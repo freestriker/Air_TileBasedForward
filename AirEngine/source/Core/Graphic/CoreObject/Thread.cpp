@@ -11,8 +11,7 @@
 #include "Core/Logic/CoreObject/Instance.h"
 #include "Core/Graphic/Manager/RenderPassManager.h"
 #include "Core/Graphic/CoreObject/Instance.h"
-#include "Core/Graphic/RenderPass/BackgroundRenderPass.h"
-#include "Core/Graphic/Shader.h"
+#include "Core/Graphic/Rendering/Shader.h"
 #include "Utils/IntersectionChecker.h"
 #include <future>
 #include "Core/Graphic/Command/CommandPool.h"
@@ -23,11 +22,20 @@
 #include "Renderer/Renderer.h"
 #include "Asset/Mesh.h"
 #include "Utils/OrientedBoundingBox.h"
-#include "Core/Graphic/Material.h"
+#include "Core/Graphic/Rendering/Material.h"
 #include "Core/Graphic/CoreObject/Window.h"
 #include "Core/Graphic/Command/ImageMemoryBarrier.h"
-#include "Core/Graphic/RenderPass/PresentRenderPass.h"
-#include "Core/Graphic/RenderPass/RenderPassBase.h"
+#include "Core/Graphic/Manager/RenderPipelineManager.h"
+#include "Core/Graphic/Rendering/RenderPipelineBase.h"
+#include "Core/Graphic/Rendering/RendererBase.h"
+#include "Core/Graphic/Rendering/Material.h"
+#include "Core/Graphic/Rendering/Shader.h"
+#include "Rendering/PresentRenderPass.h"
+#include "Core/Graphic/Instance/ImageSampler.h"
+#include "Core/IO/Manager/AssetManager.h"
+#include "Core/Graphic/Instance/Buffer.h"
+#include "Core/Graphic/Instance/Image.h"
+#include "Core/Graphic/Rendering/FrameBuffer.h"
 
 AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread AirEngine::Core::Graphic::CoreObject::Thread::_graphicThread = AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread();
 std::array<AirEngine::Core::Graphic::CoreObject::Thread::SubGraphicThread, 4> AirEngine::Core::Graphic::CoreObject::Thread::_subGraphicThreads = std::array<AirEngine::Core::Graphic::CoreObject::Thread::SubGraphicThread, 4>();
@@ -121,15 +129,15 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnStart()
 
 void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnThreadStart()
 {
-	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::UNIFORM_BUFFER, { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER }, 10);
-	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::STORAGE_BUFFER, { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER }, 10);
-	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::UNIFORM_TEXEL_BUFFER, { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER }, 10);
-	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::STORAGE_TEXEL_BUFFER, { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER }, 10);
-	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::TEXTURE_CUBE, { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER }, 10);
-	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::TEXTURE2D, { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER }, 10);
-	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::TEXTURE2D_WITH_INFO, { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER }, 10);
-	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::STORAGE_TEXTURE2D, { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE }, 10);
-	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(ShaderSlotType::STORAGE_TEXTURE2D_WITH_INFO, { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER }, 10);
+	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(Rendering::ShaderSlotType::UNIFORM_BUFFER, { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER }, 10);
+	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(Rendering::ShaderSlotType::STORAGE_BUFFER, { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER }, 10);
+	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(Rendering::ShaderSlotType::UNIFORM_TEXEL_BUFFER, { VK_DESCRIPTOR_TYPE_UNIFORM_TEXEL_BUFFER }, 10);
+	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(Rendering::ShaderSlotType::STORAGE_TEXEL_BUFFER, { VK_DESCRIPTOR_TYPE_STORAGE_TEXEL_BUFFER }, 10);
+	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(Rendering::ShaderSlotType::TEXTURE_CUBE, { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER }, 10);
+	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(Rendering::ShaderSlotType::TEXTURE2D, { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER }, 10);
+	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(Rendering::ShaderSlotType::TEXTURE2D_WITH_INFO, { VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER }, 10);
+	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(Rendering::ShaderSlotType::STORAGE_TEXTURE2D, { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE }, 10);
+	CoreObject::Instance::DescriptorSetManager().AddDescriptorSetPool(Rendering::ShaderSlotType::STORAGE_TEXTURE2D_WITH_INFO, { VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER }, 10);
 
 }
 
@@ -141,18 +149,24 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 		Logic::CoreObject::Instance::SetNeedIterateRenderer(true);
 		Instance::StartRenderCondition().Wait();
 
-
 		//Lights
 		auto lightCopyTask = AddTask(
 			[](Command::CommandPool* graphicCommandPool, Command::CommandPool* computeCommandPool)->void 
 			{
 				CoreObject::Instance::LightManager().SetLightInfo(CoreObject::Instance::_lights);
-				auto commandBuffer = graphicCommandPool->CreateCommandBuffer("LightCopyCommandBuffer", VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+				auto commandBuffer = graphicCommandPool->CreateCommandBuffer(VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 				CoreObject::Instance::LightManager().CopyLightInfo(commandBuffer);
 				graphicCommandPool->DestoryCommandBuffer(commandBuffer);
 			}
 		);
 		lightCopyTask.wait();
+
+		std::vector<Renderer::Renderer*> rendererComponents = std::vector<Renderer::Renderer*>(Instance::_renderers.size());
+		for (size_t i = 0; i < rendererComponents.size(); i++)
+		{
+			rendererComponents[i] = static_cast<Renderer::Renderer*>(Instance::_renderers[i]);
+			rendererComponents[i]->RefreshObjectInfo();
+		}
 
 		//Camera
 		for (auto& component : Instance::_cameras)
@@ -161,81 +175,104 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 			if(!(camera)) continue;
 			camera->RefreshCameraInfo();
 
-			auto viewMatrix = camera->ViewMatrix();
-
-			//Classify renderers
-			std::map<std::string, std::multimap<float, Renderer::Renderer*>> rendererDistenceMaps = std::map<std::string, std::multimap<float, Renderer::Renderer*>>();
-
-			for (auto& rendererComponent : Instance::_renderers)
-			{
-				auto renderer = dynamic_cast<Renderer::Renderer*>(rendererComponent);
-				if (!(renderer && renderer->GetMaterials()->size() && renderer->mesh)) continue;
-				renderer->RefreshObjectInfo();
-
-				auto obbMvCenter = viewMatrix * renderer->GameObject()->transform.ModelMatrix() * glm::vec4(renderer->mesh->OrientedBoundingBox().Center(), 1.0f);
-
-				for (const auto& materialPair : *renderer->GetMaterials())
-				{
-					rendererDistenceMaps[materialPair.first].insert({ obbMvCenter.z, renderer });
-				}
-			}
-
-			//Prepare render pass
-			for (const auto& renderPass : *camera->_renderPassTarget->RenderPasses())
-			{
-				renderPass->OnPrepare(camera);
-			}
-
-			std::map<std::string, std::future<void>> renderTasks = std::map<std::string, std::future<void>>();
-			//Add build command buffer task
-			for (const auto& renderPass : *camera->_renderPassTarget->RenderPasses())
-			{
-				//Utils::Log::Message(renderPass->Name());
-				auto rendererDistanceMap = &rendererDistenceMaps[renderPass->Name()];
-
-				renderTasks[renderPass->Name()] = AddTask(
-					[renderPass, rendererDistanceMap, camera](Command::CommandPool* graphicCommandPool, Command::CommandPool* computeCommandPool)
-					{
-						renderPass->OnPopulateCommandBuffer(graphicCommandPool, *rendererDistanceMap, camera);
-					}
-				);
-			}
-
-			//Submit command buffers
-			for (const auto& renderPass : *camera->_renderPassTarget->RenderPasses())
-			{
-				renderTasks[renderPass->Name()].wait();
-				renderPass->OnSubmit();
-			}
-
-			//Clear command buffers
-			for (const auto& renderPass : *camera->_renderPassTarget->RenderPasses())
-			{
-				renderPass->OnClear();
-			}
-
-			//Clear
-			ClearCommandPools();
+			Core::Graphic::CoreObject::Instance::RenderPipelineManager().Renderer(camera->RendererName())->PrepareRenderer(Core::Graphic::CoreObject::Instance::RenderPipelineManager().RendererData(camera));
+		}
+		for (auto& component : Instance::_cameras)
+		{
+			auto camera = dynamic_cast<Camera::CameraBase*>(component);
+			if(!(camera)) continue;
+			Core::Graphic::CoreObject::Instance::RenderPipelineManager().Renderer(camera->RendererName())->ExcuteRenderer(Core::Graphic::CoreObject::Instance::RenderPipelineManager().RendererData(camera), camera, &rendererComponents);
+		}
+		for (auto& component : Instance::_cameras)
+		{
+			auto camera = dynamic_cast<Camera::CameraBase*>(component);
+			if(!(camera)) continue;
+			Core::Graphic::CoreObject::Instance::RenderPipelineManager().Renderer(camera->RendererName())->SubmitRenderer(Core::Graphic::CoreObject::Instance::RenderPipelineManager().RendererData(camera));
+		}
+		for (auto& component : Instance::_cameras)
+		{
+			auto camera = dynamic_cast<Camera::CameraBase*>(component);
+			if(!(camera)) continue;
+			Core::Graphic::CoreObject::Instance::RenderPipelineManager().Renderer(camera->RendererName())->FinishRenderer(Core::Graphic::CoreObject::Instance::RenderPipelineManager().RendererData(camera));
 		}
 
 		Logic::CoreObject::Instance::SetNeedIterateRenderer(false);
 		Instance::EndRenderCondition().Awake();
 
 		//Present
-		auto mainCamera = Camera::CameraBase::mainCamera;
-		if (mainCamera)
 		{
-			auto presentRenderPass = &Graphic::CoreObject::Instance::RenderPassManager().RenderPass("PresentRenderPass");
-			presentRenderPass->OnPrepare(mainCamera);
-			AddTask(
-				[mainCamera, presentRenderPass](Command::CommandPool* graphicCommandPool, Command::CommandPool* computeCommandPool)
-				{
-					std::multimap<float, Renderer::Renderer*> emptyTable = std::multimap<float, Renderer::Renderer*>();
-					presentRenderPass->OnPopulateCommandBuffer(graphicCommandPool, emptyTable, mainCamera);
-				}
-			).wait();
-			presentRenderPass->OnSubmit();
-			presentRenderPass->OnClear();
+			static AirEngine::Core::Graphic::Rendering::RenderPassBase* presentRenderPass = Instance::RenderPassManager().LoadRenderPass<AirEngine::Rendering::PresentRenderPass>();
+			static Rendering::Shader* presentShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\PresentShader.shader");
+			static Rendering::Material* presentMaterial = new Core::Graphic::Rendering::Material(presentShader);
+			static Core::Graphic::Instance::ImageSampler* presentSampler = new Core::Graphic::Instance::ImageSampler
+			(
+				VkFilter::VK_FILTER_LINEAR,
+				VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
+				VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
+				0.0f,
+				VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
+			);
+			static Core::Graphic::Instance::Buffer* attachmentSizeBuffer = new Core::Graphic::Instance::Buffer(
+				sizeof(glm::vec2),
+				VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+				VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT
+			);
+			static Asset::Mesh* fullScreenMesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\BackgroundMesh.ply");
+
+			auto mainCamera = Camera::CameraBase::mainCamera;
+			if (mainCamera)
+			{
+				auto prp = presentRenderPass;
+				auto pm = presentMaterial;
+				auto ps = presentSampler;
+				auto asb = attachmentSizeBuffer;
+				auto extent = mainCamera->attachments["ColorAttachment"]->VkExtent2D_();
+				auto fm = fullScreenMesh;
+				auto curSwapchaineImageIndex = CoreObject::Window::VulkanWindow_()->currentSwapChainImageIndex();
+				auto curSwapchaineImage = CoreObject::Window::VulkanWindow_()->swapChainImage(curSwapchaineImageIndex);
+				auto curSwapchaineImageView = CoreObject::Window::VulkanWindow_()->swapChainImageView(curSwapchaineImageIndex);
+				auto windowExtent = CoreObject::Window::Extent();
+
+				auto ai = Graphic::Instance::Image::CreateNative2DImage(
+					curSwapchaineImage, 
+					curSwapchaineImageView, 
+					windowExtent, 
+					VK_FORMAT_B8G8R8A8_SRGB, 
+					VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT, 
+					VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
+				);
+				auto frameBuffer = new Rendering::FrameBuffer(prp, { {"SwapchainAttachment", ai} });
+				glm::vec2 attachmentSize = { windowExtent.width, windowExtent.height };
+				attachmentSizeBuffer->WriteData(&attachmentSize, sizeof(glm::vec2));
+				pm->SetUniformBuffer("attachmentSizeInfo", attachmentSizeBuffer);
+				pm->SetSlotData("colorTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, ps->VkSampler_(), mainCamera->attachments["ColorAttachment"]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
+				AddTask(
+					[mainCamera, prp, pm, ps, frameBuffer, fm](Command::CommandPool* graphicCommandPool, Command::CommandPool* computeCommandPool)
+					{
+						auto commandBuffer = graphicCommandPool->CreateCommandBuffer(VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+						commandBuffer->Reset();
+						commandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+						auto colorAttachmentBarrier = Command::ImageMemoryBarrier
+						(
+							mainCamera->attachments["ColorAttachment"],
+							VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+							VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+							VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+							VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+						);
+						commandBuffer->AddPipelineImageBarrier(VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, { &colorAttachmentBarrier });
+						VkClearValue cv = { 0, 0, 0, 0 };
+						commandBuffer->BeginRenderPass(prp, frameBuffer, { {"SwapchainAttachment", cv} });
+						commandBuffer->DrawMesh(fm, pm);
+						commandBuffer->EndRenderPass();
+
+						commandBuffer->EndRecord();
+						commandBuffer->Submit();
+						commandBuffer->WaitForFinish();
+						graphicCommandPool->DestoryCommandBuffer(commandBuffer);
+					}
+				).wait();
+			}
 		}
 
 		Instance::EndPresentCondition().Awake();
@@ -243,10 +280,11 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 		Instance::MemoryManager().Collect();
 		Instance::DescriptorSetManager().Collect();
 
-		
+		Instance::RenderPassManager().Collect();
 	}
 	Instance::MemoryManager().Collect();
 	Instance::DescriptorSetManager().Collect();
+	Instance::RenderPassManager().Collect();
 }
 
 void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnEnd()

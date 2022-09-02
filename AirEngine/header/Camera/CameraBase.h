@@ -30,9 +30,9 @@ namespace AirEngine
 		{
 			class Thread;
 		}
-		namespace Manager
+		namespace Rendering
 		{
-			class RenderPassTarget;
+			class RendererDataBase;
 		}
 	}
 	namespace Camera
@@ -64,17 +64,16 @@ namespace AirEngine
 		public:
 			static CameraBase* mainCamera;
 			const CameraType cameraType;
-			std::vector<std::string> renderPassNames;
 			std::map<std::string, Core::Graphic::Instance::Image*> attachments;
 			float nearFlat;
 			float farFlat;
 			float aspectRatio;
 		protected:
 		private:
+			std::string _rendererName;
 			Core::Graphic::Instance::Buffer* _buffer;
 			CameraData _cameraInfo;
 			glm::mat4 _projectionMatrix;
-			Core::Graphic::Manager::RenderPassTarget* _renderPassTarget;
 			AirRenderer::Utils::IntersectionChecker _intersectionChecker;
 
 		public:
@@ -83,11 +82,14 @@ namespace AirEngine
 			const glm::vec4* ClipPlanes();
 			void RefreshCameraInfo();
 			Core::Graphic::Instance::Buffer* CameraInfoBuffer();
-			void RefreshRenderPassObject();
 			bool CheckInFrustum(std::array<glm::vec3, 8>& vertexes, glm::mat4& matrix);
-			Core::Graphic::Manager::RenderPassTarget* RenderPassTarget();
+
+			void SetRendererName(std::string rendererName);
+			std::string RendererName();
+			void RefreshRenderer();
+			Core::Graphic::Rendering::RendererDataBase* RendererData();
 		protected:
-			CameraBase(CameraType cameraType, std::vector<std::string> renderPassNames, std::map<std::string, Core::Graphic::Instance::Image*> attachments);
+			CameraBase(CameraType cameraType, std::string rendererName, std::map<std::string, Core::Graphic::Instance::Image*> attachments);
 			virtual ~CameraBase();
 			virtual void OnSetParameter(glm::vec4& parameter);
 			virtual void OnSetSize(glm::vec2& parameter) = 0;

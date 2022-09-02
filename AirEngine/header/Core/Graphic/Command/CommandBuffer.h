@@ -14,20 +14,16 @@ namespace AirEngine
 	{
 		namespace Graphic
 		{
-			class Shader;
-			class Material;
-			namespace RenderPass
-			{
-				class RenderPassBase;
-			}
 			namespace Instance
 			{
 				class Buffer;
 				class Image;
 			}
-			namespace Manager
+			namespace Rendering
 			{
-				class RenderPassTarget;
+				class RenderPassBase;
+				class FrameBuffer;
+				class Material;
 			}
 			namespace Command
 			{
@@ -82,14 +78,15 @@ namespace AirEngine
 					void Submit(std::vector<Command::Semaphore*> signalSemaphores);
 					void Submit();
 					void WaitForFinish();
-					void BeginRenderPass(Graphic::RenderPass::RenderPassBase* renderPass, Graphic::Manager::RenderPassTarget* renderPassObject, std::map<std::string, VkClearValue> clearValues);
-					void BeginRenderPass(Graphic::RenderPass::RenderPassBase* renderPass, Graphic::Manager::RenderPassTarget* renderPassObject);
+					void BeginRenderPass(Graphic::Rendering::RenderPassBase* renderPass, Graphic::Rendering::FrameBuffer* frameBuffer, std::map<std::string, VkClearValue> clearValues);
+					void BeginRenderPass(Graphic::Rendering::RenderPassBase* renderPass, Graphic::Rendering::FrameBuffer* frameBuffer);
 					void EndRenderPass();
-					void BindMaterial(Material* material);
-					void DrawMesh(Asset::Mesh* mesh);
-					void Dispatch(uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ);
+					void DrawMesh(Asset::Mesh* mesh, Rendering::Material* material);
+					void Dispatch(Rendering::Material* material, uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ);
 					void Blit(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Image* dstImage, VkImageLayout dstImageLayout, VkFilter filter);
 					void Blit(Instance::Image* srcImage, VkImageLayout srcImageLayout, VkImage dstImage, VkImageLayout dstImageLayout, VkOffset3D offset1, VkOffset3D offset2, VkFilter filter);
+					
+					CommandPool* ParentCommandPool();
 				};
 			}
 		}

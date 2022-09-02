@@ -3,14 +3,14 @@
 #include "Core/Graphic/CoreObject/Instance.h"
 #include "Utils/Log.h"
 
-void AirEngine::Core::Graphic::Manager::DescriptorSetManager::AddDescriptorSetPool(ShaderSlotType slotType, std::vector<VkDescriptorType> descriptorTypes, uint32_t chunkSize)
+void AirEngine::Core::Graphic::Manager::DescriptorSetManager::AddDescriptorSetPool(Rendering::ShaderSlotType slotType, std::vector<VkDescriptorType> descriptorTypes, uint32_t chunkSize)
 {
 	std::unique_lock<std::shared_mutex> lock(_managerMutex);
 
 	_pools[slotType] = new DescriptorSetChunkPool(slotType, descriptorTypes, chunkSize);
 }
 
-void AirEngine::Core::Graphic::Manager::DescriptorSetManager::DeleteDescriptorSetPool(ShaderSlotType slotType)
+void AirEngine::Core::Graphic::Manager::DescriptorSetManager::DeleteDescriptorSetPool(Rendering::ShaderSlotType slotType)
 {
 	std::unique_lock<std::shared_mutex> lock(_managerMutex);
 
@@ -18,7 +18,7 @@ void AirEngine::Core::Graphic::Manager::DescriptorSetManager::DeleteDescriptorSe
 	_pools.erase(slotType);
 }
 
-AirEngine::Core::Graphic::Instance::DescriptorSet* AirEngine::Core::Graphic::Manager::DescriptorSetManager::AcquireDescripterSet(ShaderSlotType slotType, VkDescriptorSetLayout descriptorSetLayout)
+AirEngine::Core::Graphic::Instance::DescriptorSet* AirEngine::Core::Graphic::Manager::DescriptorSetManager::AcquireDescripterSet(Rendering::ShaderSlotType slotType, VkDescriptorSetLayout descriptorSetLayout)
 {
 	std::shared_lock<std::shared_mutex> lock(_managerMutex);
 
@@ -57,7 +57,7 @@ AirEngine::Core::Graphic::Manager::DescriptorSetManager::~DescriptorSetManager()
 	}
 }
 
-AirEngine::Core::Graphic::Manager::DescriptorSetManager::DescriptorSetChunkPool::DescriptorSetChunkPool(ShaderSlotType slotType, std::vector<VkDescriptorType>& types, uint32_t chunkSize)
+AirEngine::Core::Graphic::Manager::DescriptorSetManager::DescriptorSetChunkPool::DescriptorSetChunkPool(Rendering::ShaderSlotType slotType, std::vector<VkDescriptorType>& types, uint32_t chunkSize)
 	: slotType(slotType)
 	, mutex()
 	, chunkSize(chunkSize)

@@ -123,7 +123,7 @@ void AirEngine::Core::IO::CoreObject::Thread::SubIOThread::Init()
 void AirEngine::Core::IO::CoreObject::Thread::SubIOThread::OnStart()
 {
 	_transferCommandPool = new Core::Graphic::Command::CommandPool("TransferQueue", VkCommandPoolCreateFlagBits::VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT);
-	_transferCommandBuffer = _transferCommandPool->CreateCommandBuffer("TransferCommandBuffer", VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY);
+	_transferCommandBuffer = _transferCommandPool->CreateCommandBuffer(VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY);
 }
 
 void AirEngine::Core::IO::CoreObject::Thread::SubIOThread::OnThreadStart()

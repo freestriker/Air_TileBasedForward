@@ -16,6 +16,7 @@ namespace AirEngine
 					~Image();
 					VkImage VkImage_();
 					VkImageView VkImageView_();
+					VkExtent2D VkExtent2D_();
 					VkExtent3D VkExtent3D_();
 					Memory& Memory_();
 					VkFormat VkFormat_();

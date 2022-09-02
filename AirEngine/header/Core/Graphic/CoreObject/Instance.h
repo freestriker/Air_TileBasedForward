@@ -13,6 +13,10 @@ namespace AirEngine
 	{
 		class Condition;
 	}
+	namespace Rendering
+	{
+		class PresentRenderPass;
+	}
 	namespace Core
 	{
 		namespace Logic
@@ -24,12 +28,23 @@ namespace AirEngine
 		}
 		namespace Graphic
 		{
+			namespace Instance
+			{
+				class ImageSampler;
+			}
+			namespace Rendering
+			{
+				class FrameBuffer;
+				class Shader;
+				class Material;
+			}
 			namespace Manager
 			{
 				class MemoryManager;
 				class RenderPassManager;
 				class DescriptorSetManager;
 				class LightManager;
+				class RenderPipelineManager;
 			}
 			namespace CoreObject
 			{
@@ -61,6 +76,7 @@ namespace AirEngine
 					static Manager::RenderPassManager* _renderPassManager;
 					static Manager::DescriptorSetManager* _descriptorSetManager;
 					static Manager::LightManager* _lightManager;
+					static Manager::RenderPipelineManager* _renderPipelineManager;
 
 					static Utils::Condition* _startPresentCondition;
 					static Utils::Condition* _endPresentCondition;
@@ -85,6 +101,7 @@ namespace AirEngine
 					static Manager::RenderPassManager& RenderPassManager();
 					static Manager::DescriptorSetManager& DescriptorSetManager();
 					static Manager::LightManager& LightManager();
+					static Manager::RenderPipelineManager& RenderPipelineManager();
 
 					static Utils::Condition& StartPresentCondition();
 					static Utils::Condition& EndPresentCondition();

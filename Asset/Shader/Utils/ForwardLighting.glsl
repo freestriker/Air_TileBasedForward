@@ -35,8 +35,8 @@ layout(set = 3, binding = 0) uniform samplerCube ambientLightTexture;
 
 vec3 AmbinentLighting(in vec3 direction)
 {
-    vec4 color  = lightInfos.ambientLightInfo.intensity * lightInfos.ambientLightInfo.color * texture(ambientLightTexture, normalize(direction));
-    return color.xyz;
+    vec4 color = lightInfos.ambientLightInfo.intensity * lightInfos.ambientLightInfo.color * texture(ambientLightTexture, normalize(direction));
+    return color.rgb;
 }
 
 #endif ///#ifndef LIGHTING_MODE
