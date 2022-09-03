@@ -104,7 +104,7 @@ void AirEngine::Core::Graphic::Manager::RenderPassManager::CreateRenderPass(Rend
     {
         VkSubpassDependency dependency{};
         dependency.srcSubpass = dependencyDescriptor.srcSubpassName == "VK_SUBPASS_EXTERNAL" ? VK_SUBPASS_EXTERNAL : subpassMap[dependencyDescriptor.srcSubpassName];
-        dependency.dstSubpass = subpassMap[dependencyDescriptor.dstSubpassName];
+        dependency.dstSubpass = dependencyDescriptor.dstSubpassName == "VK_SUBPASS_EXTERNAL" ? VK_SUBPASS_EXTERNAL : subpassMap[dependencyDescriptor.dstSubpassName];
         dependency.srcStageMask = dependencyDescriptor.srcStageMask;
         dependency.srcAccessMask = dependencyDescriptor.srcAccessMask;
         dependency.dstStageMask = dependencyDescriptor.dstStageMask;
