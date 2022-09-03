@@ -95,12 +95,13 @@ AirEngine::Rendering::RenderFeature::HBAO_Occlusion_RenderFeature::HBAO_Occlusio
 	, frameBuffer(nullptr)
 	, occlusionTexture(nullptr)
 	, hbaoInfoBuffer(nullptr)
-	, noiseInfoBuffer(nullptr)
-	, samplePointRadius(1.0f)
-	, samplePointBiasAngle(25.0f)
+	, noiseTexture(nullptr)
+	, noiseStagingBuffer(nullptr)
+	, sampleRadius(1.0f)
+	, sampleBiasAngle(25.0f)
 	, stepCount(4)
 	, directionCount(6)
-	, noiseImageWidth(64)
+	, noiseTextureWidth(64)
 	, depthTexture(nullptr)
 {
 
@@ -162,6 +163,17 @@ void AirEngine::Rendering::RenderFeature::HBAO_Occlusion_RenderFeature::OnResolv
 		);
 	}
 
+	///Noise texture
+	{
+		featureData->noiseTexture = Core::Graphic::Instance::Image::Create2DImage(
+			{static_cast<uint32_t>(featureData->noiseTextureWidth), static_cast<uint32_t>(featureData->noiseTextureWidth) },
+			VK_FORMAT_R32_SFLOAT,
+			VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
+		);
+	}
+
 	///Frame buffer
 	{
 		featureData->frameBuffer = new Core::Graphic::Rendering::FrameBuffer(_renderPass, { {"OcclusionTexture", featureData->occlusionTexture} });
@@ -180,37 +192,37 @@ void AirEngine::Rendering::RenderFeature::HBAO_Occlusion_RenderFeature::OnResolv
 				HbaoInfo* hbaoInfo = reinterpret_cast<HbaoInfo*>(ptr);
 				hbaoInfo->attachmentize = glm::vec2(extent.width, extent.height);
 				hbaoInfo->attachmentTexelSize = glm::vec2(1, 1) / hbaoInfo->attachmentize;
-				hbaoInfo->samplePointRadius = featureData->samplePointRadius;
-				hbaoInfo->samplePointBiasAngle = featureData->samplePointBiasAngle;
+				hbaoInfo->sampleRadius = featureData->sampleRadius;
+				hbaoInfo->sampleBiasAngle = featureData->sampleBiasAngle;
 				hbaoInfo->stepCount = featureData->stepCount;
 				hbaoInfo->directionCount = featureData->directionCount;
-				hbaoInfo->noiseImageWidth = featureData->noiseImageWidth;
+				hbaoInfo->noiseTextureWidth = featureData->noiseTextureWidth;
 			}
 		);
 	}
 
-	///Build noise buffer
+	///Build noise staging buffer
 	{
-		featureData->noiseInfoBuffer = new Core::Graphic::Instance::Buffer{
-				sizeof(float) * featureData->noiseImageWidth * featureData->noiseImageWidth,
-				VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+		featureData->noiseStagingBuffer = new Core::Graphic::Instance::Buffer{
+				sizeof(float) * featureData->noiseTextureWidth * featureData->noiseTextureWidth,
+				VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 				VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 		};
-		std::vector<float> noiseInfo = std::vector<float>(featureData->noiseImageWidth * featureData->noiseImageWidth);
+		std::vector<float> noiseInfo = std::vector<float>(featureData->noiseTextureWidth * featureData->noiseTextureWidth);
 		std::default_random_engine engine;
 		std::uniform_real_distribution<float> u(0.0f, 1.0f);
 		for (auto& noise : noiseInfo)
 		{
 			noise = u(engine);
 		}
-		featureData->noiseInfoBuffer->WriteData(noiseInfo.data(), sizeof(float) * NOISE_COUNT);
+		featureData->noiseStagingBuffer->WriteData(noiseInfo.data(), sizeof(float) * NOISE_COUNT);
 	}
 
 	///Material
 	{
 		featureData->material = new Core::Graphic::Rendering::Material(_hbaoShader);
 		featureData->material->SetUniformBuffer("hbaoInfo", featureData->hbaoInfoBuffer);
-		featureData->material->SetUniformBuffer("noiseInfo", featureData->noiseInfoBuffer);
+		featureData->material->SetSlotData("noiseTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), featureData->noiseTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
 		featureData->material->SetSlotData("depthTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), featureData->depthTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
 	}
 }
@@ -221,7 +233,8 @@ void AirEngine::Rendering::RenderFeature::HBAO_Occlusion_RenderFeature::OnDestro
 	delete featureData->frameBuffer;
 	delete featureData->occlusionTexture;
 	delete featureData->hbaoInfoBuffer;
-	delete featureData->noiseInfoBuffer;
+	delete featureData->noiseStagingBuffer;
+	delete featureData->noiseTexture;
 
 	delete featureData->material;
 
@@ -253,6 +266,47 @@ void AirEngine::Rendering::RenderFeature::HBAO_Occlusion_RenderFeature::OnExcute
 			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
 			{ &depthTextureBarrier }
 		);
+	}
+
+	///Copy noise to noise texture
+	if (featureData->noiseStagingBuffer != nullptr)
+	{
+		{
+			auto noiseTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
+			(
+				featureData->noiseTexture,
+				VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				0,
+				VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT
+			);
+			commandBuffer->AddPipelineImageBarrier(
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
+				{ &noiseTextureBarrier }
+			);
+		}
+
+		commandBuffer->CopyBufferToImage(featureData->noiseStagingBuffer, featureData->noiseTexture, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+		{
+			auto noiseTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
+			(
+				featureData->noiseTexture,
+				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
+				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+			);
+			commandBuffer->AddPipelineImageBarrier(
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+				{ &noiseTextureBarrier }
+			);
+		}
+	}
+	else
+	{
+		delete featureData->noiseStagingBuffer;
+		featureData->noiseStagingBuffer = nullptr;
 	}
 
 	///Render

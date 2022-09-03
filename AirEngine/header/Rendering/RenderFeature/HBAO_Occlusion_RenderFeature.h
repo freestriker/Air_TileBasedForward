@@ -52,13 +52,14 @@ namespace AirEngine
 					Core::Graphic::Rendering::Material* material;
 					Core::Graphic::Rendering::FrameBuffer* frameBuffer;
 					Core::Graphic::Instance::Buffer* hbaoInfoBuffer;
-					Core::Graphic::Instance::Buffer* noiseInfoBuffer;
+					Core::Graphic::Instance::Image* noiseTexture;
+					Core::Graphic::Instance::Buffer* noiseStagingBuffer;
 				public:
-					float samplePointRadius;
-					float samplePointBiasAngle;
+					float sampleRadius;
+					float sampleBiasAngle;
 					float stepCount;
 					float directionCount;
-					int noiseImageWidth;
+					int noiseTextureWidth;
 					Core::Graphic::Instance::Image* occlusionTexture;
 					Core::Graphic::Instance::Image* depthTexture;
 
@@ -73,11 +74,11 @@ namespace AirEngine
 				{
 					alignas(8) glm::vec2 attachmentize;
 					alignas(8) glm::vec2 attachmentTexelSize;
-					alignas(4) float samplePointRadius;
-					alignas(4) float samplePointBiasAngle;
+					alignas(4) float sampleRadius;
+					alignas(4) float sampleBiasAngle;
 					alignas(4) float stepCount;
 					alignas(4) float directionCount;
-					alignas(4) int noiseImageWidth;
+					alignas(4) int noiseTextureWidth;
 				};
 				Core::Graphic::Rendering::RenderPassBase* _renderPass;
 				Asset::Mesh* _fullScreenMesh;
