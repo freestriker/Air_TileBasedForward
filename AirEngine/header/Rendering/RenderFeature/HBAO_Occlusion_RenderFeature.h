@@ -57,8 +57,8 @@ namespace AirEngine
 				public:
 					float sampleRadius;
 					float sampleBiasAngle;
-					float stepCount;
-					float directionCount;
+					int stepCount;
+					int directionCount;
 					int noiseTextureWidth;
 					Core::Graphic::Instance::Image* occlusionTexture;
 					Core::Graphic::Instance::Image* depthTexture;
@@ -76,8 +76,8 @@ namespace AirEngine
 					alignas(8) glm::vec2 attachmentTexelSize;
 					alignas(4) float sampleRadius;
 					alignas(4) float sampleBiasAngle;
-					alignas(4) float stepCount;
-					alignas(4) float directionCount;
+					alignas(4) int stepCount;
+					alignas(4) int directionCount;
 					alignas(4) int noiseTextureWidth;
 				};
 				Core::Graphic::Rendering::RenderPassBase* _renderPass;

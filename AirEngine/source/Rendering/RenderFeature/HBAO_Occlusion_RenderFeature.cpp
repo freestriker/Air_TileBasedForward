@@ -69,7 +69,7 @@ void AirEngine::Rendering::RenderFeature::HBAO_Occlusion_RenderFeature::HBAO_Occ
 	settings.AddSubpass(
 		"DrawSubpass",
 		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		{ "OcclusionTexture" }
+		{ "OcclusionTexture"}
 	);
 	settings.AddDependency(
 		"VK_SUBPASS_EXTERNAL",
@@ -97,10 +97,10 @@ AirEngine::Rendering::RenderFeature::HBAO_Occlusion_RenderFeature::HBAO_Occlusio
 	, hbaoInfoBuffer(nullptr)
 	, noiseTexture(nullptr)
 	, noiseStagingBuffer(nullptr)
-	, sampleRadius(1.0f)
-	, sampleBiasAngle(25.0f)
+	, sampleRadius(0.2f)
+	, sampleBiasAngle(30.0f)
 	, stepCount(4)
-	, directionCount(6)
+	, directionCount(8)
 	, noiseTextureWidth(64)
 	, depthTexture(nullptr)
 {
@@ -120,9 +120,9 @@ AirEngine::Rendering::RenderFeature::HBAO_Occlusion_RenderFeature::HBAO_Occlusio
 	, _hbaoShader(Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\HBAO_Occlusion_Shader.shader"))
 	, _textureSampler(
 		new Core::Graphic::Instance::ImageSampler(
-			VkFilter::VK_FILTER_NEAREST,
+			VkFilter::VK_FILTER_LINEAR,
 			VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
-			VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
+			VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
 			0.0f,
 			VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
 		)
@@ -142,14 +142,6 @@ AirEngine::Rendering::RenderFeature::HBAO_Occlusion_RenderFeature::~HBAO_Occlusi
 AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering::RenderFeature::HBAO_Occlusion_RenderFeature::OnCreateRenderFeatureData(Camera::CameraBase* camera)
 {
 	auto featureData = new HBAO_Occlusion_RenderFeatureData();
-
-	return featureData;
-}
-
-void AirEngine::Rendering::RenderFeature::HBAO_Occlusion_RenderFeature::OnResolveRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera)
-{
-	auto featureData = static_cast<HBAO_Occlusion_RenderFeatureData*>(renderFeatureData);
-
 	VkExtent2D extent = { camera->attachments["ColorAttachment"]->VkExtent2D_().width / 2, camera->attachments["ColorAttachment"]->VkExtent2D_().height / 2 };
 
 	///Occlusion texture
@@ -163,6 +155,19 @@ void AirEngine::Rendering::RenderFeature::HBAO_Occlusion_RenderFeature::OnResolv
 		);
 	}
 
+	///Frame buffer
+	{
+		featureData->frameBuffer = new Core::Graphic::Rendering::FrameBuffer(_renderPass, { {"OcclusionTexture", featureData->occlusionTexture} });
+	}
+
+	return featureData;
+}
+
+void AirEngine::Rendering::RenderFeature::HBAO_Occlusion_RenderFeature::OnResolveRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera)
+{
+	auto featureData = static_cast<HBAO_Occlusion_RenderFeatureData*>(renderFeatureData);
+	VkExtent2D extent = { camera->attachments["ColorAttachment"]->VkExtent2D_().width / 2, camera->attachments["ColorAttachment"]->VkExtent2D_().height / 2 };
+
 	///Noise texture
 	{
 		featureData->noiseTexture = Core::Graphic::Instance::Image::Create2DImage(
@@ -172,11 +177,6 @@ void AirEngine::Rendering::RenderFeature::HBAO_Occlusion_RenderFeature::OnResolv
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
 		);
-	}
-
-	///Frame buffer
-	{
-		featureData->frameBuffer = new Core::Graphic::Rendering::FrameBuffer(_renderPass, { {"OcclusionTexture", featureData->occlusionTexture} });
 	}
 
 	///Occlusion texture size info
