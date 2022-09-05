@@ -82,7 +82,7 @@ void main()
             float ao = clamp(sinHorizon - sinTangent - minSinHorizon, 0, 1);
             if(ao >= previousAo)
             {
-                wao += (1 - dot(vector, vector) / pow(hbaoInfo.sampleRadius, 2)) * (ao - previousAo);
+                wao += clamp(1 - dot(vector, vector) / pow(hbaoInfo.sampleRadius, 2), 0, 1) * (ao - previousAo);
                 previousAo = ao;
             }
         }

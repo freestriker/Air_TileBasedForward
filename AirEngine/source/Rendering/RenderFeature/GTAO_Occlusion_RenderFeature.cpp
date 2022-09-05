@@ -168,16 +168,6 @@ void AirEngine::Rendering::RenderFeature::GTAO_Occlusion_RenderFeature::OnResolv
 	auto featureData = static_cast<GTAO_Occlusion_RenderFeatureData*>(renderFeatureData);
 	VkExtent2D extent = { camera->attachments["ColorAttachment"]->VkExtent2D_().width / 2, camera->attachments["ColorAttachment"]->VkExtent2D_().height / 2 };
 
-	///Noise texture
-	{
-		featureData->noiseTexture = Core::Graphic::Instance::Image::Create2DImage(
-			{ static_cast<uint32_t>(featureData->noiseTextureWidth), static_cast<uint32_t>(featureData->noiseTextureWidth) },
-			VK_FORMAT_R32_SFLOAT,
-			VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
-		);
-	}
 
 	///Occlusion texture size info
 	{
@@ -222,7 +212,6 @@ void AirEngine::Rendering::RenderFeature::GTAO_Occlusion_RenderFeature::OnResolv
 	{
 		featureData->material = new Core::Graphic::Rendering::Material(_gtaoShader);
 		featureData->material->SetUniformBuffer("gtaoInfo", featureData->gtaoInfoBuffer);
-		featureData->material->SetSlotData("noiseTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), featureData->noiseTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
 		featureData->material->SetSlotData("depthTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), featureData->depthTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
 	}
 }
@@ -269,8 +258,17 @@ void AirEngine::Rendering::RenderFeature::GTAO_Occlusion_RenderFeature::OnExcute
 	}
 
 	///Copy noise to noise texture
-	if (featureData->noiseStagingBuffer != nullptr)
+	if (featureData->noiseTexture == nullptr)
 	{
+		featureData->noiseTexture = Core::Graphic::Instance::Image::Create2DImage(
+			{ static_cast<uint32_t>(featureData->noiseTextureWidth), static_cast<uint32_t>(featureData->noiseTextureWidth) },
+			VK_FORMAT_R32_SFLOAT,
+			VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
+		);
+		featureData->material->SetSlotData("noiseTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), featureData->noiseTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
+		
 		{
 			auto noiseTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
 			(
