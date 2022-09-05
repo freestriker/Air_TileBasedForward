@@ -66,7 +66,7 @@ void main()
         float wao = 0;
         for(int j = 0; j < hbaoInfo.stepCount; j++)
         {
-            vec3 sampleVPosition = vPosition + vStep * (j + 1);
+            vec3 sampleVPosition = vPosition + vStep * (j + 0.5);
             vec4 samplePPosition = cameraInfo.info.projection * vec4(sampleVPosition, 1);
             if(samplePPosition.w == 0) continue;
             vec3 sampleNdcPosition = samplePPosition.xyz / samplePPosition.w;

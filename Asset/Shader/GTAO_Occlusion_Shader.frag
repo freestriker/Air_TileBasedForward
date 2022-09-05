@@ -67,12 +67,14 @@ void main()
 
         float theta = acos(dot(slicePlainNormalDirection, vec3(0, 0, 1)));
         theta = dot(slicePlainNormalDirection, direction) < 0 ? theta : -theta;
+        float rightThreshold = theta - HALF_PI + gtaoInfo.sampleBiasAngle * PI / 180;
+        float leftThreshold = theta + HALF_PI - gtaoInfo.sampleBiasAngle * PI / 180;
 
         float maxRightHorizonRadian = -HALF_PI;
         ///Right
         for(int j = 0; j < gtaoInfo.stepCount; j++)
         {
-            vec3 sampleVPosition = vPosition + vStep * (j + 1);
+            vec3 sampleVPosition = vPosition + vStep * (j + 0.5);
             vec4 samplePPosition = cameraInfo.info.projection * vec4(sampleVPosition, 1);
             if(samplePPosition.w == 0) continue;
             vec3 sampleNdcPosition = samplePPosition.xyz / samplePPosition.w;
@@ -83,18 +85,22 @@ void main()
             vec3 sampledVPosition = PositionN2V(sampledNdcPosition, cameraInfo.info);
 
             vec3 vector = sampledVPosition - vPosition;
+            vector.z = clamp(vector.z, -sqrt(1 - dot(vector.xy, vector.xy)) * gtaoInfo.sampleRadius, sqrt(1 - dot(vector.xy, vector.xy)) * gtaoInfo.sampleRadius);
 
             float horizonRadian = asin(vector.z / length(vector)) - HALF_PI;
             maxRightHorizonRadian = maxRightHorizonRadian < horizonRadian ? horizonRadian : maxRightHorizonRadian;
         }
-        float rh = clamp(maxRightHorizonRadian, theta - HALF_PI + gtaoInfo.sampleBiasAngle * PI / 180, 0);
-        float rao = -cos(2 * rh - theta) + cos(theta) + 2 * rh * sin(theta);
+        // float rh = clamp(maxRightHorizonRadian, theta - HALF_PI + gtaoInfo.sampleBiasAngle * PI / 180, 0);
+        float rao = maxRightHorizonRadian < rightThreshold ? 2 : -cos(2 * maxRightHorizonRadian - theta) + cos(theta) + 2 * maxRightHorizonRadian * sin(theta);
+        // float rao = -cos(2 * maxRightHorizonRadian - theta) + cos(theta) + 2 * maxRightHorizonRadian * sin(theta);
+        // float rh = clamp(maxRightHorizonRadian, - HALF_PI, 0);
+        // float rao = 1 - cos(rh);
 
         float minLeftHorizonRadian = HALF_PI;
         ///Left
         for(int j = 0; j < gtaoInfo.stepCount; j++)
         {
-            vec3 sampleVPosition = vPosition - vStep * (j + 1);
+            vec3 sampleVPosition = vPosition - vStep * (j + 0.5);
             vec4 samplePPosition = cameraInfo.info.projection * vec4(sampleVPosition, 1);
             if(samplePPosition.w == 0) continue;
             vec3 sampleNdcPosition = samplePPosition.xyz / samplePPosition.w;
@@ -105,14 +111,19 @@ void main()
             vec3 sampledVPosition = PositionN2V(sampledNdcPosition, cameraInfo.info);
 
             vec3 vector = sampledVPosition - vPosition;
+            vector.z = clamp(vector.z, -sqrt(1 - dot(vector.xy, vector.xy)) * gtaoInfo.sampleRadius, sqrt(1 - dot(vector.xy, vector.xy)) * gtaoInfo.sampleRadius);
 
             float horizonRadian = HALF_PI - asin(vector.z / length(vector));
             minLeftHorizonRadian = minLeftHorizonRadian > horizonRadian ? horizonRadian : minLeftHorizonRadian;
         }
-        float lh = clamp(minLeftHorizonRadian, 0, theta + HALF_PI - gtaoInfo.sampleBiasAngle * PI / 180);
-        float lao = -cos(2 * lh - theta) + cos(theta) + 2 * lh * sin(theta);
+        // float lh = clamp(minLeftHorizonRadian, 0, theta + HALF_PI - gtaoInfo.sampleBiasAngle * PI / 180);
+        // float lh = minLeftHorizonRadian;
+        float lao = minLeftHorizonRadian > leftThreshold ? 2 : -cos(2 * minLeftHorizonRadian - theta) + cos(theta) + 2 * minLeftHorizonRadian * sin(theta);
+        // float lao = -cos(2 * minLeftHorizonRadian - theta) + cos(theta) + 2 * minLeftHorizonRadian * sin(theta);
+        // float lh = clamp(minLeftHorizonRadian, 0, HALF_PI);
+        // float lao = 1 - cos(lh);
 
-        float ao = length(slicePlainNormal) * 0.25 * (rao + lao);
+        float ao = 1 - 0.25 * (rao + lao);
 
         occlusion += ao;
     }
