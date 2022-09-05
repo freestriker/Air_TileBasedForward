@@ -98,7 +98,7 @@ AirEngine::Rendering::RenderFeature::GTAO_Occlusion_RenderFeature::GTAO_Occlusio
 	, noiseTexture(nullptr)
 	, noiseStagingBuffer(nullptr)
 	, sampleRadius(0.1f)
-	, sampleBiasAngle(5.0f)
+	, sampleBiasAngle(0.0f)
 	, stepCount(3)
 	, sliceCount(4)
 	, noiseTextureWidth(64)

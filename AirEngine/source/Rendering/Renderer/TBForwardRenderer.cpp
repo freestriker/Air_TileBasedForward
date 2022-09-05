@@ -93,7 +93,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::OnResolveRendererData(Co
 	//aoCoverFeatureData->occlusionTexture = ssaoFeatureData->occlusionTexture;
 	aoCoverFeatureData->occlusionTexture = hbaoFeatureData->occlusionTexture;
 	aoCoverFeatureData->occlusionTexture = gtaoFeatureData->occlusionTexture;
-	aoCoverFeatureData->intensity = 2.5f;
+	aoCoverFeatureData->intensity = 1.5f;
 
 	lightListFeatureData->depthTexture = geometryFeatureData->depthTexture;
 
