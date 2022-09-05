@@ -1,5 +1,5 @@
 #include "Rendering/Renderer/TBForwardRenderer.h"
-#include "Rendering/RenderFeature/GeometryRenderFeature.h"
+#include "Rendering/RenderFeature/Geometry_RenderFeature.h"
 #include "Rendering/RenderFeature/Background_RenderFeature.h"
 #include <glm/glm.hpp>
 #include "Camera/CameraBase.h"
@@ -32,7 +32,7 @@ RTTR_REGISTRATION
 AirEngine::Rendering::Renderer::TBForwardRenderer::TBForwardRenderer()
 	: Core::Graphic::Rendering::RendererBase()
 {
-	UseRenderFeature("GeometryRenderFeature", new RenderFeature::GeometryRenderFeature());
+	UseRenderFeature("Geometry_RenderFeature", new RenderFeature::Geometry_RenderFeature());
 	UseRenderFeature("TBForward_LightList_RenderFeature", new RenderFeature::TBForward_LightList_RenderFeature());
 	UseRenderFeature("TBForward_Opaque_RenderFeature", new RenderFeature::TBForward_Opaque_RenderFeature());
 	UseRenderFeature("Background_RenderFeature", new RenderFeature::Background_RenderFeature());
@@ -47,7 +47,7 @@ AirEngine::Rendering::Renderer::TBForwardRenderer::TBForwardRenderer()
 
 AirEngine::Rendering::Renderer::TBForwardRenderer::~TBForwardRenderer()
 {
-	delete static_cast<RenderFeature::GeometryRenderFeature*>(RenderFeature("GeometryRenderFeature"));
+	delete static_cast<RenderFeature::Geometry_RenderFeature*>(RenderFeature("GeometryRenderFeature"));
 }
 
 AirEngine::Rendering::Renderer::TBForwardRenderer::TBForwardRendererData::TBForwardRendererData()
@@ -67,7 +67,7 @@ AirEngine::Core::Graphic::Rendering::RendererDataBase* AirEngine::Rendering::Ren
 void AirEngine::Rendering::Renderer::TBForwardRenderer::OnResolveRendererData(Core::Graphic::Rendering::RendererDataBase* rendererData, Camera::CameraBase* camera)
 {
 	rendererData->RenderFeatureData<RenderFeature::Background_RenderFeature::Background_RenderFeatureData>("Background_RenderFeature")->needClearColorAttachment = true;
-	auto geometryFeatureData = rendererData->RenderFeatureData<RenderFeature::GeometryRenderFeature::GeometryRenderFeatureData>("GeometryRenderFeature");
+	auto geometryFeatureData = rendererData->RenderFeatureData<RenderFeature::Geometry_RenderFeature::Geometry_RenderFeatureData>("Geometry_RenderFeature");
 	auto lightListFeatureData = rendererData->RenderFeatureData<RenderFeature::TBForward_LightList_RenderFeature::TBForward_LightList_RenderFeatureData>("TBForward_LightList_RenderFeature");
 	auto opaqueFeatureData = rendererData->RenderFeatureData<RenderFeature::TBForward_Opaque_RenderFeature::TBForward_Opaque_RenderFeatureData>("TBForward_Opaque_RenderFeature");
 	auto depthPeelingFeatureData = rendererData->RenderFeatureData<RenderFeature::TBForward_OIT_DepthPeeling_RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatureData>("TBForward_OIT_DepthPeeling_RenderFeature");
@@ -113,7 +113,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::OnDestroyRendererData(Co
 void AirEngine::Rendering::Renderer::TBForwardRenderer::PrepareRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
 {
 	PrepareRenderFeature("Background_RenderFeature", rendererData);
-	PrepareRenderFeature("GeometryRenderFeature", rendererData);
+	PrepareRenderFeature("Geometry_RenderFeature", rendererData);
 	//PrepareRenderFeature("SSAO_Occlusion_RenderFeature", rendererData);
 	PrepareRenderFeature("HBAO_Occlusion_RenderFeature", rendererData);
 	PrepareRenderFeature("GTAO_Occlusion_RenderFeature", rendererData);
@@ -128,7 +128,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::PrepareRenderer(Core::Gr
 void AirEngine::Rendering::Renderer::TBForwardRenderer::ExcuteRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*> const* rendererComponents)
 {
 	ExcuteRenderFeature("Background_RenderFeature", rendererData, camera, rendererComponents);
-	ExcuteRenderFeature("GeometryRenderFeature", rendererData, camera, rendererComponents);
+	ExcuteRenderFeature("Geometry_RenderFeature", rendererData, camera, rendererComponents);
 	//ExcuteRenderFeature("SSAO_Occlusion_RenderFeature", rendererData, camera, rendererComponents);
 	ExcuteRenderFeature("HBAO_Occlusion_RenderFeature", rendererData, camera, rendererComponents);
 	ExcuteRenderFeature("GTAO_Occlusion_RenderFeature", rendererData, camera, rendererComponents);
@@ -143,7 +143,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::ExcuteRenderer(Core::Gra
 void AirEngine::Rendering::Renderer::TBForwardRenderer::SubmitRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
 {
 	SubmitRenderFeature("Background_RenderFeature", rendererData);
-	SubmitRenderFeature("GeometryRenderFeature", rendererData);
+	SubmitRenderFeature("Geometry_RenderFeature", rendererData);
 	//SubmitRenderFeature("SSAO_Occlusion_RenderFeature", rendererData);
 	SubmitRenderFeature("HBAO_Occlusion_RenderFeature", rendererData);
 	SubmitRenderFeature("GTAO_Occlusion_RenderFeature", rendererData);
@@ -158,7 +158,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::SubmitRenderer(Core::Gra
 void AirEngine::Rendering::Renderer::TBForwardRenderer::FinishRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
 {
 	FinishRenderFeature("Background_RenderFeature", rendererData);
-	FinishRenderFeature("GeometryRenderFeature", rendererData);
+	FinishRenderFeature("Geometry_RenderFeature", rendererData);
 	//FinishRenderFeature("SSAO_Occlusion_RenderFeature", rendererData);
 	FinishRenderFeature("HBAO_Occlusion_RenderFeature", rendererData);
 	FinishRenderFeature("GTAO_Occlusion_RenderFeature", rendererData);

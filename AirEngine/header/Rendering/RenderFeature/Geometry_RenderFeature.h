@@ -10,30 +10,32 @@ namespace AirEngine
 	{
 		namespace RenderFeature
 		{
-			class GeometryRenderFeature final : public Core::Graphic::Rendering::RenderFeatureBase
+			class Geometry_RenderFeature final : public Core::Graphic::Rendering::RenderFeatureBase
 			{
 			public:
-				class GeometryRenderPass final : public Core::Graphic::Rendering::RenderPassBase
+				class Geometry_RenderPass final : public Core::Graphic::Rendering::RenderPassBase
 				{
 				private:
 					void OnPopulateRenderPassSettings(RenderPassSettings& settings)override;
 				public:
-					CONSTRUCTOR(GeometryRenderPass)
+					CONSTRUCTOR(Geometry_RenderPass)
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderPassBase)
 				};
 
-				class GeometryRenderFeatureData final : public Core::Graphic::Rendering::RenderFeatureDataBase
+				class Geometry_RenderFeatureData final : public Core::Graphic::Rendering::RenderFeatureDataBase
 				{
-				public:
+					friend class Geometry_RenderFeature;
+				private:
 					Core::Graphic::Rendering::FrameBuffer* frameBuffer;
+				public:
 					Core::Graphic::Instance::Image* depthTexture;
 					Core::Graphic::Instance::Image* normalTexture;
 
-					CONSTRUCTOR(GeometryRenderFeatureData)
+					CONSTRUCTOR(Geometry_RenderFeatureData)
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderFeatureDataBase)
 				};
 
-				CONSTRUCTOR(GeometryRenderFeature)
+				CONSTRUCTOR(Geometry_RenderFeature)
 
 			private:
 				Core::Graphic::Rendering::RenderPassBase* _geometryRenderPass;

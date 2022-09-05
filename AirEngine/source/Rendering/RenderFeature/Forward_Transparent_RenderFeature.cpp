@@ -78,10 +78,18 @@ void AirEngine::Rendering::RenderFeature::Forward_Transparent_RenderFeature::For
 	settings.AddDependency(
 		"VK_SUBPASS_EXTERNAL",
 		"DrawSubpass",
-		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-		VK_ACCESS_COLOR_ATTACHMENT_READ_BIT,
-		VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+		VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
+	);
+	settings.AddDependency(
+		"DrawSubpass",
+		"VK_SUBPASS_EXTERNAL",
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+		VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
 	);
 	settings.AddDependency(
 		"DrawSubpass",
@@ -148,35 +156,6 @@ void AirEngine::Rendering::RenderFeature::Forward_Transparent_RenderFeature::OnE
 	commandBuffer->Reset();
 	commandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 	
-	///Change layout
-	{
-		auto colorAttachmentBarrier = Core::Graphic::Command::ImageMemoryBarrier
-		(
-			featureData->frameBuffer->Attachment("ColorAttachment"),
-			VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-			VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-			VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-			VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
-		);
-		commandBuffer->AddPipelineImageBarrier(
-			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			{ &colorAttachmentBarrier }
-		);
-
-		auto depthAttachmentBarrier = Core::Graphic::Command::ImageMemoryBarrier
-		(
-			featureData->frameBuffer->Attachment("DepthAttachment"),
-			VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-			VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-			VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-			VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
-		);
-		commandBuffer->AddPipelineImageBarrier(
-			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
-			{ &depthAttachmentBarrier }
-		);
-	}
-
 	struct TransparentRendererWrapper
 	{
 		Core::Graphic::Rendering::Material* material;
@@ -221,10 +200,7 @@ void AirEngine::Rendering::RenderFeature::Forward_Transparent_RenderFeature::OnE
 			VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
 		);
 
-		commandBuffer->BeginRenderPass(
-			_renderPass,
-			featureData->frameBuffer
-		);
+		commandBuffer->BeginRenderPass(_renderPass, featureData->frameBuffer);
 
 		for (const auto& wrapperPair : wrappers)
 		{

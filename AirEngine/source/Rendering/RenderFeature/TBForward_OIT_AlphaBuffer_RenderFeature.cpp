@@ -77,9 +77,17 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeatur
 	settings.AddDependency(
 		"VK_SUBPASS_EXTERNAL",
 		"DrawSubpass",
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+		VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+		VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
+	);
+	settings.AddDependency(
+		"DrawSubpass",
+		"VK_SUBPASS_EXTERNAL",
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
 		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-		0,
+		VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT,
 		0
 	);
 }
@@ -114,10 +122,18 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeatur
 	settings.AddDependency(
 		"VK_SUBPASS_EXTERNAL",
 		"DrawSubpass",
-		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-		0,
-		0
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+		VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
+	);
+	settings.AddDependency(
+		"DrawSubpass",
+		"VK_SUBPASS_EXTERNAL",
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+		VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
 	);
 }
 
@@ -381,21 +397,6 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeatur
 				{ &transparentLightListsBarrier }
 			);
 		}
-		///Wait depth attachment ready
-		{
-			Core::Graphic::Command::ImageMemoryBarrier depthAttachmentBarrier = Core::Graphic::Command::ImageMemoryBarrier
-			(
-				camera->attachments["DepthAttachment"],
-				VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-				VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL,
-				VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-				VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
-			);
-			commandBuffer->AddPipelineImageBarrier(
-				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
-				{ &depthAttachmentBarrier }
-			);
-		}
 
 		///Build alpha buffer
 		{
@@ -438,22 +439,6 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeatur
 				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
 				{ &headIndexImageBarrier },
 				{ &colorListBarrier , &depthListBarrier, &indexListBarrier }
-			);
-		}
-
-		///Wait camera color attachment ready
-		{
-			auto colorAttachmentBarrier = Core::Graphic::Command::ImageMemoryBarrier
-			(
-				featureData->blendFrameBuffer->Attachment("ColorAttachment"),
-				VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-				VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-				VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-				VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
-			);
-			commandBuffer->AddPipelineImageBarrier(
-				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-				{ &colorAttachmentBarrier }
 			);
 		}
 

@@ -67,10 +67,18 @@ void AirEngine::Rendering::RenderFeature::Background_RenderFeature::Background_R
 	settings.AddDependency(
 		"VK_SUBPASS_EXTERNAL",
 		"DrawSubpass",
-		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
 		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 		0,
-		0
+		VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
+	);
+	settings.AddDependency(
+		"DrawSubpass",
+		"VK_SUBPASS_EXTERNAL",
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+		VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
 	);
 }
 
@@ -154,7 +162,7 @@ void AirEngine::Rendering::RenderFeature::Background_RenderFeature::OnExcute(Cor
 				VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT
 			);
 			commandBuffer->AddPipelineImageBarrier(
-				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
 				{ &colorAttachmentBarrier }
 			);
 		}
@@ -179,28 +187,10 @@ void AirEngine::Rendering::RenderFeature::Background_RenderFeature::OnExcute(Cor
 			);
 		}
 	}
-	else
-	{
-		auto colorAttachmentBarrier = Core::Graphic::Command::ImageMemoryBarrier
-		(
-			featureData->frameBuffer->Attachment("ColorAttachment"),
-			VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-			VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-			VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-			VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
-		);
-		commandBuffer->AddPipelineImageBarrier(
-			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			{ &colorAttachmentBarrier }
-		);
-	}
 
 	///Render
 	{
-		commandBuffer->BeginRenderPass(
-			_renderPass,
-			featureData->frameBuffer
-		);
+		commandBuffer->BeginRenderPass(_renderPass, featureData->frameBuffer);
 		for (const auto& rendererComponent : *rendererComponents)
 		{
 			auto material = rendererComponent->GetMaterial(_renderPassName);

@@ -147,22 +147,6 @@ void AirEngine::Rendering::RenderFeature::TBForward_LightList_RenderFeature::OnE
 	commandBuffer->Reset();
 	commandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
-	///Change layout
-	{
-		auto depthTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
-		(
-			featureData->depthTexture,
-			VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-		);
-		commandBuffer->AddPipelineImageBarrier(
-			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-			{ &depthTextureBarrier }
-		);
-	}
-
 	///Clear lists buffer
 	commandBuffer->FillBuffer(featureData->opaqueLightIndexListsBuffer, 0);
 	commandBuffer->FillBuffer(featureData->transparentLightIndexListsBuffer, 0);

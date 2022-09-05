@@ -25,9 +25,11 @@ namespace AirEngine
 
 				class Background_RenderFeatureData final : public Core::Graphic::Rendering::RenderFeatureDataBase
 				{
-				public:
+					friend class Background_RenderFeature;
+				private:
 					Core::Graphic::Rendering::FrameBuffer* frameBuffer;
 					Core::Graphic::Instance::Buffer* attachmentSizeInfoBuffer;
+				public:
 					bool needClearColorAttachment;
 
 					CONSTRUCTOR(Background_RenderFeatureData)

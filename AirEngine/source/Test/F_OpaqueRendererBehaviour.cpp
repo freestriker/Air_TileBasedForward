@@ -41,7 +41,7 @@ void AirEngine::Test::F_OpaqueRendererBehaviour::OnStart()
 	//}
 
 	{
-		auto preZShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\GeometryShader.shader");
+		auto preZShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\Geometry_Shader.shader");
 		auto preZMaterial = new Core::Graphic::Rendering::Material(preZShader);
 		renderer->AddMaterial(preZMaterial);
 	}

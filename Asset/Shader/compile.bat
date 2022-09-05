@@ -22,8 +22,8 @@ glslangValidator.exe -t -V Background_Skybox_Shader.frag -IUtils/ -o Spv/Backgro
 glslangValidator.exe -t -V F_Transparent_BrokenGlass_Shader.vert -IUtils/ -o Spv/F_Transparent_BrokenGlass_Shader.vert.spv
 glslangValidator.exe -t -V F_Transparent_BrokenGlass_Shader.frag -IUtils/ -o Spv/F_Transparent_BrokenGlass_Shader.frag.spv
 
-glslangValidator.exe -t -V GeometryShader.vert -IUtils/ -o Spv/GeometryShader.vert.spv
-glslangValidator.exe -t -V GeometryShader.frag -IUtils/ -o Spv/GeometryShader.frag.spv
+glslangValidator.exe -t -V Geometry_Shader.vert -IUtils/ -o Spv/Geometry_Shader.vert.spv
+glslangValidator.exe -t -V Geometry_Shader.frag -IUtils/ -o Spv/Geometry_Shader.frag.spv
 
 glslangValidator.exe -t -V TBF_OIT_DepthPeeling_Shader.vert -IUtils/ -o Spv/TBF_OIT_DepthPeeling_Shader.vert.spv
 glslangValidator.exe -t -V TBF_OIT_DepthPeeling_Shader.frag -IUtils/ -o Spv/TBF_OIT_DepthPeeling_Shader.frag.spv

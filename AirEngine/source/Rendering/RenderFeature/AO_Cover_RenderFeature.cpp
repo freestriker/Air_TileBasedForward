@@ -79,6 +79,14 @@ void AirEngine::Rendering::RenderFeature::AO_Cover_RenderFeature::AO_Cover_Rende
 		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
 		VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
 	);
+	settings.AddDependency(
+		"DrawSubpass",
+		"VK_SUBPASS_EXTERNAL",
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+		VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
+	);
 }
 
 AirEngine::Rendering::RenderFeature::AO_Cover_RenderFeature::AO_Cover_RenderFeatureData::AO_Cover_RenderFeatureData()
@@ -189,40 +197,9 @@ void AirEngine::Rendering::RenderFeature::AO_Cover_RenderFeature::OnExcute(Core:
 	commandBuffer->Reset();
 	commandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
-	///Change layout
-	{
-		auto occlusionTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
-		(
-			featureData->occlusionTexture,
-			VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-		);
-		commandBuffer->AddPipelineImageBarrier(
-			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-			{ &occlusionTextureBarrier }
-		);
-		auto colorAttachmentBarrier = Core::Graphic::Command::ImageMemoryBarrier
-		(
-			featureData->frameBuffer->Attachment("ColorAttachment"),
-			VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-			VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-			VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-			VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
-		);
-		commandBuffer->AddPipelineImageBarrier(
-			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-			{ &colorAttachmentBarrier }
-		);
-	}
-
 	///Render
 	{
-		commandBuffer->BeginRenderPass(
-			_renderPass,
-			featureData->frameBuffer
-		);
+		commandBuffer->BeginRenderPass(_renderPass, featureData->frameBuffer);
 
 		commandBuffer->DrawMesh(_fullScreenMesh, featureData->material);
 

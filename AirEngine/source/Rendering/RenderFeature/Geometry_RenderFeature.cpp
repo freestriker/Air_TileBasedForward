@@ -1,4 +1,4 @@
-#include "Rendering/RenderFeature/GeometryRenderFeature.h"
+#include "Rendering/RenderFeature/Geometry_RenderFeature.h"
 #include "Core/Graphic/CoreObject/Instance.h"
 #include "Core/Graphic/Manager/RenderPassManager.h"
 #include "Core/Graphic/Rendering/FrameBuffer.h"
@@ -14,19 +14,19 @@
 
 RTTR_REGISTRATION
 {
-	rttr::registration::class_<AirEngine::Rendering::RenderFeature::GeometryRenderFeature::GeometryRenderPass>("AirEngine::Rendering::RenderFeature::GeometryRenderFeature::GeometryRenderPass")
+	rttr::registration::class_<AirEngine::Rendering::RenderFeature::Geometry_RenderFeature::Geometry_RenderPass>("AirEngine::Rendering::RenderFeature::Geometry_RenderFeature::Geometry_RenderPass")
 		.constructor<>()
 		(
 			rttr::policy::ctor::as_raw_ptr
 		)
 		;
-	rttr::registration::class_<AirEngine::Rendering::RenderFeature::GeometryRenderFeature::GeometryRenderFeatureData>("AirEngine::Rendering::RenderFeature::GeometryRenderFeature::GeometryRenderFeatureData")
+	rttr::registration::class_<AirEngine::Rendering::RenderFeature::Geometry_RenderFeature::Geometry_RenderFeatureData>("AirEngine::Rendering::RenderFeature::Geometry_RenderFeature::Geometry_RenderFeatureData")
 		.constructor<>()
 		(
 			rttr::policy::ctor::as_raw_ptr
 		)
 		;
-	rttr::registration::class_<AirEngine::Rendering::RenderFeature::GeometryRenderFeature>("AirEngine::Rendering::RenderFeature::GeometryRenderFeature")
+	rttr::registration::class_<AirEngine::Rendering::RenderFeature::Geometry_RenderFeature>("AirEngine::Rendering::RenderFeature::Geometry_RenderFeature")
 		.constructor<>()
 		(
 			rttr::policy::ctor::as_raw_ptr
@@ -34,7 +34,7 @@ RTTR_REGISTRATION
 		;
 }
 
-void AirEngine::Rendering::RenderFeature::GeometryRenderFeature::GeometryRenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
+void AirEngine::Rendering::RenderFeature::Geometry_RenderFeature::Geometry_RenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
 {
 	creator.AddColorAttachment(
 		"DepthTexture",
@@ -72,23 +72,31 @@ void AirEngine::Rendering::RenderFeature::GeometryRenderFeature::GeometryRenderP
 	creator.AddDependency(
 		"VK_SUBPASS_EXTERNAL",
 		"DrawSubpass",
-		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
 		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
 		0,
 		0
 	);
+	creator.AddDependency(
+		"DrawSubpass",
+		"VK_SUBPASS_EXTERNAL",
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT,
+		VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+		VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT
+	);
 }
 
-AirEngine::Rendering::RenderFeature::GeometryRenderFeature::GeometryRenderPass::GeometryRenderPass()
+AirEngine::Rendering::RenderFeature::Geometry_RenderFeature::Geometry_RenderPass::Geometry_RenderPass()
 	: RenderPassBase()
 {
 }
 
-AirEngine::Rendering::RenderFeature::GeometryRenderFeature::GeometryRenderPass::~GeometryRenderPass()
+AirEngine::Rendering::RenderFeature::Geometry_RenderFeature::Geometry_RenderPass::~Geometry_RenderPass()
 {
 }
 
-AirEngine::Rendering::RenderFeature::GeometryRenderFeature::GeometryRenderFeatureData::GeometryRenderFeatureData()
+AirEngine::Rendering::RenderFeature::Geometry_RenderFeature::Geometry_RenderFeatureData::Geometry_RenderFeatureData()
 	: RenderFeatureDataBase()
 	, frameBuffer(nullptr)
 	, depthTexture(nullptr)
@@ -96,27 +104,27 @@ AirEngine::Rendering::RenderFeature::GeometryRenderFeature::GeometryRenderFeatur
 {
 }
 
-AirEngine::Rendering::RenderFeature::GeometryRenderFeature::GeometryRenderFeatureData::~GeometryRenderFeatureData()
+AirEngine::Rendering::RenderFeature::Geometry_RenderFeature::Geometry_RenderFeatureData::~Geometry_RenderFeatureData()
 {
 }
 
-AirEngine::Rendering::RenderFeature::GeometryRenderFeature::GeometryRenderFeature()
+AirEngine::Rendering::RenderFeature::Geometry_RenderFeature::Geometry_RenderFeature()
 	: RenderFeatureBase()
-	, _geometryRenderPass(Core::Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass<GeometryRenderPass>())
-	, _geometryRenderPassName(rttr::type::get<GeometryRenderPass>().get_name().to_string())
+	, _geometryRenderPass(Core::Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass<Geometry_RenderPass>())
+	, _geometryRenderPassName(rttr::type::get<Geometry_RenderPass>().get_name().to_string())
 {
 
 }
 
-AirEngine::Rendering::RenderFeature::GeometryRenderFeature::~GeometryRenderFeature()
+AirEngine::Rendering::RenderFeature::Geometry_RenderFeature::~Geometry_RenderFeature()
 {
-	Core::Graphic::CoreObject::Instance::RenderPassManager().UnloadRenderPass<GeometryRenderPass>();
+	Core::Graphic::CoreObject::Instance::RenderPassManager().UnloadRenderPass<Geometry_RenderPass>();
 }
 
-AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering::RenderFeature::GeometryRenderFeature::OnCreateRenderFeatureData(Camera::CameraBase* camera)
+AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering::RenderFeature::Geometry_RenderFeature::OnCreateRenderFeatureData(Camera::CameraBase* camera)
 {
 	auto extent = camera->attachments["ColorAttachment"]->VkExtent2D_();
-	auto featureData = new GeometryRenderFeatureData();
+	auto featureData = new Geometry_RenderFeatureData();
 	featureData->depthTexture = Core::Graphic::Instance::Image::Create2DImage(
 		extent,
 		VkFormat::VK_FORMAT_R32_SFLOAT,
@@ -142,26 +150,26 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	return featureData;
 }
 
-void AirEngine::Rendering::RenderFeature::GeometryRenderFeature::OnResolveRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera)
+void AirEngine::Rendering::RenderFeature::Geometry_RenderFeature::OnResolveRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera)
 {
 }
 
-void AirEngine::Rendering::RenderFeature::GeometryRenderFeature::OnDestroyRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)
+void AirEngine::Rendering::RenderFeature::Geometry_RenderFeature::OnDestroyRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)
 {
-	auto featureData = static_cast<GeometryRenderFeatureData*>(renderFeatureData);
+	auto featureData = static_cast<Geometry_RenderFeatureData*>(renderFeatureData);
 	delete featureData->frameBuffer;
 	delete featureData->depthTexture;
 	delete featureData->normalTexture;
 	delete featureData;
 }
 
-void AirEngine::Rendering::RenderFeature::GeometryRenderFeature::OnPrepare(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)
+void AirEngine::Rendering::RenderFeature::Geometry_RenderFeature::OnPrepare(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)
 {
 }
 
-void AirEngine::Rendering::RenderFeature::GeometryRenderFeature::OnExcute(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*> const* rendererComponents)
+void AirEngine::Rendering::RenderFeature::Geometry_RenderFeature::OnExcute(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*> const* rendererComponents)
 {
-	auto featureData = static_cast<GeometryRenderFeatureData*>(renderFeatureData);
+	auto featureData = static_cast<Geometry_RenderFeatureData*>(renderFeatureData);
 	
 	commandBuffer->Reset();
 	commandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
@@ -206,12 +214,12 @@ void AirEngine::Rendering::RenderFeature::GeometryRenderFeature::OnExcute(Core::
 	commandBuffer->EndRecord();
 }
 
-void AirEngine::Rendering::RenderFeature::GeometryRenderFeature::OnSubmit(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer)
+void AirEngine::Rendering::RenderFeature::Geometry_RenderFeature::OnSubmit(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer)
 {
 	commandBuffer->Submit();
 }
 
-void AirEngine::Rendering::RenderFeature::GeometryRenderFeature::OnFinish(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer)
+void AirEngine::Rendering::RenderFeature::Geometry_RenderFeature::OnFinish(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer)
 {
 	commandBuffer->WaitForFinish();
 }

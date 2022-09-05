@@ -79,6 +79,14 @@ void AirEngine::Rendering::RenderFeature::AO_Blur_RenderFeature::AO_Blur_RenderP
 		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
 		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
 	);
+	settings.AddDependency(
+		"DrawSubpass",
+		"VK_SUBPASS_EXTERNAL",
+		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+		VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+	);
 }
 
 AirEngine::Rendering::RenderFeature::AO_Blur_RenderFeature::AO_Blur_RenderFeatureData::AO_Blur_RenderFeatureData()
@@ -218,30 +226,6 @@ void AirEngine::Rendering::RenderFeature::AO_Blur_RenderFeature::OnExcute(Core::
 	commandBuffer->Reset();
 	commandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
-	///Change layout
-	{
-		auto occlusionTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
-		(
-			featureData->occlusionTexture,
-			VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-		);
-		auto normalTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
-		(
-			featureData->normalTexture,
-			VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-		);
-		commandBuffer->AddPipelineImageBarrier(
-			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-			{ &occlusionTextureBarrier , &normalTextureBarrier }
-		);
-	}
-
 	for (int i = 0; i < featureData->iterateCount; i++)
 	{
 		///Horizontal blur
@@ -256,49 +240,13 @@ void AirEngine::Rendering::RenderFeature::AO_Blur_RenderFeature::OnExcute(Core::
 			commandBuffer->EndRenderPass();
 		}
 
-		///Wait finish
-		{
-			auto occlusionTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
-			(
-				featureData->horizontalFrameBuffer->Attachment("OcclusionTexture"),
-				VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-				VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-				VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-			);
-			commandBuffer->AddPipelineImageBarrier(
-				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-				{ &occlusionTextureBarrier }
-			);
-		}
-
 		///Vertical blur
 		{
-			commandBuffer->BeginRenderPass(
-				_renderPass,
-				featureData->verticalFrameBuffer
-			);
+			commandBuffer->BeginRenderPass(_renderPass, featureData->verticalFrameBuffer);
 
 			commandBuffer->DrawMesh(_fullScreenMesh, featureData->verticalMaterial);
 
 			commandBuffer->EndRenderPass();
-		}
-
-		///Wait finish
-		if(i + 1 != featureData->iterateCount)
-		{
-			auto occlusionTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
-			(
-				featureData->verticalFrameBuffer->Attachment("OcclusionTexture"),
-				VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-				VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-				VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-			);
-			commandBuffer->AddPipelineImageBarrier(
-				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-				{ &occlusionTextureBarrier }
-			);
 		}
 	}
 

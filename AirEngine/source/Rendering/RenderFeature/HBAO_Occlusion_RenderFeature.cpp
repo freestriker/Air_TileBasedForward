@@ -74,10 +74,10 @@ void AirEngine::Rendering::RenderFeature::HBAO_Occlusion_RenderFeature::HBAO_Occ
 	settings.AddDependency(
 		"VK_SUBPASS_EXTERNAL",
 		"DrawSubpass",
-		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-		VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-		VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+		0,
+		0
 	);
 	settings.AddDependency(
 		"DrawSubpass",
@@ -239,22 +239,6 @@ void AirEngine::Rendering::RenderFeature::HBAO_Occlusion_RenderFeature::OnExcute
 
 	commandBuffer->Reset();
 	commandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-
-	///Change layout
-	{
-		auto depthTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
-		(
-			featureData->depthTexture,
-			VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-		);
-		commandBuffer->AddPipelineImageBarrier(
-			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-			{ &depthTextureBarrier }
-		);
-	}
 
 	///Copy noise to noise texture
 	if (featureData->noiseTexture == nullptr)

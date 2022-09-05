@@ -1,5 +1,5 @@
 {
-  "renderPass": "AirEngine::Rendering::RenderFeature::GeometryRenderFeature::GeometryRenderPass",
+  "renderPass": "AirEngine::Rendering::RenderFeature::Geometry_RenderFeature::Geometry_RenderPass",
   "subpass": "DrawSubpass",
   "alphaBlendOp": 0,
   "blendEnable": 0,
@@ -8,7 +8,7 @@
   "cullMode": 0,
   "dstAlphaBlendFactor": 0,
   "dstColorBlendFactor": 0,
-  "shaderPaths": ["..\\Asset\\Shader\\Spv\\GeometryShader.vert.spv", "..\\Asset\\Shader\\Spv\\GeometryShader.frag.spv"],
+  "shaderPaths": ["..\\Asset\\Shader\\Spv\\Geometry_Shader.vert.spv", "..\\Asset\\Shader\\Spv\\Geometry_Shader.frag.spv"],
   "srcAlphaBlendFactor": 0,
   "srcColorBlendFactor": 0,
   "depthTestEnable": 1,

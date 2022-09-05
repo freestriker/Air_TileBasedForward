@@ -74,10 +74,18 @@ void AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::SSAO_Occ
 	settings.AddDependency(
 		"VK_SUBPASS_EXTERNAL",
 		"DrawSubpass",
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+		0,
+		0
+	);
+	settings.AddDependency(
+		"DrawSubpass",
+		"VK_SUBPASS_EXTERNAL",
 		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
 		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-		VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
+		VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
 	);
 }
 
@@ -233,36 +241,9 @@ void AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::OnExcute
 	commandBuffer->Reset();
 	commandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
-	///Change layout
-	{
-		auto depthTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
-		(
-			featureData->depthTexture,
-			VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-		);
-		auto normalTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
-		(
-			featureData->normalTexture,
-			VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-		);
-		commandBuffer->AddPipelineImageBarrier(
-			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-			{ &depthTextureBarrier, &normalTextureBarrier }
-		);
-	}
-
 	///Render
 	{
-		commandBuffer->BeginRenderPass(
-			_renderPass,
-			featureData->frameBuffer
-		);
+		commandBuffer->BeginRenderPass(_renderPass, featureData->frameBuffer);
 
 		featureData->material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
 		commandBuffer->DrawMesh(_fullScreenMesh, featureData->material);
