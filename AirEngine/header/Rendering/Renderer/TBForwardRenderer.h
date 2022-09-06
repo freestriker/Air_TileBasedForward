@@ -19,11 +19,18 @@ namespace AirEngine
 					DEPTH_PEELING,
 					ALPHA_BUFFER
 				};
+				enum class AoType
+				{
+					SSAO,
+					HBAO,
+					GTAO
+				};
 			public:
 				class TBForwardRendererData final : public Core::Graphic::Rendering::RendererDataBase
 				{
 				public:
 					OitType oitType = OitType::DEPTH_PEELING;
+					AoType aoType = AoType::SSAO;
 				public:
 					CONSTRUCTOR(TBForwardRendererData)
 

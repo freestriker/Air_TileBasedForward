@@ -57,6 +57,24 @@ void AirEngine::Test::RendererDataController::OnUpdate()
 			Utils::Log::Message("Switch OIT mode to Depth-Peeling.");
 		}
 	}
+	if (Core::Logic::CoreObject::Instance::InputManager().KeyUp(Core::Logic::Manager::InputKeyType::Key_K))
+	{
+		if (rendererData->aoType == Rendering::Renderer::TBForwardRenderer::AoType::SSAO)
+		{
+			rendererData->aoType = Rendering::Renderer::TBForwardRenderer::AoType::HBAO;
+			Utils::Log::Message("Switch AO mode to HBAO.");
+		}
+		else if (rendererData->aoType == Rendering::Renderer::TBForwardRenderer::AoType::HBAO)
+		{
+			rendererData->aoType = Rendering::Renderer::TBForwardRenderer::AoType::GTAO;
+			Utils::Log::Message("Switch AO mode to GTAO.");
+		}
+		else
+		{
+			rendererData->aoType = Rendering::Renderer::TBForwardRenderer::AoType::SSAO;
+			Utils::Log::Message("Switch AO mode to SSAO.");
+		}
+	}
 }
 
 void AirEngine::Test::RendererDataController::OnDestroy()
