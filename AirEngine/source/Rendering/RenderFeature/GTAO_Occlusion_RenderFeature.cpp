@@ -98,8 +98,8 @@ AirEngine::Rendering::RenderFeature::GTAO_Occlusion_RenderFeature::GTAO_Occlusio
 	, noiseTexture(nullptr)
 	, noiseStagingBuffer(nullptr)
 	, sampleRadius(0.1f)
-	, sampleBiasAngle(10.0f)
-	, stepCount(3)
+	, sampleBiasAngle(35.0f)
+	, stepCount(4)
 	, sliceCount(4)
 	, noiseTextureWidth(64)
 	, depthTexture(nullptr)
@@ -205,7 +205,7 @@ void AirEngine::Rendering::RenderFeature::GTAO_Occlusion_RenderFeature::OnResolv
 		{
 			noise = u(engine);
 		}
-		featureData->noiseStagingBuffer->WriteData(noiseInfo.data(), sizeof(float) * NOISE_COUNT);
+		featureData->noiseStagingBuffer->WriteData(noiseInfo.data(), sizeof(float) * featureData->noiseTextureWidth * featureData->noiseTextureWidth);
 	}
 
 	///Material

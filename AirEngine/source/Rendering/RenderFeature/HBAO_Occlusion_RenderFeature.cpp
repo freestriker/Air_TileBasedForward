@@ -168,7 +168,7 @@ void AirEngine::Rendering::RenderFeature::HBAO_Occlusion_RenderFeature::OnResolv
 	auto featureData = static_cast<HBAO_Occlusion_RenderFeatureData*>(renderFeatureData);
 	VkExtent2D extent = { camera->attachments["ColorAttachment"]->VkExtent2D_().width / 2, camera->attachments["ColorAttachment"]->VkExtent2D_().height / 2 };
 
-	///Occlusion texture size info
+	///Hbao info
 	{
 		featureData->hbaoInfoBuffer = new Core::Graphic::Instance::Buffer{
 			sizeof(HbaoInfo),
@@ -179,8 +179,8 @@ void AirEngine::Rendering::RenderFeature::HBAO_Occlusion_RenderFeature::OnResolv
 			[featureData, extent](void* ptr)->void
 			{
 				HbaoInfo* hbaoInfo = reinterpret_cast<HbaoInfo*>(ptr);
-				hbaoInfo->attachmentize = glm::vec2(extent.width, extent.height);
-				hbaoInfo->attachmentTexelSize = glm::vec2(1, 1) / hbaoInfo->attachmentize;
+				hbaoInfo->attachmentSize = glm::vec2(extent.width, extent.height);
+				hbaoInfo->attachmentTexelSize = glm::vec2(1, 1) / hbaoInfo->attachmentSize;
 				hbaoInfo->sampleRadius = featureData->sampleRadius;
 				hbaoInfo->sampleBiasAngle = featureData->sampleBiasAngle;
 				hbaoInfo->stepCount = featureData->stepCount;
@@ -204,7 +204,7 @@ void AirEngine::Rendering::RenderFeature::HBAO_Occlusion_RenderFeature::OnResolv
 		{
 			noise = u(engine);
 		}
-		featureData->noiseStagingBuffer->WriteData(noiseInfo.data(), sizeof(float) * NOISE_COUNT);
+		featureData->noiseStagingBuffer->WriteData(noiseInfo.data(), sizeof(float) * featureData->noiseTextureWidth * featureData->noiseTextureWidth);
 	}
 
 	///Material

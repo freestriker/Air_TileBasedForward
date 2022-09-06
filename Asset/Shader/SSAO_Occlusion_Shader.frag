@@ -5,24 +5,22 @@
 #include "Object.glsl"
 
 #define PI (acos(-1.0))
-#define NOISE_COUNT 4096
+#define DOUBLE_PI (2 * acos(-1.0))
 #define SAMPLE_POINT_COUNT 32
 
 layout(set = 0, binding = 0) uniform _CameraInfo
 {
     CameraInfo info;
 } cameraInfo;
-layout(set = 1, binding = 0) uniform NoiseInfo
+layout(set = 1, binding = 0) uniform sampler2D depthTexture;
+layout(set = 2, binding = 0) uniform sampler2D normalTexture;
+layout(set = 3, binding = 0) uniform sampler2D noiseTexture;
+layout(set = 4, binding = 0) uniform SsaoInfo
 {
-    vec4 noises[NOISE_COUNT / 4];
-}noiseInfo;
-layout(set = 2, binding = 0) uniform sampler2D depthTexture;
-layout(set = 3, binding = 0) uniform sampler2D normalTexture;
-layout(set = 4, binding = 0) uniform OcclusionTextureSizeInfo
-{
-    vec2 size;
-    vec2 texelSize;
-} occlusionTextureSizeInfo;
+    vec2 attachmentSize;
+    vec2 attachmentTexelSize;
+    int noiseTextureWidth;
+} ssaoInfo;
 layout(set = 5, binding = 0) uniform SamplePointInfo
 {
     vec4 samplePoints[SAMPLE_POINT_COUNT];
@@ -32,17 +30,30 @@ layout(location = 0) out float OcclusionTexture;
 
 void main()
 {
-    vec2 aPosition = gl_FragCoord.xy * occlusionTextureSizeInfo.texelSize;
+    vec2 aPosition = gl_FragCoord.xy * ssaoInfo.attachmentTexelSize;
     
     vec3 ndcPosition = vec3(PositionA2N(aPosition), texture(depthTexture, aPosition).r);
     vec3 vPosition = PositionN2V(ndcPosition, cameraInfo.info);
     vec3 vNormal = ParseFromColor(texture(normalTexture, aPosition).rgb);
 
-    ivec2 pixelIndexPosition = ivec2(gl_FragCoord.xy);
-    int occlusionTextureWidth = int(occlusionTextureSizeInfo.size.x);
-    int pixelIndex = pixelIndexPosition.y * occlusionTextureWidth + pixelIndexPosition.x;
-    int noiseIndex = pixelIndex % NOISE_COUNT;
-    float noiseRadian = noiseInfo.noises[noiseIndex / 4][noiseIndex % 4] * 2 * PI;
+    // vec3 faceVNormal;
+    // {
+    //     vec2 lAPosition = clamp((gl_FragCoord.xy + vec2(-1, 0)) * ssaoInfo.attachmentTexelSize, 0, 1);
+    //     float lNdcDepth =  texture(depthTexture, lAPosition).r;
+    //     vec3 lNdcPosition = vec3(PositionA2N(lAPosition), lNdcDepth);
+    //     vec3 lVPosition = PositionN2V(lNdcPosition, cameraInfo.info);
+    //     vec3 h = vPosition - lVPosition;
+
+    //     vec2 dAposition = clamp((gl_FragCoord.xy + vec2(0, 1)) * ssaoInfo.attachmentTexelSize, 0, 1);
+    //     float dNdcDepth =  texture(depthTexture, dAposition).r;
+    //     vec3 dNdcPosition = vec3(PositionA2N(dAposition), dNdcDepth);
+    //     vec3 dVPosition = PositionN2V(dNdcPosition, cameraInfo.info);
+    //     vec3 v = vPosition - dVPosition;
+
+    //     faceVNormal = normalize(cross(h, v));
+    // }
+
+    float noiseRadian = texture(noiseTexture, mod(gl_FragCoord.xy, ssaoInfo.noiseTextureWidth) / ssaoInfo.noiseTextureWidth).r * DOUBLE_PI;
     
     vec3 zAxis = vNormal;
     vec3 yAxis = normalize(cross(zAxis, vec3(cos(noiseRadian), sin(noiseRadian), 0)));

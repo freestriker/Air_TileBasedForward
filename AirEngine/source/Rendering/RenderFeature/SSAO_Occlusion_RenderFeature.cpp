@@ -94,13 +94,15 @@ AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::SSAO_Occlusio
 	, material(nullptr)
 	, frameBuffer(nullptr)
 	, occlusionTexture(nullptr)
-	, occlusionTextureSizeInfoBuffer(nullptr)
+	, ssaoInfoBuffer(nullptr)
 	, samplePointInfoBuffer(nullptr)
-	, occlusionTextureSize({0, 0})
-	, samplePointRadius(1.0f)
-	, samplePointBiasAngle(25.0f)
+	, noiseTexture(nullptr)
+	, noiseStagingBuffer(nullptr)
+	, samplePointRadius(0.1f)
+	, samplePointBiasAngle(35.0f)
 	, depthTexture(nullptr)
 	, normalTexture(nullptr)
+	, noiseTextureWidth(64)
 {
 
 }
@@ -118,28 +120,15 @@ AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::SSAO_Occlusio
 	, _ssaoShader(Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\SSAO_Occlusion_Shader.shader"))
 	, _textureSampler(
 		new Core::Graphic::Instance::ImageSampler(
-			VkFilter::VK_FILTER_NEAREST,
+			VkFilter::VK_FILTER_LINEAR,
 			VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
 			VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_BORDER,
 			0.0f,
 			VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
 		)
 	)
-	, _noiseInfoBuffer(nullptr)
 {
-	_noiseInfoBuffer = new Core::Graphic::Instance::Buffer{
-			sizeof(float) * NOISE_COUNT,
-			VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-	};
-	std::array<float, NOISE_COUNT> noiseInfo = std::array<float, NOISE_COUNT>();
-	std::default_random_engine engine;
-	std::uniform_real_distribution<float> u(0.0f, 1.0f);
-	for (auto& noise : noiseInfo)
-	{
-		noise = u(engine);
-	}
-	_noiseInfoBuffer->WriteData(noiseInfo.data(), sizeof(float) * NOISE_COUNT);
+
 }
 
 AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::~SSAO_Occlusion_RenderFeature()
@@ -148,18 +137,18 @@ AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::~SSAO_Occlusi
 	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Mesh\\BackgroundMesh.ply");
 	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\SSAO_Occlusion_Shader.shader");
 	delete _textureSampler;
-	delete _noiseInfoBuffer;
 }
 
 AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::OnCreateRenderFeatureData(Camera::CameraBase* camera)
 {
 	auto featureData = new SSAO_Occlusion_RenderFeatureData();
-	
+
+	auto extent = VkExtent2D{ camera->attachments["ColorAttachment"]->VkExtent2D_().width / 2, camera->attachments["ColorAttachment"]->VkExtent2D_().height / 2 };
+
 	///Occlusion texture
 	{
-		featureData->occlusionTextureSize = { camera->attachments["ColorAttachment"]->VkExtent2D_().width / 2, camera->attachments["ColorAttachment"]->VkExtent2D_().height / 2 };
 		featureData->occlusionTexture = Core::Graphic::Instance::Image::Create2DImage(
-			featureData->occlusionTextureSize,
+			extent,
 			VK_FORMAT_R16_SFLOAT,
 			VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
@@ -172,17 +161,6 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 		featureData->frameBuffer = new Core::Graphic::Rendering::FrameBuffer(_renderPass, { {"OcclusionTexture", featureData->occlusionTexture} });
 	}
 
-	///Occlusion texture size info
-	{
-		featureData->occlusionTextureSizeInfoBuffer = new Core::Graphic::Instance::Buffer{
-			sizeof(AttachmentSizeInfo),
-			VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
-			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-		};
-		auto occlusionTextureSize = AttachmentSizeInfo{ glm::vec2(featureData->occlusionTextureSize.width, featureData->occlusionTextureSize.height) , glm::vec2(1, 1) / glm::vec2(featureData->occlusionTextureSize.width, featureData->occlusionTextureSize.height) };
-		featureData->occlusionTextureSizeInfoBuffer->WriteData(&occlusionTextureSize, sizeof(AttachmentSizeInfo));
-	}
-
 	return featureData;
 }
 
@@ -190,6 +168,42 @@ void AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::OnResolv
 {
 	auto featureData = static_cast<SSAO_Occlusion_RenderFeatureData*>(renderFeatureData);
 
+	VkExtent2D extent = { camera->attachments["ColorAttachment"]->VkExtent2D_().width / 2, camera->attachments["ColorAttachment"]->VkExtent2D_().height / 2 };
+
+	///Hbao info
+	{
+		featureData->ssaoInfoBuffer = new Core::Graphic::Instance::Buffer{
+			sizeof(SsaoInfo),
+			VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		};
+		featureData->ssaoInfoBuffer->WriteData(
+			[featureData, extent](void* ptr)->void
+			{
+				SsaoInfo* ssaoInfo = reinterpret_cast<SsaoInfo*>(ptr);
+				ssaoInfo->attachmentSize = glm::vec2(extent.width, extent.height);
+				ssaoInfo->attachmentTexelSize = glm::vec2(1, 1) / ssaoInfo->attachmentSize;
+				ssaoInfo->noiseTextureWidth = featureData->noiseTextureWidth;
+			}
+		);
+	}
+	///Build noise staging buffer
+	{
+		featureData->noiseStagingBuffer = new Core::Graphic::Instance::Buffer{
+				sizeof(float) * featureData->noiseTextureWidth * featureData->noiseTextureWidth,
+				VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+				VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		};
+		std::vector<float> noiseInfo = std::vector<float>(featureData->noiseTextureWidth * featureData->noiseTextureWidth);
+		std::default_random_engine engine;
+		std::uniform_real_distribution<float> u(0.0f, 1.0f);
+		for (auto& noise : noiseInfo)
+		{
+			noise = u(engine);
+		}
+		featureData->noiseStagingBuffer->WriteData(noiseInfo.data(), sizeof(float) * featureData->noiseTextureWidth * featureData->noiseTextureWidth);
+	}
+	
 	///Sample point info
 	{
 		featureData->samplePointInfoBuffer = new Core::Graphic::Instance::Buffer{
@@ -209,9 +223,8 @@ void AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::OnResolv
 	///Material
 	{
 		featureData->material = new Core::Graphic::Rendering::Material(_ssaoShader);
-		featureData->material->SetUniformBuffer("occlusionTextureSizeInfo", featureData->occlusionTextureSizeInfoBuffer);
+		featureData->material->SetUniformBuffer("ssaoInfo", featureData->ssaoInfoBuffer);
 		featureData->material->SetUniformBuffer("samplePointInfo", featureData->samplePointInfoBuffer);
-		featureData->material->SetUniformBuffer("noiseInfo", _noiseInfoBuffer);
 		featureData->material->SetSlotData("depthTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), featureData->depthTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
 		featureData->material->SetSlotData("normalTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), featureData->normalTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
 	}
@@ -222,8 +235,10 @@ void AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::OnDestro
 	auto featureData = static_cast<SSAO_Occlusion_RenderFeatureData*>(renderFeatureData);
 	delete featureData->frameBuffer;
 	delete featureData->occlusionTexture;
-	delete featureData->occlusionTextureSizeInfoBuffer;
+	delete featureData->ssaoInfoBuffer;
 	delete featureData->samplePointInfoBuffer;
+	delete featureData->noiseStagingBuffer;
+	delete featureData->noiseTexture;
 
 	delete featureData->material;
 
@@ -240,6 +255,56 @@ void AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::OnExcute
 
 	commandBuffer->Reset();
 	commandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+
+	///Copy noise to noise texture
+	if (featureData->noiseTexture == nullptr)
+	{
+		featureData->noiseTexture = Core::Graphic::Instance::Image::Create2DImage(
+			{ static_cast<uint32_t>(featureData->noiseTextureWidth), static_cast<uint32_t>(featureData->noiseTextureWidth) },
+			VK_FORMAT_R32_SFLOAT,
+			VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
+		);
+		featureData->material->SetSlotData("noiseTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), featureData->noiseTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
+
+		{
+			auto noiseTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
+			(
+				featureData->noiseTexture,
+				VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				0,
+				VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT
+			);
+			commandBuffer->AddPipelineImageBarrier(
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
+				{ &noiseTextureBarrier }
+			);
+		}
+
+		commandBuffer->CopyBufferToImage(featureData->noiseStagingBuffer, featureData->noiseTexture, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+		{
+			auto noiseTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
+			(
+				featureData->noiseTexture,
+				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
+				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+			);
+			commandBuffer->AddPipelineImageBarrier(
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+				{ &noiseTextureBarrier }
+			);
+		}
+	}
+	else
+	{
+		delete featureData->noiseStagingBuffer;
+		featureData->noiseStagingBuffer = nullptr;
+	}
 
 	///Render
 	{

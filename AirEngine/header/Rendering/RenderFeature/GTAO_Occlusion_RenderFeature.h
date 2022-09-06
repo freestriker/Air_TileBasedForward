@@ -5,9 +5,6 @@
 #include "Core/Graphic/Instance/Image.h"
 #include <glm/glm.hpp>
 
-#define NOISE_COUNT 4096
-#define SAMPLE_POINT_COUNT 32
-
 namespace AirEngine
 {
 	namespace Asset

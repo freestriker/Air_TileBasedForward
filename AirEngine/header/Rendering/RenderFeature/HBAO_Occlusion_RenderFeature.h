@@ -5,9 +5,6 @@
 #include "Core/Graphic/Instance/Image.h"
 #include <glm/glm.hpp>
 
-#define NOISE_COUNT 4096
-#define SAMPLE_POINT_COUNT 32
-
 namespace AirEngine
 {
 	namespace Asset
@@ -72,7 +69,7 @@ namespace AirEngine
 			private:
 				struct HbaoInfo
 				{
-					alignas(8) glm::vec2 attachmentize;
+					alignas(8) glm::vec2 attachmentSize;
 					alignas(8) glm::vec2 attachmentTexelSize;
 					alignas(4) float sampleRadius;
 					alignas(4) float sampleBiasAngle;

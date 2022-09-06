@@ -261,7 +261,7 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 							VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
 						);
 						commandBuffer->AddPipelineImageBarrier(VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, { &colorAttachmentBarrier });
-						VkClearValue cv = { 0, 0, 0, 0 };
+						VkClearValue cv = { 0, 0, 0, 255 };
 						commandBuffer->BeginRenderPass(prp, frameBuffer, { {"SwapchainAttachment", cv} });
 						commandBuffer->DrawMesh(fm, pm);
 						commandBuffer->EndRenderPass();

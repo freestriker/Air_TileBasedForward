@@ -51,12 +51,14 @@ namespace AirEngine
 				private:
 					Core::Graphic::Rendering::Material* material;
 					Core::Graphic::Rendering::FrameBuffer* frameBuffer;
-					Core::Graphic::Instance::Buffer* occlusionTextureSizeInfoBuffer;
+					Core::Graphic::Instance::Buffer* ssaoInfoBuffer;
 					Core::Graphic::Instance::Buffer* samplePointInfoBuffer;
-					VkExtent2D occlusionTextureSize;
+					Core::Graphic::Instance::Image* noiseTexture;
+					Core::Graphic::Instance::Buffer* noiseStagingBuffer;
 				public:
 					float samplePointRadius;
 					float samplePointBiasAngle;
+					int noiseTextureWidth;
 					Core::Graphic::Instance::Image* occlusionTexture;
 					Core::Graphic::Instance::Image* depthTexture;
 					Core::Graphic::Instance::Image* normalTexture;
@@ -68,16 +70,16 @@ namespace AirEngine
 				CONSTRUCTOR(SSAO_Occlusion_RenderFeature)
 
 			private:
-				struct AttachmentSizeInfo
+				struct SsaoInfo
 				{
-					alignas(8) glm::vec2 size;
-					alignas(8) glm::vec2 texelSize;
+					alignas(8) glm::vec2 attachmentSize;
+					alignas(8) glm::vec2 attachmentTexelSize;
+					alignas(4) int noiseTextureWidth;
 				};
 				Core::Graphic::Rendering::RenderPassBase* _renderPass;
 				Asset::Mesh* _fullScreenMesh;
 				Core::Graphic::Rendering::Shader* _ssaoShader;
 				Core::Graphic::Instance::ImageSampler* _textureSampler;
-				Core::Graphic::Instance::Buffer* _noiseInfoBuffer;
 
 				Core::Graphic::Rendering::RenderFeatureDataBase* OnCreateRenderFeatureData(Camera::CameraBase* camera)override;
 				void OnResolveRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera)override;
