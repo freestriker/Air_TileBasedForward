@@ -14,12 +14,20 @@ namespace AirEngine
 			class TBForwardRenderer final : public Core::Graphic::Rendering::RendererBase
 			{
 			public:
+				enum class OitType
+				{
+					DEPTH_PEELING,
+					ALPHA_BUFFER
+				};
+			public:
 				class TBForwardRendererData final : public Core::Graphic::Rendering::RendererDataBase
 				{
 				public:
+					OitType oitType = OitType::DEPTH_PEELING;
+				public:
 					CONSTRUCTOR(TBForwardRendererData)
 
-						RTTR_ENABLE(Core::Graphic::Rendering::RendererDataBase)
+					RTTR_ENABLE(Core::Graphic::Rendering::RendererDataBase)
 				};
 
 				CONSTRUCTOR(TBForwardRenderer)

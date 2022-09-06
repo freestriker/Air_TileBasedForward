@@ -42,7 +42,7 @@ void main()
     ///Bubble sort all pixels
     for(uint iIteratorIndex = pixelIndex; iIteratorIndex != INVALID_BUFFER_INDEX; iIteratorIndex = indexList.indexes[iIteratorIndex])
     {
-        for(uint jIteratorIndex = pixelIndex; jIteratorIndex != INVALID_BUFFER_INDEX; jIteratorIndex = indexList.indexes[jIteratorIndex])
+        for(uint jIteratorIndex = indexList.indexes[iIteratorIndex]; jIteratorIndex != INVALID_BUFFER_INDEX; jIteratorIndex = indexList.indexes[jIteratorIndex])
         {
             if(depthList.depths[jIteratorIndex] < depthList.depths[iIteratorIndex])
             {

@@ -42,14 +42,14 @@ void AirEngine::Test::AudioSourceBehaviour::OnUpdate()
 	//double time = Core::Logic::CoreObject::Instance::time.LaunchDuration();
 	//double gain = std::abs(2.0 * std::fmod(time, 10.0f) / 10.f - 0.5f);
 	auto gain = audioSource->GetGain();
-	float deltaVolum = 0.05;
-	if (Core::Logic::CoreObject::Instance::InputManager().KeyDown(Core::Logic::Manager::InputKeyType::Key_Down))
+	float deltaVolumSpeed = 0.35;
+	if (Core::Logic::CoreObject::Instance::InputManager().KeyStatus(Core::Logic::Manager::InputKeyType::Key_Down) == AirEngine::Core::Logic::Manager::ButtonStatusType::Pressed)
 	{
-		gain -= deltaVolum;
+		gain -= deltaVolumSpeed * Core::Logic::CoreObject::Instance::time.DeltaDuration();
 	}
-	else if (Core::Logic::CoreObject::Instance::InputManager().KeyUp(Core::Logic::Manager::InputKeyType::Key_Up))
+	else if (Core::Logic::CoreObject::Instance::InputManager().KeyStatus(Core::Logic::Manager::InputKeyType::Key_Up) == AirEngine::Core::Logic::Manager::ButtonStatusType::Pressed)
 	{
-		gain += deltaVolum;
+		gain += deltaVolumSpeed * Core::Logic::CoreObject::Instance::time.DeltaDuration();
 	}
 	audioSource->SetGain(std::clamp(gain, 0.0f, 1.0f));
 }

@@ -26,7 +26,7 @@
 #include "Core/Graphic/CoreObject/Instance.h"
 #include "Core/Graphic/Manager/RenderPassManager.h"
 #include "Core/Graphic/CoreObject/Instance.h"
-#include "Test/TBF_OIT_DP_RenderBehaviour.h"
+#include "Test/TBF_OIT_RenderBehaviour.h"
 #include "Asset/AudioClip.h"
 #include "Audio/AudioSource.h"
 #include "Audio/AudioListener.h"
@@ -39,8 +39,9 @@
 #include "Test/TBF_WallRendererBehaviour.h"
 #include "Test/TBF_GlassRendererBehaviour.h"
 #include "Test/TBF_MirrorRendererBehaviour.h"
-#include "Test/TBF_OIT_AB_RenderBehaviour.h"
+#include "Test/TBF_OIT_RenderBehaviour.h"
 #include "Test/QuadMoveBehaviour.h"
+#include "Test/RendererDataController.h"
 
 AirEngine::Core::Logic::CoreObject::Thread::LogicThread AirEngine::Core::Logic::CoreObject::Thread::_logicThread = AirEngine::Core::Logic::CoreObject::Thread::LogicThread();
 
@@ -411,6 +412,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	cameraGo->AddComponent(camera);
 	cameraGo->AddComponent(new Test::CameraMoveBehaviour());
 	cameraGo->AddComponent(new Audio::AudioListener());
+	cameraGo->AddComponent(new Test::RendererDataController());
 
 	///AudioSource
 	Logic::Object::GameObject* audioSources = new Logic::Object::GameObject("AudioSources");
@@ -486,7 +488,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		renderers->AddChild(quadRendererGo);
 		quadRendererGo->AddComponent(new Renderer::Renderer());
 		quadRendererGo->AddComponent(new Test::QuadMoveBehaviour());
-		quadRendererGo->transform.SetTranslation(glm::vec3(-1.5, 0, -0.5));
+		quadRendererGo->transform.SetTranslation(glm::vec3(-1.5, 0, -1));
 	}
 
 	///Forward transparent
@@ -543,19 +545,12 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	renderers->AddChild(oitRenderers);
 	oitRenderers->transform.SetTranslation({3, 0, 0});
 	{
-		Logic::Object::GameObject* oitRendererGo = new Logic::Object::GameObject("OitDepthPeelingRenderer");
+		Logic::Object::GameObject* oitRendererGo = new Logic::Object::GameObject("OitRenderer");
 		oitRenderers->AddChild(oitRendererGo);
 		oitRendererGo->AddComponent(new Renderer::Renderer());
-		oitRendererGo->AddComponent(new Test::TBF_OIT_DP_RenderBehaviour("WhiteTexture2D"));
+		oitRendererGo->AddComponent(new Test::TBF_OIT_RenderBehaviour("WhiteTexture2D"));
 		oitRendererGo->AddComponent(new Test::SelfRotateBehaviour(35));
 	}
-	//{
-	//	Logic::Object::GameObject* oitRendererGo = new Logic::Object::GameObject("OitDepthPeelingRenderer");
-	//	oitRenderers->AddChild(oitRendererGo);
-	//	oitRendererGo->AddComponent(new Renderer::Renderer());
-	//	oitRendererGo->AddComponent(new Test::TBF_OIT_AB_RenderBehaviour("WhiteTexture2D"));
-	//	oitRendererGo->AddComponent(new Test::SelfRotateBehaviour(35));
-	//}
 
 	//Lights
 	Logic::Object::GameObject* lights = new Logic::Object::GameObject("Lights");

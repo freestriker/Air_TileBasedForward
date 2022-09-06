@@ -37,7 +37,7 @@ AirEngine::Rendering::Renderer::TBForwardRenderer::TBForwardRenderer()
 	UseRenderFeature("TBForward_Opaque_RenderFeature", new RenderFeature::TBForward_Opaque_RenderFeature());
 	UseRenderFeature("Background_RenderFeature", new RenderFeature::Background_RenderFeature());
 	UseRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", new RenderFeature::TBForward_OIT_DepthPeeling_RenderFeature());
-	//UseRenderFeature("TBForward_OIT_AlphaBuffer_RenderFeature", new RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeature());
+	UseRenderFeature("TBForward_OIT_AlphaBuffer_RenderFeature", new RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeature());
 	//UseRenderFeature("SSAO_Occlusion_RenderFeature", new RenderFeature::SSAO_Occlusion_RenderFeature());
 	UseRenderFeature("HBAO_Occlusion_RenderFeature", new RenderFeature::HBAO_Occlusion_RenderFeature());
 	UseRenderFeature("GTAO_Occlusion_RenderFeature", new RenderFeature::GTAO_Occlusion_RenderFeature());
@@ -71,7 +71,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::OnResolveRendererData(Co
 	auto lightListFeatureData = rendererData->RenderFeatureData<RenderFeature::TBForward_LightList_RenderFeature::TBForward_LightList_RenderFeatureData>("TBForward_LightList_RenderFeature");
 	auto opaqueFeatureData = rendererData->RenderFeatureData<RenderFeature::TBForward_Opaque_RenderFeature::TBForward_Opaque_RenderFeatureData>("TBForward_Opaque_RenderFeature");
 	auto depthPeelingFeatureData = rendererData->RenderFeatureData<RenderFeature::TBForward_OIT_DepthPeeling_RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatureData>("TBForward_OIT_DepthPeeling_RenderFeature");
-	//auto alphaBufferFeatureData = rendererData->RenderFeatureData<RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeatureData>("TBForward_OIT_AlphaBuffer_RenderFeature");
+	auto alphaBufferFeatureData = rendererData->RenderFeatureData<RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeatureData>("TBForward_OIT_AlphaBuffer_RenderFeature");
 	//auto ssaoFeatureData = rendererData->RenderFeatureData<RenderFeature::SSAO_Occlusion_RenderFeature::SSAO_Occlusion_RenderFeatureData>("SSAO_Occlusion_RenderFeature");
 	auto hbaoFeatureData = rendererData->RenderFeatureData<RenderFeature::HBAO_Occlusion_RenderFeature::HBAO_Occlusion_RenderFeatureData>("HBAO_Occlusion_RenderFeature");
 	auto gtaoFeatureData = rendererData->RenderFeatureData<RenderFeature::GTAO_Occlusion_RenderFeature::GTAO_Occlusion_RenderFeatureData>("GTAO_Occlusion_RenderFeature");
@@ -102,7 +102,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::OnResolveRendererData(Co
 	depthPeelingFeatureData->transparentLightIndexListsBuffer = lightListFeatureData->transparentLightIndexListsBuffer;
 	depthPeelingFeatureData->depthTexture = geometryFeatureData->depthTexture;
 
-	//alphaBufferFeatureData->transparentLightIndexListsBuffer = lightListFeatureData->transparentLightIndexListsBuffer;
+	alphaBufferFeatureData->transparentLightIndexListsBuffer = lightListFeatureData->transparentLightIndexListsBuffer;
 }
 
 void AirEngine::Rendering::Renderer::TBForwardRenderer::OnDestroyRendererData(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -121,8 +121,19 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::PrepareRenderer(Core::Gr
 	PrepareRenderFeature("TBForward_LightList_RenderFeature", rendererData);
 	PrepareRenderFeature("TBForward_Opaque_RenderFeature", rendererData);
 	PrepareRenderFeature("AO_Cover_RenderFeature", rendererData);
-	PrepareRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", rendererData);
-	//PrepareRenderFeature("TBForward_OIT_AlphaBuffer_RenderFeature", rendererData);
+	switch (static_cast<TBForwardRendererData*>(rendererData)->oitType)
+	{
+		case OitType::DEPTH_PEELING:
+		{
+			PrepareRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", rendererData);
+			break;
+		}
+		case OitType::ALPHA_BUFFER:
+		{
+			PrepareRenderFeature("TBForward_OIT_AlphaBuffer_RenderFeature", rendererData);
+			break;
+		}
+	}
 }
 
 void AirEngine::Rendering::Renderer::TBForwardRenderer::ExcuteRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*> const* rendererComponents)
@@ -136,8 +147,19 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::ExcuteRenderer(Core::Gra
 	ExcuteRenderFeature("TBForward_LightList_RenderFeature", rendererData, camera, rendererComponents);
 	ExcuteRenderFeature("TBForward_Opaque_RenderFeature", rendererData, camera, rendererComponents);
 	ExcuteRenderFeature("AO_Cover_RenderFeature", rendererData, camera, rendererComponents);
-	ExcuteRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", rendererData, camera, rendererComponents);
-	//ExcuteRenderFeature("TBForward_OIT_AlphaBuffer_RenderFeature", rendererData, camera, rendererComponents);
+	switch (static_cast<TBForwardRendererData*>(rendererData)->oitType)
+	{
+	case OitType::DEPTH_PEELING:
+	{
+		ExcuteRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", rendererData, camera, rendererComponents);
+		break;
+	}
+	case OitType::ALPHA_BUFFER:
+	{
+		ExcuteRenderFeature("TBForward_OIT_AlphaBuffer_RenderFeature", rendererData, camera, rendererComponents);
+		break;
+	}
+	}
 }
 
 void AirEngine::Rendering::Renderer::TBForwardRenderer::SubmitRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -151,8 +173,19 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::SubmitRenderer(Core::Gra
 	SubmitRenderFeature("TBForward_LightList_RenderFeature", rendererData);
 	SubmitRenderFeature("TBForward_Opaque_RenderFeature", rendererData);
 	SubmitRenderFeature("AO_Cover_RenderFeature", rendererData);
-	SubmitRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", rendererData);
-	//SubmitRenderFeature("TBForward_OIT_AlphaBuffer_RenderFeature", rendererData);
+	switch (static_cast<TBForwardRendererData*>(rendererData)->oitType)
+	{
+		case OitType::DEPTH_PEELING:
+		{
+			SubmitRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", rendererData);
+			break;
+		}
+		case OitType::ALPHA_BUFFER:
+		{
+			SubmitRenderFeature("TBForward_OIT_AlphaBuffer_RenderFeature", rendererData);
+			break;
+		}
+	}
 }
 
 void AirEngine::Rendering::Renderer::TBForwardRenderer::FinishRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -166,6 +199,17 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::FinishRenderer(Core::Gra
 	FinishRenderFeature("TBForward_LightList_RenderFeature", rendererData);
 	FinishRenderFeature("TBForward_Opaque_RenderFeature", rendererData);
 	FinishRenderFeature("AO_Cover_RenderFeature", rendererData);
-	FinishRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", rendererData);
-	//FinishRenderFeature("TBForward_OIT_AlphaBuffer_RenderFeature", rendererData);
+	switch (static_cast<TBForwardRendererData*>(rendererData)->oitType)
+	{
+		case OitType::DEPTH_PEELING:
+		{
+			FinishRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", rendererData);
+			break;
+		}
+		case OitType::ALPHA_BUFFER:
+		{
+			FinishRenderFeature("TBForward_OIT_AlphaBuffer_RenderFeature", rendererData);
+			break;
+		}
+	}
 }
