@@ -168,7 +168,7 @@ void AirEngine::Rendering::RenderFeature::Background_RenderFeature::OnExcute(Cor
 		}
 
 		///Clear
-		VkClearColorValue clearValue = { 0, 0, 0, 0 };
+		VkClearColorValue clearValue = { 0, 0, 0, 255 };
 		commandBuffer->ClearColorImage(featureData->frameBuffer->Attachment("ColorAttachment"), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, clearValue);
 
 		//Change layout

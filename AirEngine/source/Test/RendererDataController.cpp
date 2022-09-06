@@ -43,6 +43,15 @@ void AirEngine::Test::RendererDataController::OnStart()
 
 void AirEngine::Test::RendererDataController::OnUpdate()
 {
+	if (Core::Logic::CoreObject::Instance::InputManager().KeyDown(Core::Logic::Manager::InputKeyType::Key_A))
+	{
+		Utils::Log::Message("Key: A is down.");
+	}
+	if (Core::Logic::CoreObject::Instance::InputManager().MouseDown(Core::Logic::Manager::InputMouseType::LeftButton))
+	{
+		Utils::Log::Message("Mouse: Left button is down.");
+	}
+
 	auto camera = GameObject()->GetComponent<Camera::CameraBase>();
 	auto rendererData = dynamic_cast<Rendering::Renderer::TBForwardRenderer::TBForwardRendererData*>(camera->RendererData());
 	if (rendererData)

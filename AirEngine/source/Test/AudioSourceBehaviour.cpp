@@ -39,8 +39,6 @@ void AirEngine::Test::AudioSourceBehaviour::OnStart()
 void AirEngine::Test::AudioSourceBehaviour::OnUpdate()
 {
 	auto audioSource = GameObject()->GetComponent<Audio::AudioSource>();
-	//double time = Core::Logic::CoreObject::Instance::time.LaunchDuration();
-	//double gain = std::abs(2.0 * std::fmod(time, 10.0f) / 10.f - 0.5f);
 	auto gain = audioSource->GetGain();
 	float deltaVolumSpeed = 0.35;
 	if (Core::Logic::CoreObject::Instance::InputManager().KeyStatus(Core::Logic::Manager::InputKeyType::Key_Down) == AirEngine::Core::Logic::Manager::ButtonStatusType::Pressed)
