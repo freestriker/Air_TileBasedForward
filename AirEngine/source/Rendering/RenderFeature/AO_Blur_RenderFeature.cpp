@@ -225,7 +225,7 @@ void AirEngine::Rendering::RenderFeature::AO_Blur_RenderFeature::OnExcute(Core::
 
 	commandBuffer->Reset();
 	commandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-
+	
 	for (int i = 0; i < featureData->iterateCount; i++)
 	{
 		///Horizontal blur

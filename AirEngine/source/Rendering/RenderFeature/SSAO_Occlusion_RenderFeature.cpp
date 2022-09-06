@@ -82,9 +82,9 @@ void AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::SSAO_Occ
 	settings.AddDependency(
 		"DrawSubpass",
 		"VK_SUBPASS_EXTERNAL",
-		VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-		VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+		VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
 		VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
 	);
 }

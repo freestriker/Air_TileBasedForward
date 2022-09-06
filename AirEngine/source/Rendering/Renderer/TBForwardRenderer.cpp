@@ -80,10 +80,6 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::OnResolveRendererData(Co
 	auto depthPeelingFeatureData = rendererData->RenderFeatureData<RenderFeature::TBForward_OIT_DepthPeeling_RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatureData>("TBForward_OIT_DepthPeeling_RenderFeature");
 	auto alphaBufferFeatureData = rendererData->RenderFeatureData<RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeatureData>("TBForward_OIT_AlphaBuffer_RenderFeature");
 
-
-	auto hbaoFeatureData = rendererData->RenderFeatureData<RenderFeature::HBAO_Occlusion_RenderFeature::HBAO_Occlusion_RenderFeatureData>("HBAO_Occlusion_RenderFeature");
-	auto gtaoFeatureData = rendererData->RenderFeatureData<RenderFeature::GTAO_Occlusion_RenderFeature::GTAO_Occlusion_RenderFeatureData>("GTAO_Occlusion_RenderFeature");
-
 	///SSAO
 	{
 		auto ssaoFeatureData = rendererData->RenderFeatureData<RenderFeature::SSAO_Occlusion_RenderFeature::SSAO_Occlusion_RenderFeatureData>("SSAO_Occlusion_RenderFeature");
@@ -93,7 +89,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::OnResolveRendererData(Co
 
 		auto aoBlurFeatureData = rendererData->RenderFeatureData<RenderFeature::AO_Blur_RenderFeature::AO_Blur_RenderFeatureData>("SSAO_Blur_RenderFeature");
 		aoBlurFeatureData->normalTexture = geometryFeatureData->normalTexture;
-		aoBlurFeatureData->occlusionTexture = gtaoFeatureData->occlusionTexture;
+		aoBlurFeatureData->occlusionTexture = ssaoFeatureData->occlusionTexture;
 		aoBlurFeatureData->iterateCount = 2;
 
 		auto aoCoverFeatureData = rendererData->RenderFeatureData<RenderFeature::AO_Cover_RenderFeature::AO_Cover_RenderFeatureData>("SSAO_Cover_RenderFeature");
@@ -107,7 +103,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::OnResolveRendererData(Co
 
 		auto aoBlurFeatureData = rendererData->RenderFeatureData<RenderFeature::AO_Blur_RenderFeature::AO_Blur_RenderFeatureData>("HBAO_Blur_RenderFeature");
 		aoBlurFeatureData->normalTexture = geometryFeatureData->normalTexture;
-		aoBlurFeatureData->occlusionTexture = gtaoFeatureData->occlusionTexture;
+		aoBlurFeatureData->occlusionTexture = hbaoFeatureData->occlusionTexture;
 		aoBlurFeatureData->iterateCount = 2;
 
 		auto aoCoverFeatureData = rendererData->RenderFeatureData<RenderFeature::AO_Cover_RenderFeature::AO_Cover_RenderFeatureData>("HBAO_Cover_RenderFeature");
@@ -116,8 +112,8 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::OnResolveRendererData(Co
 	}
 	///GTAO
 	{
-		auto hbaoFeatureData = rendererData->RenderFeatureData<RenderFeature::GTAO_Occlusion_RenderFeature::GTAO_Occlusion_RenderFeatureData>("GTAO_Occlusion_RenderFeature");
-		hbaoFeatureData->depthTexture = geometryFeatureData->depthTexture;
+		auto gtaoFeatureData = rendererData->RenderFeatureData<RenderFeature::GTAO_Occlusion_RenderFeature::GTAO_Occlusion_RenderFeatureData>("GTAO_Occlusion_RenderFeature");
+		gtaoFeatureData->depthTexture = geometryFeatureData->depthTexture;
 
 		auto aoBlurFeatureData = rendererData->RenderFeatureData<RenderFeature::AO_Blur_RenderFeature::AO_Blur_RenderFeatureData>("GTAO_Blur_RenderFeature");
 		aoBlurFeatureData->normalTexture = geometryFeatureData->normalTexture;
@@ -125,7 +121,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::OnResolveRendererData(Co
 		aoBlurFeatureData->iterateCount = 2;
 
 		auto aoCoverFeatureData = rendererData->RenderFeatureData<RenderFeature::AO_Cover_RenderFeature::AO_Cover_RenderFeatureData>("GTAO_Cover_RenderFeature");
-		aoCoverFeatureData->occlusionTexture = hbaoFeatureData->occlusionTexture;
+		aoCoverFeatureData->occlusionTexture = gtaoFeatureData->occlusionTexture;
 		aoCoverFeatureData->intensity = 2.0f;
 	}
 
