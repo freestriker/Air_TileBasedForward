@@ -77,12 +77,13 @@ void main()
             vec3 sampledVPosition = PositionN2V(sampledNdcPosition, cameraInfo.info);
 
             vec3 vector = sampledVPosition - vPosition;
+            vector.z = clamp(vector.z, -sqrt(1 - dot(vector.xy, vector.xy)) * hbaoInfo.sampleRadius, sqrt(1 - dot(vector.xy, vector.xy)) * hbaoInfo.sampleRadius);
 
             float sinHorizon = vector.z / length(vector);
             float ao = clamp(sinHorizon - sinTangent - minSinHorizon, 0, 1);
             if(ao >= previousAo)
             {
-                wao += clamp(1 - dot(vector, vector) / pow(hbaoInfo.sampleRadius, 2), 0, 1) * (ao - previousAo);
+                wao += (1 - dot(vector, vector) / pow(hbaoInfo.sampleRadius, 2)) * (ao - previousAo);
                 previousAo = ao;
             }
         }

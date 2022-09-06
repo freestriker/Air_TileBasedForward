@@ -98,7 +98,7 @@ AirEngine::Rendering::RenderFeature::HBAO_Occlusion_RenderFeature::HBAO_Occlusio
 	, noiseTexture(nullptr)
 	, noiseStagingBuffer(nullptr)
 	, sampleRadius(0.2f)
-	, sampleBiasAngle(30.0f)
+	, sampleBiasAngle(35.0f)
 	, stepCount(4)
 	, directionCount(8)
 	, noiseTextureWidth(64)

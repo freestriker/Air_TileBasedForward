@@ -17,6 +17,7 @@
 #include "Renderer/Renderer.h"
 #include "Camera/CameraBase.h"
 #include "Rendering/Renderer/TBForwardRenderer.h"
+#include "Rendering/Renderer/AmbientOcclusionRenderer.h"
 
 RTTR_REGISTRATION
 {
@@ -43,36 +44,74 @@ void AirEngine::Test::RendererDataController::OnStart()
 void AirEngine::Test::RendererDataController::OnUpdate()
 {
 	auto camera = GameObject()->GetComponent<Camera::CameraBase>();
-	auto rendererData = static_cast<Rendering::Renderer::TBForwardRenderer::TBForwardRendererData*>(camera->RendererData());
-	if (Core::Logic::CoreObject::Instance::InputManager().KeyUp(Core::Logic::Manager::InputKeyType::Key_J))
+	auto rendererData = dynamic_cast<Rendering::Renderer::TBForwardRenderer::TBForwardRendererData*>(camera->RendererData());
+	if (rendererData)
 	{
-		if (rendererData->oitType == Rendering::Renderer::TBForwardRenderer::OitType::DEPTH_PEELING)
+		if (Core::Logic::CoreObject::Instance::InputManager().KeyUp(Core::Logic::Manager::InputKeyType::Key_J))
 		{
-			rendererData->oitType = Rendering::Renderer::TBForwardRenderer::OitType::ALPHA_BUFFER;
-			Utils::Log::Message("Switch OIT mode to Alpha-Buffer.");
+			if (rendererData->oitType == Rendering::Renderer::TBForwardRenderer::OitType::DEPTH_PEELING)
+			{
+				rendererData->oitType = Rendering::Renderer::TBForwardRenderer::OitType::ALPHA_BUFFER;
+				Utils::Log::Message("Switch OIT mode to Alpha-Buffer.");
+			}
+			else
+			{
+				rendererData->oitType = Rendering::Renderer::TBForwardRenderer::OitType::DEPTH_PEELING;
+				Utils::Log::Message("Switch OIT mode to Depth-Peeling.");
+			}
 		}
-		else
+		if (Core::Logic::CoreObject::Instance::InputManager().KeyUp(Core::Logic::Manager::InputKeyType::Key_K))
 		{
-			rendererData->oitType = Rendering::Renderer::TBForwardRenderer::OitType::DEPTH_PEELING;
-			Utils::Log::Message("Switch OIT mode to Depth-Peeling.");
+			if (rendererData->aoType == Rendering::Renderer::TBForwardRenderer::AoType::SSAO)
+			{
+				rendererData->aoType = Rendering::Renderer::TBForwardRenderer::AoType::HBAO;
+				Utils::Log::Message("Switch AO mode to HBAO.");
+			}
+			else if (rendererData->aoType == Rendering::Renderer::TBForwardRenderer::AoType::HBAO)
+			{
+				rendererData->aoType = Rendering::Renderer::TBForwardRenderer::AoType::GTAO;
+				Utils::Log::Message("Switch AO mode to GTAO.");
+			}
+			else
+			{
+				rendererData->aoType = Rendering::Renderer::TBForwardRenderer::AoType::SSAO;
+				Utils::Log::Message("Switch AO mode to SSAO.");
+			}
 		}
 	}
-	if (Core::Logic::CoreObject::Instance::InputManager().KeyUp(Core::Logic::Manager::InputKeyType::Key_K))
+	else
 	{
-		if (rendererData->aoType == Rendering::Renderer::TBForwardRenderer::AoType::SSAO)
+		auto rendererData = dynamic_cast<Rendering::Renderer::AmbientOcclusionRenderer::AmbientOcclusionRendererData*>(camera->RendererData());
+		if (Core::Logic::CoreObject::Instance::InputManager().KeyUp(Core::Logic::Manager::InputKeyType::Key_K))
 		{
-			rendererData->aoType = Rendering::Renderer::TBForwardRenderer::AoType::HBAO;
-			Utils::Log::Message("Switch AO mode to HBAO.");
+			if (rendererData->aoType == Rendering::Renderer::AmbientOcclusionRenderer::AoType::SSAO)
+			{
+				rendererData->aoType = Rendering::Renderer::AmbientOcclusionRenderer::AoType::HBAO;
+				Utils::Log::Message("Switch AO mode to HBAO.");
+			}
+			else if (rendererData->aoType == Rendering::Renderer::AmbientOcclusionRenderer::AoType::HBAO)
+			{
+				rendererData->aoType = Rendering::Renderer::AmbientOcclusionRenderer::AoType::GTAO;
+				Utils::Log::Message("Switch AO mode to GTAO.");
+			}
+			else
+			{
+				rendererData->aoType = Rendering::Renderer::AmbientOcclusionRenderer::AoType::SSAO;
+				Utils::Log::Message("Switch AO mode to SSAO.");
+			}
 		}
-		else if (rendererData->aoType == Rendering::Renderer::TBForwardRenderer::AoType::HBAO)
+	}
+	if (Core::Logic::CoreObject::Instance::InputManager().KeyUp(Core::Logic::Manager::InputKeyType::Key_L))
+	{
+		if (camera->RendererName() == "TBForwardRenderer")
 		{
-			rendererData->aoType = Rendering::Renderer::TBForwardRenderer::AoType::GTAO;
-			Utils::Log::Message("Switch AO mode to GTAO.");
+			camera->SetRendererName("AmbientOcclusionRenderer");
+			Utils::Log::Message("Switch Renderer mode to AmbientOcclusionRenderer.");
 		}
 		else
 		{
-			rendererData->aoType = Rendering::Renderer::TBForwardRenderer::AoType::SSAO;
-			Utils::Log::Message("Switch AO mode to SSAO.");
+			camera->SetRendererName("TBForwardRenderer");
+			Utils::Log::Message("Switch Renderer mode to TBForwardRenderer.");
 		}
 	}
 }

@@ -73,9 +73,8 @@ bool AirEngine::Camera::CameraBase::CheckInFrustum(std::array<glm::vec3, 8>& ver
 
 void AirEngine::Camera::CameraBase::SetRendererName(std::string rendererName)
 {
-	_rendererName = rendererName;
-
 	Core::Graphic::CoreObject::Instance::RenderPipelineManager().DestroyRendererData(this);
+	_rendererName = rendererName;
 	Core::Graphic::CoreObject::Instance::RenderPipelineManager().CreateRendererData(this);
 }
 
