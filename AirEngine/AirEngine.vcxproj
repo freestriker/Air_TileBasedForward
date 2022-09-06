@@ -186,6 +186,7 @@
     <ClCompile Include="source\Test\F_OpaqueRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\F_BrokenGlassRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\F_WallRendererBehaviour.cpp" />
+    <ClCompile Include="source\Test\QuadMoveBehaviour.cpp" />
     <ClCompile Include="source\Test\SelfRotateBehaviour.cpp" />
     <ClCompile Include="source\Test\TBF_GlassRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\TBF_MirrorRendererBehaviour.cpp" />
@@ -283,6 +284,7 @@
     <ClInclude Include="header\Test\F_MirrorRendererBehaviour.h" />
     <ClInclude Include="header\Test\F_OpaqueRendererBehaviour.h" />
     <ClInclude Include="header\Test\F_WallRendererBehaviour.h" />
+    <ClInclude Include="header\Test\QuadMoveBehaviour.h" />
     <ClInclude Include="header\Test\SelfRotateBehaviour.h" />
     <ClInclude Include="header\Test\TBF_GlassRendererBehaviour.h" />
     <ClInclude Include="header\Test\TBF_MirrorRendererBehaviour.h" />

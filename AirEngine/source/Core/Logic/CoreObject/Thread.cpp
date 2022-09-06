@@ -40,6 +40,7 @@
 #include "Test/TBF_GlassRendererBehaviour.h"
 #include "Test/TBF_MirrorRendererBehaviour.h"
 #include "Test/TBF_OIT_AB_RenderBehaviour.h"
+#include "Test/QuadMoveBehaviour.h"
 
 AirEngine::Core::Logic::CoreObject::Thread::LogicThread AirEngine::Core::Logic::CoreObject::Thread::_logicThread = AirEngine::Core::Logic::CoreObject::Thread::LogicThread();
 
@@ -475,7 +476,17 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		renderers->AddChild(mirrorMeshRendererGo);
 		mirrorMeshRendererGo->AddComponent(new Renderer::Renderer());
 		mirrorMeshRendererGo->AddComponent(new Test::TBF_MirrorRendererBehaviour());
+		mirrorMeshRendererGo->AddComponent(new Test::SelfRotateBehaviour(45));
 		mirrorMeshRendererGo->transform.SetTranslation(glm::vec3(-3, 0, 0));
+	}
+
+	///TBForward quad mover
+	{
+		Logic::Object::GameObject* quadRendererGo = new Logic::Object::GameObject("QuadRenderer");
+		renderers->AddChild(quadRendererGo);
+		quadRendererGo->AddComponent(new Renderer::Renderer());
+		quadRendererGo->AddComponent(new Test::QuadMoveBehaviour());
+		quadRendererGo->transform.SetTranslation(glm::vec3(-1.5, 0, -0.5));
 	}
 
 	///Forward transparent

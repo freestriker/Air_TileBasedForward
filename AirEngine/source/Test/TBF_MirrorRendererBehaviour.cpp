@@ -25,7 +25,7 @@ void AirEngine::Test::TBF_MirrorRendererBehaviour::OnAwake()
 void AirEngine::Test::TBF_MirrorRendererBehaviour::OnStart()
 {
 	auto renderer = GameObject()->GetComponent<Renderer::Renderer>();
-	auto mesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\RingSphere.ply");
+	auto mesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\Complex.ply");
 	renderer->mesh = mesh;
 
 	{
