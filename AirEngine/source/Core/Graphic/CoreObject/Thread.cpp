@@ -175,25 +175,33 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 			if(!(camera)) continue;
 			camera->RefreshCameraInfo();
 
-			Core::Graphic::CoreObject::Instance::RenderPipelineManager().Renderer(camera->RendererName())->PrepareRenderer(Core::Graphic::CoreObject::Instance::RenderPipelineManager().RendererData(camera));
+			auto renderer = Core::Graphic::CoreObject::Instance::RenderPipelineManager().Renderer(camera->RendererName());
+			auto rendererData = Core::Graphic::CoreObject::Instance::RenderPipelineManager().RendererData(camera);
+			renderer->PrepareRenderer(rendererData);
 		}
 		for (auto& component : Instance::_cameras)
 		{
 			auto camera = dynamic_cast<Camera::CameraBase*>(component);
 			if(!(camera)) continue;
-			Core::Graphic::CoreObject::Instance::RenderPipelineManager().Renderer(camera->RendererName())->ExcuteRenderer(Core::Graphic::CoreObject::Instance::RenderPipelineManager().RendererData(camera), camera, &rendererComponents);
+			auto renderer = Core::Graphic::CoreObject::Instance::RenderPipelineManager().Renderer(camera->RendererName());
+			auto rendererData = Core::Graphic::CoreObject::Instance::RenderPipelineManager().RendererData(camera);
+			renderer->ExcuteRenderer(rendererData, camera, &rendererComponents);
 		}
 		for (auto& component : Instance::_cameras)
 		{
 			auto camera = dynamic_cast<Camera::CameraBase*>(component);
 			if(!(camera)) continue;
-			Core::Graphic::CoreObject::Instance::RenderPipelineManager().Renderer(camera->RendererName())->SubmitRenderer(Core::Graphic::CoreObject::Instance::RenderPipelineManager().RendererData(camera));
+			auto renderer = Core::Graphic::CoreObject::Instance::RenderPipelineManager().Renderer(camera->RendererName());
+			auto rendererData = Core::Graphic::CoreObject::Instance::RenderPipelineManager().RendererData(camera);
+			renderer->SubmitRenderer(rendererData);
 		}
 		for (auto& component : Instance::_cameras)
 		{
 			auto camera = dynamic_cast<Camera::CameraBase*>(component);
 			if(!(camera)) continue;
-			Core::Graphic::CoreObject::Instance::RenderPipelineManager().Renderer(camera->RendererName())->FinishRenderer(Core::Graphic::CoreObject::Instance::RenderPipelineManager().RendererData(camera));
+			auto renderer = Core::Graphic::CoreObject::Instance::RenderPipelineManager().Renderer(camera->RendererName());
+			auto rendererData = Core::Graphic::CoreObject::Instance::RenderPipelineManager().RendererData(camera);
+			renderer->FinishRenderer(rendererData);
 		}
 
 		Logic::CoreObject::Instance::SetNeedIterateRenderer(false);

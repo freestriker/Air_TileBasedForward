@@ -85,7 +85,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::OnResolveRendererData(Co
 		auto ssaoFeatureData = rendererData->RenderFeatureData<RenderFeature::SSAO_Occlusion_RenderFeature::SSAO_Occlusion_RenderFeatureData>("SSAO_Occlusion_RenderFeature");
 		ssaoFeatureData->depthTexture = geometryFeatureData->depthTexture;
 		ssaoFeatureData->normalTexture = geometryFeatureData->normalTexture;
-		ssaoFeatureData->samplePointRadius = 0.2;
+		ssaoFeatureData->samplePointRadius = 1;
 
 		auto aoBlurFeatureData = rendererData->RenderFeatureData<RenderFeature::AO_Blur_RenderFeature::AO_Blur_RenderFeatureData>("SSAO_Blur_RenderFeature");
 		aoBlurFeatureData->normalTexture = geometryFeatureData->normalTexture;
@@ -94,7 +94,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::OnResolveRendererData(Co
 
 		auto aoCoverFeatureData = rendererData->RenderFeatureData<RenderFeature::AO_Cover_RenderFeature::AO_Cover_RenderFeatureData>("SSAO_Cover_RenderFeature");
 		aoCoverFeatureData->occlusionTexture = ssaoFeatureData->occlusionTexture;
-		aoCoverFeatureData->intensity = 1.0f;
+		aoCoverFeatureData->intensity = 1.5f;
 	}
 	///HBAO
 	{
