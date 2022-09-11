@@ -154,12 +154,8 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 			[](Command::CommandPool* graphicCommandPool, Command::CommandPool* computeCommandPool)->void 
 			{
 				CoreObject::Instance::LightManager().SetLightInfo(CoreObject::Instance::_lights);
-				auto commandBuffer = graphicCommandPool->CreateCommandBuffer(VkCommandBufferLevel::VK_COMMAND_BUFFER_LEVEL_PRIMARY);
-				CoreObject::Instance::LightManager().CopyLightInfo(commandBuffer);
-				graphicCommandPool->DestoryCommandBuffer(commandBuffer);
 			}
 		);
-		lightCopyTask.wait();
 
 		std::vector<Renderer::Renderer*> rendererComponents = std::vector<Renderer::Renderer*>(Instance::_renderers.size());
 		for (size_t i = 0; i < rendererComponents.size(); i++)
@@ -167,6 +163,7 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 			rendererComponents[i] = static_cast<Renderer::Renderer*>(Instance::_renderers[i]);
 			rendererComponents[i]->RefreshObjectInfo();
 		}
+		lightCopyTask.wait();
 
 		//Camera
 		for (auto& component : Instance::_cameras)

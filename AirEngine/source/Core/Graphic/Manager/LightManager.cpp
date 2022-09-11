@@ -7,8 +7,7 @@
 #include "Light/AmbientLight.h"
 
 AirEngine::Core::Graphic::Manager::LightManager::LightManager()
-	: _stagingBuffer(nullptr)
-	, _forwardLightInfosBuffer(nullptr)
+	: _forwardLightInfosBuffer(nullptr)
 	, _tileBasedForwardLightInfosBuffer(nullptr)
 	, _ambientTextureCube(nullptr)
 	, _ambientLightInfo()
@@ -17,10 +16,9 @@ AirEngine::Core::Graphic::Manager::LightManager::LightManager()
 	, _ortherLightCount()
 	, _ortherLightBoundingBoxInfos()
 {
-	_stagingBuffer = new Instance::Buffer(sizeof(StagingLightInfos), VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-	_forwardLightInfosBuffer = new Instance::Buffer(sizeof(ForwardLightInfos), VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-	_tileBasedForwardLightInfosBuffer = new Instance::Buffer(sizeof(TileBasedForwardLightInfos), VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
-	_tileBasedForwardLightBoundingBoxInfosBuffer = new Instance::Buffer(sizeof(TileBasedForwardLightBoundingBoxInfos), VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
+	_forwardLightInfosBuffer = new Instance::Buffer(sizeof(ForwardLightInfos), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	_tileBasedForwardLightInfosBuffer = new Instance::Buffer(sizeof(TileBasedForwardLightInfos), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	_tileBasedForwardLightBoundingBoxInfosBuffer = new Instance::Buffer(sizeof(TileBasedForwardLightBoundingBoxInfos), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 }
 
 AirEngine::Core::Graphic::Manager::LightManager::~LightManager()
@@ -96,52 +94,48 @@ void AirEngine::Core::Graphic::Manager::LightManager::SetLightInfo(std::vector<L
 		_ortherLightInfos[i] = *reinterpret_cast<const LightInfo*>(data);
 		_ortherLightBoundingBoxInfos[i] = *reinterpret_cast<const LightBoundingBox*>(boxData->data());
 	}
-}
 
-void AirEngine::Core::Graphic::Manager::LightManager::CopyLightInfo(Command::CommandBuffer* commandBuffer)
-{
-	_stagingBuffer->WriteData(
+
+	_forwardLightInfosBuffer->WriteData(
 		[this](void* pointer) -> void
 		{
-			const VkDeviceSize dataSize = sizeof(LightInfo);
-			auto offset = reinterpret_cast<char*>(pointer);
 			int ortherLightCount = _ortherLightCount;
 			int importantLightCount = std::min(ortherLightCount, MAX_FORWARD_ORTHER_LIGHT_COUNT);
 			int unimportantLightCount = std::min(ortherLightCount - importantLightCount, MAX_FORWARD_ORTHER_LIGHT_COUNT);
-			
-			memcpy(offset + offsetof(StagingLightInfos, ortherLightCount), &ortherLightCount, sizeof(int));
-			memcpy(offset + offsetof(StagingLightInfos, importantLightCount), &importantLightCount, sizeof(int));
-			memcpy(offset + offsetof(StagingLightInfos, unimportantLightCount), &unimportantLightCount, sizeof(int));
-			memcpy(offset + offsetof(StagingLightInfos, ambientLightInfo), &_ambientLightInfo, dataSize);
-			memcpy(offset + offsetof(StagingLightInfos, mainLightInfo), &_mainLightInfo, dataSize);
-			memcpy(offset + offsetof(StagingLightInfos, ortherLightInfos), _ortherLightInfos.data(), dataSize * ortherLightCount);
-			memcpy(offset + offsetof(StagingLightInfos, ortherLightBoundingBoxInfos), _ortherLightBoundingBoxInfos.data(), sizeof(LightBoundingBox) * ortherLightCount);
+
+			auto offset = reinterpret_cast<char*>(pointer);
+			memcpy(offset + offsetof(ForwardLightInfos, importantLightCount), &importantLightCount, sizeof(int));
+			memcpy(offset + offsetof(ForwardLightInfos, unimportantLightCount), &unimportantLightCount, sizeof(int));
+			memcpy(offset + offsetof(ForwardLightInfos, ambientLightInfo), &_ambientLightInfo, sizeof(LightInfo));
+			memcpy(offset + offsetof(ForwardLightInfos, mainLightInfo), &_mainLightInfo, sizeof(LightInfo));
+			memcpy(offset + offsetof(ForwardLightInfos, importantLightInfos), _ortherLightInfos.data(), sizeof(LightInfo) * importantLightCount);
+			memcpy(offset + offsetof(ForwardLightInfos, unimportantLightInfos), _ortherLightInfos.data() + sizeof(LightInfo) * importantLightCount, sizeof(LightInfo) * unimportantLightCount);
 		}
 	);
 
-	commandBuffer->Reset();
-	commandBuffer->BeginRecord(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+	_tileBasedForwardLightInfosBuffer->WriteData(
+		[this](void* pointer) -> void
+		{
+			int ortherLightCount = std::min(_ortherLightCount, MAX_TILE_BASED_FORWARD_ORTHER_LIGHT_COUNT);
 
-	//Forward
-	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, importantLightCount), _forwardLightInfosBuffer, offsetof(ForwardLightInfos, importantLightCount), sizeof(int));
-	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, unimportantLightCount), _forwardLightInfosBuffer, offsetof(ForwardLightInfos, unimportantLightCount), sizeof(int));
-	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, ambientLightInfo), _forwardLightInfosBuffer, offsetof(ForwardLightInfos, ambientLightInfo), sizeof(LightInfo));
-	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, mainLightInfo), _forwardLightInfosBuffer, offsetof(ForwardLightInfos, mainLightInfo), sizeof(LightInfo));
-	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, ortherLightInfos), _forwardLightInfosBuffer, offsetof(ForwardLightInfos, importantLightInfos), sizeof(LightInfo) * MAX_FORWARD_ORTHER_LIGHT_COUNT);
-	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, ortherLightInfos) + MAX_FORWARD_ORTHER_LIGHT_COUNT * sizeof(LightInfo), _forwardLightInfosBuffer, offsetof(ForwardLightInfos, unimportantLightInfos), sizeof(LightInfo) * MAX_FORWARD_ORTHER_LIGHT_COUNT);
+			auto offset = reinterpret_cast<char*>(pointer);
+			memcpy(offset + offsetof(TileBasedForwardLightInfos, ortherLightCount), &ortherLightCount, sizeof(int));
+			memcpy(offset + offsetof(TileBasedForwardLightInfos, ambientLightInfo), &_ambientLightInfo, sizeof(LightInfo));
+			memcpy(offset + offsetof(TileBasedForwardLightInfos, mainLightInfo), &_mainLightInfo, sizeof(LightInfo));
+			memcpy(offset + offsetof(TileBasedForwardLightInfos, ortherLightInfos), _ortherLightInfos.data(), sizeof(LightInfo) * ortherLightCount);
+		}
+	);
 
-	//Tile based forward
-	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, ambientLightInfo), _tileBasedForwardLightInfosBuffer, offsetof(TileBasedForwardLightInfos, ambientLightInfo), sizeof(LightInfo));
-	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, mainLightInfo), _tileBasedForwardLightInfosBuffer, offsetof(TileBasedForwardLightInfos, mainLightInfo), sizeof(LightInfo));
-	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, ortherLightCount), _tileBasedForwardLightInfosBuffer, offsetof(TileBasedForwardLightInfos, ortherLightCount), sizeof(int));
-	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, ortherLightInfos), _tileBasedForwardLightInfosBuffer, offsetof(TileBasedForwardLightInfos, ortherLightInfos), sizeof(LightInfo) * _ortherLightCount);
-	
-	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, ortherLightCount), _tileBasedForwardLightBoundingBoxInfosBuffer, offsetof(TileBasedForwardLightBoundingBoxInfos, lightCount), sizeof(int));
-	commandBuffer->CopyBuffer(_stagingBuffer, offsetof(StagingLightInfos, ortherLightBoundingBoxInfos), _tileBasedForwardLightBoundingBoxInfosBuffer, offsetof(TileBasedForwardLightBoundingBoxInfos, lightBoundingBoxInfos), sizeof(LightBoundingBox) * _ortherLightCount);
+	_tileBasedForwardLightBoundingBoxInfosBuffer->WriteData(
+		[this](void* pointer) -> void
+		{
+			int ortherLightCount = std::min(_ortherLightCount, MAX_TILE_BASED_FORWARD_ORTHER_LIGHT_COUNT);
 
-	commandBuffer->EndRecord();
-	commandBuffer->Submit();
-	commandBuffer->WaitForFinish();
+			auto offset = reinterpret_cast<char*>(pointer);
+			memcpy(offset + offsetof(TileBasedForwardLightBoundingBoxInfos, lightCount), &ortherLightCount, sizeof(int));
+			memcpy(offset + offsetof(TileBasedForwardLightBoundingBoxInfos, lightBoundingBoxInfos), _ortherLightBoundingBoxInfos.data(), sizeof(LightBoundingBox) * ortherLightCount);
+		}
+	);
 }
 
 AirEngine::Asset::TextureCube* AirEngine::Core::Graphic::Manager::LightManager::AmbientTextureCube()

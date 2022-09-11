@@ -64,16 +64,6 @@ namespace AirEngine
 						alignas(16) glm::vec4 color;
 					};
 					struct LightBoundingBox { glm::vec4 vertexes[8]; };
-					struct StagingLightInfos
-					{
-						int ortherLightCount;
-						int importantLightCount;
-						int unimportantLightCount;
-						LightInfo ambientLightInfo;
-						LightInfo mainLightInfo;
-						LightInfo ortherLightInfos[MAX_ORTHER_LIGHT_COUNT];
-						LightBoundingBox ortherLightBoundingBoxInfos[MAX_ORTHER_LIGHT_COUNT];
-					};
 					struct ForwardLightInfos
 					{
 						LightInfo ambientLightInfo;
@@ -96,13 +86,11 @@ namespace AirEngine
 						alignas(16) LightBoundingBox lightBoundingBoxInfos[MAX_TILE_BASED_FORWARD_ORTHER_LIGHT_COUNT];
 					};
 					void SetLightInfo(std::vector<Logic::Object::Component*> lights);
-					void CopyLightInfo(Command::CommandBuffer* commandBuffer);
 					Asset::TextureCube* AmbientTextureCube();
 					Instance::Buffer* ForwardLightInfosBuffer();
 					Instance::Buffer* TileBasedForwardLightInfosBuffer();
 					Instance::Buffer* TileBasedForwardLightBoundindBoxInfosBuffer();
 				private:
-					Instance::Buffer* _stagingBuffer;
 					Instance::Buffer* _forwardLightInfosBuffer;
 					Instance::Buffer* _tileBasedForwardLightInfosBuffer;
 					Instance::Buffer* _tileBasedForwardLightBoundingBoxInfosBuffer;
