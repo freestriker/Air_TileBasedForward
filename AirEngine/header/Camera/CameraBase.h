@@ -83,6 +83,7 @@ namespace AirEngine
 			void RefreshCameraInfo();
 			Core::Graphic::Instance::Buffer* CameraInfoBuffer();
 			bool CheckInFrustum(std::array<glm::vec3, 8>& vertexes, glm::mat4& matrix);
+			void AngularPointVPosition(glm::vec3(&points)[8]);
 
 			void SetRendererName(std::string rendererName);
 			std::string RendererName();

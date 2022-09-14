@@ -18,7 +18,7 @@ AirEngine::Camera::CameraBase* AirEngine::Camera::CameraBase::mainCamera = nullp
 RTTR_REGISTRATION
 {
 	using namespace rttr;
-	registration::class_<AirEngine::Camera::CameraBase>("AirEngine::Camera::Camera");
+	registration::class_<AirEngine::Camera::CameraBase>("AirEngine::Camera::CameraBase");
 }
 
 glm::mat4 AirEngine::Camera::CameraBase::ViewMatrix()
@@ -69,6 +69,42 @@ AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Camera::CameraBase::Camer
 bool AirEngine::Camera::CameraBase::CheckInFrustum(std::array<glm::vec3, 8>& vertexes, glm::mat4& matrix)
 {
 	return _intersectionChecker.Check(vertexes.data(), 8, matrix);
+}
+
+void AirEngine::Camera::CameraBase::AngularPointVPosition(glm::vec3(&points)[8])
+{
+	const glm::vec3 nPositions[8] = {
+		{-1, 1, 0},
+		{-1, -1, 0},
+		{1, -1, 0},
+		{1, 1, 0},
+		{-1, 1, 1},
+		{-1, -1, 1},
+		{1, -1, 1},
+		{1, 1, 1}
+	};
+	if (cameraType == CameraType::ORTHOGRAPHIC)
+	{
+		for (int i = 0; i < 8; i++)
+		{
+			auto& ndcPosition = nPositions[i];
+			glm::vec3 nearFlatPosition = glm::vec3(glm::vec2(ndcPosition.x, ndcPosition.y) * _cameraInfo.halfSize, -_cameraInfo.nearFlat);
+			glm::vec3 farFlatPosition = glm::vec3(glm::vec2(ndcPosition.x, ndcPosition.y) * _cameraInfo.halfSize, -_cameraInfo.farFlat);
+			float linearDepth = ndcPosition.z;
+			points[i] = nearFlatPosition * (1 - linearDepth) + farFlatPosition * linearDepth;
+		}
+	}
+	else if (cameraType == CameraType::PERSPECTIVE)
+	{
+		for (int i = 0; i < 8; i++)
+		{
+			auto& ndcPosition = nPositions[i];
+			glm::vec3 nearFlatPosition = glm::vec3(glm::vec2(ndcPosition.x, ndcPosition.y) * _cameraInfo.halfSize, -_cameraInfo.nearFlat);
+			glm::vec3 farFlatPosition = glm::vec3(glm::vec2(ndcPosition.x, ndcPosition.y) * _cameraInfo.halfSize * _cameraInfo.farFlat / _cameraInfo.nearFlat, -_cameraInfo.farFlat);
+			float linearDepth = _cameraInfo.nearFlat * ndcPosition.z / (ndcPosition.z * (_cameraInfo.nearFlat - _cameraInfo.farFlat) + _cameraInfo.farFlat);
+			points[i] = nearFlatPosition * (1 - linearDepth) + farFlatPosition * linearDepth;
+		}
+	}
 }
 
 void AirEngine::Camera::CameraBase::SetRendererName(std::string rendererName)
