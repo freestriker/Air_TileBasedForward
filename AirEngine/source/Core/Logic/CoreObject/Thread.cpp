@@ -558,10 +558,10 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 
 	Logic::Object::GameObject* directionalLightGo = new Logic::Object::GameObject("DirectionalLight");
 	lights->AddChild(directionalLightGo);
-	directionalLightGo->transform.SetEulerRotation(glm::vec3(-30, 70, 0));
+	//directionalLightGo->transform.SetEulerRotation(glm::vec3(-30, 70, 0));
 	auto directionalLight = new Light::DirectionalLight();
 	directionalLight->color = { 1, 239.0 / 255, 213.0 / 255, 1 };
-	directionalLight->intensity = 0.0f;
+	directionalLight->intensity = 0.6f;
 	directionalLightGo->AddComponent(directionalLight);
 
 	Logic::Object::GameObject* skyBoxGo = new Logic::Object::GameObject("SkyBox");

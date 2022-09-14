@@ -59,13 +59,13 @@ void AirEngine::Core::Graphic::Rendering::RendererBase::ExcuteRenderFeature(std:
 			renderFeature->OnExcute(wrapper->renderFeatureData, wrapper->commandBuffer, camera, rendererComponents);
 		}
 	);
-	//wrapper->excuteTask.get();
+	wrapper->excuteTask.get();
 }
 
 void AirEngine::Core::Graphic::Rendering::RendererBase::SubmitRenderFeature(std::string renderFeatureName, RendererDataBase* rendererData)
 {
 	RendererDataBase::RenderFeatureWrapper* wrapper = &rendererData->_renderFeatureWrappers[renderFeatureName];
-	wrapper->excuteTask.get();
+	//wrapper->excuteTask.get();
 	_renderFeatures[renderFeatureName]->OnSubmit(wrapper->renderFeatureData, wrapper->commandBuffer);
 }
 

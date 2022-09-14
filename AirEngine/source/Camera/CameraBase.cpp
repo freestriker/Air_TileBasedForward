@@ -71,7 +71,7 @@ bool AirEngine::Camera::CameraBase::CheckInFrustum(std::array<glm::vec3, 8>& ver
 	return _intersectionChecker.Check(vertexes.data(), 8, matrix);
 }
 
-void AirEngine::Camera::CameraBase::AngularPointVPosition(glm::vec3(&points)[8])
+void AirEngine::Camera::CameraBase::GetAngularPointVPosition(glm::vec3(&points)[8])
 {
 	const glm::vec3 nPositions[8] = {
 		{-1, 1, 0},
