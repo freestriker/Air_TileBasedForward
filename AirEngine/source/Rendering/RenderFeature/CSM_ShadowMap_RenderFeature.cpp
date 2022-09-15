@@ -88,11 +88,11 @@ AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_
 	, shadowFrameBuffers()
 	, lightCameraInfoBuffer(nullptr)
 	, lightCameraInfoStagingBuffer(nullptr)
-	, frustumSplitScales()
+	, frustumSegmentScales()
 	, lightCameraCompensationDistances()
 	, shadowImageResolutions()
 {
-	frustumSplitScales.fill(1.0 / CASCADE_COUNT);
+	frustumSegmentScales.fill(1.0 / CASCADE_COUNT);
 	lightCameraCompensationDistances.fill(20);
 	shadowImageResolutions.fill(1024);
 }
@@ -189,10 +189,10 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnExcute(
 
 	glm::vec3 subAngularPointVPositions[CASCADE_COUNT][8];
 	{
-		std::array<float, CASCADE_COUNT> frustumSplitRatio = featureData->frustumSplitScales;
+		std::array<float, CASCADE_COUNT> frustumSplitRatio = featureData->frustumSegmentScales;
 		for (int i = 1; i < CASCADE_COUNT; i++)
 		{
-			frustumSplitRatio[i] = frustumSplitRatio[i - 1] + featureData->frustumSplitScales[i];
+			frustumSplitRatio[i] = frustumSplitRatio[i - 1] + featureData->frustumSegmentScales[i];
 		}
 
 		for (int i = 0; i < CASCADE_COUNT; i++)
@@ -245,18 +245,6 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnExcute(
 	}
 
 	glm::vec3 lightVPositions[CASCADE_COUNT];
-	{
-		auto lightInfo = Core::Graphic::CoreObject::Instance::LightManager().MainLightInfo();
-		glm::mat4 cameraV = camera->ViewMatrix();
-		glm::vec3 lightVPosition = cameraV * glm::vec4(lightInfo.position, 1);
-		glm::vec3 lightVDirection = glm::normalize(glm::vec3(cameraV * glm::vec4(lightInfo.position + lightInfo.direction, 1)) - lightVPosition);
-
-		for (int i = 0; i < CASCADE_COUNT; i++)
-		{
-			lightVPositions[i] = sphereCenterVPositions[i] - lightVDirection * (sphereRadius[i] + featureData->lightCameraCompensationDistances[i]);
-		}
-	}
-
 	LightCameraInfo lightCameraInfos[CASCADE_COUNT];
 	{
 		auto light = Core::Graphic::CoreObject::Instance::LightManager().MainLight();
@@ -264,6 +252,23 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnExcute(
 		glm::mat4 lightM = light->GameObject()->transform.ModelMatrix();
 		glm::vec3 lightVPosition = cameraV * lightM * glm::vec4(0, 0, 0, 1);
 		glm::vec3 lightVUp = glm::normalize(glm::vec3(cameraV * lightM * glm::vec4(0, 1, 0, 1)) - lightVPosition);
+		glm::vec3 lightVRight = glm::normalize(glm::vec3(cameraV * lightM * glm::vec4(1, 0, 0, 1)) - lightVPosition);
+		glm::vec3 lightVView = glm::normalize(glm::vec3(cameraV * lightM * glm::vec4(0, 0, -1, 1)) - lightVPosition);
+
+		for (int i = 0; i < CASCADE_COUNT; i++)
+		{
+			glm::mat4 matrixVC2VL = glm::lookAt({ 0, 0, 0 }, lightVView, lightVUp);
+			float unit = sphereRadius[i] * 2 / featureData->shadowImageResolutions[i];
+
+			glm::vec3 virtualCenterLVPosition = matrixVC2VL * glm::vec4(sphereCenterVPositions[i], 1);
+			virtualCenterLVPosition.x -= std::fmod(virtualCenterLVPosition.x, unit);
+			virtualCenterLVPosition.y -= std::fmod(virtualCenterLVPosition.y, unit);
+
+			sphereCenterVPositions[i] = glm::inverse(matrixVC2VL) * glm::vec4(virtualCenterLVPosition, 1);
+
+			lightVPositions[i] = sphereCenterVPositions[i] - lightVView * (sphereRadius[i] + featureData->lightCameraCompensationDistances[i]);
+		}
+
 		for (int i = 0; i < CASCADE_COUNT; i++)
 		{
 			float halfWidth = sphereRadius[i];

@@ -37,7 +37,7 @@ namespace AirEngine
 					Core::Graphic::Instance::Buffer* lightCameraInfoBuffer;
 					Core::Graphic::Instance::Buffer* lightCameraInfoStagingBuffer;
 				public:
-					std::array<float, CASCADE_COUNT> frustumSplitScales;
+					std::array<float, CASCADE_COUNT> frustumSegmentScales;
 					std::array<float, CASCADE_COUNT> lightCameraCompensationDistances;
 					std::array<uint32_t, CASCADE_COUNT> shadowImageResolutions;
 

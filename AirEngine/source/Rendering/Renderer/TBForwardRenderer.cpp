@@ -138,7 +138,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::OnResolveRendererData(Co
 	alphaBufferFeatureData->transparentLightIndexListsBuffer = lightListFeatureData->transparentLightIndexListsBuffer;
 
 	auto csmShadowMapFeatureData = rendererData->RenderFeatureData<RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderFeatureData>("CSM_ShadowMap_RenderFeature");
-	csmShadowMapFeatureData->frustumSplitScales = {0.02, 0.03, 0.1, 0.85};
+	csmShadowMapFeatureData->frustumSegmentScales = {0.02, 0.03, 0.1, 0.85};
 	csmShadowMapFeatureData->lightCameraCompensationDistances = { 20, 30, 40, 50 };
 	csmShadowMapFeatureData->shadowImageResolutions = { 2048, 2048, 1024, 1024 };
 }
