@@ -2,7 +2,7 @@
 #include <glm/glm.hpp>
 #include <vector>
 
-namespace AirRenderer
+namespace AirEngine
 {
 	namespace Utils
 	{
@@ -16,12 +16,8 @@ namespace AirRenderer
 			bool Check(const glm::vec3* vertexes, size_t vertexCount, glm::mat4 matrix);
 
 			IntersectionChecker();
+			IntersectionChecker(std::vector<glm::vec4>& intersectPlanes);
 			~IntersectionChecker();
-			IntersectionChecker(const IntersectionChecker&) = delete;
-			IntersectionChecker& operator=(const IntersectionChecker&) = delete;
-			IntersectionChecker(IntersectionChecker&&) = delete;
-			IntersectionChecker& operator=(IntersectionChecker&&) = delete;
-
 		};
 	}
 }

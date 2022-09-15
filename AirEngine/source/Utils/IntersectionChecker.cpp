@@ -1,6 +1,6 @@
 #include "Utils/IntersectionChecker.h"
 
-void AirRenderer::Utils::IntersectionChecker::SetIntersectPlanes(const glm::vec4* planes, size_t planeCount)
+void AirEngine::Utils::IntersectionChecker::SetIntersectPlanes(const glm::vec4* planes, size_t planeCount)
 {
 	_intersectPlanes.clear();
 	_intersectPlanes.resize(planeCount);
@@ -11,7 +11,7 @@ void AirRenderer::Utils::IntersectionChecker::SetIntersectPlanes(const glm::vec4
 	}
 }
 
-bool AirRenderer::Utils::IntersectionChecker::Check(const glm::vec3* vertexes, size_t vertexCount)
+bool AirEngine::Utils::IntersectionChecker::Check(const glm::vec3* vertexes, size_t vertexCount)
 {
 	int planeCount = _intersectPlanes.size();
 	for (int j = 0; j < planeCount; j++)
@@ -30,7 +30,7 @@ bool AirRenderer::Utils::IntersectionChecker::Check(const glm::vec3* vertexes, s
 	return true;
 }
 
-bool AirRenderer::Utils::IntersectionChecker::Check(const glm::vec3* vertexes, size_t vertexCount, glm::mat4 matrix)
+bool AirEngine::Utils::IntersectionChecker::Check(const glm::vec3* vertexes, size_t vertexCount, glm::mat4 matrix)
 {
 	std::vector<glm::vec4> wvBoundryVertexes = std::vector<glm::vec4>(vertexCount);
 	for (size_t i = 0; i < vertexCount; i++)
@@ -54,11 +54,16 @@ bool AirRenderer::Utils::IntersectionChecker::Check(const glm::vec3* vertexes, s
 	return true;
 }
 
-AirRenderer::Utils::IntersectionChecker::IntersectionChecker()
+AirEngine::Utils::IntersectionChecker::IntersectionChecker()
 	: _intersectPlanes()
 {
 }
 
-AirRenderer::Utils::IntersectionChecker::~IntersectionChecker()
+AirEngine::Utils::IntersectionChecker::IntersectionChecker(std::vector<glm::vec4>& intersectPlanes)
+	: _intersectPlanes(intersectPlanes)
+{
+}
+
+AirEngine::Utils::IntersectionChecker::~IntersectionChecker()
 {
 }

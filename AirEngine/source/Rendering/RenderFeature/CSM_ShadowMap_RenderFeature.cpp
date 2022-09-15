@@ -15,6 +15,8 @@
 #include "Core/Graphic/CoreObject/Instance.h"
 #include <set>
 #include "Light/LightBase.h"
+#include "Utils/IntersectionChecker.h"
+#include <array>
 
 RTTR_REGISTRATION
 {
@@ -289,12 +291,29 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnExcute(
 		featureData->lightCameraInfoStagingBuffer->WriteData(&lightCameraInfos, sizeof(LightCameraInfo) * CASCADE_COUNT);
 	}
 
+	AirEngine::Utils::IntersectionChecker checkers[CASCADE_COUNT];
+	{
+		for (int i = 0; i < CASCADE_COUNT; i++)
+		{
+			glm::vec4 planes[6] =
+			{
+				glm::vec4(-1, 0, 0, sphereRadius[i]),
+				glm::vec4(1, 0, 0, sphereRadius[i]),
+				glm::vec4(0, -1, 0, sphereRadius[i]),
+				glm::vec4(0, 1, 0, sphereRadius[i]),
+				glm::vec4(0, 0, -1, 0),
+				glm::vec4(0, 0, 1, sphereRadius[i] * 2 + featureData->lightCameraCompensationDistances[i])
+			};
+			checkers[i].SetIntersectPlanes(planes, 6);
+		}
+	}
+
 	struct RendererWrapper
 	{
 		Core::Graphic::Rendering::Material* material;
 		Asset::Mesh* mesh;
 	};
-	std::vector<RendererWrapper> wrappers = std::vector<RendererWrapper>();
+	std::vector< RendererWrapper> rendererWrappers[CASCADE_COUNT];
 	for (const auto& rendererComponent : *rendererComponents)
 	{
 		auto material = rendererComponent->GetMaterial(_shadowMapRenderPassName);
@@ -303,7 +322,16 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnExcute(
 		material->SetUniformBuffer("lightCameraInfo", featureData->lightCameraInfoBuffer);
 		material->SetUniformBuffer("meshObjectInfo", rendererComponent->ObjectInfoBuffer());
 
-		wrappers.push_back({ material , rendererComponent->mesh });
+		for (int i = 0; i < CASCADE_COUNT; i++)
+		{
+			auto obbVertexes = rendererComponent->mesh->OrientedBoundingBox().BoundryVertexes();
+			auto mvMatrix = lightCameraInfos[i].view * rendererComponent->GameObject()->transform.ModelMatrix();
+			if (rendererComponent->enableFrustumCulling && !camera->CheckInFrustum(obbVertexes, mvMatrix))
+			{
+				continue;
+			}
+			rendererWrappers[i].push_back({material , rendererComponent->mesh});
+		}
 	}
 
 	commandBuffer->Reset();
@@ -323,7 +351,7 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnExcute(
 			}
 		);
 
-		for (const auto& wrapper : wrappers)
+		for (const auto& wrapper : rendererWrappers[i])
 		{
 			commandBuffer->DrawMesh(wrapper.mesh, wrapper.material);
 		}

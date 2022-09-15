@@ -74,7 +74,7 @@ namespace AirEngine
 			Core::Graphic::Instance::Buffer* _buffer;
 			CameraData _cameraInfo;
 			glm::mat4 _projectionMatrix;
-			AirRenderer::Utils::IntersectionChecker _intersectionChecker;
+			AirEngine::Utils::IntersectionChecker _intersectionChecker;
 
 		public:
 			glm::mat4 ViewMatrix();
