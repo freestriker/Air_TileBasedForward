@@ -17,6 +17,8 @@
 #include "Light/LightBase.h"
 #include "Utils/IntersectionChecker.h"
 #include <array>
+#include "Core/Graphic/Rendering/Material.h"
+#include "Core/Graphic/Instance/ImageSampler.h"
 
 RTTR_REGISTRATION
 {
@@ -49,7 +51,7 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_Shado
 		VK_ATTACHMENT_LOAD_OP_CLEAR,
 		VK_ATTACHMENT_STORE_OP_STORE,
 		VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-		VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL
+		VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
 	);
 	creator.AddSubpass(
 		"DrawSubpass",
@@ -107,6 +109,15 @@ AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_
 	: RenderFeatureBase()
 	, _shadowMapRenderPass(Core::Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass<CSM_ShadowMap_RenderPass>())
 	, _shadowMapRenderPassName(rttr::type::get<CSM_ShadowMap_RenderPass>().get_name().to_string())
+	, shadowImageSampler(
+		new Core::Graphic::Instance::ImageSampler(
+			VkFilter::VK_FILTER_NEAREST,
+			VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
+			VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+			0.0f,
+			VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
+		)
+	)
 {
 
 }
@@ -114,6 +125,7 @@ AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_
 AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::~CSM_ShadowMap_RenderFeature()
 {
 	Core::Graphic::CoreObject::Instance::RenderPassManager().UnloadRenderPass<CSM_ShadowMap_RenderPass>();
+	delete shadowImageSampler;
 }
 
 void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderFeatureData::Refresh()
@@ -139,10 +151,20 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_Shado
 	}
 }
 
+void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderFeatureData::SetShadowReceiverMaterialParameters(Core::Graphic::Rendering::Material* material)
+{
+	material->SetUniformBuffer("csmShadowReceiverInfo", csmShadowReceiverInfoBuffer);
+	for (int i = 0; i < CASCADE_COUNT; i++)
+	{
+		material->SetSlotData("shadowTexture_" + std::to_string(i), {0}, {{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, sampler->VkSampler_(), shadowImages[i]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}});
+	}
+}
+
 AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnCreateRenderFeatureData(Camera::CameraBase* camera)
 {
 	auto featureData = new CSM_ShadowMap_RenderFeatureData();
 	featureData->shadowMapRenderPass = _shadowMapRenderPass;
+	featureData->sampler = shadowImageSampler;
 
 	featureData->lightCameraInfoBuffer = new Core::Graphic::Instance::Buffer(
 		sizeof(LightCameraInfo),
@@ -152,6 +174,12 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	featureData->lightCameraInfoStagingBuffer = new Core::Graphic::Instance::Buffer(
 		sizeof(LightCameraInfo) * CASCADE_COUNT,
 		VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+		VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+	);
+
+	featureData->csmShadowReceiverInfoBuffer = new Core::Graphic::Instance::Buffer(
+		sizeof(CsmShadowReceiverInfo),
+		VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 		VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 	);
 
@@ -169,6 +197,7 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnDestroy
 	auto featureData = static_cast<CSM_ShadowMap_RenderFeatureData*>(renderFeatureData);
 	delete featureData->lightCameraInfoBuffer;
 	delete featureData->lightCameraInfoStagingBuffer;
+	delete featureData->csmShadowReceiverInfoBuffer;
 	for (auto i = 0; i < CASCADE_COUNT; i++)
 	{
 		delete featureData->shadowImages[i];
@@ -186,10 +215,10 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnExcute(
 {
 	auto featureData = static_cast<CSM_ShadowMap_RenderFeatureData*>(renderFeatureData);
 	
-	glm::vec3 angularPointVPositions[8];
+	glm::vec3 angularPointVPositions[8]{};
 	camera->GetAngularPointVPosition(angularPointVPositions);
 
-	glm::vec3 subAngularPointVPositions[CASCADE_COUNT][8];
+	glm::vec3 subAngularPointVPositions[CASCADE_COUNT][8]{};
 	{
 		std::array<float, CASCADE_COUNT> frustumSplitRatio = featureData->frustumSegmentScales;
 		for (int i = 1; i < CASCADE_COUNT; i++)
@@ -231,8 +260,8 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnExcute(
 		}
 	}
 
-	glm::vec3 sphereCenterVPositions[CASCADE_COUNT];
-	float sphereRadius[CASCADE_COUNT];
+	glm::vec3 sphereCenterVPositions[CASCADE_COUNT]{};
+	float sphereRadius[CASCADE_COUNT]{};
 	{
 		for (int i = 0; i < CASCADE_COUNT; i++)
 		{
@@ -246,8 +275,9 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnExcute(
 		}
 	}
 
-	glm::vec3 lightVPositions[CASCADE_COUNT];
-	LightCameraInfo lightCameraInfos[CASCADE_COUNT];
+	glm::vec3 lightVPositions[CASCADE_COUNT]{};
+	LightCameraInfo lightCameraInfos[CASCADE_COUNT]{};
+	CsmShadowReceiverInfo csmShadowReceiverInfo{};
 	{
 		auto light = Core::Graphic::CoreObject::Instance::LightManager().MainLight();
 		glm::mat4 cameraV = camera->ViewMatrix();
@@ -282,13 +312,21 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnExcute(
 				0, 0, 0, 1
 			);
 
-			auto m = glm::lookAt(lightVPositions[i], sphereCenterVPositions[i], lightVUp);
-			lightCameraInfos[i].view = m * cameraV;
+			auto matrixVC2VL = glm::lookAt(lightVPositions[i], sphereCenterVPositions[i], lightVUp);
+			lightCameraInfos[i].view = matrixVC2VL * cameraV;
 
 			lightCameraInfos[i].viewProjection = lightCameraInfos[i].projection * lightCameraInfos[i].view;
+
+			csmShadowReceiverInfo.matrixVC2PL[i] = lightCameraInfos[i].projection * matrixVC2VL;
+			if (i == 0)
+			{
+				csmShadowReceiverInfo.thresholdVZ[0].x = subAngularPointVPositions[0][0].z;
+			}
+			csmShadowReceiverInfo.thresholdVZ[i + 1].x = subAngularPointVPositions[i][4].z;
 		}
 
 		featureData->lightCameraInfoStagingBuffer->WriteData(&lightCameraInfos, sizeof(LightCameraInfo) * CASCADE_COUNT);
+		featureData->csmShadowReceiverInfoBuffer->WriteData(&csmShadowReceiverInfo, sizeof(CsmShadowReceiverInfo));
 	}
 
 	AirEngine::Utils::IntersectionChecker checkers[CASCADE_COUNT];

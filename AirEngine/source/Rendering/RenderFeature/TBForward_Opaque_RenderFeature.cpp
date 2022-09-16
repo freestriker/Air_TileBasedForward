@@ -15,6 +15,7 @@
 #include "Core/IO/CoreObject/Instance.h"
 #include "Core/IO/Manager/AssetManager.h"
 #include "Core/Graphic/Command/BufferMemoryBarrier.h"
+#include "Rendering/RenderFeature/CSM_ShadowMap_RenderFeature.h"
 
 RTTR_REGISTRATION
 {
@@ -98,6 +99,7 @@ AirEngine::Rendering::RenderFeature::TBForward_Opaque_RenderFeature::TBForward_O
 	, frameBuffer(nullptr)
 	, opaqueLightIndexListsBuffer(nullptr)
 	, needClearColorAttachment(false)
+	, csmShadowMapRenderFeatureData(nullptr)
 {
 
 }
@@ -207,6 +209,9 @@ void AirEngine::Rendering::RenderFeature::TBForward_Opaque_RenderFeature::OnExcu
 	///Render
 	{
 		commandBuffer->BeginRenderPass(_renderPass, featureData->frameBuffer);
+
+		CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderFeatureData* shadowRenderFeatureData = static_cast<CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderFeatureData*>(featureData->csmShadowMapRenderFeatureData);
+
 		auto viewMatrix = camera->ViewMatrix();
 		auto ambientLightTexture = Core::Graphic::CoreObject::Instance::LightManager().AmbientTextureCube();
 		for (const auto& rendererComponent : *rendererComponents)
@@ -226,6 +231,11 @@ void AirEngine::Rendering::RenderFeature::TBForward_Opaque_RenderFeature::OnExcu
 			material->SetUniformBuffer("lightInfos", Core::Graphic::CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
 			material->SetTextureCube("ambientLightTexture", ambientLightTexture);
 			material->SetStorageBuffer("opaqueLightIndexLists", featureData->opaqueLightIndexListsBuffer);
+
+			if (shadowRenderFeatureData)
+			{
+				shadowRenderFeatureData->SetShadowReceiverMaterialParameters(material);
+			}
 
 			commandBuffer->DrawMesh(rendererComponent->mesh, material);
 		}

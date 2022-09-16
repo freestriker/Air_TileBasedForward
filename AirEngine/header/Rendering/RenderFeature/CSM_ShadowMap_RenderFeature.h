@@ -10,6 +10,20 @@
 
 namespace AirEngine
 {
+	namespace Core
+	{
+		namespace Graphic
+		{
+			namespace Rendering
+			{
+				class Material;
+			}
+			namespace Instance
+			{
+				class ImageSampler;
+			}
+		}
+	}
 	namespace Rendering
 	{
 		namespace RenderFeature
@@ -31,17 +45,21 @@ namespace AirEngine
 					friend class CSM_ShadowMap_RenderFeature;
 				private:
 					Core::Graphic::Rendering::RenderPassBase* shadowMapRenderPass;
+					Core::Graphic::Instance::ImageSampler* sampler;
 
 					std::array<Core::Graphic::Instance::Image*, CASCADE_COUNT> shadowImages;
 					std::array<Core::Graphic::Rendering::FrameBuffer*, CASCADE_COUNT> shadowFrameBuffers;
 					Core::Graphic::Instance::Buffer* lightCameraInfoBuffer;
 					Core::Graphic::Instance::Buffer* lightCameraInfoStagingBuffer;
+					Core::Graphic::Instance::Buffer* csmShadowReceiverInfoBuffer;
 				public:
 					std::array<float, CASCADE_COUNT> frustumSegmentScales;
 					std::array<float, CASCADE_COUNT> lightCameraCompensationDistances;
 					std::array<uint32_t, CASCADE_COUNT> shadowImageResolutions;
 
 					void Refresh();
+
+					void SetShadowReceiverMaterialParameters(Core::Graphic::Rendering::Material* material);
 
 					CONSTRUCTOR(CSM_ShadowMap_RenderFeatureData)
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderFeatureDataBase)
@@ -53,12 +71,18 @@ namespace AirEngine
 					glm::mat4 projection;
 					glm::mat4 viewProjection;
 				};
+				struct CsmShadowReceiverInfo
+				{
+					alignas(16) glm::vec4 thresholdVZ[CASCADE_COUNT + 1];
+					alignas(16) glm::mat4 matrixVC2PL[CASCADE_COUNT];
+				};
 
 				CONSTRUCTOR(CSM_ShadowMap_RenderFeature)
 
 			private:
 				Core::Graphic::Rendering::RenderPassBase* _shadowMapRenderPass;
 				std::string _shadowMapRenderPassName;
+				Core::Graphic::Instance::ImageSampler* shadowImageSampler;
 
 				Core::Graphic::Rendering::RenderFeatureDataBase* OnCreateRenderFeatureData(Camera::CameraBase* camera)override;
 				void OnResolveRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera)override;

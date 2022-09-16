@@ -130,17 +130,20 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::OnResolveRendererData(Co
 
 	lightListFeatureData->depthTexture = geometryFeatureData->depthTexture;
 
+	auto csmShadowMapFeatureData = rendererData->RenderFeatureData<RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderFeatureData>("CSM_ShadowMap_RenderFeature");
+	csmShadowMapFeatureData->frustumSegmentScales = { 0.02, 0.03, 0.1, 0.85 };
+	csmShadowMapFeatureData->lightCameraCompensationDistances = { 20, 30, 40, 50 };
+	csmShadowMapFeatureData->shadowImageResolutions = { 2048, 2048, 1024, 1024 };
+
 	opaqueFeatureData->opaqueLightIndexListsBuffer = lightListFeatureData->opaqueLightIndexListsBuffer;
+	opaqueFeatureData->csmShadowMapRenderFeatureData = csmShadowMapFeatureData;
 
 	depthPeelingFeatureData->transparentLightIndexListsBuffer = lightListFeatureData->transparentLightIndexListsBuffer;
 	depthPeelingFeatureData->depthTexture = geometryFeatureData->depthTexture;
 
 	alphaBufferFeatureData->transparentLightIndexListsBuffer = lightListFeatureData->transparentLightIndexListsBuffer;
 
-	auto csmShadowMapFeatureData = rendererData->RenderFeatureData<RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderFeatureData>("CSM_ShadowMap_RenderFeature");
-	csmShadowMapFeatureData->frustumSegmentScales = {0.02, 0.03, 0.1, 0.85};
-	csmShadowMapFeatureData->lightCameraCompensationDistances = { 20, 30, 40, 50 };
-	csmShadowMapFeatureData->shadowImageResolutions = { 2048, 2048, 1024, 1024 };
+
 }
 
 void AirEngine::Rendering::Renderer::TBForwardRenderer::OnDestroyRendererData(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -173,9 +176,10 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::PrepareRenderer(Core::Gr
 			break;
 		}
 	}
+	PrepareRenderFeature("CSM_ShadowMap_RenderFeature", rendererData);
+	
 	PrepareRenderFeature("TBForward_LightList_RenderFeature", rendererData);
 	PrepareRenderFeature("TBForward_Opaque_RenderFeature", rendererData);
-	PrepareRenderFeature("CSM_ShadowMap_RenderFeature", rendererData);
 	switch (static_cast<TBForwardRendererData*>(rendererData)->aoType)
 	{
 		case AoType::SSAO:
@@ -234,9 +238,10 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::ExcuteRenderer(Core::Gra
 			break;
 		}
 	}
+	ExcuteRenderFeature("CSM_ShadowMap_RenderFeature", rendererData, camera, rendererComponents);
+	
 	ExcuteRenderFeature("TBForward_LightList_RenderFeature", rendererData, camera, rendererComponents);
 	ExcuteRenderFeature("TBForward_Opaque_RenderFeature", rendererData, camera, rendererComponents);
-	ExcuteRenderFeature("CSM_ShadowMap_RenderFeature", rendererData, camera, rendererComponents);
 	switch (static_cast<TBForwardRendererData*>(rendererData)->aoType)
 	{
 		case AoType::SSAO:
@@ -295,9 +300,10 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::SubmitRenderer(Core::Gra
 			break;
 		}
 	}
+	SubmitRenderFeature("CSM_ShadowMap_RenderFeature", rendererData);
+
 	SubmitRenderFeature("TBForward_LightList_RenderFeature", rendererData);
 	SubmitRenderFeature("TBForward_Opaque_RenderFeature", rendererData);
-	SubmitRenderFeature("CSM_ShadowMap_RenderFeature", rendererData);
 	switch (static_cast<TBForwardRendererData*>(rendererData)->aoType)
 	{
 		case AoType::SSAO:
@@ -356,9 +362,10 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::FinishRenderer(Core::Gra
 			break;
 		}
 	}
+	FinishRenderFeature("CSM_ShadowMap_RenderFeature", rendererData);
+	
 	FinishRenderFeature("TBForward_LightList_RenderFeature", rendererData);
 	FinishRenderFeature("TBForward_Opaque_RenderFeature", rendererData);
-	FinishRenderFeature("CSM_ShadowMap_RenderFeature", rendererData);
 	switch (static_cast<TBForwardRendererData*>(rendererData)->aoType)
 	{
 		case AoType::SSAO:

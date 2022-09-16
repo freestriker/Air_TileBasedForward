@@ -4,12 +4,12 @@
 #ifdef CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX
 #define CSM_SHADOW_RECEIVER_DESCRIPTOR_COUNT 5
 
-#define CASCAD_COUNT 4
+#define CASCADE_COUNT 4
 
 layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 0, binding = 0) uniform CsmShadowReceiverInfo
 {
-    int thresholdVZ[CASCAD_COUNT + 1];
-    mat4 matrixVC2PL[CASCAD_COUNT + 1];
+    float thresholdVZ[CASCADE_COUNT + 1];
+    mat4 matrixVC2PL[CASCADE_COUNT];
 }csmShadowReceiverInfo;
 
 layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 1, binding = 0) uniform sampler2D shadowTexture_0;
@@ -17,12 +17,12 @@ layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 2, binding = 0) unifor
 layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 3, binding = 0) uniform sampler2D shadowTexture_2;
 layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 4, binding = 0) uniform sampler2D shadowTexture_3;
 
-float GetShadowIntensity(vec3 vPosition)
+float GetShadowIntensity(in vec3 vPosition)
 {
     int cascadIndex = -1;
-    for(int i = 0; i < CASCAD_COUNT + 1; i++)
+    for(int i = 0; i < CASCADE_COUNT + 1; i++)
     {
-        if(vPosition.z < csmShadowReceiverInfo.thresholdVZ[i])
+        if(vPosition.z > csmShadowReceiverInfo.thresholdVZ[i])
         {
             cascadIndex = i - 1;
             break;
@@ -59,7 +59,7 @@ float GetShadowIntensity(vec3 vPosition)
         }
     }
 
-    return lnVisiableDepth <= lnPosition.z ? 1.0f : 0.0f;
+    return lnVisiableDepth < lnPosition.z ? 1.0f : 0.0f;
 }
 
 #endif ///#ifdef CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX
