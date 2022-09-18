@@ -19,6 +19,7 @@
 #include <array>
 #include "Core/Graphic/Rendering/Material.h"
 #include "Core/Graphic/Instance/ImageSampler.h"
+#include <algorithm>
 
 RTTR_REGISTRATION
 {
@@ -99,8 +100,9 @@ AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_
 	frustumSegmentScales.fill(1.0 / CASCADE_COUNT);
 	lightCameraCompensationDistances.fill(20);
 	shadowImageResolutions.fill(1024);
-	minBias = 0.0015;
+	minBias = 0.0025;
 	maxBias = 0.0035;
+	overlapScale = 0.3;
 }
 
 AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderFeatureData::~CSM_ShadowMap_RenderFeatureData()
@@ -260,6 +262,14 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnExcute(
 				subAngularPointVPositions[i][7] = (1 - frustumSplitRatio[i]) * angularPointVPositions[3] + frustumSplitRatio[i] * angularPointVPositions[7];
 			}
 		}
+
+		for (int i = CASCADE_COUNT - 1; i > 0; i--)
+		{
+			subAngularPointVPositions[i][0] = featureData->overlapScale * subAngularPointVPositions[i - 1][0] + (1 - featureData->overlapScale) * subAngularPointVPositions[i - 1][4];
+			subAngularPointVPositions[i][1] = featureData->overlapScale * subAngularPointVPositions[i - 1][1] + (1 - featureData->overlapScale) * subAngularPointVPositions[i - 1][5];
+			subAngularPointVPositions[i][2] = featureData->overlapScale * subAngularPointVPositions[i - 1][2] + (1 - featureData->overlapScale) * subAngularPointVPositions[i - 1][6];
+			subAngularPointVPositions[i][3] = featureData->overlapScale * subAngularPointVPositions[i - 1][3] + (1 - featureData->overlapScale) * subAngularPointVPositions[i - 1][7];
+		}
 	}
 
 	glm::vec3 sphereCenterVPositions[CASCADE_COUNT]{};
@@ -293,14 +303,14 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnExcute(
 
 		for (int i = 0; i < CASCADE_COUNT; i++)
 		{
-			//glm::mat4 matrixVC2VL = glm::lookAt({ 0, 0, 0 }, lightVView, lightVUp);
-			//float unit = sphereRadius[i] * 2 / featureData->shadowImageResolutions[i];
+			glm::mat4 matrixVC2VL = glm::lookAt({ 0, 0, 0 }, lightVView, lightVUp);
+			float unit = sphereRadius[i] * 2 / featureData->shadowImageResolutions[i];
 
-			//glm::vec3 virtualCenterLVPosition = matrixVC2VL * glm::vec4(sphereCenterVPositions[i], 1);
-			//virtualCenterLVPosition.x -= std::fmod(virtualCenterLVPosition.x, unit);
-			//virtualCenterLVPosition.y -= std::fmod(virtualCenterLVPosition.y, unit);
+			glm::vec3 virtualCenterLVPosition = matrixVC2VL * glm::vec4(sphereCenterVPositions[i], 1);
+			virtualCenterLVPosition.x -= std::fmod(virtualCenterLVPosition.x, unit);
+			virtualCenterLVPosition.y -= std::fmod(virtualCenterLVPosition.y, unit);
 
-			//sphereCenterVPositions[i] = glm::inverse(matrixVC2VL) * glm::vec4(virtualCenterLVPosition, 1);
+			sphereCenterVPositions[i] = glm::inverse(matrixVC2VL) * glm::vec4(virtualCenterLVPosition, 1);
 
 			lightVPositions[i] = sphereCenterVPositions[i] - lightVView * (sphereRadius[i] + featureData->lightCameraCompensationDistances[i]);
 		}
@@ -324,12 +334,12 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnExcute(
 			lightCameraInfos[i].viewProjection = lightCameraInfos[i].projection * lightCameraInfos[i].view;
 
 			csmShadowReceiverInfo.matrixVC2PL[i] = lightCameraInfos[i].projection * matrixVC2VL;
-			if (i == 0)
-			{
-				csmShadowReceiverInfo.thresholdVZ[0].x = subAngularPointVPositions[0][0].z;
-			}
-			csmShadowReceiverInfo.thresholdVZ[i + 1].x = subAngularPointVPositions[i][4].z;
+
+			csmShadowReceiverInfo.thresholdVZ[i * 2 + 0].x = subAngularPointVPositions[i][0].z;
+			csmShadowReceiverInfo.thresholdVZ[i * 2 + 1].x = subAngularPointVPositions[i][4].z;
 		}
+
+		std::sort(csmShadowReceiverInfo.thresholdVZ, csmShadowReceiverInfo.thresholdVZ + CASCADE_COUNT * 2, [](glm::vec4 a, glm::vec4 b)->bool {return a.x > b.x; });
 
 		featureData->lightCameraInfoStagingBuffer->WriteData(&lightCameraInfos, sizeof(LightCameraInfo) * CASCADE_COUNT);
 		featureData->csmShadowReceiverInfoBuffer->WriteData(&csmShadowReceiverInfo, sizeof(CsmShadowReceiverInfo));

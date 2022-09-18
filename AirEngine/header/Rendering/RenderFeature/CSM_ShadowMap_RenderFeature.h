@@ -58,6 +58,7 @@ namespace AirEngine
 					std::array<uint32_t, CASCADE_COUNT> shadowImageResolutions;
 					float minBias;
 					float maxBias;
+					float overlapScale;
 
 					void Refresh();
 
@@ -75,7 +76,7 @@ namespace AirEngine
 				};
 				struct CsmShadowReceiverInfo
 				{
-					alignas(16) glm::vec4 thresholdVZ[CASCADE_COUNT + 1];
+					alignas(16) glm::vec4 thresholdVZ[CASCADE_COUNT * 2];
 					alignas(16) glm::vec3 wLightDirection;
 					alignas(4) float minBias;
 					alignas(4) float maxBias;
