@@ -32,7 +32,7 @@ void main()
 
     vec3 background = texture(backgroundTexture, -normalize(reflect(viewDirection, worldNormal))).xyz;
 
-    float shadowIntensity = GetShadowIntensity((cameraInfo.info.view * vec4(inWorldPosition, 1)).xyz);
+    float shadowIntensity = GetShadowIntensity((cameraInfo.info.view * vec4(inWorldPosition, 1)).xyz, worldNormal);
 
     ColorAttachment = vec4(background + ambient * 0.2 + diffuse * 0.2 + specular * 0.2, 1) * (1 - shadowIntensity);
 }

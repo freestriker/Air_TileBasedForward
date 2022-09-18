@@ -56,6 +56,8 @@ namespace AirEngine
 					std::array<float, CASCADE_COUNT> frustumSegmentScales;
 					std::array<float, CASCADE_COUNT> lightCameraCompensationDistances;
 					std::array<uint32_t, CASCADE_COUNT> shadowImageResolutions;
+					float minBias;
+					float maxBias;
 
 					void Refresh();
 
@@ -74,6 +76,9 @@ namespace AirEngine
 				struct CsmShadowReceiverInfo
 				{
 					alignas(16) glm::vec4 thresholdVZ[CASCADE_COUNT + 1];
+					alignas(16) glm::vec3 wLightDirection;
+					alignas(4) float minBias;
+					alignas(4) float maxBias;
 					alignas(16) glm::mat4 matrixVC2PL[CASCADE_COUNT];
 				};
 

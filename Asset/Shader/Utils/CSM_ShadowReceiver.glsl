@@ -9,6 +9,9 @@
 layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 0, binding = 0) uniform CsmShadowReceiverInfo
 {
     float thresholdVZ[CASCADE_COUNT + 1];
+    vec3 wLightDirection;
+    float minBias;
+    float maxBias;
     mat4 matrixVC2PL[CASCADE_COUNT];
 }csmShadowReceiverInfo;
 
@@ -17,7 +20,7 @@ layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 2, binding = 0) unifor
 layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 3, binding = 0) uniform sampler2D shadowTexture_2;
 layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 4, binding = 0) uniform sampler2D shadowTexture_3;
 
-float GetShadowIntensity(in vec3 vPosition)
+float GetShadowIntensity(in vec3 vPosition, in vec3 wNormal)
 {
     int cascadIndex = -1;
     for(int i = 0; i < CASCADE_COUNT + 1; i++)
@@ -58,8 +61,9 @@ float GetShadowIntensity(in vec3 vPosition)
             break;
         }
     }
-
-    return lnVisiableDepth < lnPosition.z ? 1.0f : 0.0f;
+    float bias = max(csmShadowReceiverInfo.maxBias * (1.0 - dot(wNormal, -csmShadowReceiverInfo.wLightDirection)), csmShadowReceiverInfo.minBias);
+    // return lnVisiableDepth < lnPosition.z ? 1.0f : 0.0f;
+    return lnPosition.z - bias > lnVisiableDepth ? 1.0 : 0.0;
 }
 
 #endif ///#ifdef CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX

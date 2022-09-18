@@ -99,6 +99,8 @@ AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_
 	frustumSegmentScales.fill(1.0 / CASCADE_COUNT);
 	lightCameraCompensationDistances.fill(20);
 	shadowImageResolutions.fill(1024);
+	minBias = 0.0015;
+	maxBias = 0.0035;
 }
 
 AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderFeatureData::~CSM_ShadowMap_RenderFeatureData()
@@ -282,6 +284,8 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnExcute(
 		auto light = Core::Graphic::CoreObject::Instance::LightManager().MainLight();
 		glm::mat4 cameraV = camera->ViewMatrix();
 		glm::mat4 lightM = light->GameObject()->transform.ModelMatrix();
+		glm::vec3 lightWPosition = lightM * glm::vec4(0, 0, 0, 1);
+		glm::vec3 lightWView = glm::normalize(glm::vec3(lightM * glm::vec4(0, 0, -1, 1)) - lightWPosition);
 		glm::vec3 lightVPosition = cameraV * lightM * glm::vec4(0, 0, 0, 1);
 		glm::vec3 lightVUp = glm::normalize(glm::vec3(cameraV * lightM * glm::vec4(0, 1, 0, 1)) - lightVPosition);
 		glm::vec3 lightVRight = glm::normalize(glm::vec3(cameraV * lightM * glm::vec4(1, 0, 0, 1)) - lightVPosition);
@@ -289,18 +293,20 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnExcute(
 
 		for (int i = 0; i < CASCADE_COUNT; i++)
 		{
-			glm::mat4 matrixVC2VL = glm::lookAt({ 0, 0, 0 }, lightVView, lightVUp);
-			float unit = sphereRadius[i] * 2 / featureData->shadowImageResolutions[i];
+			//glm::mat4 matrixVC2VL = glm::lookAt({ 0, 0, 0 }, lightVView, lightVUp);
+			//float unit = sphereRadius[i] * 2 / featureData->shadowImageResolutions[i];
 
-			glm::vec3 virtualCenterLVPosition = matrixVC2VL * glm::vec4(sphereCenterVPositions[i], 1);
-			virtualCenterLVPosition.x -= std::fmod(virtualCenterLVPosition.x, unit);
-			virtualCenterLVPosition.y -= std::fmod(virtualCenterLVPosition.y, unit);
+			//glm::vec3 virtualCenterLVPosition = matrixVC2VL * glm::vec4(sphereCenterVPositions[i], 1);
+			//virtualCenterLVPosition.x -= std::fmod(virtualCenterLVPosition.x, unit);
+			//virtualCenterLVPosition.y -= std::fmod(virtualCenterLVPosition.y, unit);
 
-			sphereCenterVPositions[i] = glm::inverse(matrixVC2VL) * glm::vec4(virtualCenterLVPosition, 1);
+			//sphereCenterVPositions[i] = glm::inverse(matrixVC2VL) * glm::vec4(virtualCenterLVPosition, 1);
 
 			lightVPositions[i] = sphereCenterVPositions[i] - lightVView * (sphereRadius[i] + featureData->lightCameraCompensationDistances[i]);
 		}
-
+		csmShadowReceiverInfo.wLightDirection = lightWView;
+		csmShadowReceiverInfo.minBias = featureData->minBias;
+		csmShadowReceiverInfo.maxBias = featureData->maxBias;
 		for (int i = 0; i < CASCADE_COUNT; i++)
 		{
 			float halfWidth = sphereRadius[i];
