@@ -59,6 +59,7 @@ namespace AirEngine
 					float minBias;
 					float maxBias;
 					float overlapScale;
+					int sampleHalfWidth;
 
 					void Refresh();
 
@@ -81,6 +82,8 @@ namespace AirEngine
 					alignas(4) float minBias;
 					alignas(4) float maxBias;
 					alignas(16) glm::mat4 matrixVC2PL[CASCADE_COUNT];
+					alignas(16) glm::vec4 texelSize[CASCADE_COUNT];
+					alignas(4) int sampleHalfWidth;
 				};
 
 				CONSTRUCTOR(CSM_ShadowMap_RenderFeature)

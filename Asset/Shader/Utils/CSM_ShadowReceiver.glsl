@@ -13,12 +13,44 @@ layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 0, binding = 0) unifor
     float minBias;
     float maxBias;
     mat4 matrixVC2PL[CASCADE_COUNT];
+    vec2 texelSize[CASCADE_COUNT];
+    int sampleHalfWidth;
 }csmShadowReceiverInfo;
 
 layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 1, binding = 0) uniform sampler2D shadowTexture_0;
 layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 2, binding = 0) uniform sampler2D shadowTexture_1;
 layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 3, binding = 0) uniform sampler2D shadowTexture_2;
 layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 4, binding = 0) uniform sampler2D shadowTexture_3;
+
+float SampleShadowTexture(int cascadIndex, vec2 aPosition)
+{
+    float depth;
+    switch(cascadIndex)
+    {
+        case 0:
+        {
+            depth = texture(shadowTexture_0, aPosition).r;
+            break;
+        }
+        case 1:
+        {
+            depth = texture(shadowTexture_1, aPosition).r;
+            break;
+        }
+        case 2:
+        {
+            depth = texture(shadowTexture_2, aPosition).r;
+            break;
+        }
+        case 3:
+        {
+            depth = texture(shadowTexture_3, aPosition).r;
+            break;
+        }
+    }
+    return depth;
+}
+
 
 float GetShadowIntensity(in vec3 vPosition, in vec3 wNormal)
 {
@@ -33,9 +65,9 @@ float GetShadowIntensity(in vec3 vPosition, in vec3 wNormal)
     }
 
     if(cascadIndex == -1) return 1;
-    float lnVisiableDepth0 = 0;
+    float shadowIntensity0 = 0;
     float lnDepth0 = 0;
-    float lnVisiableDepth1 = 0;
+    float shadowIntensity1 = 0;
     float lnDepth1 = 0;
 
     float bias = max(csmShadowReceiverInfo.maxBias * (1.0 - dot(wNormal, -csmShadowReceiverInfo.wLightDirection)), csmShadowReceiverInfo.minBias);
@@ -45,33 +77,22 @@ float GetShadowIntensity(in vec3 vPosition, in vec3 wNormal)
         vec3 lnPosition = lvPosition.xyz / lvPosition.w;
         lnDepth0 = lnPosition.z;
         vec2 laPosition = (clamp(lvPosition.xy, -1, 1) + vec2(1, -1)) / vec2(2, -2);
-        switch((cascadIndex + 1) / 2)
+
+        int inShadowCount = 0;
+        for(int i = -csmShadowReceiverInfo.sampleHalfWidth; i <= csmShadowReceiverInfo.sampleHalfWidth; i++)
         {
-            case 0:
+            for(int j = -csmShadowReceiverInfo.sampleHalfWidth; j <= csmShadowReceiverInfo.sampleHalfWidth; j++)
             {
-                lnVisiableDepth0 = texture(shadowTexture_0, laPosition).r;
-                break;
-            }
-            case 1:
-            {
-                lnVisiableDepth0 = texture(shadowTexture_1, laPosition).r;
-                break;
-            }
-            case 2:
-            {
-                lnVisiableDepth0 = texture(shadowTexture_2, laPosition).r;
-                break;
-            }
-            case 3:
-            {
-                lnVisiableDepth0 = texture(shadowTexture_3, laPosition).r;
-                break;
+                inShadowCount += lnDepth0 - bias > SampleShadowTexture((cascadIndex + 1) / 2, laPosition + vec2(i, j) * csmShadowReceiverInfo.texelSize[(cascadIndex + 1) / 2]) ? 1 : 0;
             }
         }
+        
+        shadowIntensity0 = float(inShadowCount) / float((csmShadowReceiverInfo.sampleHalfWidth * 2 + 1) * (csmShadowReceiverInfo.sampleHalfWidth * 2 + 1));
     }
+
     if(cascadIndex % 2 == 0)
     {
-        return lnDepth0 - bias > lnVisiableDepth0 ? 1.0 : 0.0;
+        return shadowIntensity0;
     }
     else
     {
@@ -79,34 +100,25 @@ float GetShadowIntensity(in vec3 vPosition, in vec3 wNormal)
         vec3 lnPosition = lvPosition.xyz / lvPosition.w;
         lnDepth1 = lnPosition.z;
         vec2 laPosition = (clamp(lvPosition.xy, -1, 1) + vec2(1, -1)) / vec2(2, -2);
-        switch(cascadIndex / 2)
+
+        int inShadowCount = 0;
+        for(int i = -csmShadowReceiverInfo.sampleHalfWidth; i <= csmShadowReceiverInfo.sampleHalfWidth; i++)
         {
-            case 0:
+            for(int j = -csmShadowReceiverInfo.sampleHalfWidth; j <= csmShadowReceiverInfo.sampleHalfWidth; j++)
             {
-                lnVisiableDepth1 = texture(shadowTexture_0, laPosition).r;
-                break;
-            }
-            case 1:
-            {
-                lnVisiableDepth1 = texture(shadowTexture_1, laPosition).r;
-                break;
-            }
-            case 2:
-            {
-                lnVisiableDepth1 = texture(shadowTexture_2, laPosition).r;
-                break;
-            }
-            case 3:
-            {
-                lnVisiableDepth1 = texture(shadowTexture_3, laPosition).r;
-                break;
+                inShadowCount += lnDepth0 - bias > SampleShadowTexture(cascadIndex / 2, laPosition + vec2(i, j) * csmShadowReceiverInfo.texelSize[cascadIndex / 2]) ? 1 : 0;
             }
         }
+        shadowIntensity1 = float(inShadowCount) / float((csmShadowReceiverInfo.sampleHalfWidth * 2 + 1) * (csmShadowReceiverInfo.sampleHalfWidth * 2 + 1));
 
-        return lnDepth0 - bias > lnVisiableDepth0 || lnDepth1 - bias > lnVisiableDepth1 ? 1.0 : 0.0;
+        float len = csmShadowReceiverInfo.thresholdVZ[cascadIndex] - csmShadowReceiverInfo.thresholdVZ[cascadIndex + 1];
+        float pre = csmShadowReceiverInfo.thresholdVZ[cascadIndex] - vPosition.z;
+        float next = vPosition.z - csmShadowReceiverInfo.thresholdVZ[cascadIndex + 1];
+
+        return shadowIntensity0 * pre / len + shadowIntensity1 * next / len;
     }
 
-    // return lnDepth0 - bias > lnVisiableDepth0 ? 1.0 : 0.0;
+    // return shadowIntensity0;
 }
 
 #endif ///#ifdef CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX
