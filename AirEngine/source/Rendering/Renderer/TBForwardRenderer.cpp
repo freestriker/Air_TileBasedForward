@@ -135,12 +135,13 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::OnResolveRendererData(Co
 	auto csmShadowMapFeatureData = rendererData->RenderFeatureData<RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderFeatureData>("CSM_ShadowMap_RenderFeature");
 	csmShadowMapFeatureData->frustumSegmentScales = { 0.1, 0.2, 0.3, 0.4 };
 	csmShadowMapFeatureData->lightCameraCompensationDistances = { 5, 5, 5, 5 };
-	csmShadowMapFeatureData->shadowImageResolutions = { 8192, 4096, 2048, 1024 };
+	csmShadowMapFeatureData->shadowImageResolutions = { 2048, 2048, 1024, 1024 };
+	csmShadowMapFeatureData->sampleHalfWidth = 2;
 
 	auto sevsmShadowMapFeatureData = rendererData->RenderFeatureData<RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::CascadeEVSM_ShadowCaster_RenderFeatureData>("CascadeEVSM_ShadowCaster_RenderFeature");
 	sevsmShadowMapFeatureData->frustumSegmentScales = { 0.1, 0.2, 0.3, 0.4 };
 	sevsmShadowMapFeatureData->lightCameraCompensationDistances = { 5, 5, 5, 5 };
-	sevsmShadowMapFeatureData->shadowImageResolutions = { 8192, 4096, 2048, 1024 };
+	sevsmShadowMapFeatureData->shadowImageResolutions = { 1024, 1024, 1024, 1024 };
 
 	opaqueFeatureData->opaqueLightIndexListsBuffer = lightListFeatureData->opaqueLightIndexListsBuffer;
 	opaqueFeatureData->csmShadowMapRenderFeatureData = csmShadowMapFeatureData;

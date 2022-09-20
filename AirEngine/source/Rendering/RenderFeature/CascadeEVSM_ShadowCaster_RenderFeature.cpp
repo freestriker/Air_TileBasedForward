@@ -11,6 +11,7 @@
 #include "Core/Logic/Object/GameObject.h"
 #include "Core/Logic/Object/Transform.h"
 #include "Core/Graphic/Rendering/Material.h"
+#include "Core/Graphic/Rendering/Shader.h"
 #include "Core/Graphic/Manager/LightManager.h"
 #include "Core/Graphic/CoreObject/Instance.h"
 #include <set>
@@ -18,8 +19,11 @@
 #include "Utils/IntersectionChecker.h"
 #include <array>
 #include "Core/Graphic/Rendering/Material.h"
+#include "Core/Graphic/Rendering/Shader.h"
 #include "Core/Graphic/Instance/ImageSampler.h"
 #include <algorithm>
+#include "Core/IO/Manager/AssetManager.h"
+#include "Core/IO/CoreObject/Instance.h"
 
 RTTR_REGISTRATION
 {
@@ -109,9 +113,9 @@ AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::Cas
 
 void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::CascadeEVSM_Blit_RenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
 {
-	creator.AddDepthAttachment(
+	creator.AddColorAttachment(
 		"ColorAttachment",
-		VK_FORMAT_R16G16B16A16_SFLOAT,
+		VK_FORMAT_R32G32B32A32_SFLOAT,
 		VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT,
 		VK_ATTACHMENT_LOAD_OP_DONT_CARE,
 		VK_ATTACHMENT_STORE_OP_STORE,
@@ -153,7 +157,7 @@ void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature
 {
 	creator.AddDepthAttachment(
 		"ColorAttachment",
-		VK_FORMAT_R16G16B16A16_SFLOAT,
+		VK_FORMAT_R32G32B32A32_SFLOAT,
 		VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT,
 		VK_ATTACHMENT_LOAD_OP_DONT_CARE,
 		VK_ATTACHMENT_STORE_OP_STORE,
@@ -193,11 +197,18 @@ AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::Cas
 	, lightCameraCompensationDistances()
 	, shadowImageResolutions()
 	, csmShadowReceiverInfoBuffer(nullptr)
+	, blitInfoBuffers()
+	, shadowTextures()
+	, blitFrameBuffers()
+	, blitRenderPass(nullptr)
+	, blitMaterials()
 {
 	frustumSegmentScales.fill(1.0 / CASCADE_COUNT);
 	lightCameraCompensationDistances.fill(20);
 	shadowImageResolutions.fill(1024);
 	overlapScale = 0.3;
+	c1 = 40;
+	c2 = 5;
 }
 
 AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::CascadeEVSM_ShadowCaster_RenderFeatureData::~CascadeEVSM_ShadowCaster_RenderFeatureData()
@@ -207,6 +218,7 @@ AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::Cas
 AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature()
 	: RenderFeatureBase()
 	, _shadowCasterRenderPass(Core::Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass<CascadeEVSM_ShadowCaster_RenderPass>())
+	, _blitRenderPass(Core::Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass<CascadeEVSM_Blit_RenderPass>())
 	, _shadowCasterRenderPassName(rttr::type::get<CascadeEVSM_ShadowCaster_RenderPass>().get_name().to_string())
 	, _pointSampler(
 		new Core::Graphic::Instance::ImageSampler(
@@ -217,6 +229,8 @@ AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::Cas
 			VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
 		)
 	)
+	, _blitShader(Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\CascadeEVSM_Blit_Shader.shader"))
+	, _fullScreenMesh(Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\BackgroundMesh.ply"))
 {
 
 }
@@ -224,6 +238,8 @@ AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::Cas
 AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::~CascadeEVSM_ShadowCaster_RenderFeature()
 {
 	Core::Graphic::CoreObject::Instance::RenderPassManager().UnloadRenderPass<CascadeEVSM_ShadowCaster_RenderPass>();
+	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Mesh\\BackgroundMesh.ply");
+	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\CascadeEVSM_Blit_Shader.shader");
 	delete _pointSampler;
 }
 
@@ -247,6 +263,22 @@ void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature
 				{"DepthAttachment", depthAttachemnts[i]},
 			}
 		);
+		delete shadowTextures[i];
+		shadowTextures[i] = Core::Graphic::Instance::Image::Create2DImage(
+			extent,
+			VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT,
+			VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT,
+			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
+		);
+		delete blitFrameBuffers[i];
+		blitFrameBuffers[i] = new Core::Graphic::Rendering::FrameBuffer(
+			blitRenderPass,
+			{
+				{"ColorAttachment", shadowTextures[i]},
+			}
+		);
+		blitMaterials[i]->SetSlotData("depthTexture", {0}, {{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, pointSampler->VkSampler_(), depthAttachemnts[i]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}});
 	}
 }
 
@@ -259,7 +291,20 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 {
 	auto featureData = new CascadeEVSM_ShadowCaster_RenderFeatureData();
 	featureData->shadowCasterRenderPass = _shadowCasterRenderPass;
+	featureData->blitRenderPass = _blitRenderPass;
 	featureData->pointSampler = _pointSampler;
+
+	for (auto i = 0; i < CASCADE_COUNT; i++)
+	{
+		featureData->blitInfoBuffers[i] = new Core::Graphic::Instance::Buffer(
+			sizeof(CascadeEvsmBlitInfo),
+			VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		);
+		featureData->blitMaterials[i] = new Core::Graphic::Rendering::Material(_blitShader);
+
+		featureData->blitMaterials[i]->SetUniformBuffer("cascadeEvsmBlitInfo", featureData->blitInfoBuffers[i]);
+	}
 
 	featureData->lightCameraInfoBuffer = new Core::Graphic::Instance::Buffer(
 		sizeof(LightCameraInfo),
@@ -295,8 +340,12 @@ void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature
 	delete featureData->csmShadowReceiverInfoBuffer;
 	for (auto i = 0; i < CASCADE_COUNT; i++)
 	{
+		delete featureData->blitInfoBuffers[i];
 		delete featureData->depthAttachemnts[i];
 		delete featureData->shadowCasterFrameBuffers[i];
+		delete featureData->shadowTextures[i];
+		delete featureData->blitFrameBuffers[i];
+		delete featureData->blitMaterials[i];
 	}
 	delete featureData;
 }
@@ -381,6 +430,7 @@ void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature
 	glm::vec3 lightVPositions[CASCADE_COUNT]{};
 	LightCameraInfo lightCameraInfos[CASCADE_COUNT]{};
 	CsmShadowReceiverInfo csmShadowReceiverInfo{};
+	CascadeEvsmBlitInfo cascadeEvsmBlitInfo{};
 	{
 		auto light = Core::Graphic::CoreObject::Instance::LightManager().MainLight();
 		glm::mat4 cameraV = camera->ViewMatrix();
@@ -392,6 +442,8 @@ void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature
 		glm::vec3 lightVRight = glm::normalize(glm::vec3(cameraV * lightM * glm::vec4(1, 0, 0, 1)) - lightVPosition);
 		glm::vec3 lightVView = glm::normalize(glm::vec3(cameraV * lightM * glm::vec4(0, 0, -1, 1)) - lightVPosition);
 
+		cascadeEvsmBlitInfo.c1 = featureData->c1;
+		cascadeEvsmBlitInfo.c2 = featureData->c2;
 		for (int i = 0; i < CASCADE_COUNT; i++)
 		{
 			glm::mat4 matrixVC2VL = glm::lookAt({ 0, 0, 0 }, lightVView, lightVUp);
@@ -428,6 +480,9 @@ void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature
 			csmShadowReceiverInfo.thresholdVZ[i * 2 + 1].x = subAngularPointVPositions[i][4].z;
 
 			csmShadowReceiverInfo.texelSize[i] = { 1.0f / featureData->shadowImageResolutions[i], 1.0f / featureData->shadowImageResolutions[i], 0, 0 };
+
+			cascadeEvsmBlitInfo.texelSize = csmShadowReceiverInfo.texelSize[i];
+			featureData->blitInfoBuffers[i]->WriteData(&cascadeEvsmBlitInfo, sizeof(CascadeEvsmBlitInfo));
 		}
 
 		std::sort(csmShadowReceiverInfo.thresholdVZ, csmShadowReceiverInfo.thresholdVZ + CASCADE_COUNT * 2, [](glm::vec4 a, glm::vec4 b)->bool {return a.x > b.x; });
@@ -500,6 +555,15 @@ void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature
 		{
 			commandBuffer->DrawMesh(wrapper.mesh, wrapper.material);
 		}
+
+		commandBuffer->EndRenderPass();
+	}
+
+	for (int i = 0; i < CASCADE_COUNT; i++)
+	{
+		commandBuffer->BeginRenderPass(_blitRenderPass, featureData->blitFrameBuffers[i]);
+
+		commandBuffer->DrawMesh(_fullScreenMesh, featureData->blitMaterials[i]);
 
 		commandBuffer->EndRenderPass();
 	}

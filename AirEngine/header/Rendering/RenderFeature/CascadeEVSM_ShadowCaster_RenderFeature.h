@@ -10,6 +10,10 @@
 
 namespace AirEngine
 {
+	namespace Asset
+	{
+		class Mesh;
+	}
 	namespace Core
 	{
 		namespace Graphic
@@ -17,6 +21,7 @@ namespace AirEngine
 			namespace Rendering
 			{
 				class Material;
+				class Shader;
 			}
 			namespace Instance
 			{
@@ -61,10 +66,15 @@ namespace AirEngine
 					friend class CascadeEVSM_ShadowCaster_RenderFeature;
 				private:
 					Core::Graphic::Rendering::RenderPassBase* shadowCasterRenderPass;
+					Core::Graphic::Rendering::RenderPassBase* blitRenderPass;
 					Core::Graphic::Instance::ImageSampler* pointSampler;
 
 					std::array<Core::Graphic::Instance::Image*, CASCADE_COUNT> depthAttachemnts;
+					std::array<Core::Graphic::Instance::Image*, CASCADE_COUNT> shadowTextures;
 					std::array<Core::Graphic::Rendering::FrameBuffer*, CASCADE_COUNT> shadowCasterFrameBuffers;
+					std::array<Core::Graphic::Rendering::FrameBuffer*, CASCADE_COUNT> blitFrameBuffers;
+					std::array<Core::Graphic::Rendering::Material*, CASCADE_COUNT> blitMaterials;
+					std::array<Core::Graphic::Instance::Buffer*, CASCADE_COUNT> blitInfoBuffers;
 					Core::Graphic::Instance::Buffer* lightCameraInfoBuffer;
 					Core::Graphic::Instance::Buffer* lightCameraInfoStagingBuffer;
 					Core::Graphic::Instance::Buffer* csmShadowReceiverInfoBuffer;
@@ -73,6 +83,8 @@ namespace AirEngine
 					std::array<float, CASCADE_COUNT> lightCameraCompensationDistances;
 					std::array<uint32_t, CASCADE_COUNT> shadowImageResolutions;
 					float overlapScale;
+					float c1;
+					float c2;
 
 					void Refresh();
 
@@ -88,6 +100,12 @@ namespace AirEngine
 					glm::mat4 projection;
 					glm::mat4 viewProjection;
 				};
+				struct CascadeEvsmBlitInfo
+				{
+					alignas(8) glm::vec2 texelSize;
+					alignas(4) float c1;
+					alignas(4) float c2;
+				};
 				struct CsmShadowReceiverInfo
 				{
 					alignas(16) glm::vec4 thresholdVZ[CASCADE_COUNT * 2];
@@ -100,8 +118,11 @@ namespace AirEngine
 
 			private:
 				Core::Graphic::Rendering::RenderPassBase* _shadowCasterRenderPass;
+				Core::Graphic::Rendering::RenderPassBase* _blitRenderPass;
 				std::string _shadowCasterRenderPassName;
 				Core::Graphic::Instance::ImageSampler* _pointSampler;
+				Core::Graphic::Rendering::Shader* _blitShader;
+				Asset::Mesh* _fullScreenMesh;
 
 				Core::Graphic::Rendering::RenderFeatureDataBase* OnCreateRenderFeatureData(Camera::CameraBase* camera)override;
 				void OnResolveRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera)override;
