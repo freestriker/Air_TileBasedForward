@@ -13,6 +13,7 @@
 #include "Rendering/RenderFeature/HBAO_Occlusion_RenderFeature.h"
 #include "Rendering/RenderFeature/GTAO_Occlusion_RenderFeature.h"
 #include "Rendering/RenderFeature/CSM_ShadowMap_RenderFeature.h"
+#include "Rendering/RenderFeature/CascadeEVSM_ShadowCaster_RenderFeature.h"
 
 RTTR_REGISTRATION
 {
@@ -53,6 +54,7 @@ AirEngine::Rendering::Renderer::TBForwardRenderer::TBForwardRenderer()
 	UseRenderFeature("GTAO_Cover_RenderFeature", new RenderFeature::AO_Cover_RenderFeature());
 
 	UseRenderFeature("CSM_ShadowMap_RenderFeature", new RenderFeature::CSM_ShadowMap_RenderFeature());
+	UseRenderFeature("CascadeEVSM_ShadowCaster_RenderFeature", new RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature());
 }
 
 AirEngine::Rendering::Renderer::TBForwardRenderer::~TBForwardRenderer()
@@ -135,6 +137,11 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::OnResolveRendererData(Co
 	csmShadowMapFeatureData->lightCameraCompensationDistances = { 5, 5, 5, 5 };
 	csmShadowMapFeatureData->shadowImageResolutions = { 8192, 4096, 2048, 1024 };
 
+	auto sevsmShadowMapFeatureData = rendererData->RenderFeatureData<RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::CascadeEVSM_ShadowCaster_RenderFeatureData>("CascadeEVSM_ShadowCaster_RenderFeature");
+	sevsmShadowMapFeatureData->frustumSegmentScales = { 0.1, 0.2, 0.3, 0.4 };
+	sevsmShadowMapFeatureData->lightCameraCompensationDistances = { 5, 5, 5, 5 };
+	sevsmShadowMapFeatureData->shadowImageResolutions = { 8192, 4096, 2048, 1024 };
+
 	opaqueFeatureData->opaqueLightIndexListsBuffer = lightListFeatureData->opaqueLightIndexListsBuffer;
 	opaqueFeatureData->csmShadowMapRenderFeatureData = csmShadowMapFeatureData;
 
@@ -177,6 +184,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::PrepareRenderer(Core::Gr
 		}
 	}
 	PrepareRenderFeature("CSM_ShadowMap_RenderFeature", rendererData);
+	PrepareRenderFeature("CascadeEVSM_ShadowCaster_RenderFeature", rendererData);
 	
 	PrepareRenderFeature("TBForward_LightList_RenderFeature", rendererData);
 	PrepareRenderFeature("TBForward_Opaque_RenderFeature", rendererData);
@@ -239,6 +247,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::ExcuteRenderer(Core::Gra
 		}
 	}
 	ExcuteRenderFeature("CSM_ShadowMap_RenderFeature", rendererData, camera, rendererComponents);
+	ExcuteRenderFeature("CascadeEVSM_ShadowCaster_RenderFeature", rendererData, camera, rendererComponents);
 	
 	ExcuteRenderFeature("TBForward_LightList_RenderFeature", rendererData, camera, rendererComponents);
 	ExcuteRenderFeature("TBForward_Opaque_RenderFeature", rendererData, camera, rendererComponents);
@@ -301,6 +310,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::SubmitRenderer(Core::Gra
 		}
 	}
 	SubmitRenderFeature("CSM_ShadowMap_RenderFeature", rendererData);
+	SubmitRenderFeature("CascadeEVSM_ShadowCaster_RenderFeature", rendererData);
 
 	SubmitRenderFeature("TBForward_LightList_RenderFeature", rendererData);
 	SubmitRenderFeature("TBForward_Opaque_RenderFeature", rendererData);
@@ -363,6 +373,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::FinishRenderer(Core::Gra
 		}
 	}
 	FinishRenderFeature("CSM_ShadowMap_RenderFeature", rendererData);
+	FinishRenderFeature("CascadeEVSM_ShadowCaster_RenderFeature", rendererData);
 	
 	FinishRenderFeature("TBForward_LightList_RenderFeature", rendererData);
 	FinishRenderFeature("TBForward_Opaque_RenderFeature", rendererData);

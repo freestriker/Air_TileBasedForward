@@ -110,6 +110,7 @@
     <ClCompile Include="source\Rendering\RenderFeature\AO_Blur_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\AO_Cover_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\Background_RenderFeature.cpp" />
+    <ClCompile Include="source\Rendering\RenderFeature\CascadeEVSM_ShadowCaster_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\ClearColorAttachment_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\CSM_ShadowMap_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\Forward_Opaque_RenderFeature.cpp" />
@@ -269,6 +270,7 @@
     <ClInclude Include="header\Rendering\RenderFeature\AO_Blur_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\AO_Cover_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\Background_RenderFeature.h" />
+    <ClInclude Include="header\Rendering\RenderFeature\CascadeEVSM_ShadowCaster_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\ClearColorAttachment_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\CSM_ShadowMap_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\Forward_Opaque_RenderFeature.h" />

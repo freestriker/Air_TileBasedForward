@@ -49,6 +49,12 @@ void AirEngine::Test::TBF_WallRendererBehaviour::OnStart()
 		auto shadowCasterMaterial = new Core::Graphic::Rendering::Material(shadowCasterShader);
 		renderer->AddMaterial(shadowCasterMaterial);
 	}
+
+	{
+		auto shadowCasterShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\CascadeEVSM_ShadowCaster_Shader.shader");
+		auto shadowCasterMaterial = new Core::Graphic::Rendering::Material(shadowCasterShader);
+		renderer->AddMaterial(shadowCasterMaterial);
+	}
 }
 
 void AirEngine::Test::TBF_WallRendererBehaviour::OnUpdate()

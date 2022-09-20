@@ -61,6 +61,9 @@ glslangValidator.exe -t -V PresentShader.frag -IUtils/ -o Spv/PresentShader.frag
 glslangValidator.exe -t -V CSM_ShadowCaster_Shader.vert -IUtils/ -o Spv/CSM_ShadowCaster_Shader.vert.spv
 glslangValidator.exe -t -V CSM_ShadowCaster_Shader.frag -IUtils/ -o Spv/CSM_ShadowCaster_Shader.frag.spv
 
+glslangValidator.exe -t -V CascadeEVSM_ShadowCaster_Shader.vert -IUtils/ -o Spv/CascadeEVSM_ShadowCaster_Shader.vert.spv
+glslangValidator.exe -t -V CascadeEVSM_ShadowCaster_Shader.frag -IUtils/ -o Spv/CascadeEVSM_ShadowCaster_Shader.frag.spv
+
 glslangValidator.exe -t -V TBF_LightList_Shader.comp -IUtils/ -o Spv/TBF_LightList_Shader.comp.spv
 
 cmd
