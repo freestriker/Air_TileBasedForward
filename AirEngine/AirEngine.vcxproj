@@ -106,6 +106,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="source\Rendering\Renderer\AmbientOcclusionRenderer.cpp" />
+    <ClCompile Include="source\Rendering\Renderer\ShadowVisualizationRenderer.cpp" />
     <ClCompile Include="source\Rendering\Renderer\TBForwardRenderer.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\AO_Blur_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\AO_Cover_RenderFeature.cpp" />
@@ -266,6 +267,7 @@
     <ClInclude Include="header\Rendering\PresentRenderPass.h" />
     <ClInclude Include="header\Rendering\Renderer\AmbientOcclusionRenderer.h" />
     <ClInclude Include="header\Rendering\Renderer\ForwardRenderer.h" />
+    <ClInclude Include="header\Rendering\Renderer\ShadowVisualizationRenderer.h" />
     <ClInclude Include="header\Rendering\Renderer\TBForwardRenderer.h" />
     <ClInclude Include="header\Rendering\RenderFeature\AO_Blur_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\AO_Cover_RenderFeature.h" />
