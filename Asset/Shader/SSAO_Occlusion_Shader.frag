@@ -36,23 +36,6 @@ void main()
     vec3 vPosition = PositionN2V(ndcPosition, cameraInfo.info);
     vec3 vNormal = ParseFromColor(texture(normalTexture, aPosition).rgb);
 
-    // vec3 faceVNormal;
-    // {
-    //     vec2 lAPosition = clamp((gl_FragCoord.xy + vec2(-1, 0)) * ssaoInfo.attachmentTexelSize, 0, 1);
-    //     float lNdcDepth =  texture(depthTexture, lAPosition).r;
-    //     vec3 lNdcPosition = vec3(PositionA2N(lAPosition), lNdcDepth);
-    //     vec3 lVPosition = PositionN2V(lNdcPosition, cameraInfo.info);
-    //     vec3 h = vPosition - lVPosition;
-
-    //     vec2 dAposition = clamp((gl_FragCoord.xy + vec2(0, 1)) * ssaoInfo.attachmentTexelSize, 0, 1);
-    //     float dNdcDepth =  texture(depthTexture, dAposition).r;
-    //     vec3 dNdcPosition = vec3(PositionA2N(dAposition), dNdcDepth);
-    //     vec3 dVPosition = PositionN2V(dNdcPosition, cameraInfo.info);
-    //     vec3 v = vPosition - dVPosition;
-
-    //     faceVNormal = normalize(cross(h, v));
-    // }
-
     float noiseRadian = texture(noiseTexture, mod(gl_FragCoord.xy, ssaoInfo.noiseTextureWidth) / ssaoInfo.noiseTextureWidth).r * DOUBLE_PI;
     
     vec3 zAxis = vNormal;

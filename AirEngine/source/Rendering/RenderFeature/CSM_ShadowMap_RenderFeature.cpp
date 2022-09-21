@@ -316,6 +316,7 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnExcute(
 			lightVPositions[i] = sphereCenterVPositions[i] - lightVView * (sphereRadius[i] + featureData->lightCameraCompensationDistances[i]);
 		}
 		csmShadowReceiverInfo.wLightDirection = lightWView;
+		csmShadowReceiverInfo.vLightDirection = lightVView;
 		csmShadowReceiverInfo.minBias = featureData->minBias;
 		csmShadowReceiverInfo.maxBias = featureData->maxBias;
 		csmShadowReceiverInfo.sampleHalfWidth = featureData->sampleHalfWidth;

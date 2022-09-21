@@ -79,6 +79,7 @@ namespace AirEngine
 				{
 					alignas(16) glm::vec4 thresholdVZ[CASCADE_COUNT * 2];
 					alignas(16) glm::vec3 wLightDirection;
+					alignas(16) glm::vec3 vLightDirection;
 					alignas(4) float minBias;
 					alignas(4) float maxBias;
 					alignas(16) glm::mat4 matrixVC2PL[CASCADE_COUNT];
