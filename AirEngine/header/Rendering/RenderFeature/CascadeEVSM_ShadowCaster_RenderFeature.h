@@ -77,7 +77,7 @@ namespace AirEngine
 					std::array<Core::Graphic::Instance::Buffer*, CASCADE_COUNT> blitInfoBuffers;
 					Core::Graphic::Instance::Buffer* lightCameraInfoBuffer;
 					Core::Graphic::Instance::Buffer* lightCameraInfoStagingBuffer;
-					Core::Graphic::Instance::Buffer* csmShadowReceiverInfoBuffer;
+					Core::Graphic::Instance::Buffer* cascadeEvsmShadowReceiverInfoBuffer;
 				public:
 					std::array<float, CASCADE_COUNT> frustumSegmentScales;
 					std::array<float, CASCADE_COUNT> lightCameraCompensationDistances;
@@ -85,6 +85,7 @@ namespace AirEngine
 					float overlapScale;
 					float c1;
 					float c2;
+					float threshold;
 
 					void Refresh();
 
@@ -106,12 +107,16 @@ namespace AirEngine
 					alignas(4) float c1;
 					alignas(4) float c2;
 				};
-				struct CsmShadowReceiverInfo
+				struct CascadeEvsmShadowReceiverInfo
 				{
 					alignas(16) glm::vec4 thresholdVZ[CASCADE_COUNT * 2];
 					alignas(16) glm::vec3 wLightDirection;
+					alignas(16) glm::vec3 vLightDirection;
 					alignas(16) glm::mat4 matrixVC2PL[CASCADE_COUNT];
 					alignas(16) glm::vec4 texelSize[CASCADE_COUNT];
+					alignas(4) float c1;
+					alignas(4) float c2;
+					alignas(4) float threshold;
 				};
 
 				CONSTRUCTOR(CascadeEVSM_ShadowCaster_RenderFeature)

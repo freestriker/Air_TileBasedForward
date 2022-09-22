@@ -6,6 +6,7 @@
 #include "Rendering/RenderFeature/CSM_ShadowMap_RenderFeature.h"
 #include "Rendering/RenderFeature/CascadeEVSM_ShadowCaster_RenderFeature.h"
 #include "Rendering/RenderFeature/CSM_Visualization_RenderFeature.h"
+#include "Rendering/RenderFeature/CascadeEVSM_Visualization_RenderFeature.h"
 
 RTTR_REGISTRATION
 {
@@ -33,6 +34,7 @@ AirEngine::Rendering::Renderer::ShadowVisualizationRenderer::ShadowVisualization
 	UseRenderFeature("CSM_Visualization_RenderFeature", new RenderFeature::CSM_Visualization_RenderFeature());
 	
 	UseRenderFeature("CascadeEVSM_ShadowCaster_RenderFeature", new RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature());
+	UseRenderFeature("CascadeEVSM_Visualization_RenderFeature", new RenderFeature::CascadeEVSM_Visualization_RenderFeature());
 }
 
 AirEngine::Rendering::Renderer::ShadowVisualizationRenderer::~ShadowVisualizationRenderer()
@@ -44,6 +46,7 @@ AirEngine::Rendering::Renderer::ShadowVisualizationRenderer::~ShadowVisualizatio
 	delete static_cast<RenderFeature::CSM_Visualization_RenderFeature*>(RenderFeature("CSM_Visualization_RenderFeature"));
 	
 	delete static_cast<RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature*>(RenderFeature("CascadeEVSM_ShadowCaster_RenderFeature"));
+	delete static_cast<RenderFeature::CascadeEVSM_Visualization_RenderFeature*>(RenderFeature("CascadeEVSM_Visualization_RenderFeature"));
 }
 
 AirEngine::Rendering::Renderer::ShadowVisualizationRenderer::ShadowVisualizationRendererData::ShadowVisualizationRendererData()
@@ -80,10 +83,14 @@ void AirEngine::Rendering::Renderer::ShadowVisualizationRenderer::OnResolveRende
 	csmVisualizationFeatureData->csmRenderFeatureData = csmShadowMapFeatureData;
 	csmVisualizationFeatureData->geometryRenderFeatureData = geometryFeatureData;
 
-	auto sevsmShadowMapFeatureData = rendererData->RenderFeatureData<RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::CascadeEVSM_ShadowCaster_RenderFeatureData>("CascadeEVSM_ShadowCaster_RenderFeature");
-	sevsmShadowMapFeatureData->frustumSegmentScales = { 0.1, 0.2, 0.3, 0.4 };
-	sevsmShadowMapFeatureData->lightCameraCompensationDistances = { 5, 5, 5, 5 };
-	sevsmShadowMapFeatureData->shadowImageResolutions = { 1024, 1024, 1024, 1024 };
+	auto cevsmShadowMapFeatureData = rendererData->RenderFeatureData<RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::CascadeEVSM_ShadowCaster_RenderFeatureData>("CascadeEVSM_ShadowCaster_RenderFeature");
+	cevsmShadowMapFeatureData->frustumSegmentScales = { 0.1, 0.2, 0.3, 0.4 };
+	cevsmShadowMapFeatureData->lightCameraCompensationDistances = { 5, 5, 5, 5 };
+	cevsmShadowMapFeatureData->shadowImageResolutions = { 2048, 2048, 1024, 1024 };
+
+	auto cevsmVisualizationFeatureData = rendererData->RenderFeatureData<RenderFeature::CascadeEVSM_Visualization_RenderFeature::CascadeEVSM_Visualization_RenderFeatureData>("CascadeEVSM_Visualization_RenderFeature");
+	cevsmVisualizationFeatureData->cascadeEvsmRenderFeatureData = cevsmShadowMapFeatureData;
+	cevsmVisualizationFeatureData->geometryRenderFeatureData = geometryFeatureData;
 }
 
 void AirEngine::Rendering::Renderer::ShadowVisualizationRenderer::OnDestroyRendererData(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -107,6 +114,7 @@ void AirEngine::Rendering::Renderer::ShadowVisualizationRenderer::PrepareRendere
 		case ShadowType::CASCADE_EVSM:
 		{
 			PrepareRenderFeature("CascadeEVSM_ShadowCaster_RenderFeature", rendererData);
+			PrepareRenderFeature("CascadeEVSM_Visualization_RenderFeature", rendererData);
 			break;
 		}
 	}
@@ -127,6 +135,7 @@ void AirEngine::Rendering::Renderer::ShadowVisualizationRenderer::ExcuteRenderer
 		case ShadowType::CASCADE_EVSM:
 		{
 			ExcuteRenderFeature("CascadeEVSM_ShadowCaster_RenderFeature", rendererData, camera, rendererComponents);
+			ExcuteRenderFeature("CascadeEVSM_Visualization_RenderFeature", rendererData, camera, rendererComponents);
 			break;
 		}
 	}
@@ -147,6 +156,7 @@ void AirEngine::Rendering::Renderer::ShadowVisualizationRenderer::SubmitRenderer
 		case ShadowType::CASCADE_EVSM:
 		{
 			SubmitRenderFeature("CascadeEVSM_ShadowCaster_RenderFeature", rendererData);
+			SubmitRenderFeature("CascadeEVSM_Visualization_RenderFeature", rendererData);
 			break;
 		}
 	}
@@ -167,6 +177,7 @@ void AirEngine::Rendering::Renderer::ShadowVisualizationRenderer::FinishRenderer
 		case ShadowType::CASCADE_EVSM:
 		{
 			FinishRenderFeature("CascadeEVSM_ShadowCaster_RenderFeature", rendererData);
+			FinishRenderFeature("CascadeEVSM_Visualization_RenderFeature", rendererData);
 			break;
 		}
 	}

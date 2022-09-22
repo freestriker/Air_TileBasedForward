@@ -196,7 +196,7 @@ AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::Cas
 	, frustumSegmentScales()
 	, lightCameraCompensationDistances()
 	, shadowImageResolutions()
-	, csmShadowReceiverInfoBuffer(nullptr)
+	, cascadeEvsmShadowReceiverInfoBuffer(nullptr)
 	, blitInfoBuffers()
 	, shadowTextures()
 	, blitFrameBuffers()
@@ -209,6 +209,7 @@ AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::Cas
 	overlapScale = 0.3;
 	c1 = 40;
 	c2 = 5;
+	threshold = 0;
 }
 
 AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::CascadeEVSM_ShadowCaster_RenderFeatureData::~CascadeEVSM_ShadowCaster_RenderFeatureData()
@@ -284,7 +285,11 @@ void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature
 
 void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::CascadeEVSM_ShadowCaster_RenderFeatureData::SetShadowReceiverMaterialParameters(Core::Graphic::Rendering::Material* material)
 {
-
+	material->SetUniformBuffer("cascadeEvsmShadowReceiverInfo", cascadeEvsmShadowReceiverInfoBuffer);
+	for (int i = 0; i < CASCADE_COUNT; i++)
+	{
+		material->SetSlotData("shadowTexture_" + std::to_string(i), { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, pointSampler->VkSampler_(), shadowTextures[i]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
+	}
 }
 
 AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::OnCreateRenderFeatureData(Camera::CameraBase* camera)
@@ -317,8 +322,8 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 		VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 	);
 
-	featureData->csmShadowReceiverInfoBuffer = new Core::Graphic::Instance::Buffer(
-		sizeof(CsmShadowReceiverInfo),
+	featureData->cascadeEvsmShadowReceiverInfoBuffer = new Core::Graphic::Instance::Buffer(
+		sizeof(CascadeEvsmShadowReceiverInfo),
 		VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 		VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 	);
@@ -337,7 +342,7 @@ void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature
 	auto featureData = static_cast<CascadeEVSM_ShadowCaster_RenderFeatureData*>(renderFeatureData);
 	delete featureData->lightCameraInfoBuffer;
 	delete featureData->lightCameraInfoStagingBuffer;
-	delete featureData->csmShadowReceiverInfoBuffer;
+	delete featureData->cascadeEvsmShadowReceiverInfoBuffer;
 	for (auto i = 0; i < CASCADE_COUNT; i++)
 	{
 		delete featureData->blitInfoBuffers[i];
@@ -429,7 +434,7 @@ void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature
 
 	glm::vec3 lightVPositions[CASCADE_COUNT]{};
 	LightCameraInfo lightCameraInfos[CASCADE_COUNT]{};
-	CsmShadowReceiverInfo csmShadowReceiverInfo{};
+	CascadeEvsmShadowReceiverInfo cascadeEvsmShadowReceiverInfo{};
 	CascadeEvsmBlitInfo cascadeEvsmBlitInfo{};
 	{
 		auto light = Core::Graphic::CoreObject::Instance::LightManager().MainLight();
@@ -457,7 +462,11 @@ void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature
 
 			lightVPositions[i] = sphereCenterVPositions[i] - lightVView * (sphereRadius[i] + featureData->lightCameraCompensationDistances[i]);
 		}
-		csmShadowReceiverInfo.wLightDirection = lightWView;
+		cascadeEvsmShadowReceiverInfo.wLightDirection = lightWView;
+		cascadeEvsmShadowReceiverInfo.vLightDirection = lightVView;
+		cascadeEvsmShadowReceiverInfo.c1 = featureData->c1;
+		cascadeEvsmShadowReceiverInfo.c2 = featureData->c2;
+		cascadeEvsmShadowReceiverInfo.threshold = featureData->threshold;
 		for (int i = 0; i < CASCADE_COUNT; i++)
 		{
 			float halfWidth = sphereRadius[i];
@@ -474,21 +483,21 @@ void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature
 
 			lightCameraInfos[i].viewProjection = lightCameraInfos[i].projection * lightCameraInfos[i].view;
 
-			csmShadowReceiverInfo.matrixVC2PL[i] = lightCameraInfos[i].projection * matrixVC2VL;
+			cascadeEvsmShadowReceiverInfo.matrixVC2PL[i] = lightCameraInfos[i].projection * matrixVC2VL;
 
-			csmShadowReceiverInfo.thresholdVZ[i * 2 + 0].x = subAngularPointVPositions[i][0].z;
-			csmShadowReceiverInfo.thresholdVZ[i * 2 + 1].x = subAngularPointVPositions[i][4].z;
+			cascadeEvsmShadowReceiverInfo.thresholdVZ[i * 2 + 0].x = subAngularPointVPositions[i][0].z;
+			cascadeEvsmShadowReceiverInfo.thresholdVZ[i * 2 + 1].x = subAngularPointVPositions[i][4].z;
 
-			csmShadowReceiverInfo.texelSize[i] = { 1.0f / featureData->shadowImageResolutions[i], 1.0f / featureData->shadowImageResolutions[i], 0, 0 };
+			cascadeEvsmShadowReceiverInfo.texelSize[i] = { 1.0f / featureData->shadowImageResolutions[i], 1.0f / featureData->shadowImageResolutions[i], 0, 0 };
 
-			cascadeEvsmBlitInfo.texelSize = csmShadowReceiverInfo.texelSize[i];
+			cascadeEvsmBlitInfo.texelSize = cascadeEvsmShadowReceiverInfo.texelSize[i];
 			featureData->blitInfoBuffers[i]->WriteData(&cascadeEvsmBlitInfo, sizeof(CascadeEvsmBlitInfo));
 		}
 
-		std::sort(csmShadowReceiverInfo.thresholdVZ, csmShadowReceiverInfo.thresholdVZ + CASCADE_COUNT * 2, [](glm::vec4 a, glm::vec4 b)->bool {return a.x > b.x; });
+		std::sort(cascadeEvsmShadowReceiverInfo.thresholdVZ, cascadeEvsmShadowReceiverInfo.thresholdVZ + CASCADE_COUNT * 2, [](glm::vec4 a, glm::vec4 b)->bool {return a.x > b.x; });
 
 		featureData->lightCameraInfoStagingBuffer->WriteData(&lightCameraInfos, sizeof(LightCameraInfo) * CASCADE_COUNT);
-		featureData->csmShadowReceiverInfoBuffer->WriteData(&csmShadowReceiverInfo, sizeof(CsmShadowReceiverInfo));
+		featureData->cascadeEvsmShadowReceiverInfoBuffer->WriteData(&cascadeEvsmShadowReceiverInfo, sizeof(CascadeEvsmShadowReceiverInfo));
 	}
 
 	AirEngine::Utils::IntersectionChecker checkers[CASCADE_COUNT];
