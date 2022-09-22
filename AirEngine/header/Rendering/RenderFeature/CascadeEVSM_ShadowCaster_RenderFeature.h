@@ -67,14 +67,19 @@ namespace AirEngine
 				private:
 					Core::Graphic::Rendering::RenderPassBase* shadowCasterRenderPass;
 					Core::Graphic::Rendering::RenderPassBase* blitRenderPass;
+					Core::Graphic::Rendering::RenderPassBase* blurRenderPass;
 					Core::Graphic::Instance::ImageSampler* pointSampler;
 
 					std::array<Core::Graphic::Instance::Image*, CASCADE_COUNT> depthAttachemnts;
 					std::array<Core::Graphic::Instance::Image*, CASCADE_COUNT> shadowTextures;
+					std::array<Core::Graphic::Instance::Image*, CASCADE_COUNT> temporaryShadowTextures;
 					std::array<Core::Graphic::Rendering::FrameBuffer*, CASCADE_COUNT> shadowCasterFrameBuffers;
 					std::array<Core::Graphic::Rendering::FrameBuffer*, CASCADE_COUNT> blitFrameBuffers;
+					std::array<Core::Graphic::Rendering::FrameBuffer*, CASCADE_COUNT * 2> blurFrameBuffers;
 					std::array<Core::Graphic::Rendering::Material*, CASCADE_COUNT> blitMaterials;
 					std::array<Core::Graphic::Instance::Buffer*, CASCADE_COUNT> blitInfoBuffers;
+					std::array<Core::Graphic::Rendering::Material*, CASCADE_COUNT * 2> blurMaterials;
+					std::array<Core::Graphic::Instance::Buffer*, CASCADE_COUNT * 2> blurInfoBuffers;
 					Core::Graphic::Instance::Buffer* lightCameraInfoBuffer;
 					Core::Graphic::Instance::Buffer* lightCameraInfoStagingBuffer;
 					Core::Graphic::Instance::Buffer* cascadeEvsmShadowReceiverInfoBuffer;
@@ -82,10 +87,12 @@ namespace AirEngine
 					std::array<float, CASCADE_COUNT> frustumSegmentScales;
 					std::array<float, CASCADE_COUNT> lightCameraCompensationDistances;
 					std::array<uint32_t, CASCADE_COUNT> shadowImageResolutions;
+					std::array<float, CASCADE_COUNT> blurOffsets;
 					float overlapScale;
 					float c1;
 					float c2;
 					float threshold;
+					int iterateCount;
 
 					void Refresh();
 
@@ -107,6 +114,11 @@ namespace AirEngine
 					alignas(4) float c1;
 					alignas(4) float c2;
 				};
+				struct CascadeEvsmBlurInfo
+				{
+					alignas(8) glm::vec2 texelSize;
+					alignas(8) glm::vec2 sampleOffset;
+				};
 				struct CascadeEvsmShadowReceiverInfo
 				{
 					alignas(16) glm::vec4 thresholdVZ[CASCADE_COUNT * 2];
@@ -124,9 +136,11 @@ namespace AirEngine
 			private:
 				Core::Graphic::Rendering::RenderPassBase* _shadowCasterRenderPass;
 				Core::Graphic::Rendering::RenderPassBase* _blitRenderPass;
+				Core::Graphic::Rendering::RenderPassBase* _blurRenderPass;
 				std::string _shadowCasterRenderPassName;
 				Core::Graphic::Instance::ImageSampler* _pointSampler;
 				Core::Graphic::Rendering::Shader* _blitShader;
+				Core::Graphic::Rendering::Shader* _blurShader;
 				Asset::Mesh* _fullScreenMesh;
 
 				Core::Graphic::Rendering::RenderFeatureDataBase* OnCreateRenderFeatureData(Camera::CameraBase* camera)override;

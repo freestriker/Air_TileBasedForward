@@ -489,7 +489,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		quadRendererGo->AddComponent(new Renderer::Renderer());
 		quadRendererGo->AddComponent(new Test::QuadMoveBehaviour());
 		quadRendererGo->transform.SetTranslation(glm::vec3(-1.5, 0, -1));
-		//quadRendererGo->transform.SetScale({ 5, 5, 1 });
+		quadRendererGo->transform.SetScale({ 5, 5, 1 });
 	}
 
 	///Forward transparent

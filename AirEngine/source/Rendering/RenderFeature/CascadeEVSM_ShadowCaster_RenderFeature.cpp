@@ -155,8 +155,8 @@ AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::Cas
 
 void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::CascadeEVSM_Blur_RenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
 {
-	creator.AddDepthAttachment(
-		"ColorAttachment",
+	creator.AddColorAttachment(
+		"ShadowTexture",
 		VK_FORMAT_R32G32B32A32_SFLOAT,
 		VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT,
 		VK_ATTACHMENT_LOAD_OP_DONT_CARE,
@@ -167,14 +167,14 @@ void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature
 	creator.AddSubpass(
 		"DrawSubpass",
 		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		{ "ColorAttachment" }
+		{ "ShadowTexture" }
 	);
 	creator.AddDependency(
 		"VK_SUBPASS_EXTERNAL",
 		"DrawSubpass",
-		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-		VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+		VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
 		VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
 	);
 	creator.AddDependency(
@@ -202,6 +202,10 @@ AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::Cas
 	, blitFrameBuffers()
 	, blitRenderPass(nullptr)
 	, blitMaterials()
+	, blurInfoBuffers()
+	, blurMaterials()
+	, blurFrameBuffers()
+	, temporaryShadowTextures()
 {
 	frustumSegmentScales.fill(1.0 / CASCADE_COUNT);
 	lightCameraCompensationDistances.fill(20);
@@ -209,7 +213,9 @@ AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::Cas
 	overlapScale = 0.3;
 	c1 = 40;
 	c2 = 5;
-	threshold = 0;
+	threshold = 0.0;
+	iterateCount = 1;
+	blurOffsets.fill(1);
 }
 
 AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::CascadeEVSM_ShadowCaster_RenderFeatureData::~CascadeEVSM_ShadowCaster_RenderFeatureData()
@@ -220,6 +226,7 @@ AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::Cas
 	: RenderFeatureBase()
 	, _shadowCasterRenderPass(Core::Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass<CascadeEVSM_ShadowCaster_RenderPass>())
 	, _blitRenderPass(Core::Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass<CascadeEVSM_Blit_RenderPass>())
+	, _blurRenderPass(Core::Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass<CascadeEVSM_Blur_RenderPass>())
 	, _shadowCasterRenderPassName(rttr::type::get<CascadeEVSM_ShadowCaster_RenderPass>().get_name().to_string())
 	, _pointSampler(
 		new Core::Graphic::Instance::ImageSampler(
@@ -231,6 +238,7 @@ AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::Cas
 		)
 	)
 	, _blitShader(Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\CascadeEVSM_Blit_Shader.shader"))
+	, _blurShader(Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\CascadeEVSM_Blur_Shader.shader"))
 	, _fullScreenMesh(Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\BackgroundMesh.ply"))
 {
 
@@ -241,6 +249,7 @@ AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::~Ca
 	Core::Graphic::CoreObject::Instance::RenderPassManager().UnloadRenderPass<CascadeEVSM_ShadowCaster_RenderPass>();
 	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Mesh\\BackgroundMesh.ply");
 	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\CascadeEVSM_Blit_Shader.shader");
+	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\CascadeEVSM_Blur_Shader.shader");
 	delete _pointSampler;
 }
 
@@ -264,6 +273,7 @@ void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature
 				{"DepthAttachment", depthAttachemnts[i]},
 			}
 		);
+
 		delete shadowTextures[i];
 		shadowTextures[i] = Core::Graphic::Instance::Image::Create2DImage(
 			extent,
@@ -272,6 +282,7 @@ void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature
 			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
 		);
+
 		delete blitFrameBuffers[i];
 		blitFrameBuffers[i] = new Core::Graphic::Rendering::FrameBuffer(
 			blitRenderPass,
@@ -280,6 +291,31 @@ void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature
 			}
 		);
 		blitMaterials[i]->SetSlotData("depthTexture", {0}, {{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, pointSampler->VkSampler_(), depthAttachemnts[i]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}});
+	
+		delete temporaryShadowTextures[i];
+		temporaryShadowTextures[i] = Core::Graphic::Instance::Image::Create2DImage(
+			extent,
+			VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT,
+			VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT,
+			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
+		);
+		delete blurFrameBuffers[i];
+		blurFrameBuffers[i] = new Core::Graphic::Rendering::FrameBuffer(
+			blurRenderPass,
+			{
+				{"ShadowTexture", temporaryShadowTextures[i]},
+			}
+		);
+		delete blurFrameBuffers[i + CASCADE_COUNT];
+		blurFrameBuffers[i + CASCADE_COUNT] = new Core::Graphic::Rendering::FrameBuffer(
+			blurRenderPass,
+			{
+				{"ShadowTexture", shadowTextures[i]},
+			}
+		);
+		blurMaterials[i]->SetSlotData("shadowTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, pointSampler->VkSampler_(), shadowTextures[i]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
+		blurMaterials[i + CASCADE_COUNT]->SetSlotData("shadowTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, pointSampler->VkSampler_(), temporaryShadowTextures[i]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
 	}
 }
 
@@ -297,6 +333,7 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	auto featureData = new CascadeEVSM_ShadowCaster_RenderFeatureData();
 	featureData->shadowCasterRenderPass = _shadowCasterRenderPass;
 	featureData->blitRenderPass = _blitRenderPass;
+	featureData->blurRenderPass = _blurRenderPass;
 	featureData->pointSampler = _pointSampler;
 
 	for (auto i = 0; i < CASCADE_COUNT; i++)
@@ -307,8 +344,22 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 		);
 		featureData->blitMaterials[i] = new Core::Graphic::Rendering::Material(_blitShader);
-
 		featureData->blitMaterials[i]->SetUniformBuffer("cascadeEvsmBlitInfo", featureData->blitInfoBuffers[i]);
+
+		featureData->blurInfoBuffers[i] = new Core::Graphic::Instance::Buffer(
+			sizeof(CascadeEvsmBlurInfo),
+			VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		);
+		featureData->blurInfoBuffers[i + CASCADE_COUNT] = new Core::Graphic::Instance::Buffer(
+			sizeof(CascadeEvsmBlurInfo),
+			VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		);
+		featureData->blurMaterials[i] = new Core::Graphic::Rendering::Material(_blurShader);
+		featureData->blurMaterials[i + CASCADE_COUNT] = new Core::Graphic::Rendering::Material(_blurShader);
+		featureData->blurMaterials[i]->SetUniformBuffer("cascadeEvsmBlurInfo", featureData->blurInfoBuffers[i]);
+		featureData->blurMaterials[i + CASCADE_COUNT]->SetUniformBuffer("cascadeEvsmBlurInfo", featureData->blurInfoBuffers[i + CASCADE_COUNT]);
 	}
 
 	featureData->lightCameraInfoBuffer = new Core::Graphic::Instance::Buffer(
@@ -345,12 +396,22 @@ void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature
 	delete featureData->cascadeEvsmShadowReceiverInfoBuffer;
 	for (auto i = 0; i < CASCADE_COUNT; i++)
 	{
-		delete featureData->blitInfoBuffers[i];
 		delete featureData->depthAttachemnts[i];
 		delete featureData->shadowCasterFrameBuffers[i];
+
 		delete featureData->shadowTextures[i];
+		delete featureData->blitInfoBuffers[i];
 		delete featureData->blitFrameBuffers[i];
 		delete featureData->blitMaterials[i];
+
+		delete featureData->temporaryShadowTextures[i];
+		delete featureData->blurMaterials[i];
+		delete featureData->blurMaterials[i + CASCADE_COUNT];
+		delete featureData->blurInfoBuffers[i];
+		delete featureData->blurInfoBuffers[i + CASCADE_COUNT];
+		delete featureData->blurFrameBuffers[i];
+		delete featureData->blurFrameBuffers[i + CASCADE_COUNT];
+		
 	}
 	delete featureData;
 }
@@ -492,6 +553,13 @@ void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature
 
 			cascadeEvsmBlitInfo.texelSize = cascadeEvsmShadowReceiverInfo.texelSize[i];
 			featureData->blitInfoBuffers[i]->WriteData(&cascadeEvsmBlitInfo, sizeof(CascadeEvsmBlitInfo));
+
+			CascadeEvsmBlurInfo cascadeEvsmBlurInfo{};
+			cascadeEvsmBlurInfo.texelSize = cascadeEvsmShadowReceiverInfo.texelSize[i];
+			cascadeEvsmBlurInfo.sampleOffset = { featureData->blurOffsets[i], 0 };
+			featureData->blurInfoBuffers[i]->WriteData(&cascadeEvsmBlurInfo, sizeof(CascadeEvsmBlurInfo));
+			cascadeEvsmBlurInfo.sampleOffset = { 0, featureData->blurOffsets[i] };
+			featureData->blurInfoBuffers[i + CASCADE_COUNT]->WriteData(&cascadeEvsmBlurInfo, sizeof(CascadeEvsmBlurInfo));
 		}
 
 		std::sort(cascadeEvsmShadowReceiverInfo.thresholdVZ, cascadeEvsmShadowReceiverInfo.thresholdVZ + CASCADE_COUNT * 2, [](glm::vec4 a, glm::vec4 b)->bool {return a.x > b.x; });
@@ -575,6 +643,20 @@ void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature
 		commandBuffer->DrawMesh(_fullScreenMesh, featureData->blitMaterials[i]);
 
 		commandBuffer->EndRenderPass();
+	}
+
+	for (int ii = 0; ii < featureData->iterateCount; ii++)
+	{
+		for (int i = 0; i < CASCADE_COUNT; i++)
+		{
+			commandBuffer->BeginRenderPass(_blurRenderPass, featureData->blurFrameBuffers[i]);
+			commandBuffer->DrawMesh(_fullScreenMesh, featureData->blurMaterials[i]);
+			commandBuffer->EndRenderPass();
+
+			commandBuffer->BeginRenderPass(_blurRenderPass, featureData->blurFrameBuffers[i + CASCADE_COUNT]);
+			commandBuffer->DrawMesh(_fullScreenMesh, featureData->blurMaterials[i + CASCADE_COUNT]);
+			commandBuffer->EndRenderPass();
+		}
 	}
 
 	commandBuffer->EndRecord();

@@ -82,53 +82,55 @@ float GetShadowIntensity(in vec3 vPosition)
             vec2 mu = param.xz;
             vec2 sigma2 = param.yw - mu * mu;
             vec2 expDepth = vec2(exp(lnDepth0 * cascadeEvsmShadowReceiverInfo.c1), -exp(-lnDepth0 * cascadeEvsmShadowReceiverInfo.c2));
-            vec2 lightIntensity = clamp(sigma2 / (sigma2 + (expDepth - mu) * (expDepth - mu)), cascadeEvsmShadowReceiverInfo.threshold, 1);
+            vec2 lightIntensity = clamp(sigma2 / (sigma2 + (expDepth - mu) * (expDepth - mu)), 0, 1);
             if(expDepth.x <= mu.x || expDepth.y <= mu.y)
             {
                 shadowIntensity0 = 0;
             }
             else
             {
-                shadowIntensity0 = 1 - (lightIntensity.x < lightIntensity.y ? lightIntensity.x : lightIntensity.y);
+                shadowIntensity0 = clamp((lightIntensity.x < lightIntensity.y ? lightIntensity.x : lightIntensity.y) - cascadeEvsmShadowReceiverInfo.threshold, 0, 1);
+                shadowIntensity0 = 1 - shadowIntensity0 / (1 - cascadeEvsmShadowReceiverInfo.threshold);
             }
         }
     }
 
-    // if(cascadIndex % 2 == 0)
-    // {
-    //     return shadowIntensity0;
-    // }
-    // else
-    // {
-    //     vec4 lvPosition = cascadeEvsmShadowReceiverInfo.matrixVC2PL[cascadIndex / 2] * vec4(vPosition, 1);
-    //     vec3 lnPosition = lvPosition.xyz / lvPosition.w;
-    //     lnDepth1 = lnPosition.z;
-    //     vec2 laPosition = (clamp(lvPosition.xy, -1, 1) + vec2(1, -1)) / vec2(2, -2);
+    if(cascadIndex % 2 == 0)
+    {
+        return shadowIntensity0;
+    }
+    else
+    {
+        vec4 lvPosition = cascadeEvsmShadowReceiverInfo.matrixVC2PL[cascadIndex / 2] * vec4(vPosition, 1);
+        vec3 lnPosition = lvPosition.xyz / lvPosition.w;
+        lnDepth1 = lnPosition.z;
+        vec2 laPosition = (clamp(lvPosition.xy, -1, 1) + vec2(1, -1)) / vec2(2, -2);
 
-    //     vec4 param = SampleShadowTexture(cascadIndex / 2, laPosition);
-    //     {
-    //         vec2 mu = param.xz;
-    //         vec2 sigma2 = param.yw - mu * mu;
-    //         vec2 expDepth = vec2(exp(lnDepth1 * cascadeEvsmShadowReceiverInfo.c1), -exp(-lnDepth1 * cascadeEvsmShadowReceiverInfo.c2));
-    //         vec2 lightIntensity = clamp(sigma2 / (sigma2 + (expDepth - mu) * (expDepth - mu)), cascadeEvsmShadowReceiverInfo.threshold, 1);
-    //         if(expDepth.x <= mu.x || expDepth.y <= mu.y)
-    //         {
-    //             shadowIntensity1 = 0;
-    //         }
-    //         else
-    //         {
-    //             shadowIntensity1 = 1 - (lightIntensity.x < lightIntensity.y ? lightIntensity.x : lightIntensity.y);
-    //         }
-    //     }
+        vec4 param = SampleShadowTexture(cascadIndex / 2, laPosition);
+        {
+            vec2 mu = param.xz;
+            vec2 sigma2 = param.yw - mu * mu;
+            vec2 expDepth = vec2(exp(lnDepth1 * cascadeEvsmShadowReceiverInfo.c1), -exp(-lnDepth1 * cascadeEvsmShadowReceiverInfo.c2));
+            vec2 lightIntensity = clamp(sigma2 / (sigma2 + (expDepth - mu) * (expDepth - mu)), cascadeEvsmShadowReceiverInfo.threshold, 1);
+            if(expDepth.x <= mu.x || expDepth.y <= mu.y)
+            {
+                shadowIntensity1 = 0;
+            }
+            else
+            {
+                shadowIntensity1 = clamp((lightIntensity.x < lightIntensity.y ? lightIntensity.x : lightIntensity.y) - cascadeEvsmShadowReceiverInfo.threshold, 0, 1);
+                shadowIntensity1 = 1 - shadowIntensity1 / (1 - cascadeEvsmShadowReceiverInfo.threshold);
+            }
+        }
 
-    //     float len = cascadeEvsmShadowReceiverInfo.thresholdVZ[cascadIndex] - cascadeEvsmShadowReceiverInfo.thresholdVZ[cascadIndex + 1];
-    //     float pre = cascadeEvsmShadowReceiverInfo.thresholdVZ[cascadIndex] - vPosition.z;
-    //     float next = vPosition.z - cascadeEvsmShadowReceiverInfo.thresholdVZ[cascadIndex + 1];
+        float len = cascadeEvsmShadowReceiverInfo.thresholdVZ[cascadIndex] - cascadeEvsmShadowReceiverInfo.thresholdVZ[cascadIndex + 1];
+        float pre = cascadeEvsmShadowReceiverInfo.thresholdVZ[cascadIndex] - vPosition.z;
+        float next = vPosition.z - cascadeEvsmShadowReceiverInfo.thresholdVZ[cascadIndex + 1];
 
-    //     return shadowIntensity0 * pre / len + shadowIntensity1 * next / len;
-    // }
+        return shadowIntensity0 * pre / len + shadowIntensity1 * next / len;
+    }
 
-    return shadowIntensity0;
+    // return shadowIntensity0;
 }
 
 #endif ///#ifdef CASCADE_EVSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX

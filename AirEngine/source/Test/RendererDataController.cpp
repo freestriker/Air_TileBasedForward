@@ -80,7 +80,7 @@ void AirEngine::Test::RendererDataController::OnUpdate()
 				if (rendererData->shadowType == Rendering::Renderer::ShadowVisualizationRenderer::ShadowType::CSM)
 				{
 					rendererData->shadowType = Rendering::Renderer::ShadowVisualizationRenderer::ShadowType::CASCADE_EVSM;
-					Utils::Log::Message("Switch Shadow mode to CASCADE_EVSM.");
+					Utils::Log::Message("Switch Shadow mode to CascadeEVSM.");
 				}
 				else if (rendererData->shadowType == Rendering::Renderer::ShadowVisualizationRenderer::ShadowType::CASCADE_EVSM)
 				{
