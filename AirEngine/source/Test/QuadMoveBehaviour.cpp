@@ -56,7 +56,7 @@ void AirEngine::Test::QuadMoveBehaviour::OnStart()
 	}
 
 	{
-		auto shadowCasterShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\CSM_SecondPlane_ShadowCaster_Shader.shader");
+		auto shadowCasterShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\CSM_ShadowCaster_Shader.shader");
 		auto shadowCasterMaterial = new Core::Graphic::Rendering::Material(shadowCasterShader);
 		renderer->AddMaterial(shadowCasterMaterial);
 	}

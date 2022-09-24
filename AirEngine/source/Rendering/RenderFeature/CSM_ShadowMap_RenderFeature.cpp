@@ -100,8 +100,8 @@ AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_
 	frustumSegmentScales.fill(1.0 / CASCADE_COUNT);
 	lightCameraCompensationDistances.fill(20);
 	shadowImageResolutions.fill(1024);
-	minBias = 0.0025;
-	maxBias = 0.0035;
+	minBias = 0.0035;
+	maxBias = 0.0065;
 	overlapScale = 0.3;
 	sampleHalfWidth = 3;
 }

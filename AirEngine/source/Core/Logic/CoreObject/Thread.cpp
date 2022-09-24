@@ -494,7 +494,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 				quadRendererGo->AddComponent(new Test::QuadMoveBehaviour());
 				quadRendererGo->transform.SetEulerRotation(glm::vec3(-90, 0, 0));
 				quadRendererGo->transform.SetTranslation(glm::vec3(i * 20, j * 20, -1));
-				quadRendererGo->transform.SetScale({ 10, 0.5, 10 });
+				quadRendererGo->transform.SetScale({ 10, 1, 10 });
 			}
 		}
 	}

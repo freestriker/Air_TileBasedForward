@@ -75,7 +75,7 @@ void AirEngine::Rendering::Renderer::ShadowVisualizationRenderer::OnResolveRende
 	csmShadowMapFeatureData->frustumSegmentScales = { 0.1, 0.2, 0.3, 0.4 };
 	csmShadowMapFeatureData->lightCameraCompensationDistances = { 5, 5, 5, 5 };
 	csmShadowMapFeatureData->shadowImageResolutions = { 2048, 2048, 1024, 1024 };
-	csmShadowMapFeatureData->sampleHalfWidth = 4;
+	csmShadowMapFeatureData->sampleHalfWidth = 3;
 	//csmShadowMapFeatureData->minBias = 0.004;
 	//csmShadowMapFeatureData->maxBias = 0.005;
 
