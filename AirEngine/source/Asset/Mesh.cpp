@@ -19,7 +19,7 @@ void AirEngine::Asset::Mesh::OnLoad(Core::Graphic::Command::CommandBuffer* trans
     std::vector<glm::vec3> vertexPositions = std::vector<glm::vec3>();
 
     Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(Path(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
+    const aiScene* scene = importer.ReadFile(Path(), aiProcess_Triangulate | aiProcess_GenNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 
     Utils::Log::Exception(importer.GetErrorString(), !scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode);
 

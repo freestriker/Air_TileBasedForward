@@ -304,14 +304,14 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnExcute(
 
 		for (int i = 0; i < CASCADE_COUNT; i++)
 		{
-			glm::mat4 matrixVC2VL = glm::lookAt({ 0, 0, 0 }, lightVView, lightVUp);
-			float unit = sphereRadius[i] * 2 / featureData->shadowImageResolutions[i];
+			//glm::mat4 matrixVC2VL = glm::lookAt({ 0, 0, 0 }, lightVView, lightVUp);
+			//float unit = sphereRadius[i] * 2 / featureData->shadowImageResolutions[i];
 
-			glm::vec3 virtualCenterLVPosition = matrixVC2VL * glm::vec4(sphereCenterVPositions[i], 1);
-			virtualCenterLVPosition.x -= std::fmod(virtualCenterLVPosition.x, unit);
-			virtualCenterLVPosition.y -= std::fmod(virtualCenterLVPosition.y, unit);
+			//glm::vec3 virtualCenterLVPosition = matrixVC2VL * glm::vec4(sphereCenterVPositions[i], 1);
+			//virtualCenterLVPosition.x -= std::fmod(virtualCenterLVPosition.x, unit);
+			//virtualCenterLVPosition.y -= std::fmod(virtualCenterLVPosition.y, unit);
 
-			sphereCenterVPositions[i] = glm::inverse(matrixVC2VL) * glm::vec4(virtualCenterLVPosition, 1);
+			//sphereCenterVPositions[i] = glm::inverse(matrixVC2VL) * glm::vec4(virtualCenterLVPosition, 1);
 
 			lightVPositions[i] = sphereCenterVPositions[i] - lightVView * (sphereRadius[i] + featureData->lightCameraCompensationDistances[i]);
 		}
