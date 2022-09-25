@@ -603,7 +603,7 @@ void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature
 		{
 			auto obbVertexes = rendererComponent->mesh->OrientedBoundingBox().BoundryVertexes();
 			auto mvMatrix = lightCameraInfos[i].view * rendererComponent->GameObject()->transform.ModelMatrix();
-			if (rendererComponent->enableFrustumCulling && !camera->CheckInFrustum(obbVertexes, mvMatrix))
+			if (rendererComponent->enableFrustumCulling && !checkers[i].Check(obbVertexes.data(), obbVertexes.size(), mvMatrix))
 			{
 				continue;
 			}

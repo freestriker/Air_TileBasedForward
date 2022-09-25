@@ -480,6 +480,20 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		mirrorMeshRendererGo->AddComponent(new Test::TBF_MirrorRendererBehaviour());
 		mirrorMeshRendererGo->AddComponent(new Test::SelfRotateBehaviour(45));
 		mirrorMeshRendererGo->transform.SetTranslation(glm::vec3(-3, 0, 0));
+
+		for (int i = -2; i <= 2; i++)
+		{
+			for (int j = -2; j <= 2; j++)
+			{
+				if (i == 0 && j == 0) continue;
+				Logic::Object::GameObject* sphereGroupRendererGo = new Logic::Object::GameObject("SphereGroup_" + std::to_string(i) + " " + std::to_string(j));
+				renderers->AddChild(sphereGroupRendererGo);
+				sphereGroupRendererGo->AddComponent(new Renderer::Renderer());
+				sphereGroupRendererGo->AddComponent(new Test::TBF_WallRendererBehaviour("..\\Asset\\Mesh\\NineSphere.ply"));
+				sphereGroupRendererGo->transform.SetEulerRotation(glm::vec3(-90, 0, 0));
+				sphereGroupRendererGo->transform.SetTranslation(glm::vec3(i * 20, j * 20, 0));
+			}
+		}
 	}
 
 	///TBForward quad mover

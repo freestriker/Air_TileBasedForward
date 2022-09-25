@@ -72,10 +72,10 @@ float GetShadowIntensity(in vec3 vPosition)
     float lnDepth1 = 0;
     
     {
-        vec4 lvPosition = cascadeEvsmShadowReceiverInfo.matrixVC2PL[(cascadIndex + 1) / 2] * vec4(vPosition, 1);
-        vec3 lnPosition = lvPosition.xyz / lvPosition.w;
+        vec4 lpPosition = cascadeEvsmShadowReceiverInfo.matrixVC2PL[(cascadIndex + 1) / 2] * vec4(vPosition, 1);
+        vec3 lnPosition = lpPosition.xyz / lpPosition.w;
         lnDepth0 = lnPosition.z;
-        vec2 laPosition = (clamp(lvPosition.xy, -1, 1) + vec2(1, -1)) / vec2(2, -2);
+        vec2 laPosition = (clamp(lnPosition.xy, -1, 1) + vec2(1, -1)) / vec2(2, -2);
 
         vec4 param = SampleShadowTexture((cascadIndex + 1) / 2, laPosition);
         {

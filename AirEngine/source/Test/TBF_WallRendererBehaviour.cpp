@@ -11,10 +11,16 @@ RTTR_REGISTRATION
 }
 
 AirEngine::Test::TBF_WallRendererBehaviour::TBF_WallRendererBehaviour()
+	: TBF_WallRendererBehaviour("..\\Asset\\Mesh\\Sphere.ply")
 {
 }
 
 AirEngine::Test::TBF_WallRendererBehaviour::~TBF_WallRendererBehaviour()
+{
+}
+
+AirEngine::Test::TBF_WallRendererBehaviour::TBF_WallRendererBehaviour(std::string mesh)
+	: _meshPath(mesh)
 {
 }
 
@@ -25,7 +31,7 @@ void AirEngine::Test::TBF_WallRendererBehaviour::OnAwake()
 void AirEngine::Test::TBF_WallRendererBehaviour::OnStart()
 {
 	auto renderer = GameObject()->GetComponent<Renderer::Renderer>();
-	auto mesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\Sphere.ply");
+	auto mesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>(_meshPath);
 	renderer->mesh = mesh;
 
 	{

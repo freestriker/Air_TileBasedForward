@@ -91,9 +91,9 @@ void AirEngine::Rendering::Renderer::ShadowVisualizationRenderer::OnResolveRende
 	cevsmShadowMapFeatureData->frustumSegmentScales = { 0.1, 0.2, 0.3, 0.4 };
 	cevsmShadowMapFeatureData->lightCameraCompensationDistances = { 5, 5, 5, 5 };
 	cevsmShadowMapFeatureData->shadowImageResolutions = { 2048, 2048, 1024, 1024 };
-	cevsmShadowMapFeatureData->blurOffsets = { 1.5, 1.5, 1, 1 };
+	cevsmShadowMapFeatureData->blurOffsets = { 1.5, 1.25, 1.0, 0.5 };
 	cevsmShadowMapFeatureData->iterateCount = 2;
-	cevsmShadowMapFeatureData->threshold = 0.23;
+	cevsmShadowMapFeatureData->threshold = 0.5;
 
 	auto cevsmVisualizationFeatureData = rendererData->RenderFeatureData<RenderFeature::CascadeEVSM_Visualization_RenderFeature::CascadeEVSM_Visualization_RenderFeatureData>("CascadeEVSM_Visualization_RenderFeature");
 	cevsmVisualizationFeatureData->cascadeEvsmRenderFeatureData = cevsmShadowMapFeatureData;
