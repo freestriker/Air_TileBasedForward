@@ -35,5 +35,7 @@ void main()
         specular += SpecularLighting(lightInfos.ortherLightInfos[opaqueLightIndexList.indexes[i]], viewDirection, inWorldPosition, worldNormal, 80.0);
     }
 
-    ColorAttachment = texture(diffuseTexture, inTexCoords) * vec4(diffuse + specular + ambient, 1);
+    float shadowIntensity = GetShadowIntensity((cameraInfo.info.view * vec4(inWorldPosition, 1)).xyz, worldNormal);
+
+    ColorAttachment = texture(diffuseTexture, inTexCoords) * vec4(diffuse + specular + ambient, 1) * (1 - shadowIntensity);
 }

@@ -31,6 +31,8 @@ namespace AirEngine
 					bool needClearColorAttachment;
 					Core::Graphic::Instance::Buffer* opaqueLightIndexListsBuffer;
 
+					Core::Graphic::Rendering::RenderFeatureDataBase* csmShadowMapRenderFeatureData;
+
 					CONSTRUCTOR(TBForward_Opaque_RenderFeatureData)
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderFeatureDataBase)
 				};

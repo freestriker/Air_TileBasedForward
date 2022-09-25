@@ -14,7 +14,10 @@ namespace AirEngine
 	{
 		class TBF_WallRendererBehaviour : public AirEngine::Behaviour::Behaviour
 		{
+		private:
+			std::string _meshPath;
 		public:
+			TBF_WallRendererBehaviour(std::string mesh);
 			CONSTRUCTOR(TBF_WallRendererBehaviour)
 			void OnAwake()override;
 			void OnStart()override;

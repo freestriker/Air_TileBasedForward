@@ -58,6 +58,25 @@ glslangValidator.exe -t -V AO_Cover_Shader.frag -IUtils/ -o Spv/AO_Cover_Shader.
 glslangValidator.exe -t -V PresentShader.vert -IUtils/ -o Spv/PresentShader.vert.spv
 glslangValidator.exe -t -V PresentShader.frag -IUtils/ -o Spv/PresentShader.frag.spv
 
+glslangValidator.exe -t -V CSM_ShadowCaster_Shader.vert -IUtils/ -o Spv/CSM_ShadowCaster_Shader.vert.spv
+glslangValidator.exe -t -V CSM_ShadowCaster_Shader.frag -IUtils/ -o Spv/CSM_ShadowCaster_Shader.frag.spv
+
+glslangValidator.exe -t -V CSM_Visualization_Shader.vert -IUtils/ -o Spv/CSM_Visualization_Shader.vert.spv
+glslangValidator.exe -t -V CSM_Visualization_Shader.frag -IUtils/ -o Spv/CSM_Visualization_Shader.frag.spv
+
+glslangValidator.exe -t -V CascadeEVSM_ShadowCaster_Shader.vert -IUtils/ -o Spv/CascadeEVSM_ShadowCaster_Shader.vert.spv
+glslangValidator.exe -t -V CascadeEVSM_ShadowCaster_Shader.frag -IUtils/ -o Spv/CascadeEVSM_ShadowCaster_Shader.frag.spv
+
+glslangValidator.exe -t -V CascadeEVSM_Blit_Shader.vert -IUtils/ -o Spv/CascadeEVSM_Blit_Shader.vert.spv
+glslangValidator.exe -t -V CascadeEVSM_Blit_Shader.frag -IUtils/ -o Spv/CascadeEVSM_Blit_Shader.frag.spv
+
+glslangValidator.exe -t -V CascadeEVSM_Blur_Shader.vert -IUtils/ -o Spv/CascadeEVSM_Blur_Shader.vert.spv
+glslangValidator.exe -t -V CascadeEVSM_Blur_Shader.frag -IUtils/ -o Spv/CascadeEVSM_Blur_Shader.frag.spv
+
+glslangValidator.exe -t -V CascadeEVSM_Visualization_Shader.vert -IUtils/ -o Spv/CascadeEVSM_Visualization_Shader.vert.spv
+glslangValidator.exe -t -V CascadeEVSM_Visualization_Shader.frag -IUtils/ -o Spv/CascadeEVSM_Visualization_Shader.frag.spv
+
+
 glslangValidator.exe -t -V TBF_LightList_Shader.comp -IUtils/ -o Spv/TBF_LightList_Shader.comp.spv
 
 cmd

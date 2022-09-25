@@ -37,6 +37,7 @@ void AirEngine::Core::Graphic::Manager::LightManager::SetLightInfo(std::vector<L
 			case Light::LightBase::LightType::DIRECTIONAL:
 			{
 				unqiueLights.emplace(std::make_pair(light->lightType, light));
+				_mainLight = light;
 				break;
 			}
 			case Light::LightBase::LightType::POINT:
@@ -156,4 +157,14 @@ AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Manager::L
 AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Manager::LightManager::TileBasedForwardLightBoundindBoxInfosBuffer()
 {
 	return _tileBasedForwardLightBoundingBoxInfosBuffer;
+}
+
+AirEngine::Core::Graphic::Manager::LightManager::LightInfo AirEngine::Core::Graphic::Manager::LightManager::MainLightInfo()
+{
+	return _mainLightInfo;
+}
+
+AirEngine::Light::LightBase* AirEngine::Core::Graphic::Manager::LightManager::MainLight()
+{
+	return _mainLight;
 }

@@ -10,6 +10,8 @@ layout (early_fragment_tests) in;
 layout (origin_upper_left) in vec4 gl_FragCoord;
 #endif ///#ifdef FRAGMENT_STAGE
 
+#define TBF_OIT_ALPHA_BUFFER_LIGHTING_DESCRIPTOR_COUNT (5 + TBFORWARD_LIGHTING_DESCRIPTOR_COUNT)
+
 layout (set = START_SET_INDEX + 0, binding = 0, r32ui) uniform uimage2D headIndexImage;
 layout (set = START_SET_INDEX + 1, binding = 0) writeonly buffer ColorList
 {
@@ -29,7 +31,7 @@ layout (set = START_SET_INDEX + 4, binding = 0) buffer AtomicCounter
 }atomicCounter;
 
 #undef START_SET_INDEX
-#define START_SET_INDEX 11
+#define START_SET_INDEX TBF_OIT_ALPHA_BUFFER_LIGHTING_DESCRIPTOR_COUNT
 
 #define INVALID_BUFFER_INDEX 0
 #define CURRENT_BUFFER_INDEX (atomicCounter.counter)

@@ -90,6 +90,8 @@ namespace AirEngine
 					Instance::Buffer* ForwardLightInfosBuffer();
 					Instance::Buffer* TileBasedForwardLightInfosBuffer();
 					Instance::Buffer* TileBasedForwardLightBoundindBoxInfosBuffer();
+					LightInfo MainLightInfo();
+					Light::LightBase* MainLight();
 				private:
 					Instance::Buffer* _forwardLightInfosBuffer;
 					Instance::Buffer* _tileBasedForwardLightInfosBuffer;
@@ -98,6 +100,7 @@ namespace AirEngine
 					LightInfo _ambientLightInfo;
 					Asset::TextureCube* _ambientTextureCube;
 					LightInfo _mainLightInfo;
+					Light::LightBase* _mainLight;
 					int _ortherLightCount;
 					std::array<LightInfo, MAX_ORTHER_LIGHT_COUNT> _ortherLightInfos;
 					std::array<LightBoundingBox, MAX_ORTHER_LIGHT_COUNT> _ortherLightBoundingBoxInfos;

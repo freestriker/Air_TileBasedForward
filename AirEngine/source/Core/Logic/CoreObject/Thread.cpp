@@ -480,15 +480,37 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		mirrorMeshRendererGo->AddComponent(new Test::TBF_MirrorRendererBehaviour());
 		mirrorMeshRendererGo->AddComponent(new Test::SelfRotateBehaviour(45));
 		mirrorMeshRendererGo->transform.SetTranslation(glm::vec3(-3, 0, 0));
+
+		for (int i = -2; i <= 2; i++)
+		{
+			for (int j = -2; j <= 2; j++)
+			{
+				if (i == 0 && j == 0) continue;
+				Logic::Object::GameObject* sphereGroupRendererGo = new Logic::Object::GameObject("SphereGroup_" + std::to_string(i) + " " + std::to_string(j));
+				renderers->AddChild(sphereGroupRendererGo);
+				sphereGroupRendererGo->AddComponent(new Renderer::Renderer());
+				sphereGroupRendererGo->AddComponent(new Test::TBF_WallRendererBehaviour("..\\Asset\\Mesh\\NineSphere.ply"));
+				sphereGroupRendererGo->transform.SetEulerRotation(glm::vec3(-90, 0, 0));
+				sphereGroupRendererGo->transform.SetTranslation(glm::vec3(i * 20, j * 20, 0));
+			}
+		}
 	}
 
 	///TBForward quad mover
 	{
-		Logic::Object::GameObject* quadRendererGo = new Logic::Object::GameObject("QuadRenderer");
-		renderers->AddChild(quadRendererGo);
-		quadRendererGo->AddComponent(new Renderer::Renderer());
-		quadRendererGo->AddComponent(new Test::QuadMoveBehaviour());
-		quadRendererGo->transform.SetTranslation(glm::vec3(-1.5, 0, -1));
+		for (int i = -2; i <= 2; i++)
+		{
+			for (int j = -2; j <= 2; j++)
+			{
+				Logic::Object::GameObject* quadRendererGo = new Logic::Object::GameObject("QuadRenderer_" + std::to_string(i) + " " + std::to_string(j));
+				renderers->AddChild(quadRendererGo);
+				quadRendererGo->AddComponent(new Renderer::Renderer());
+				quadRendererGo->AddComponent(new Test::QuadMoveBehaviour());
+				quadRendererGo->transform.SetEulerRotation(glm::vec3(-90, 0, 0));
+				quadRendererGo->transform.SetTranslation(glm::vec3(i * 20, j * 20, -1));
+				quadRendererGo->transform.SetScale({ 10, 1, 10 });
+			}
+		}
 	}
 
 	///Forward transparent
@@ -558,10 +580,10 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 
 	Logic::Object::GameObject* directionalLightGo = new Logic::Object::GameObject("DirectionalLight");
 	lights->AddChild(directionalLightGo);
-	directionalLightGo->transform.SetEulerRotation(glm::vec3(-30, 70, 0));
+	directionalLightGo->transform.SetEulerRotation(glm::vec3(-30, 0, 0));
 	auto directionalLight = new Light::DirectionalLight();
 	directionalLight->color = { 1, 239.0 / 255, 213.0 / 255, 1 };
-	directionalLight->intensity = 0.0f;
+	directionalLight->intensity = 0.6f;
 	directionalLightGo->AddComponent(directionalLight);
 
 	Logic::Object::GameObject* skyBoxGo = new Logic::Object::GameObject("SkyBox");

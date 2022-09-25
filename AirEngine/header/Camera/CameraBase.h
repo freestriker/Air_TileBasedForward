@@ -74,7 +74,7 @@ namespace AirEngine
 			Core::Graphic::Instance::Buffer* _buffer;
 			CameraData _cameraInfo;
 			glm::mat4 _projectionMatrix;
-			AirRenderer::Utils::IntersectionChecker _intersectionChecker;
+			AirEngine::Utils::IntersectionChecker _intersectionChecker;
 
 		public:
 			glm::mat4 ViewMatrix();
@@ -83,6 +83,7 @@ namespace AirEngine
 			void RefreshCameraInfo();
 			Core::Graphic::Instance::Buffer* CameraInfoBuffer();
 			bool CheckInFrustum(std::array<glm::vec3, 8>& vertexes, glm::mat4& matrix);
+			void GetAngularPointVPosition(glm::vec3(&points)[8]);
 
 			void SetRendererName(std::string rendererName);
 			std::string RendererName();
