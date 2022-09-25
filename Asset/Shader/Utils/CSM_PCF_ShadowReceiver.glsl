@@ -81,7 +81,6 @@ float GetShadowIntensity(in vec3 vPosition, in vec3 wNormal)
     {
         bias = max(csmShadowReceiverInfo.maxBias * (1.0 - cosLightWithNormal), csmShadowReceiverInfo.minBias);
     }
-    // float bias = 0;
    
     {
         vec4 lpPosition = csmShadowReceiverInfo.matrixVC2PL[(cascadIndex + 1) / 2] * vec4(vPosition, 1);
@@ -165,7 +164,6 @@ float GetShadowIntensityWithVNormal(in vec3 vPosition, in vec3 vNormal)
     {
         bias = max(csmShadowReceiverInfo.maxBias * (1.0 - cosLightWithNormal), csmShadowReceiverInfo.minBias);
     }
-    // float bias = 0;
     
     {
         vec4 lpPosition = csmShadowReceiverInfo.matrixVC2PL[(cascadIndex + 1) / 2] * vec4(vPosition, 1);

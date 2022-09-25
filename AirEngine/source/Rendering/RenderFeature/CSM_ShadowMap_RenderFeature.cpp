@@ -100,10 +100,10 @@ AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_
 	frustumSegmentScales.fill(1.0 / CASCADE_COUNT);
 	lightCameraCompensationDistances.fill(20);
 	shadowImageResolutions.fill(1024);
-	minBias = 0.0035;
+	minBias = 0.00005;
 	maxBias = 0.0065;
 	overlapScale = 0.3;
-	sampleHalfWidth = 3;
+	sampleHalfWidth = 1;
 }
 
 AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderFeatureData::~CSM_ShadowMap_RenderFeatureData()
@@ -385,7 +385,7 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnExcute(
 		{
 			auto obbVertexes = rendererComponent->mesh->OrientedBoundingBox().BoundryVertexes();
 			auto mvMatrix = lightCameraInfos[i].view * rendererComponent->GameObject()->transform.ModelMatrix();
-			if (rendererComponent->enableFrustumCulling && !camera->CheckInFrustum(obbVertexes, mvMatrix))
+			if (rendererComponent->enableFrustumCulling && !checkers[i].Check(obbVertexes.data(), obbVertexes.size(), mvMatrix))
 			{
 				continue;
 			}
