@@ -1,5 +1,5 @@
 {
-  "renderPass": "AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderPass",
+  "renderPass": "AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderPass",
   "subpass": "DrawSubpass",
   "alphaBlendOp": 0,
   "blendEnable": 0,

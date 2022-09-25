@@ -15,7 +15,7 @@
 #include "Core/IO/CoreObject/Instance.h"
 #include "Core/IO/Manager/AssetManager.h"
 #include "Core/Graphic/Command/BufferMemoryBarrier.h"
-#include "Rendering/RenderFeature/CSM_ShadowMap_RenderFeature.h"
+#include "Rendering/RenderFeature/CSM_ShadowCaster_RenderFeature.h"
 
 RTTR_REGISTRATION
 {
@@ -210,7 +210,7 @@ void AirEngine::Rendering::RenderFeature::TBForward_Opaque_RenderFeature::OnExcu
 	{
 		commandBuffer->BeginRenderPass(_renderPass, featureData->frameBuffer);
 
-		CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderFeatureData* shadowRenderFeatureData = static_cast<CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderFeatureData*>(featureData->csmShadowMapRenderFeatureData);
+		CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderFeatureData* shadowRenderFeatureData = static_cast<CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderFeatureData*>(featureData->csmShadowMapRenderFeatureData);
 
 		auto viewMatrix = camera->ViewMatrix();
 		auto ambientLightTexture = Core::Graphic::CoreObject::Instance::LightManager().AmbientTextureCube();

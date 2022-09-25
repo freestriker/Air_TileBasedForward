@@ -22,7 +22,7 @@
 #include "Core/Graphic/Rendering/Shader.h"
 #include "Core/Graphic/Instance/ImageSampler.h"
 #include "Rendering/RenderFeature/Geometry_RenderFeature.h"
-#include "Rendering/RenderFeature/CSM_ShadowMap_RenderFeature.h"
+#include "Rendering/RenderFeature/CSM_ShadowCaster_RenderFeature.h"
 
 RTTR_REGISTRATION
 {
@@ -172,7 +172,7 @@ void AirEngine::Rendering::RenderFeature::CSM_Visualization_RenderFeature::OnRes
 		featureData->visualizationMaterial->SetSlotData("depthTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), geometryData->depthTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
 		featureData->visualizationMaterial->SetSlotData("normalTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), geometryData->normalTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
 	
-		CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderFeatureData* csmData = static_cast<CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderFeatureData*>(featureData->csmRenderFeatureData);
+		CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderFeatureData* csmData = static_cast<CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderFeatureData*>(featureData->csmRenderFeatureData);
 		csmData->SetShadowReceiverMaterialParameters(featureData->visualizationMaterial);
 	}
 }

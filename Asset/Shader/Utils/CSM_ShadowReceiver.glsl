@@ -1,12 +1,12 @@
-#ifndef _CSM_PCF_SHADOW_RECEIVER_GLSL_
-#define _CSM_PCF_SHADOW_RECEIVER_GLSL_
+#ifndef _CSM_SHADOW_RECEIVER_GLSL_
+#define _CSM_SHADOW_RECEIVER_GLSL_
 
-#ifdef CSM_PCF_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX
-#define CSM_PCF_SHADOW_RECEIVER_DESCRIPTOR_COUNT 5
+#ifdef CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX
+#define CSM_SHADOW_RECEIVER_DESCRIPTOR_COUNT 5
 
 #define CASCADE_COUNT 4
 
-layout(set = CSM_PCF_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 0, binding = 0) uniform CsmShadowReceiverInfo
+layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 0, binding = 0) uniform CsmShadowReceiverInfo
 {
     float thresholdVZ[CASCADE_COUNT * 2];
     vec3 wLightDirection;
@@ -17,10 +17,10 @@ layout(set = CSM_PCF_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 0, binding = 0) un
     int sampleHalfWidth;
 }csmShadowReceiverInfo;
 
-layout(set = CSM_PCF_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 1, binding = 0) uniform sampler2D shadowTexture_0;
-layout(set = CSM_PCF_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 2, binding = 0) uniform sampler2D shadowTexture_1;
-layout(set = CSM_PCF_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 3, binding = 0) uniform sampler2D shadowTexture_2;
-layout(set = CSM_PCF_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 4, binding = 0) uniform sampler2D shadowTexture_3;
+layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 1, binding = 0) uniform sampler2D shadowTexture_0;
+layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 2, binding = 0) uniform sampler2D shadowTexture_1;
+layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 3, binding = 0) uniform sampler2D shadowTexture_2;
+layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 4, binding = 0) uniform sampler2D shadowTexture_3;
 
 float SampleShadowTexture(int cascadIndex, vec2 aPosition)
 {
@@ -248,6 +248,6 @@ float GetShadowIntensityWithVNormal(in vec3 vPosition, in vec3 vNormal)
     // return shadowIntensity0;
 }
 
-#endif ///#ifdef CSM_PCF_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX
+#endif ///#ifdef CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX
 
-#endif ///#ifndef _CSM_PCF_SHADOW_RECEIVER_GLSL_
+#endif ///#ifndef _CSM_SHADOW_RECEIVER_GLSL_

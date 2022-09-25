@@ -16,8 +16,8 @@ layout(set = 1, binding = 0) uniform VisualizationInfo
 layout(set = 2, binding = 0) uniform sampler2D depthTexture;
 layout(set = 3, binding = 0) uniform sampler2D normalTexture;
 
-#define CSM_PCF_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX 4
-#include "CSM_PCF_ShadowReceiver.glsl"
+#define CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX 4
+#include "CSM_ShadowReceiver.glsl"
 
 layout(location = 0) out vec4 ColorAttachment;
 

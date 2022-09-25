@@ -1,4 +1,4 @@
-#include "Rendering/RenderFeature/CSM_ShadowMap_RenderFeature.h"
+#include "Rendering/RenderFeature/CSM_ShadowCaster_RenderFeature.h"
 #include "Core/Graphic/CoreObject/Instance.h"
 #include "Core/Graphic/Manager/RenderPassManager.h"
 #include "Core/Graphic/Rendering/FrameBuffer.h"
@@ -23,19 +23,19 @@
 
 RTTR_REGISTRATION
 {
-	rttr::registration::class_<AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderPass>("AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderPass")
+	rttr::registration::class_<AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderPass>("AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderPass")
 		.constructor<>()
 		(
 			rttr::policy::ctor::as_raw_ptr
 		)
 		;
-	rttr::registration::class_<AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderFeatureData>("AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderFeatureData")
+	rttr::registration::class_<AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderFeatureData>("AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderFeatureData")
 		.constructor<>()
 		(
 			rttr::policy::ctor::as_raw_ptr
 		)
 		;
-	rttr::registration::class_<AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature>("AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature")
+	rttr::registration::class_<AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature>("AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature")
 		.constructor<>()
 		(
 			rttr::policy::ctor::as_raw_ptr
@@ -43,7 +43,7 @@ RTTR_REGISTRATION
 		;
 }
 
-void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
+void AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderPass::OnPopulateRenderPassSettings(RenderPassSettings& creator)
 {
 	creator.AddDepthAttachment(
 		"DepthAttachment",
@@ -78,16 +78,16 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_Shado
 	);
 }
 
-AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderPass::CSM_ShadowMap_RenderPass()
+AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderPass::CSM_ShadowCaster_RenderPass()
 	: RenderPassBase()
 {
 }
 
-AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderPass::~CSM_ShadowMap_RenderPass()
+AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderPass::~CSM_ShadowCaster_RenderPass()
 {
 }
 
-AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderFeatureData::CSM_ShadowMap_RenderFeatureData()
+AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderFeatureData::CSM_ShadowCaster_RenderFeatureData()
 	: RenderFeatureDataBase()
 	, shadowImages()
 	, shadowFrameBuffers()
@@ -105,14 +105,14 @@ AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_
 	sampleHalfWidth = 1;
 }
 
-AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderFeatureData::~CSM_ShadowMap_RenderFeatureData()
+AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderFeatureData::~CSM_ShadowCaster_RenderFeatureData()
 {
 }
 
-AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderFeature()
+AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderFeature()
 	: RenderFeatureBase()
-	, _shadowMapRenderPass(Core::Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass<CSM_ShadowMap_RenderPass>())
-	, _shadowMapRenderPassName(rttr::type::get<CSM_ShadowMap_RenderPass>().get_name().to_string())
+	, _shadowMapRenderPass(Core::Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass<CSM_ShadowCaster_RenderPass>())
+	, _shadowMapRenderPassName(rttr::type::get<CSM_ShadowCaster_RenderPass>().get_name().to_string())
 	, shadowImageSampler(
 		new Core::Graphic::Instance::ImageSampler(
 			VkFilter::VK_FILTER_NEAREST,
@@ -126,13 +126,13 @@ AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_
 
 }
 
-AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::~CSM_ShadowMap_RenderFeature()
+AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::~CSM_ShadowCaster_RenderFeature()
 {
-	Core::Graphic::CoreObject::Instance::RenderPassManager().UnloadRenderPass<CSM_ShadowMap_RenderPass>();
+	Core::Graphic::CoreObject::Instance::RenderPassManager().UnloadRenderPass<CSM_ShadowCaster_RenderPass>();
 	delete shadowImageSampler;
 }
 
-void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderFeatureData::Refresh()
+void AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderFeatureData::Refresh()
 {
 	for (auto i = 0; i < CASCADE_COUNT; i++)
 	{
@@ -155,7 +155,7 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_Shado
 	}
 }
 
-void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_RenderFeatureData::SetShadowReceiverMaterialParameters(Core::Graphic::Rendering::Material* material)
+void AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderFeatureData::SetShadowReceiverMaterialParameters(Core::Graphic::Rendering::Material* material)
 {
 	material->SetUniformBuffer("csmShadowReceiverInfo", csmShadowReceiverInfoBuffer);
 	for (int i = 0; i < CASCADE_COUNT; i++)
@@ -164,9 +164,9 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_Shado
 	}
 }
 
-AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnCreateRenderFeatureData(Camera::CameraBase* camera)
+AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::OnCreateRenderFeatureData(Camera::CameraBase* camera)
 {
-	auto featureData = new CSM_ShadowMap_RenderFeatureData();
+	auto featureData = new CSM_ShadowCaster_RenderFeatureData();
 	featureData->shadowMapRenderPass = _shadowMapRenderPass;
 	featureData->sampler = shadowImageSampler;
 
@@ -190,15 +190,15 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	return featureData;
 }
 
-void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnResolveRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera)
+void AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::OnResolveRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera)
 {
-	auto featureData = static_cast<CSM_ShadowMap_RenderFeatureData*>(renderFeatureData);
+	auto featureData = static_cast<CSM_ShadowCaster_RenderFeatureData*>(renderFeatureData);
 	featureData->Refresh();
 }
 
-void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnDestroyRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)
+void AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::OnDestroyRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)
 {
-	auto featureData = static_cast<CSM_ShadowMap_RenderFeatureData*>(renderFeatureData);
+	auto featureData = static_cast<CSM_ShadowCaster_RenderFeatureData*>(renderFeatureData);
 	delete featureData->lightCameraInfoBuffer;
 	delete featureData->lightCameraInfoStagingBuffer;
 	delete featureData->csmShadowReceiverInfoBuffer;
@@ -210,14 +210,14 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnDestroy
 	delete featureData;
 }
 
-void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnPrepare(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)
+void AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::OnPrepare(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)
 {
 
 }
 
-void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnExcute(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*> const* rendererComponents)
+void AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::OnExcute(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*> const* rendererComponents)
 {
-	auto featureData = static_cast<CSM_ShadowMap_RenderFeatureData*>(renderFeatureData);
+	auto featureData = static_cast<CSM_ShadowCaster_RenderFeatureData*>(renderFeatureData);
 	
 	glm::vec3 angularPointVPositions[8]{};
 	camera->GetAngularPointVPosition(angularPointVPositions);
@@ -420,12 +420,12 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnExcute(
 	commandBuffer->EndRecord();
 }
 
-void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnSubmit(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer)
+void AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::OnSubmit(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer)
 {
 	commandBuffer->Submit();
 }
 
-void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnFinish(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer)
+void AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::OnFinish(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer)
 {
 	commandBuffer->WaitForFinish();
 }

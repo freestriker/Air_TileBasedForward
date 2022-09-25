@@ -28,21 +28,21 @@ namespace AirEngine
 	{
 		namespace RenderFeature
 		{
-			class CSM_ShadowMap_RenderFeature final : public Core::Graphic::Rendering::RenderFeatureBase
+			class CSM_ShadowCaster_RenderFeature final : public Core::Graphic::Rendering::RenderFeatureBase
 			{
 			public:
-				class CSM_ShadowMap_RenderPass final : public Core::Graphic::Rendering::RenderPassBase
+				class CSM_ShadowCaster_RenderPass final : public Core::Graphic::Rendering::RenderPassBase
 				{
 				private:
 					void OnPopulateRenderPassSettings(RenderPassSettings& settings)override;
 				public:
-					CONSTRUCTOR(CSM_ShadowMap_RenderPass)
+					CONSTRUCTOR(CSM_ShadowCaster_RenderPass)
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderPassBase)
 				};
 
-				class CSM_ShadowMap_RenderFeatureData final : public Core::Graphic::Rendering::RenderFeatureDataBase
+				class CSM_ShadowCaster_RenderFeatureData final : public Core::Graphic::Rendering::RenderFeatureDataBase
 				{
-					friend class CSM_ShadowMap_RenderFeature;
+					friend class CSM_ShadowCaster_RenderFeature;
 				private:
 					Core::Graphic::Rendering::RenderPassBase* shadowMapRenderPass;
 					Core::Graphic::Instance::ImageSampler* sampler;
@@ -64,7 +64,7 @@ namespace AirEngine
 
 					void SetShadowReceiverMaterialParameters(Core::Graphic::Rendering::Material* material);
 
-					CONSTRUCTOR(CSM_ShadowMap_RenderFeatureData)
+					CONSTRUCTOR(CSM_ShadowCaster_RenderFeatureData)
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderFeatureDataBase)
 				};
 
@@ -85,7 +85,7 @@ namespace AirEngine
 					alignas(4) int sampleHalfWidth;
 				};
 
-				CONSTRUCTOR(CSM_ShadowMap_RenderFeature)
+				CONSTRUCTOR(CSM_ShadowCaster_RenderFeature)
 
 			private:
 				Core::Graphic::Rendering::RenderPassBase* _shadowMapRenderPass;
