@@ -100,8 +100,7 @@ AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::CSM_ShadowMap_
 	frustumSegmentScales.fill(1.0 / CASCADE_COUNT);
 	lightCameraCompensationDistances.fill(20);
 	shadowImageResolutions.fill(1024);
-	minBias = 0.00005;
-	maxBias = 0.0065;
+	bias.fill({ 0.00005 , 0.0065 });
 	overlapScale = 0.3;
 	sampleHalfWidth = 1;
 }
@@ -317,8 +316,6 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnExcute(
 		}
 		csmShadowReceiverInfo.wLightDirection = lightWView;
 		csmShadowReceiverInfo.vLightDirection = lightVView;
-		csmShadowReceiverInfo.minBias = featureData->minBias;
-		csmShadowReceiverInfo.maxBias = featureData->maxBias;
 		csmShadowReceiverInfo.sampleHalfWidth = featureData->sampleHalfWidth;
 		for (int i = 0; i < CASCADE_COUNT; i++)
 		{
@@ -342,6 +339,8 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowMap_RenderFeature::OnExcute(
 			csmShadowReceiverInfo.thresholdVZ[i * 2 + 1].x = subAngularPointVPositions[i][4].z;
 
 			csmShadowReceiverInfo.texelSize[i] = { 1.0f / featureData->shadowImageResolutions[i], 1.0f / featureData->shadowImageResolutions[i], 0, 0};
+			
+			csmShadowReceiverInfo.bias[i] = glm::vec4(featureData->bias[i], 0, 0);
 		}
 
 		std::sort(csmShadowReceiverInfo.thresholdVZ, csmShadowReceiverInfo.thresholdVZ + CASCADE_COUNT * 2, [](glm::vec4 a, glm::vec4 b)->bool {return a.x > b.x; });

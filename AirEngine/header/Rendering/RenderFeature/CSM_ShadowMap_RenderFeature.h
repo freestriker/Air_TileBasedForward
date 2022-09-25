@@ -56,8 +56,7 @@ namespace AirEngine
 					std::array<float, CASCADE_COUNT> frustumSegmentScales;
 					std::array<float, CASCADE_COUNT> lightCameraCompensationDistances;
 					std::array<uint32_t, CASCADE_COUNT> shadowImageResolutions;
-					float minBias;
-					float maxBias;
+					std::array <glm::vec2, CASCADE_COUNT> bias;
 					float overlapScale;
 					int sampleHalfWidth;
 
@@ -80,8 +79,7 @@ namespace AirEngine
 					alignas(16) glm::vec4 thresholdVZ[CASCADE_COUNT * 2];
 					alignas(16) glm::vec3 wLightDirection;
 					alignas(16) glm::vec3 vLightDirection;
-					alignas(4) float minBias;
-					alignas(4) float maxBias;
+					alignas(16) glm::vec4 bias[CASCADE_COUNT];
 					alignas(16) glm::mat4 matrixVC2PL[CASCADE_COUNT];
 					alignas(16) glm::vec4 texelSize[CASCADE_COUNT];
 					alignas(4) int sampleHalfWidth;

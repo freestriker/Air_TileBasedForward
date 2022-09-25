@@ -11,8 +11,7 @@ layout(set = CSM_PCF_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 0, binding = 0) un
     float thresholdVZ[CASCADE_COUNT * 2];
     vec3 wLightDirection;
     vec3 vLightDirection;
-    float minBias;
-    float maxBias;
+    vec2 bias[CASCADE_COUNT];
     mat4 matrixVC2PL[CASCADE_COUNT];
     vec2 texelSize[CASCADE_COUNT];
     int sampleHalfWidth;
@@ -71,19 +70,21 @@ float GetShadowIntensity(in vec3 vPosition, in vec3 wNormal)
     float shadowIntensity1 = 0;
     float lnDepth1 = 0;
 
-    float bias = 0;
-    float cosLightWithNormal = dot(wNormal, -csmShadowReceiverInfo.wLightDirection);
-    if(cosLightWithNormal <= 0)
     {
-        bias = csmShadowReceiverInfo.minBias;
-    }
-    else
-    {
-        bias = max(csmShadowReceiverInfo.maxBias * (1.0 - cosLightWithNormal), csmShadowReceiverInfo.minBias);
-    }
+        int index = (cascadIndex + 1) / 2;
+
+        float bias = 0;
+        float cosLightWithNormal = dot(wNormal, -csmShadowReceiverInfo.wLightDirection);
+        if(cosLightWithNormal <= 0)
+        {
+            bias = csmShadowReceiverInfo.bias[index].x;
+        }
+        else
+        {
+            bias = max(csmShadowReceiverInfo.bias[index].y * (1.0 - cosLightWithNormal), csmShadowReceiverInfo.bias[index].x);
+        }
    
-    {
-        vec4 lpPosition = csmShadowReceiverInfo.matrixVC2PL[(cascadIndex + 1) / 2] * vec4(vPosition, 1);
+        vec4 lpPosition = csmShadowReceiverInfo.matrixVC2PL[index] * vec4(vPosition, 1);
         vec3 lnPosition = lpPosition.xyz / lpPosition.w;
         lnDepth0 = lnPosition.z;
         vec2 laPosition = (clamp(lnPosition.xy, -1, 1) + vec2(1, -1)) / vec2(2, -2);
@@ -93,13 +94,13 @@ float GetShadowIntensity(in vec3 vPosition, in vec3 wNormal)
         {
             for(int j = -csmShadowReceiverInfo.sampleHalfWidth; j <= csmShadowReceiverInfo.sampleHalfWidth; j++)
             {
-                vec2 offsetAPosition = clamp(laPosition + vec2(i, j) * csmShadowReceiverInfo.texelSize[(cascadIndex + 1) / 2], 0, 1);
-                inShadowCount += ((lnDepth0 - bias) > SampleShadowTexture((cascadIndex + 1) / 2, offsetAPosition) ? 1 : 0);
+                vec2 offsetAPosition = clamp(laPosition + vec2(i, j) * csmShadowReceiverInfo.texelSize[index], 0, 1);
+                inShadowCount += ((lnDepth0 - bias) > SampleShadowTexture(index, offsetAPosition) ? 1 : 0);
             }
         }
         shadowIntensity0 = float(inShadowCount) / float((csmShadowReceiverInfo.sampleHalfWidth * 2 + 1) * (csmShadowReceiverInfo.sampleHalfWidth * 2 + 1));
         
-        // shadowIntensity0 = (lnDepth0 - bias) > SampleShadowTexture((cascadIndex + 1) / 2, laPosition) ? 1 : 0;
+        // shadowIntensity0 = (lnDepth0 - bias) > SampleShadowTexture(index, laPosition) ? 1 : 0;
     }
 
     if(cascadIndex % 2 == 0)
@@ -108,7 +109,20 @@ float GetShadowIntensity(in vec3 vPosition, in vec3 wNormal)
     }
     else
     {
-        vec4 lpPosition = csmShadowReceiverInfo.matrixVC2PL[cascadIndex / 2] * vec4(vPosition, 1);
+        int index = cascadIndex / 2;
+
+        float bias = 0;
+        float cosLightWithNormal = dot(wNormal, -csmShadowReceiverInfo.wLightDirection);
+        if(cosLightWithNormal <= 0)
+        {
+            bias = csmShadowReceiverInfo.bias[index].x;
+        }
+        else
+        {
+            bias = max(csmShadowReceiverInfo.bias[index].y * (1.0 - cosLightWithNormal), csmShadowReceiverInfo.bias[index].x);
+        }
+
+        vec4 lpPosition = csmShadowReceiverInfo.matrixVC2PL[index] * vec4(vPosition, 1);
         vec3 lnPosition = lpPosition.xyz / lpPosition.w;
         lnDepth1 = lpPosition.z;
         vec2 laPosition = (clamp(lnPosition.xy, -1, 1) + vec2(1, -1)) / vec2(2, -2);
@@ -118,13 +132,13 @@ float GetShadowIntensity(in vec3 vPosition, in vec3 wNormal)
         {
             for(int j = -csmShadowReceiverInfo.sampleHalfWidth; j <= csmShadowReceiverInfo.sampleHalfWidth; j++)
             {
-                vec2 offsetAPosition = clamp(laPosition + vec2(i, j) * csmShadowReceiverInfo.texelSize[cascadIndex / 2], 0, 1);
-                inShadowCount += ((lnDepth1 - bias) > SampleShadowTexture(cascadIndex / 2, offsetAPosition) ? 1 : 0);
+                vec2 offsetAPosition = clamp(laPosition + vec2(i, j) * csmShadowReceiverInfo.texelSize[index], 0, 1);
+                inShadowCount += ((lnDepth1 - bias) > SampleShadowTexture(index, offsetAPosition) ? 1 : 0);
             }
         }
         shadowIntensity1 = float(inShadowCount) / float((csmShadowReceiverInfo.sampleHalfWidth * 2 + 1) * (csmShadowReceiverInfo.sampleHalfWidth * 2 + 1));
         
-        // shadowIntensity1 = (lnDepth1 - bias) > SampleShadowTexture(cascadIndex / 2, laPosition) ? 1 : 0;
+        // shadowIntensity1 = (lnDepth1 - bias) > SampleShadowTexture(index, laPosition) ? 1 : 0;
 
         float len = csmShadowReceiverInfo.thresholdVZ[cascadIndex] - csmShadowReceiverInfo.thresholdVZ[cascadIndex + 1];
         float pre = csmShadowReceiverInfo.thresholdVZ[cascadIndex] - vPosition.z;
@@ -154,19 +168,21 @@ float GetShadowIntensityWithVNormal(in vec3 vPosition, in vec3 vNormal)
     float shadowIntensity1 = 0;
     float lnDepth1 = 0;
 
-    float bias = 0;
-    float cosLightWithNormal = dot(vNormal, -csmShadowReceiverInfo.vLightDirection);
-    if(cosLightWithNormal <= 0)
     {
-        bias = csmShadowReceiverInfo.minBias;
-    }
-    else
-    {
-        bias = max(csmShadowReceiverInfo.maxBias * (1.0 - cosLightWithNormal), csmShadowReceiverInfo.minBias);
-    }
-    
-    {
-        vec4 lpPosition = csmShadowReceiverInfo.matrixVC2PL[(cascadIndex + 1) / 2] * vec4(vPosition, 1);
+        int index = (cascadIndex + 1) / 2;
+
+        float bias = 0;
+        float cosLightWithNormal = dot(vNormal, -csmShadowReceiverInfo.vLightDirection);
+        if(cosLightWithNormal <= 0)
+        {
+            bias = csmShadowReceiverInfo.bias[index].x;
+        }
+        else
+        {
+            bias = max(csmShadowReceiverInfo.bias[index].y * (1.0 - cosLightWithNormal), csmShadowReceiverInfo.bias[index].x);
+        }
+   
+        vec4 lpPosition = csmShadowReceiverInfo.matrixVC2PL[index] * vec4(vPosition, 1);
         vec3 lnPosition = lpPosition.xyz / lpPosition.w;
         lnDepth0 = lnPosition.z;
         vec2 laPosition = (clamp(lnPosition.xy, -1, 1) + vec2(1, -1)) / vec2(2, -2);
@@ -176,13 +192,13 @@ float GetShadowIntensityWithVNormal(in vec3 vPosition, in vec3 vNormal)
         {
             for(int j = -csmShadowReceiverInfo.sampleHalfWidth; j <= csmShadowReceiverInfo.sampleHalfWidth; j++)
             {
-                vec2 offsetAPosition = clamp(laPosition + vec2(i, j) * csmShadowReceiverInfo.texelSize[(cascadIndex + 1) / 2], 0, 1);
-                inShadowCount += ((lnDepth0 - bias) > SampleShadowTexture((cascadIndex + 1) / 2, offsetAPosition) ? 1 : 0);
+                vec2 offsetAPosition = clamp(laPosition + vec2(i, j) * csmShadowReceiverInfo.texelSize[index], 0, 1);
+                inShadowCount += ((lnDepth0 - bias) > SampleShadowTexture(index, offsetAPosition) ? 1 : 0);
             }
         }
         shadowIntensity0 = float(inShadowCount) / float((csmShadowReceiverInfo.sampleHalfWidth * 2 + 1) * (csmShadowReceiverInfo.sampleHalfWidth * 2 + 1));
         
-        // shadowIntensity0 = (lnDepth0 - bias) > SampleShadowTexture((cascadIndex + 1) / 2, laPosition) ? 1 : 0;
+        // shadowIntensity0 = (lnDepth0 - bias) > SampleShadowTexture(index, laPosition) ? 1 : 0;
     }
 
     if(cascadIndex % 2 == 0)
@@ -191,7 +207,20 @@ float GetShadowIntensityWithVNormal(in vec3 vPosition, in vec3 vNormal)
     }
     else
     {
-        vec4 lpPosition = csmShadowReceiverInfo.matrixVC2PL[cascadIndex / 2] * vec4(vPosition, 1);
+        int index = cascadIndex / 2;
+
+        float bias = 0;
+        float cosLightWithNormal = dot(vNormal, -csmShadowReceiverInfo.vLightDirection);
+        if(cosLightWithNormal <= 0)
+        {
+            bias = csmShadowReceiverInfo.bias[index].x;
+        }
+        else
+        {
+            bias = max(csmShadowReceiverInfo.bias[index].y * (1.0 - cosLightWithNormal), csmShadowReceiverInfo.bias[index].x);
+        }
+
+        vec4 lpPosition = csmShadowReceiverInfo.matrixVC2PL[index] * vec4(vPosition, 1);
         vec3 lnPosition = lpPosition.xyz / lpPosition.w;
         lnDepth1 = lpPosition.z;
         vec2 laPosition = (clamp(lnPosition.xy, -1, 1) + vec2(1, -1)) / vec2(2, -2);
@@ -201,13 +230,13 @@ float GetShadowIntensityWithVNormal(in vec3 vPosition, in vec3 vNormal)
         {
             for(int j = -csmShadowReceiverInfo.sampleHalfWidth; j <= csmShadowReceiverInfo.sampleHalfWidth; j++)
             {
-                vec2 offsetAPosition = clamp(laPosition + vec2(i, j) * csmShadowReceiverInfo.texelSize[cascadIndex / 2], 0, 1);
-                inShadowCount += ((lnDepth1 - bias) > SampleShadowTexture(cascadIndex / 2, offsetAPosition) ? 1 : 0);
+                vec2 offsetAPosition = clamp(laPosition + vec2(i, j) * csmShadowReceiverInfo.texelSize[index], 0, 1);
+                inShadowCount += ((lnDepth1 - bias) > SampleShadowTexture(index, offsetAPosition) ? 1 : 0);
             }
         }
         shadowIntensity1 = float(inShadowCount) / float((csmShadowReceiverInfo.sampleHalfWidth * 2 + 1) * (csmShadowReceiverInfo.sampleHalfWidth * 2 + 1));
         
-        // shadowIntensity1 = (lnDepth1 - bias) > SampleShadowTexture(cascadIndex / 2, laPosition) ? 1 : 0;
+        // shadowIntensity1 = (lnDepth1 - bias) > SampleShadowTexture(index, laPosition) ? 1 : 0;
 
         float len = csmShadowReceiverInfo.thresholdVZ[cascadIndex] - csmShadowReceiverInfo.thresholdVZ[cascadIndex + 1];
         float pre = csmShadowReceiverInfo.thresholdVZ[cascadIndex] - vPosition.z;
