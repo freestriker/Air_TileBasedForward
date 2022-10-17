@@ -42,6 +42,7 @@
 #include "Test/TBF_OIT_RenderBehaviour.h"
 #include "Test/QuadMoveBehaviour.h"
 #include "Test/RendererDataController.h"
+#include "Core/Graphic/Instance/NewImage.h"
 
 AirEngine::Core::Logic::CoreObject::Thread::LogicThread AirEngine::Core::Logic::CoreObject::Thread::_logicThread = AirEngine::Core::Logic::CoreObject::Thread::LogicThread();
 
@@ -396,6 +397,9 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnThreadStart()
 void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 {
 	Graphic::CoreObject::Instance::RenderPipelineManager().SwitchRenderPipeline(new Rendering::RenderPipeline::ForwardRenderPipeline());
+
+	auto clip = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::NewImage>("..\\Asset\\Texture\\SkyImageCube.json");
+
 
 	//Camera
 	Object::GameObject* cameraGo = new Logic::Object::GameObject("Camera");

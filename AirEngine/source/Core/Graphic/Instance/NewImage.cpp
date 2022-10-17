@@ -100,10 +100,12 @@ void AirEngine::Core::Graphic::Instance::NewImage::OnLoad(Core::Graphic::Command
 
 				if (!inited)
 				{
+					inited = true;
+
 					pixelDepth = subPixelDepth;
 					pitch = subPitch;
 					extent2D = subExtent2D;
-					_perLayerSize = static_cast<size_t>(extent2D.width) * extent2D.height * subPitch;
+					_perLayerSize = static_cast<size_t>(extent2D.width) * extent2D.height * subPixelDepth / 8;
 					byteDatas = std::vector<std::vector<unsigned char>>(_imageImfo.subresourcePaths.size(), std::vector<unsigned char>(_perLayerSize));
 				}
 				else
@@ -147,7 +149,7 @@ void AirEngine::Core::Graphic::Instance::NewImage::OnLoad(Core::Graphic::Command
 		imageInfo.format = _imageImfo.format;
 		imageInfo.tiling = _imageImfo.imageTiling;
 		imageInfo.initialLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
-		imageInfo.usage = _imageImfo.imageUsageFlags;
+		imageInfo.usage = _imageImfo.imageUsageFlags | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 		imageInfo.samples = VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT;
 		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		imageInfo.flags = _imageImfo.imageCreateFlags;
