@@ -4,6 +4,7 @@
 #include "Utils/Log.h"
 #include "Core/Graphic/Instance/Buffer.h"
 #include "Core/Graphic/Instance/Image.h"
+#include "Core/Graphic/Instance/NewImage.h"
 #include "Core/Graphic/Command/Semaphore.h"
 #include "Core/Graphic/Command/ImageMemoryBarrier.h"
 #include "Core/Graphic/Command/BufferMemoryBarrier.h"
@@ -166,6 +167,19 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::CopyBufferToImage(Instanc
     }
 
     vkCmdCopyBufferToImage(_vkCommandBuffer, srcBuffer->VkBuffer_(), dstImage->VkImage_(), dstImageLayout, static_cast<uint32_t>(layerCount), infos.data());
+}
+
+void AirEngine::Core::Graphic::Command::CommandBuffer::CopyBufferToImage(Instance::Buffer* srcBuffer, Instance::NewImage* dstImage, VkImageLayout dstImageLayout)
+{
+    VkBufferImageCopy info{};
+    info.bufferOffset = 0;
+    info.bufferRowLength = 0;
+    info.bufferImageHeight = 0;
+    info.imageSubresource = dstImage->ImageView_().vkImageSubresourceLayers;
+    info.imageOffset = { 0, 0, 0 };
+    info.imageExtent = dstImage->VkExtent3D_();
+
+    vkCmdCopyBufferToImage(_vkCommandBuffer, srcBuffer->VkBuffer_(), dstImage->VkImage_(), dstImageLayout, 1, &info);
 }
 
 void AirEngine::Core::Graphic::Command::CommandBuffer::CopyImageToBuffer(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Buffer* dstBuffer)

@@ -106,6 +106,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Core\Graphic\Instance\NewImage.cpp" />
     <ClCompile Include="source\Rendering\Renderer\AmbientOcclusionRenderer.cpp" />
     <ClCompile Include="source\Rendering\Renderer\ShadowVisualizationRenderer.cpp" />
     <ClCompile Include="source\Rendering\Renderer\TBForwardRenderer.cpp" />
@@ -238,6 +239,7 @@
     <ClInclude Include="header\Core\Graphic\Instance\Image.h" />
     <ClInclude Include="header\Core\Graphic\Instance\ImageSampler.h" />
     <ClInclude Include="header\Core\Graphic\Instance\Memory.h" />
+    <ClInclude Include="header\Core\Graphic\Instance\NewImage.h" />
     <ClInclude Include="header\Core\Graphic\Manager\DescriptorSetManager.h" />
     <ClInclude Include="header\Core\Graphic\Manager\LightManager.h" />
     <ClInclude Include="header\Core\Graphic\Manager\MemoryManager.h" />
