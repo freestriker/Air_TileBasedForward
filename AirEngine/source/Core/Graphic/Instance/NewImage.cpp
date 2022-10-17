@@ -14,21 +14,165 @@
 #include "Core/Graphic/Instance/ImageSampler.h"
 #include "Core/Graphic/Command/ImageMemoryBarrier.h"
 
+AirEngine::Core::Graphic::Instance::NewImage* AirEngine::Core::Graphic::Instance::NewImage::Create2DImage(VkExtent2D extent, VkFormat format, VkImageUsageFlags imageUsage, VkMemoryPropertyFlags memoryProperty, VkImageAspectFlags aspect, VkImageTiling imageTiling)
+{
+	auto newImage = new NewImage();
+
+	newImage->_vkExtent2D = extent;
+	newImage->_isNative = false;
+	newImage->_layerCount = 1;
+	newImage->_imageImfo.subresourcePaths = { };
+	newImage->_imageImfo.format = format;
+	newImage->_imageImfo.imageTiling = imageTiling;
+	newImage->_imageImfo.imageUsageFlags = imageUsage;
+	newImage->_imageImfo.memoryPropertyFlags = memoryProperty;
+	newImage->_imageImfo.imageCreateFlags = 0;
+	newImage->_imageImfo.imageViewInfos = {
+		{
+			"DefaultImageView",
+			{
+				VkImageViewType::VK_IMAGE_VIEW_TYPE_2D,
+				aspect,
+				0,
+				1
+			}
+		}
+	};
+
+	newImage->CreateVulkanInstance();
+
+	return newImage;
+}
+
+AirEngine::Core::Graphic::Instance::NewImage* AirEngine::Core::Graphic::Instance::NewImage::CreateNative2DImage(VkImage vkImage, VkImageView vkImageView, VkExtent2D extent, VkFormat format, VkImageUsageFlags imageUsage, VkImageAspectFlags aspect)
+{
+	auto newImage = new NewImage();
+
+	newImage->_vkExtent2D = extent;
+	newImage->_isNative = true;
+	newImage->_layerCount = 1;
+	newImage->_imageImfo.subresourcePaths = { };
+	newImage->_imageImfo.format = format;
+	newImage->_imageImfo.imageTiling = VkImageTiling::VK_IMAGE_TILING_OPTIMAL;
+	newImage->_imageImfo.imageUsageFlags = imageUsage;
+	newImage->_imageImfo.memoryPropertyFlags = 0;
+	newImage->_imageImfo.imageCreateFlags = 0;
+	newImage->_imageImfo.imageViewInfos = {
+		{
+			"DefaultImageView",
+			{
+				VkImageViewType::VK_IMAGE_VIEW_TYPE_2D,
+				aspect,
+				0,
+				1
+			}
+		}
+	};
+
+	newImage->_vkImage = vkImage;
+
+	ImageView imageView = {};
+
+	imageView.vkImageSubresourceRange.aspectMask = aspect;
+	imageView.vkImageSubresourceRange.baseMipLevel = 0;
+	imageView.vkImageSubresourceRange.levelCount = 1;
+	imageView.vkImageSubresourceRange.baseArrayLayer = 0;
+	imageView.vkImageSubresourceRange.layerCount = 1;
+
+	imageView.vkImageSubresourceLayers.aspectMask = aspect;
+	imageView.vkImageSubresourceLayers.mipLevel = 0;
+	imageView.vkImageSubresourceLayers.baseArrayLayer = 0;
+	imageView.vkImageSubresourceLayers.layerCount = 1;
+
+	VkImageViewCreateInfo imageViewCreateInfo{};
+	imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	imageViewCreateInfo.image = vkImage;
+	imageViewCreateInfo.viewType = VkImageViewType::VK_IMAGE_VIEW_TYPE_2D;
+	imageViewCreateInfo.format = format;
+	imageViewCreateInfo.subresourceRange = imageView.vkImageSubresourceRange;
+
+	Utils::Log::Exception("Failed to create image view.", vkCreateImageView(CoreObject::Instance::VkDevice_(), &imageViewCreateInfo, nullptr, &imageView.vkImageView));
+
+	newImage->_imageViews.emplace("DefaultImageView", imageView);
+
+	return newImage;
+}
+
+AirEngine::Core::Graphic::Instance::NewImage* AirEngine::Core::Graphic::Instance::NewImage::Create2DImageArray(VkExtent2D extent, VkFormat format, VkImageUsageFlags imageUsage, VkMemoryPropertyFlags memoryProperty, VkImageAspectFlags aspect, uint32_t arraySize, VkImageTiling imageTiling)
+{
+	auto newImage = new NewImage();
+
+	newImage->_vkExtent2D = extent;
+	newImage->_isNative = false;
+	newImage->_layerCount = arraySize;
+	newImage->_imageImfo.subresourcePaths = { };
+	newImage->_imageImfo.format = format;
+	newImage->_imageImfo.imageTiling = imageTiling;
+	newImage->_imageImfo.imageUsageFlags = imageUsage;
+	newImage->_imageImfo.memoryPropertyFlags = memoryProperty;
+	newImage->_imageImfo.imageCreateFlags = VkImageCreateFlagBits::VK_IMAGE_CREATE_2D_ARRAY_COMPATIBLE_BIT;
+	newImage->_imageImfo.imageViewInfos = {
+		{
+			"DefaultImageView",
+			{
+				VkImageViewType::VK_IMAGE_VIEW_TYPE_2D_ARRAY,
+				aspect,
+				0,
+				arraySize
+			}
+		}
+	};
+
+	newImage->CreateVulkanInstance();
+
+	return newImage;
+}
+
+AirEngine::Core::Graphic::Instance::NewImage* AirEngine::Core::Graphic::Instance::NewImage::CreateCubeImage(VkExtent2D extent, VkFormat format, VkImageUsageFlags imageUsage, VkMemoryPropertyFlags memoryProperty, VkImageAspectFlags aspect, VkImageTiling imageTiling)
+{
+	auto newImage = new NewImage();
+
+	newImage->_vkExtent2D = extent;
+	newImage->_isNative = false;
+	newImage->_layerCount = 6;
+	newImage->_imageImfo.subresourcePaths = { };
+	newImage->_imageImfo.format = format;
+	newImage->_imageImfo.imageTiling = imageTiling;
+	newImage->_imageImfo.imageUsageFlags = imageUsage;
+	newImage->_imageImfo.memoryPropertyFlags = memoryProperty;
+	newImage->_imageImfo.imageCreateFlags = VkImageCreateFlagBits::VK_IMAGE_CREATE_CUBE_COMPATIBLE_BIT;
+	newImage->_imageImfo.imageViewInfos = {
+		{
+			"DefaultImageView",
+			{
+				VkImageViewType::VK_IMAGE_VIEW_TYPE_2D,
+				aspect,
+				0,
+				6
+			}
+		}
+	};
+
+	newImage->CreateVulkanInstance();
+
+	return newImage;
+}
+
 AirEngine::Core::Graphic::Instance::NewImage::NewImage()
 	: AssetBase(true)
-	, _isNative(true)
+	, _isNative(false)
 	, _imageImfo()
 	, _vkImage(VK_NULL_HANDLE)
 	, _memory(nullptr)
 	, _vkExtent2D()
 	, _imageViews()
-	, _perLayerSize()
+	, _layerCount()
 {
 }
 
 AirEngine::Core::Graphic::Instance::NewImage::~NewImage()
 {
-	if (_isNative)
+	if (!_isNative)
 	{
 		for (auto& imageViewPair : _imageViews)
 		{
@@ -51,19 +195,34 @@ VkImage AirEngine::Core::Graphic::Instance::NewImage::VkImage_()
 	return _vkImage;
 }
 
-size_t AirEngine::Core::Graphic::Instance::NewImage::PerLayerSize()
-{
-	return _perLayerSize;
-}
-
 uint32_t AirEngine::Core::Graphic::Instance::NewImage::LayerCount()
 {
-	return static_cast<uint32_t>(_imageImfo.subresourcePaths.size());
+	return _layerCount;
+}
+
+VkFormat AirEngine::Core::Graphic::Instance::NewImage::VkFormat_()
+{
+	return _imageImfo.format;
+}
+
+VkMemoryPropertyFlags AirEngine::Core::Graphic::Instance::NewImage::VkMemoryPropertyFlags_()
+{
+	return _imageImfo.memoryPropertyFlags;
+}
+
+AirEngine::Core::Graphic::Instance::Memory& AirEngine::Core::Graphic::Instance::NewImage::Memory_()
+{
+	return *_memory;
 }
 
 VkExtent3D AirEngine::Core::Graphic::Instance::NewImage::VkExtent3D_()
 {
 	return VkExtent3D{ _vkExtent2D.width, _vkExtent2D .height, 1};
+}
+
+VkExtent2D AirEngine::Core::Graphic::Instance::NewImage::VkExtent2D_()
+{
+	return _vkExtent2D;
 }
 
 void AirEngine::Core::Graphic::Instance::NewImage::OnLoad(Core::Graphic::Command::CommandBuffer* transferCommandBuffer)
@@ -79,11 +238,13 @@ void AirEngine::Core::Graphic::Instance::NewImage::OnLoad(Core::Graphic::Command
 
 	//Load bitmap
 	std::vector<std::vector<unsigned char>> byteDatas;
+	size_t perLayerSize;
 	{
 		bool inited = false;
 		uint32_t pixelDepth = 0;
 		uint32_t pitch = 0;
 		VkExtent2D& extent2D = _vkExtent2D;
+		uint32_t& layerCount = _layerCount;
 
 		for (size_t i = 0; i < _imageImfo.subresourcePaths.size(); i++)
 		{
@@ -105,8 +266,9 @@ void AirEngine::Core::Graphic::Instance::NewImage::OnLoad(Core::Graphic::Command
 					pixelDepth = subPixelDepth;
 					pitch = subPitch;
 					extent2D = subExtent2D;
-					_perLayerSize = static_cast<size_t>(extent2D.width) * extent2D.height * subPixelDepth / 8;
-					byteDatas = std::vector<std::vector<unsigned char>>(_imageImfo.subresourcePaths.size(), std::vector<unsigned char>(_perLayerSize));
+					perLayerSize = static_cast<size_t>(extent2D.width) * extent2D.height * subPixelDepth / 8;
+					byteDatas = std::vector<std::vector<unsigned char>>(_imageImfo.subresourcePaths.size(), std::vector<unsigned char>(perLayerSize));
+					layerCount = static_cast<uint32_t>(_imageImfo.subresourcePaths.size());
 				}
 				else
 				{
@@ -125,73 +287,21 @@ void AirEngine::Core::Graphic::Instance::NewImage::OnLoad(Core::Graphic::Command
 		}
 	}
 
+	CreateVulkanInstance();
+
 	//Create staging buffer
 	Core::Graphic::Instance::Buffer stagingBuffer = Core::Graphic::Instance::Buffer(
-		_perLayerSize * _imageImfo.subresourcePaths.size(), 
+		perLayerSize * _layerCount,
 		VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
 		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 	);
-	stagingBuffer.WriteData([this, &byteDatas](void* transferDst) {
+	stagingBuffer.WriteData([perLayerSize, &byteDatas](void* transferDst) {
 		for (int i = 0; i < 6; i++)
 		{
-			memcpy(static_cast<char*>(transferDst) + i * _perLayerSize, byteDatas[i].data(), _perLayerSize);
+			memcpy(static_cast<char*>(transferDst) + i * perLayerSize, byteDatas[i].data(), perLayerSize);
 		}
 	});
 
-	///Create vk image
-	{
-		VkImageCreateInfo imageInfo{};
-		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-		imageInfo.imageType = VkImageType::VK_IMAGE_TYPE_2D;
-		imageInfo.extent = { _vkExtent2D.width, _vkExtent2D.height, 1 };
-		imageInfo.mipLevels = 1;
-		imageInfo.arrayLayers = static_cast<uint32_t>(_imageImfo.subresourcePaths.size());
-		imageInfo.format = _imageImfo.format;
-		imageInfo.tiling = _imageImfo.imageTiling;
-		imageInfo.initialLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
-		imageInfo.usage = _imageImfo.imageUsageFlags | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-		imageInfo.samples = VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT;
-		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		imageInfo.flags = _imageImfo.imageCreateFlags;
-
-		Utils::Log::Exception("Failed to create image.", vkCreateImage(CoreObject::Instance::VkDevice_(), &imageInfo, nullptr, &_vkImage));
-
-		VkMemoryRequirements memRequirements;
-		vkGetImageMemoryRequirements(CoreObject::Instance::VkDevice_(), _vkImage, &memRequirements);
-
-		auto newMemory = new Instance::Memory(CoreObject::Instance::MemoryManager().AcquireMemory(memRequirements, _imageImfo.memoryPropertyFlags));
-		vkBindImageMemory(CoreObject::Instance::VkDevice_(), _vkImage, newMemory->VkDeviceMemory_(), newMemory->Offset());
-	}
-
-	///Create vk image view
-	{
-		for (auto& imageInfoPair : _imageImfo.imageViewInfos)
-		{
-			ImageView imageView = {};
-
-			imageView.vkImageSubresourceRange.aspectMask = imageInfoPair.second.imageAspectFlags;
-			imageView.vkImageSubresourceRange.baseMipLevel = 0;
-			imageView.vkImageSubresourceRange.levelCount = 1;
-			imageView.vkImageSubresourceRange.baseArrayLayer = imageInfoPair.second.baseArrayLayer;
-			imageView.vkImageSubresourceRange.layerCount = imageInfoPair.second.layerCount;
-
-			imageView.vkImageSubresourceLayers.aspectMask = imageInfoPair.second.imageAspectFlags;
-			imageView.vkImageSubresourceLayers.mipLevel = 0;
-			imageView.vkImageSubresourceLayers.baseArrayLayer = imageInfoPair.second.baseArrayLayer;
-			imageView.vkImageSubresourceLayers.layerCount = imageInfoPair.second.layerCount;
-
-			VkImageViewCreateInfo imageViewCreateInfo{};
-			imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-			imageViewCreateInfo.image = _vkImage;
-			imageViewCreateInfo.viewType = VkImageViewType::VK_IMAGE_VIEW_TYPE_CUBE;
-			imageViewCreateInfo.format = _imageImfo.format;
-			imageViewCreateInfo.subresourceRange = imageView.vkImageSubresourceRange;
-
-			Utils::Log::Exception("Failed to create image view.", vkCreateImageView(CoreObject::Instance::VkDevice_(), &imageViewCreateInfo, nullptr, &imageView.vkImageView));
-
-			_imageViews.emplace(imageInfoPair.first, imageView);
-		}
-	}
 
 	//Copy buffer to image
 	{
@@ -224,5 +334,68 @@ void AirEngine::Core::Graphic::Instance::NewImage::OnLoad(Core::Graphic::Command
 		transferCommandBuffer->EndRecord();
 		transferCommandBuffer->Submit();
 		transferCommandBuffer->WaitForFinish();
+	}
+}
+
+void AirEngine::Core::Graphic::Instance::NewImage::CreateVulkanInstance()
+{
+	///Create vk image
+	{
+		VkImageCreateInfo imageInfo{};
+		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+		imageInfo.imageType = VkImageType::VK_IMAGE_TYPE_2D;
+		imageInfo.extent = { _vkExtent2D.width, _vkExtent2D.height, 1 };
+		imageInfo.mipLevels = 1;
+		imageInfo.arrayLayers = _layerCount;
+		imageInfo.format = _imageImfo.format;
+		imageInfo.tiling = _imageImfo.imageTiling;
+		imageInfo.initialLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
+		imageInfo.usage = _imageImfo.imageUsageFlags | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+		imageInfo.samples = VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT;
+		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		imageInfo.flags = _imageImfo.imageCreateFlags;
+
+		Utils::Log::Exception("Failed to create image.", vkCreateImage(CoreObject::Instance::VkDevice_(), &imageInfo, nullptr, &_vkImage));
+
+		VkMemoryRequirements memRequirements;
+		vkGetImageMemoryRequirements(CoreObject::Instance::VkDevice_(), _vkImage, &memRequirements);
+
+		auto newMemory = new Instance::Memory(CoreObject::Instance::MemoryManager().AcquireMemory(memRequirements, _imageImfo.memoryPropertyFlags));
+		vkBindImageMemory(CoreObject::Instance::VkDevice_(), _vkImage, newMemory->VkDeviceMemory_(), newMemory->Offset());
+	}
+
+	///Create vk image view
+	{
+		if (_imageImfo.imageViewInfos.find("DefaultImageView") == _imageImfo.imageViewInfos.end())
+		{
+			Utils::Log::Exception("Failed to find DefaultImageView.");
+		}
+
+		for (auto& imageInfoPair : _imageImfo.imageViewInfos)
+		{
+			ImageView imageView = {};
+
+			imageView.vkImageSubresourceRange.aspectMask = imageInfoPair.second.imageAspectFlags;
+			imageView.vkImageSubresourceRange.baseMipLevel = 0;
+			imageView.vkImageSubresourceRange.levelCount = 1;
+			imageView.vkImageSubresourceRange.baseArrayLayer = imageInfoPair.second.baseArrayLayer;
+			imageView.vkImageSubresourceRange.layerCount = imageInfoPair.second.layerCount;
+
+			imageView.vkImageSubresourceLayers.aspectMask = imageInfoPair.second.imageAspectFlags;
+			imageView.vkImageSubresourceLayers.mipLevel = 0;
+			imageView.vkImageSubresourceLayers.baseArrayLayer = imageInfoPair.second.baseArrayLayer;
+			imageView.vkImageSubresourceLayers.layerCount = imageInfoPair.second.layerCount;
+
+			VkImageViewCreateInfo imageViewCreateInfo{};
+			imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+			imageViewCreateInfo.image = _vkImage;
+			imageViewCreateInfo.viewType = imageInfoPair.second.imageViewType;
+			imageViewCreateInfo.format = _imageImfo.format;
+			imageViewCreateInfo.subresourceRange = imageView.vkImageSubresourceRange;
+
+			Utils::Log::Exception("Failed to create image view.", vkCreateImageView(CoreObject::Instance::VkDevice_(), &imageViewCreateInfo, nullptr, &imageView.vkImageView));
+
+			_imageViews.emplace(imageInfoPair.first, imageView);
+		}
 	}
 }

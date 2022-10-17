@@ -7,7 +7,6 @@
         "..\\Asset\\Texture\\DefaultTextureCube_Top.png",
         "..\\Asset\\Texture\\DefaultTextureCube_Bottom.png"
     ],
-    "imageType": 1,
     "format": 50,
     "imageTiling": 0,
     "imageUsageFlags": 4,
