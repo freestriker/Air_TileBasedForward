@@ -50,7 +50,7 @@ namespace AirEngine
 					std::array<Core::Graphic::Instance::Image*, CASCADE_COUNT> shadowImages;
 					std::array<Core::Graphic::Rendering::FrameBuffer*, CASCADE_COUNT> shadowFrameBuffers;
 					Core::Graphic::Instance::Buffer* lightCameraInfoBuffer;
-					Core::Graphic::Instance::Buffer* lightCameraInfoStagingBuffer;
+					Core::Graphic::Instance::Buffer* lightCameraInfoHostStagingBuffer;
 					Core::Graphic::Instance::Buffer* csmShadowReceiverInfoBuffer;
 				public:
 					std::array<float, CASCADE_COUNT> frustumSegmentScales;

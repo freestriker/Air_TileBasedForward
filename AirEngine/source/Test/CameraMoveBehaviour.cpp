@@ -3,7 +3,6 @@
 #include "Core/Logic/Object/GameObject.h"
 #include "Core/Logic/CoreObject/Instance.h"
 #include <algorithm>
-#include "Asset/TextureCube.h"
 RTTR_REGISTRATION
 {
 	rttr::registration::class_<AirEngine::Test::CameraMoveBehaviour>("AirEngine::Test::CameraMoveBehaviour");

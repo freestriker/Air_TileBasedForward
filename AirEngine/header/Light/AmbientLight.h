@@ -4,9 +4,9 @@
 
 namespace AirEngine
 {
-	namespace Asset
+	namespace Core::Graphic::Instance
 	{
-		class TextureCube;
+		class Image;
 	}
 	namespace Light
 	{
@@ -16,7 +16,7 @@ namespace AirEngine
 			void OnSetLightInfo(LightInfo& info)override;
 			void OnSetBoundingBoxInfo(std::array<glm::vec4, 8>& boundingBoxVertexes)override;
 		public:
-			Asset::TextureCube* ambientLightTextureCube;
+			Core::Graphic::Instance::Image* ambientLightTextureCube;
 
 			AmbientLight();
 			~AmbientLight();

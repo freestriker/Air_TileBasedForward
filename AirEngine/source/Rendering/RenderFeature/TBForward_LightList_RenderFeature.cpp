@@ -118,9 +118,8 @@ void AirEngine::Rendering::RenderFeature::TBForward_LightList_RenderFeature::OnR
 	featureData->material->SetUniformBuffer("lightBoundingBoxInfos", Core::Graphic::CoreObject::Instance::LightManager().TileBasedForwardLightBoundindBoxInfosBuffer());
 	featureData->material->SetStorageBuffer("opaqueLightIndexLists", featureData->opaqueLightIndexListsBuffer);
 	featureData->material->SetStorageBuffer("transparentLightIndexLists", featureData->transparentLightIndexListsBuffer);
-	featureData->material->SetSlotData("depthTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _depthTextureSampler->VkSampler_(), featureData->depthTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
+	featureData->material->SetSampledImage2D("depthTexture", featureData->depthTexture, _depthTextureSampler);
 	featureData->material->SetUniformBuffer("depthTextureInfo", featureData->depthTextureInfoBuffer);
-
 }
 
 void AirEngine::Rendering::RenderFeature::TBForward_LightList_RenderFeature::OnDestroyRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)

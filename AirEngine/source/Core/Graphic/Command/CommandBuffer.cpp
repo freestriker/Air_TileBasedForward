@@ -112,22 +112,15 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::AddPipelineBarrier(VkPipe
 }
 void AirEngine::Core::Graphic::Command::CommandBuffer::CopyImage(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Image* dstImage, VkImageLayout dstImageLayout)
 {
-    auto layerCount = std::min(srcImage->LayerCount(), dstImage->LayerCount());
-    auto srcSubresources = srcImage->VkImageSubresourceLayers_();
-    auto dstSubresources = dstImage->VkImageSubresourceLayers_();
-    std::vector< VkImageCopy> infos = std::vector<VkImageCopy>(layerCount);
-    for (uint32_t i = 0; i < layerCount; i++)
-    {
-        auto& copy = infos[i];
 
-        copy.srcSubresource = srcSubresources[i];
-        copy.srcOffset = { 0, 0, 0 };
-        copy.dstSubresource = dstSubresources[i];
-        copy.srcOffset = { 0, 0, 0 };
-        copy.extent = dstImage->VkExtent3D_();
-    }
+    VkImageCopy copy = {};
+    copy.srcSubresource = srcImage->ImageView_().vkImageSubresourceLayers;
+    copy.srcOffset = { 0, 0, 0 };
+    copy.dstSubresource = dstImage->ImageView_().vkImageSubresourceLayers;
+    copy.srcOffset = { 0, 0, 0 };
+    copy.extent = dstImage->VkExtent3D_();
 
-    vkCmdCopyImage(_vkCommandBuffer, srcImage->VkImage_(), srcImageLayout, dstImage->VkImage_(), dstImageLayout, static_cast<uint32_t>(layerCount), infos.data());
+    vkCmdCopyImage(_vkCommandBuffer, srcImage->VkImage_(), srcImageLayout, dstImage->VkImage_(), dstImageLayout, 1, &copy);
 }
 void AirEngine::Core::Graphic::Command::CommandBuffer::AddPipelineImageBarrier(VkDependencyFlags dependencyFlag, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, std::vector<ImageMemoryBarrier*> imageMemoryBarriers)
 {
@@ -149,44 +142,28 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::AddPipelineImageBarrier(V
 
 void AirEngine::Core::Graphic::Command::CommandBuffer::CopyBufferToImage(Instance::Buffer* srcBuffer, Instance::Image* dstImage, VkImageLayout dstImageLayout)
 {
-    auto layerCount = dstImage->LayerCount();
-    auto layerSize = dstImage->PerLayerSize();
-    auto subresources = dstImage->VkImageSubresourceLayers_();
-    std::vector< VkBufferImageCopy> infos = std::vector<VkBufferImageCopy>(layerCount);
-    for (uint32_t i = 0; i < layerCount; i++)
-    {
-        auto& region = infos[i];
+    VkBufferImageCopy info{};
+    info.bufferOffset = 0;
+    info.bufferRowLength = 0;
+    info.bufferImageHeight = 0;
+    info.imageSubresource = dstImage->ImageView_().vkImageSubresourceLayers;
+    info.imageOffset = { 0, 0, 0 };
+    info.imageExtent = dstImage->VkExtent3D_();
 
-        region.bufferOffset = layerSize * i;
-        region.bufferRowLength = 0;
-        region.bufferImageHeight = 0;
-        region.imageSubresource = subresources[i];
-        region.imageOffset = { 0, 0, 0 };
-        region.imageExtent = dstImage->VkExtent3D_();
-    }
-
-    vkCmdCopyBufferToImage(_vkCommandBuffer, srcBuffer->VkBuffer_(), dstImage->VkImage_(), dstImageLayout, static_cast<uint32_t>(layerCount), infos.data());
+    vkCmdCopyBufferToImage(_vkCommandBuffer, srcBuffer->VkBuffer_(), dstImage->VkImage_(), dstImageLayout, 1, &info);
 }
 
 void AirEngine::Core::Graphic::Command::CommandBuffer::CopyImageToBuffer(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Buffer* dstBuffer)
 {
-    auto layerCount = srcImage->LayerCount();
-    auto layerSize = srcImage->PerLayerSize();
-    auto subresources = srcImage->VkImageSubresourceLayers_();
-    std::vector< VkBufferImageCopy> infos = std::vector<VkBufferImageCopy>(layerCount);
-    for (uint32_t i = 0; i < layerCount; i++)
-    {
-        auto& region = infos[i];
+    VkBufferImageCopy region = {};
+    region.bufferOffset = 0;
+    region.bufferRowLength = 0;
+    region.bufferImageHeight = 0;
+    region.imageSubresource = srcImage->ImageView_().vkImageSubresourceLayers;
+    region.imageOffset = { 0, 0, 0 };
+    region.imageExtent = srcImage->VkExtent3D_();
 
-        region.bufferOffset = layerSize * i;
-        region.bufferRowLength = 0;
-        region.bufferImageHeight = 0;
-        region.imageSubresource = subresources[i];
-        region.imageOffset = { 0, 0, 0 };
-        region.imageExtent = srcImage->VkExtent3D_();
-    }
-
-    vkCmdCopyImageToBuffer(_vkCommandBuffer, srcImage->VkImage_(), srcImageLayout, dstBuffer->VkBuffer_(), static_cast<uint32_t>(layerCount), infos.data());
+    vkCmdCopyImageToBuffer(_vkCommandBuffer, srcImage->VkImage_(), srcImageLayout, dstBuffer->VkBuffer_(), 1, &region);
 }
 
 void AirEngine::Core::Graphic::Command::CommandBuffer::FillBuffer(Instance::Buffer* dstBuffer, uint32_t data)
@@ -219,16 +196,13 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::EndRecord()
 
 void AirEngine::Core::Graphic::Command::CommandBuffer::ClearDepthImage(Instance::Image* image, VkImageLayout layout, float depth)
 {
-    auto ranges = image->VkImageSubresourceRanges_();
-    std::vector< VkClearDepthStencilValue> clearValues = std::vector< VkClearDepthStencilValue>(ranges.size(), { depth, 0 });
-    vkCmdClearDepthStencilImage(_vkCommandBuffer, image->VkImage_(), layout, clearValues.data(), static_cast<uint32_t>(ranges.size()), ranges.data());
+    VkClearDepthStencilValue clearValues = { depth, 0 };
+    vkCmdClearDepthStencilImage(_vkCommandBuffer, image->VkImage_(), layout, &clearValues, 1, &image->ImageView_().vkImageSubresourceRange);
 }
 
 void AirEngine::Core::Graphic::Command::CommandBuffer::ClearColorImage(Instance::Image* image, VkImageLayout layout, VkClearColorValue targetColor)
 {
-    auto ranges = image->VkImageSubresourceRanges_();
-    std::vector< VkClearColorValue> clearValues = std::vector< VkClearColorValue>(ranges.size(), targetColor);
-    vkCmdClearColorImage(_vkCommandBuffer, image->VkImage_(), layout, clearValues.data(), static_cast<uint32_t>(ranges.size()), ranges.data());
+    vkCmdClearColorImage(_vkCommandBuffer, image->VkImage_(), layout, &targetColor, 1, &image->ImageView_().vkImageSubresourceRange);
 }
 
 void AirEngine::Core::Graphic::Command::CommandBuffer::Submit(std::vector<Command::Semaphore*> waitSemaphores, std::vector<VkPipelineStageFlags> waitStages, std::vector<Command::Semaphore*> signalSemaphores)
@@ -445,44 +419,16 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::Blit(Instance::Image* src
 {
     auto src = srcImage->VkExtent3D_();
     auto dst = dstImage->VkExtent3D_();
-    auto layerCount = std::min(srcImage->LayerCount(), dstImage->LayerCount());
-    auto srcSubresources = srcImage->VkImageSubresourceLayers_();
-    auto dstSubresources = dstImage->VkImageSubresourceLayers_();
-    std::vector< VkImageBlit> infos = std::vector< VkImageBlit>(layerCount);
-    for (uint32_t i = 0; i < layerCount; i++)
-    {
-        auto& blit = infos[i];
 
-        blit.srcSubresource = srcSubresources[i];
-        blit.srcOffsets[0] = { 0, 0, 0 };
-        blit.srcOffsets[1] = *reinterpret_cast<VkOffset3D*>(&src);
-        blit.dstSubresource = dstSubresources[i];
-        blit.dstOffsets[0] = { 0, 0, 0 };
-        blit.dstOffsets[1] = *reinterpret_cast<VkOffset3D*>(&dst);
-    }
+    VkImageBlit blit = {};
+    blit.srcSubresource = srcImage->ImageView_().vkImageSubresourceLayers;
+    blit.srcOffsets[0] = { 0, 0, 0 };
+    blit.srcOffsets[1] = *reinterpret_cast<VkOffset3D*>(&src);
+    blit.dstSubresource = dstImage->ImageView_().vkImageSubresourceLayers;
+    blit.dstOffsets[0] = { 0, 0, 0 };
+    blit.dstOffsets[1] = *reinterpret_cast<VkOffset3D*>(&dst);
 
-    vkCmdBlitImage(_vkCommandBuffer, srcImage->VkImage_(), srcImageLayout, dstImage->VkImage_(), dstImageLayout, static_cast<uint32_t>(layerCount), infos.data(), filter);
-}
-
-void AirEngine::Core::Graphic::Command::CommandBuffer::Blit(Instance::Image* srcImage, VkImageLayout srcImageLayout, VkImage dstImage, VkImageLayout dstImageLayout, VkOffset3D offset1, VkOffset3D offset2, VkFilter filter)
-{
-    auto src = srcImage->VkExtent3D_();
-    auto layerCount = srcImage->LayerCount();
-    auto srcSubresources = srcImage->VkImageSubresourceLayers_();
-    std::vector< VkImageBlit> infos = std::vector< VkImageBlit>(layerCount);
-    for (uint32_t i = 0; i < layerCount; i++)
-    {
-        auto& blit = infos[i];
-
-        blit.srcSubresource = srcSubresources[i];
-        blit.srcOffsets[0] = { 0, 0, 0 };
-        blit.srcOffsets[1] = *reinterpret_cast<VkOffset3D*>(&src);
-        blit.dstSubresource = srcSubresources[i];
-        blit.dstOffsets[0] = offset1;
-        blit.dstOffsets[1] = offset2;
-    }
-
-    vkCmdBlitImage(_vkCommandBuffer, srcImage->VkImage_(), srcImageLayout, dstImage, dstImageLayout, static_cast<uint32_t>(layerCount), infos.data(), filter);
+    vkCmdBlitImage(_vkCommandBuffer, srcImage->VkImage_(), srcImageLayout, dstImage->VkImage_(), dstImageLayout, 1, &blit, filter);
 }
 
 AirEngine::Core::Graphic::Command::CommandPool* AirEngine::Core::Graphic::Command::CommandBuffer::ParentCommandPool()

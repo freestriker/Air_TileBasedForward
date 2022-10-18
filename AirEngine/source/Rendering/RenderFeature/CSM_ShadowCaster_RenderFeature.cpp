@@ -92,7 +92,7 @@ AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_ShadowC
 	, shadowImages()
 	, shadowFrameBuffers()
 	, lightCameraInfoBuffer(nullptr)
-	, lightCameraInfoStagingBuffer(nullptr)
+	, lightCameraInfoHostStagingBuffer(nullptr)
 	, frustumSegmentScales()
 	, lightCameraCompensationDistances()
 	, shadowImageResolutions()
@@ -160,7 +160,7 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_Sh
 	material->SetUniformBuffer("csmShadowReceiverInfo", csmShadowReceiverInfoBuffer);
 	for (int i = 0; i < CASCADE_COUNT; i++)
 	{
-		material->SetSlotData("shadowTexture_" + std::to_string(i), {0}, {{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, sampler->VkSampler_(), shadowImages[i]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}});
+		material->SetSampledImage2D("shadowTexture_" + std::to_string(i), shadowImages[i], sampler);
 	}
 }
 
@@ -175,7 +175,7 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 		VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT,
 		VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 	);
-	featureData->lightCameraInfoStagingBuffer = new Core::Graphic::Instance::Buffer(
+	featureData->lightCameraInfoHostStagingBuffer = new Core::Graphic::Instance::Buffer(
 		sizeof(LightCameraInfo) * CASCADE_COUNT,
 		VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
 		VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
@@ -200,7 +200,7 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::OnDest
 {
 	auto featureData = static_cast<CSM_ShadowCaster_RenderFeatureData*>(renderFeatureData);
 	delete featureData->lightCameraInfoBuffer;
-	delete featureData->lightCameraInfoStagingBuffer;
+	delete featureData->lightCameraInfoHostStagingBuffer;
 	delete featureData->csmShadowReceiverInfoBuffer;
 	for (auto i = 0; i < CASCADE_COUNT; i++)
 	{
@@ -345,7 +345,7 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::OnExcu
 
 		std::sort(csmShadowReceiverInfo.thresholdVZ, csmShadowReceiverInfo.thresholdVZ + CASCADE_COUNT * 2, [](glm::vec4 a, glm::vec4 b)->bool {return a.x > b.x; });
 
-		featureData->lightCameraInfoStagingBuffer->WriteData(&lightCameraInfos, sizeof(LightCameraInfo) * CASCADE_COUNT);
+		featureData->lightCameraInfoHostStagingBuffer->WriteData(&lightCameraInfos, sizeof(LightCameraInfo) * CASCADE_COUNT);
 		featureData->csmShadowReceiverInfoBuffer->WriteData(&csmShadowReceiverInfo, sizeof(CsmShadowReceiverInfo));
 	}
 
@@ -397,7 +397,7 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::OnExcu
 
 	for (int i = 0; i < CASCADE_COUNT; i++)
 	{
-		commandBuffer->CopyBuffer(featureData->lightCameraInfoStagingBuffer, sizeof(LightCameraInfo) * i, featureData->lightCameraInfoBuffer, 0, sizeof(LightCameraInfo));
+		commandBuffer->CopyBuffer(featureData->lightCameraInfoHostStagingBuffer, sizeof(LightCameraInfo) * i, featureData->lightCameraInfoBuffer, 0, sizeof(LightCameraInfo));
 
 		VkClearValue depthClearValue{};
 		depthClearValue.depthStencil.depth = 1.0f;

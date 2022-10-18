@@ -1,12 +1,18 @@
 {
-    "addressMode": 0,
-    "anisotropy": 0.0,
-    "borderColor": 3,
+    "subresourcePaths": [
+        "..\\Asset\\Texture\\BrokenGlassTesture2D.png"
+    ],
     "format": 50,
-    "usage": 4,
-    "useSampler": true,
-    "imagePath": "..\\Asset\\Texture\\BrokenGlassTesture2D.png",
-    "magFilter": 1,
-    "minFilter": 1,
-    "sampleCount": 1
+    "imageTiling": 0,
+    "imageUsageFlags": 4,
+    "memoryPropertyFlags": 1,
+    "imageCreateFlags": 0,
+    "imageViewInfos": {
+        "DefaultImageView": {
+            "imageViewType": 1,
+            "imageAspectFlags": 1,
+            "baseArrayLayer": 0,
+            "layerCount": 1
+        }
+    }
 }

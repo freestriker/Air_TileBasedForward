@@ -4,8 +4,6 @@
 #include <string>
 #include "Asset/Mesh.h"
 #include "Core/Graphic/Rendering/Shader.h"
-#include "Asset/Texture2D.h"
-#include "Asset/TextureCube.h"
 #include "Core/Graphic/Rendering/Material.h"
 #include <future>
 

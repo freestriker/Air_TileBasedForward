@@ -106,6 +106,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="source\Core\Graphic\Instance\Image.cpp" />
     <ClCompile Include="source\Rendering\Renderer\AmbientOcclusionRenderer.cpp" />
     <ClCompile Include="source\Rendering\Renderer\ShadowVisualizationRenderer.cpp" />
     <ClCompile Include="source\Rendering\Renderer\TBForwardRenderer.cpp" />
@@ -140,8 +141,6 @@
     <ClCompile Include="source\Core\Graphic\Manager\DescriptorSetManager.cpp" />
     <ClCompile Include="source\Core\Graphic\Manager\LightManager.cpp" />
     <ClCompile Include="source\Core\Graphic\Manager\RenderPassManager.cpp" />
-    <ClCompile Include="source\Asset\Texture2D.cpp" />
-    <ClCompile Include="source\Asset\TextureCube.cpp" />
     <ClCompile Include="source\Core\Graphic\Command\ImageMemoryBarrier.cpp" />
     <ClCompile Include="source\Core\Graphic\Instance\Buffer.cpp" />
     <ClCompile Include="main.cpp" />
@@ -153,7 +152,6 @@
     <ClCompile Include="source\Core\Graphic\CoreObject\Thread.cpp" />
     <ClCompile Include="source\Core\Graphic\CoreObject\Instance.cpp" />
     <ClCompile Include="source\Core\Graphic\CoreObject\Window.cpp" />
-    <ClCompile Include="source\Core\Graphic\Instance\Image.cpp" />
     <ClCompile Include="source\Core\Graphic\Instance\ImageSampler.cpp" />
     <ClCompile Include="source\Core\Graphic\Instance\Memory.cpp" />
     <ClCompile Include="source\Core\Graphic\Manager\MemoryManager.cpp" />
@@ -215,8 +213,6 @@
   <ItemGroup>
     <ClInclude Include="header\Asset\AudioClip.h" />
     <ClInclude Include="header\Asset\Mesh.h" />
-    <ClInclude Include="header\Asset\Texture2D.h" />
-    <ClInclude Include="header\Asset\TextureCube.h" />
     <ClInclude Include="header\Audio\AudioListener.h" />
     <ClInclude Include="header\Audio\AudioSource.h" />
     <ClInclude Include="header\Behaviour\Behaviour.h" />
@@ -235,9 +231,9 @@
     <ClInclude Include="header\Core\Graphic\CoreObject\Window.h" />
     <ClInclude Include="header\Core\Graphic\Instance\Buffer.h" />
     <ClInclude Include="header\Core\Graphic\Instance\DescriptorSet.h" />
-    <ClInclude Include="header\Core\Graphic\Instance\Image.h" />
     <ClInclude Include="header\Core\Graphic\Instance\ImageSampler.h" />
     <ClInclude Include="header\Core\Graphic\Instance\Memory.h" />
+    <ClInclude Include="header\Core\Graphic\Instance\Image.h" />
     <ClInclude Include="header\Core\Graphic\Manager\DescriptorSetManager.h" />
     <ClInclude Include="header\Core\Graphic\Manager\LightManager.h" />
     <ClInclude Include="header\Core\Graphic\Manager\MemoryManager.h" />

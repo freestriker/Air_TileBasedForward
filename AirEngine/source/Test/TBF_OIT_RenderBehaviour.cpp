@@ -3,6 +3,8 @@
 #include "Core/IO/Manager/AssetManager.h"
 #include "Core/Logic/Object/GameObject.h"
 #include "Renderer/Renderer.h"
+#include "Core/Graphic/Instance/Image.h"
+#include "Core/Graphic/Instance/ImageSampler.h"
 
 RTTR_REGISTRATION
 {
@@ -33,13 +35,10 @@ void AirEngine::Test::TBF_OIT_RenderBehaviour::OnStart()
 	auto boxMesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\Complex.ply");
 	auto dpShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\TBF_OIT_DepthPeeling_Shader.shader");
 	auto abShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\TBF_OIT_AlphaBuffer_Shader.shader");
-	auto diffuse = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Texture2D>("..\\Asset\\Texture\\" + _diffuseTextureName + ".json");
 
 	auto dpMaterial = new AirEngine::Core::Graphic::Rendering::Material(dpShader);
-	dpMaterial->SetTexture2D("diffuseTexture", diffuse);
 
 	auto abMaterial = new AirEngine::Core::Graphic::Rendering::Material(abShader);
-	abMaterial->SetTexture2D("diffuseTexture", diffuse);
 
 	auto renderer = GameObject()->GetComponent<Renderer::Renderer>();
 	renderer->AddMaterial(dpMaterial);

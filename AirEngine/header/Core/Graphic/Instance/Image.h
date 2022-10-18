@@ -1,6 +1,11 @@
 #pragma once
 #include <vulkan/vulkan_core.h>
 #include <vector>
+#include <string>
+#include "Core/IO/Asset/AssetBase.h"
+#include <json.hpp>
+#include <map>
+
 namespace AirEngine
 {
 	namespace Core
@@ -10,38 +15,68 @@ namespace AirEngine
 			namespace Instance
 			{
 				class Memory;
-				class Image
+				class Image: public Core::IO::Asset::AssetBase
 				{
 				public:
-					~Image();
-					VkImage VkImage_();
-					VkImageView VkImageView_();
-					VkExtent2D VkExtent2D_();
-					VkExtent3D VkExtent3D_();
-					Memory& Memory_();
-					VkFormat VkFormat_();
-					VkSampleCountFlags VkSampleCountFlags_();
-					std::vector<VkImageSubresourceRange> VkImageSubresourceRanges_();
-					std::vector<VkImageSubresourceLayers> VkImageSubresourceLayers_();
-					uint32_t LayerCount();
-					size_t PerLayerSize();
-					VkImageUsageFlags VkImageUsageFlags_();
-					VkMemoryPropertyFlags VkMemoryPropertyFlags_();
-					VkImageAspectFlags VkImageAspectFlags_();
+					struct ImageViewInfo
+					{
+						VkImageViewType imageViewType;
+						VkImageAspectFlags imageAspectFlags;
+						uint32_t baseArrayLayer;
+						uint32_t layerCount;
+						NLOHMANN_DEFINE_TYPE_INTRUSIVE(
+							ImageViewInfo,
+							imageViewType,
+							imageAspectFlags,
+							baseArrayLayer,
+							layerCount
+						)
+					};
+					struct ImageInfo
+					{
+						std::vector<std::string> subresourcePaths;
+						VkFormat format;
+						VkImageTiling imageTiling;
+						VkImageUsageFlags imageUsageFlags;
+						VkMemoryPropertyFlags memoryPropertyFlags;
+						VkImageCreateFlags imageCreateFlags;
+						std::map<std::string, ImageViewInfo> imageViewInfos;
 
-					static Image* CreateCubeImage(
-						VkExtent2D extent,
-						VkFormat format,
-						VkImageUsageFlags imageUsage,
-						VkMemoryPropertyFlags memoryProperty,
-						VkImageAspectFlags aspect
-					);
+						NLOHMANN_DEFINE_TYPE_INTRUSIVE(
+							ImageInfo,
+							subresourcePaths,
+							format,
+							imageTiling,
+							imageUsageFlags,
+							memoryPropertyFlags,
+							imageCreateFlags,
+							imageViewInfos
+						)
+					};
+					struct ImageView
+					{
+						VkImageView vkImageView;
+						VkImageSubresourceRange vkImageSubresourceRange;
+						VkImageSubresourceLayers vkImageSubresourceLayers;
+					};
+
+				private:
+					bool _isNative;
+					ImageInfo _imageImfo;
+					VkImage _vkImage;
+					Memory* _memory;
+					VkExtent2D _vkExtent2D;
+					std::map<std::string, ImageView> _imageViews;
+					uint32_t _layerCount;
+
+				public:
 					static Image* Create2DImage(
 						VkExtent2D extent,
 						VkFormat format,
 						VkImageUsageFlags imageUsage,
 						VkMemoryPropertyFlags memoryProperty,
-						VkImageAspectFlags aspect
+						VkImageAspectFlags aspect,
+						VkImageTiling imageTiling = VkImageTiling::VK_IMAGE_TILING_OPTIMAL
 					);
 					static Image* CreateNative2DImage(
 						VkImage vkImage,
@@ -51,31 +86,43 @@ namespace AirEngine
 						VkImageUsageFlags imageUsage,
 						VkImageAspectFlags aspect
 					);
-				private:
-					bool _isNative;
-
-					VkImageType _vkImageType;
-					VkExtent3D _extent;
-					VkFormat _vkFormat;
-					VkImageTiling _vkImageTiling;
-					VkImageUsageFlags _vkImageUsage;
-					uint32_t _mipLevels;
-					VkSampleCountFlags _vkSampleCount;
-					VkMemoryPropertyFlags _vkMemoryProperty;
-					VkImageViewType _vkImageViewType;
-					VkImageAspectFlags _vkImageAspect;
-					uint32_t _layerCount;
-					size_t _perLayerSize;
-
-					VkImage _vkImage;
-					VkImageView _vkImageView;
-					Memory* _memory;
+					static Image* Create2DImageArray(
+						VkExtent2D extent,
+						VkFormat format,
+						VkImageUsageFlags imageUsage,
+						VkMemoryPropertyFlags memoryProperty,
+						VkImageAspectFlags aspect,
+						uint32_t arraySize,
+						VkImageTiling imageTiling = VkImageTiling::VK_IMAGE_TILING_OPTIMAL
+					);
+					static Image* CreateCubeImage(
+						VkExtent2D extent,
+						VkFormat format,
+						VkImageUsageFlags imageUsage,
+						VkMemoryPropertyFlags memoryProperty,
+						VkImageAspectFlags aspect,
+						VkImageTiling imageTiling = VkImageTiling::VK_IMAGE_TILING_OPTIMAL
+					);
 
 					Image();
+					~Image();
 					Image(const Image&) = delete;
 					Image& operator=(const Image&) = delete;
 					Image(Image&&) = delete;
 					Image& operator=(Image&&) = delete;
+
+					const ImageView& ImageView_(std::string imageViewName = "DefaultImageView");
+					VkImage VkImage_();
+					VkExtent3D VkExtent3D_();
+					VkExtent2D VkExtent2D_();
+					uint32_t LayerCount();
+					VkFormat VkFormat_();
+					VkMemoryPropertyFlags VkMemoryPropertyFlags_();
+					Memory& Memory_();
+
+				private:
+					void OnLoad(Core::Graphic::Command::CommandBuffer* transferCommandBuffer)override;
+					void CreateVulkanInstance();
 				};
 
 			}

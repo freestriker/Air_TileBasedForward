@@ -14,6 +14,7 @@
 #include "Core/Graphic/Manager/LightManager.h"
 #include "Core/IO/CoreObject/Instance.h"
 #include "Core/IO/Manager/AssetManager.h"
+#include "Core/Graphic/Instance/ImageSampler.h"
 
 RTTR_REGISTRATION
 {
@@ -110,6 +111,15 @@ AirEngine::Rendering::RenderFeature::Forward_Opaque_RenderFeature::Forward_Opaqu
 	: RenderFeatureBase()
 	, _renderPass(Core::Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass<Forward_Opaque_RenderPass>())
 	, _renderPassName(rttr::type::get<Forward_Opaque_RenderPass>().get_name().to_string())
+	, _sampler(
+		new Core::Graphic::Instance::ImageSampler(
+			VkFilter::VK_FILTER_NEAREST,
+			VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
+			VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+			0.0f,
+			VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
+		)
+	)
 {
 
 }
@@ -197,7 +207,7 @@ void AirEngine::Rendering::RenderFeature::Forward_Opaque_RenderFeature::OnExcute
 		{
 			auto material = rendererComponent->GetMaterial(_renderPassName);
 			if (material == nullptr) continue;
-			
+
 			auto obbVertexes = rendererComponent->mesh->OrientedBoundingBox().BoundryVertexes();
 			auto mvMatrix = viewMatrix * rendererComponent->GameObject()->transform.ModelMatrix();
 			if (rendererComponent->enableFrustumCulling && !camera->CheckInFrustum(obbVertexes, mvMatrix))
@@ -208,7 +218,7 @@ void AirEngine::Rendering::RenderFeature::Forward_Opaque_RenderFeature::OnExcute
 			material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
 			material->SetUniformBuffer("meshObjectInfo", rendererComponent->ObjectInfoBuffer());
 			material->SetUniformBuffer("lightInfos", Core::Graphic::CoreObject::Instance::LightManager().ForwardLightInfosBuffer());
-			material->SetTextureCube("ambientLightTexture", ambientLightTexture);
+			material->SetSampledImageCube("ambientLightTexture", ambientLightTexture, _sampler);
 
 			commandBuffer->DrawMesh(rendererComponent->mesh, material);
 		}

@@ -164,7 +164,7 @@ void AirEngine::Rendering::RenderFeature::AO_Cover_RenderFeature::OnResolveRende
 	{
 		featureData->material = new Core::Graphic::Rendering::Material(_coverShader);
 		featureData->material->SetUniformBuffer("coverInfo", featureData->coverInfoBuffer);
-		featureData->material->SetSlotData("occlusionTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), featureData->occlusionTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
+		featureData->material->SetSampledImage2D("occlusionTexture", featureData->occlusionTexture, _textureSampler);
 	}
 }
 

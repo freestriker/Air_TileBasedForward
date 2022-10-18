@@ -4,8 +4,6 @@
 #include "Core/IO/CoreObject/Instance.h"
 #include "Core/Logic/CoreObject/Instance.h"
 #include "Asset/Mesh.h"
-#include "Asset/Texture2D.h"
-#include "Asset/TextureCube.h"
 #include "Utils/Log.h"
 #include "Utils/Condition.h"
 #include "Core/Graphic/CoreObject/Instance.h"
@@ -591,7 +589,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	auto skyBox = new Light::AmbientLight();
 	skyBox->color = { 1, 1, 1, 1 };
 	skyBox->intensity = 0.8f;
-	skyBox->ambientLightTextureCube = IO::CoreObject::Instance::AssetManager().Load<Asset::TextureCube>("..\\Asset\\Texture\\DefaultTextureCube.json");
+	skyBox->ambientLightTextureCube = IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>("..\\Asset\\Texture\\DefaultTextureCube.json");
 	skyBoxGo->AddComponent(skyBox);
 
 	float sr6 = std::pow(6.0f, 0.5f);

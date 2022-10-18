@@ -9,11 +9,6 @@
 
 namespace AirEngine
 {
-	namespace Asset
-	{
-		class Texture2D;
-		class TextureCube;
-	}
 	namespace Core
 	{
 		namespace Graphic
@@ -25,6 +20,8 @@ namespace AirEngine
 			namespace Instance
 			{
 				class Buffer;
+				class Image;
+				class ImageSampler;
 				class DescriptorSet;
 			}
 
@@ -56,15 +53,14 @@ namespace AirEngine
 					Material(Material&&) = delete;
 					Material& operator=(Material&&) = delete;
 
-					void RefreshSlotData(std::vector<std::string> slotNames);
 					void SetSlotData(std::string name, std::vector<uint32_t> bindingIndex, std::vector< Graphic::Instance::DescriptorSet::DescriptorSetWriteData> data);
-					Asset::TextureCube* GetTextureCube(std::string name);
-					void SetTextureCube(std::string name, Asset::TextureCube* textureCube);
-					Asset::Texture2D* GetTexture2D(std::string name);
-					void SetTexture2D(std::string name, Asset::Texture2D* texture2d);
-					Asset::Texture2D* GetStorageTexture2D(std::string name);
-					void SetStorgeTexture2D(std::string name, Asset::Texture2D* texture2d);
-					Instance::Buffer* GetUniformBuffer(std::string name);
+					AirEngine::Core::Graphic::Instance::Image* GetSampledImageCube(std::string name);
+					void SetSampledImageCube(std::string slotName, AirEngine::Core::Graphic::Instance::Image* imageCube, AirEngine::Core::Graphic::Instance::ImageSampler* sampler, std::string imageViewName = "DefaultImageView");
+					AirEngine::Core::Graphic::Instance::Image* GetSampledImage2D(std::string name);
+					void SetSampledImage2D(std::string slotName, AirEngine::Core::Graphic::Instance::Image* image2D, AirEngine::Core::Graphic::Instance::ImageSampler* sampler, std::string imageViewName = "DefaultImageView");
+					AirEngine::Core::Graphic::Instance::Image* GetStorageImage2D(std::string name);
+					void SetStorageImage2D(std::string slotName, AirEngine::Core::Graphic::Instance::Image* image2D, std::string imageViewName = "DefaultImageView");
+					AirEngine::Core::Graphic::Instance::Buffer* GetUniformBuffer(std::string name);
 					void SetUniformBuffer(std::string name, Instance::Buffer* buffer);
 					Instance::Buffer* GetStorageBuffer(std::string name);
 					void SetStorageBuffer(std::string name, Instance::Buffer* buffer);

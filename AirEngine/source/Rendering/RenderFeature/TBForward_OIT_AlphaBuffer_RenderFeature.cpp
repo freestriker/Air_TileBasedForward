@@ -166,6 +166,15 @@ AirEngine::Rendering::RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeature::TB
 	, _blendRenderPass(Core::Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass<TBForward_OIT_AlphaBufferBlend_RenderPass>())
 	, _blendShader(Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\TBF_OIT_AlphaBufferBlend_Shader.shader"))
 	, _fullScreenMesh(Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\BackgroundMesh.ply"))
+	, _sampler(
+		new Core::Graphic::Instance::ImageSampler(
+			VkFilter::VK_FILTER_NEAREST,
+			VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
+			VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+			0.0f,
+			VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
+		)
+	)
 {
 
 }
@@ -246,7 +255,7 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeatur
 	featureData->blendMaterial->SetStorageBuffer("colorList", featureData->colorListBuffer);
 	featureData->blendMaterial->SetStorageBuffer("depthList", featureData->depthListBuffer);
 	featureData->blendMaterial->SetStorageBuffer("indexList", featureData->indexListBuffer);
-	featureData->blendMaterial->SetSlotData("headIndexImage", { 0 }, { {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_NULL_HANDLE, featureData->headIndexImage->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL} });
+	featureData->blendMaterial->SetStorageImage2D("headIndexImage", featureData->headIndexImage);
 }
 
 void AirEngine::Rendering::RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeature::OnDestroyRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)
@@ -305,10 +314,10 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeatur
 			material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
 			material->SetUniformBuffer("meshObjectInfo", rendererComponent->ObjectInfoBuffer());
 			material->SetUniformBuffer("lightInfos", Core::Graphic::CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
-			material->SetTextureCube("ambientLightTexture", Core::Graphic::CoreObject::Instance::LightManager().AmbientTextureCube());
+			material->SetSampledImageCube("ambientLightTexture", ambientLightTexture, _sampler);
 			material->SetStorageBuffer("transparentLightIndexLists", featureData->transparentLightIndexListsBuffer);
 
-			material->SetSlotData("headIndexImage", { 0 }, { {VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_NULL_HANDLE, featureData->headIndexImage->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL} });
+			material->SetStorageImage2D("headIndexImage", featureData->headIndexImage);
 			material->SetStorageBuffer("indexList", featureData->indexListBuffer);
 			material->SetStorageBuffer("colorList", featureData->colorListBuffer);
 			material->SetStorageBuffer("depthList", featureData->depthListBuffer);

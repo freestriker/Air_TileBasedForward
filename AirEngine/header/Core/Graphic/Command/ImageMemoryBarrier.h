@@ -1,6 +1,7 @@
 #pragma once
 #include <vulkan/vulkan_core.h>
 #include <vector>
+#include <string>
 namespace AirEngine
 {
 	namespace Core
@@ -17,8 +18,8 @@ namespace AirEngine
 				{
 					std::vector<VkImageMemoryBarrier> _vkImageMemoryBarriers;
 				public:
+					ImageMemoryBarrier(Instance::Image* image, std::string imageViewName, VkImageLayout oldLayout, VkImageLayout newLayout, VkAccessFlags srcAccessFlags, VkAccessFlags dstAccessFlags);
 					ImageMemoryBarrier(Instance::Image* image, VkImageLayout oldLayout, VkImageLayout newLayout, VkAccessFlags srcAccessFlags, VkAccessFlags dstAccessFlags);
-					ImageMemoryBarrier(VkImage image, VkImageLayout oldLayout, VkImageLayout newLayout, VkAccessFlags srcAccessFlags, VkAccessFlags dstAccessFlags, std::vector<VkImageSubresourceRange> subresourceRanges);
 					~ImageMemoryBarrier();
 					const std::vector<VkImageMemoryBarrier>& VkImageMemoryBarriers();
 				};

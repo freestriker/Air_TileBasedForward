@@ -1,6 +1,5 @@
 #include "Core/Graphic/Manager/LightManager.h"
 #include "Core/Graphic/Instance/Buffer.h"
-#include "Asset/TextureCube.h"
 #include "Core/Graphic/Command/CommandBuffer.h"
 #include "Light/LightBase.h"
 #include <map>
@@ -139,7 +138,7 @@ void AirEngine::Core::Graphic::Manager::LightManager::SetLightInfo(std::vector<L
 	);
 }
 
-AirEngine::Asset::TextureCube* AirEngine::Core::Graphic::Manager::LightManager::AmbientTextureCube()
+AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Manager::LightManager::AmbientTextureCube()
 {
 	return _ambientTextureCube;
 }

@@ -225,8 +225,8 @@ void AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::OnResolv
 		featureData->material = new Core::Graphic::Rendering::Material(_ssaoShader);
 		featureData->material->SetUniformBuffer("ssaoInfo", featureData->ssaoInfoBuffer);
 		featureData->material->SetUniformBuffer("samplePointInfo", featureData->samplePointInfoBuffer);
-		featureData->material->SetSlotData("depthTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), featureData->depthTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
-		featureData->material->SetSlotData("normalTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), featureData->normalTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
+		featureData->material->SetSampledImage2D("depthTexture", featureData->depthTexture, _textureSampler);
+		featureData->material->SetSampledImage2D("normalTexture", featureData->normalTexture, _textureSampler);
 	}
 }
 
@@ -266,7 +266,7 @@ void AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::OnExcute
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
 		);
-		featureData->material->SetSlotData("noiseTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), featureData->noiseTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
+		featureData->material->SetSampledImage2D("noiseTexture", featureData->noiseTexture, _textureSampler);
 
 		{
 			auto noiseTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier

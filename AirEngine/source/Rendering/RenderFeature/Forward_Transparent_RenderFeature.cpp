@@ -15,6 +15,7 @@
 #include "Core/IO/CoreObject/Instance.h"
 #include "Core/IO/Manager/AssetManager.h"
 #include <map>
+#include "Core/Graphic/Instance/ImageSampler.h"
 
 RTTR_REGISTRATION
 {
@@ -118,6 +119,15 @@ AirEngine::Rendering::RenderFeature::Forward_Transparent_RenderFeature::Forward_
 	: RenderFeatureBase()
 	, _renderPass(Core::Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass<Forward_Transparent_RenderPass>())
 	, _renderPassName(rttr::type::get<Forward_Transparent_RenderPass>().get_name().to_string())
+	, _sampler(
+		new Core::Graphic::Instance::ImageSampler(
+			VkFilter::VK_FILTER_NEAREST,
+			VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
+			VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+			0.0f,
+			VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
+		)
+	)
 {
 
 }
@@ -185,7 +195,7 @@ void AirEngine::Rendering::RenderFeature::Forward_Transparent_RenderFeature::OnE
 			material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
 			material->SetUniformBuffer("meshObjectInfo", rendererComponent->ObjectInfoBuffer());
 			material->SetUniformBuffer("lightInfos", Core::Graphic::CoreObject::Instance::LightManager().ForwardLightInfosBuffer());
-			material->SetTextureCube("ambientLightTexture", ambientLightTexture);
+			material->SetSampledImageCube("ambientLightTexture", ambientLightTexture, _sampler);
 		}
 	}
 

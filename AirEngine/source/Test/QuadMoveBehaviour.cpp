@@ -10,8 +10,8 @@
 #include "Core/Logic/CoreObject/Instance.h"
 #include "Asset/Mesh.h"
 #include "Core/Graphic/Rendering/Shader.h"
-#include "Asset/Texture2D.h"
-#include "Asset/TextureCube.h"
+#include "Core/Graphic/Instance/Image.h"
+#include "Core/Graphic/Instance/ImageSampler.h"
 #include "Core/Graphic/Rendering/Material.h"
 #include <future>
 #include "Renderer/Renderer.h"
@@ -38,14 +38,21 @@ void AirEngine::Test::QuadMoveBehaviour::OnStart()
 	auto renderer = GameObject()->GetComponent<Renderer::Renderer>();
 	auto mesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\LargeQuad.ply");
 	renderer->mesh = mesh;
+	auto sampler = new Core::Graphic::Instance::ImageSampler(
+		VkFilter::VK_FILTER_NEAREST,
+		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
+		VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+		0.0f,
+		VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
+	);
 
 	{
-		auto diffuseTexture2D = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Texture2D>("..\\Asset\\Texture\\WallDiffuseTexture2D.json");
-		auto normalTexture2D = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Texture2D>("..\\Asset\\Texture\\WallNormalTexture2D.json");
+		auto diffuseTexture2D = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>("..\\Asset\\Texture\\WallDiffuseTexture2D.json");
+		auto normalTexture2D = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>("..\\Asset\\Texture\\WallNormalTexture2D.json");
 		auto shader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\TBF_Opaque_Wall_Shader.shader");
 		auto material = new Core::Graphic::Rendering::Material(shader);
-		material->SetTexture2D("diffuseTexture", diffuseTexture2D);
-		material->SetTexture2D("normalTexture", normalTexture2D);
+		material->SetSampledImage2D("diffuseTexture", diffuseTexture2D, sampler);
+		material->SetSampledImage2D("normalTexture", normalTexture2D, sampler);
 		renderer->AddMaterial(material);
 	}
 
