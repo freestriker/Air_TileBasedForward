@@ -111,6 +111,9 @@ namespace AirEngine
 					Image(Image&&) = delete;
 					Image& operator=(Image&&) = delete;
 
+					void AddImageView(std::string name, VkImageViewType imageViewType, VkImageAspectFlags imageAspectFlags, uint32_t baseArrayLayer, uint32_t layerCount);
+					void RemoveImageView(std::string name);
+
 					const ImageView& ImageView_(std::string imageViewName = "DefaultImageView");
 					VkImage VkImage_();
 					VkExtent3D VkExtent3D_();

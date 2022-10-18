@@ -318,6 +318,7 @@ void AirEngine::Core::Graphic::Rendering::Shader::_CreateDescriptorLayouts(_Pipe
 						SlotDescriptor newSlotLayout = SlotDescriptor();
 						newSlotLayout.name = refl_binding.name;
 						newSlotLayout.setIndex = refl_set.set;
+						newSlotLayout.isArray = refl_binding.array.dims_count > 0;
 						if (refl_binding.descriptor_type == SpvReflectDescriptorType::SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
 						{
 							newSlotLayout.slotType = ShaderSlotType::UNIFORM_BUFFER;

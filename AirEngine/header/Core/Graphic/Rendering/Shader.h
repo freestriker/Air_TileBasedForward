@@ -40,6 +40,7 @@ namespace AirEngine
 					struct SlotDescriptor
 					{
 						std::string name{};
+						bool isArray{};
 						uint32_t setIndex{};
 						ShaderSlotType slotType{};
 						VkDescriptorSetLayout vkDescriptorSetLayout{};
