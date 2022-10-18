@@ -28,7 +28,7 @@ namespace AirEngine
 					std::map<std::string, Instance::Image*> _attachments;
 					VkExtent2D _extent2D;
 				public:
-					FrameBuffer(Rendering::RenderPassBase* renderPass, std::map<std::string, Instance::Image*> availableAttachments);
+					FrameBuffer(Rendering::RenderPassBase* renderPass, std::map<std::string, Instance::Image*> availableAttachments, std::map<std::string, std::string> availableAttachmentViews = {});
 					~FrameBuffer();
 					FrameBuffer(const FrameBuffer&) = delete;
 					FrameBuffer& operator=(const FrameBuffer&) = delete;

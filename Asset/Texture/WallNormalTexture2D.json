@@ -1,12 +1,17 @@
-{
-    "addressMode": 0,
-    "anisotropy": 0.0,
-    "borderColor": 3,
-    "format": 44,
-    "usage": 4,
-    "useSampler": true,
-    "imagePath": "..\\Asset\\Texture\\WallNormalTexture2D.png",
-    "magFilter": 1,
-    "minFilter": 1,
-    "sampleCount": 1
+{    "subresourcePaths": [
+        "..\\Asset\\Texture\\WallNormalTexture2D.png"
+    ],
+    "format": 50,
+    "imageTiling": 0,
+    "imageUsageFlags": 4,
+    "memoryPropertyFlags": 1,
+    "imageCreateFlags": 0,
+    "imageViewInfos": {
+        "DefaultImageView": {
+            "imageViewType": 1,
+            "imageAspectFlags": 1,
+            "baseArrayLayer": 0,
+            "layerCount": 1
+        }
+    }
 }

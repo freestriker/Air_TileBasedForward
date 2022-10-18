@@ -6,7 +6,6 @@
 #include "Core/Graphic/Instance/Buffer.h"
 #include "Core/Graphic/Command/CommandBuffer.h"
 #include "Asset/Mesh.h"
-#include "Asset/TextureCube.h"
 #include "Core/Graphic/Instance/Image.h"
 #include "Core/Graphic/Instance/ImageSampler.h"
 #include "Core/Graphic/CoreObject/Instance.h"

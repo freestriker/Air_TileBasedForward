@@ -6,7 +6,7 @@
 #include "Core/Graphic/CoreObject/Instance.h"
 #include <algorithm>
 
-AirEngine::Core::Graphic::Rendering::FrameBuffer::FrameBuffer(Rendering::RenderPassBase* renderPass, std::map<std::string, AirEngine::Core::Graphic::Instance::Image*> availableAttachments)
+AirEngine::Core::Graphic::Rendering::FrameBuffer::FrameBuffer(Rendering::RenderPassBase* renderPass, std::map<std::string, AirEngine::Core::Graphic::Instance::Image*> availableAttachments, std::map<std::string, std::string> availableAttachmentViews)
     : _vkFrameBuffer(VK_NULL_HANDLE)
     , _attachments()
     , _extent2D()
@@ -19,7 +19,8 @@ AirEngine::Core::Graphic::Rendering::FrameBuffer::FrameBuffer(Rendering::RenderP
         Utils::Log::Exception("The available attachment do not match the render pass.", targetIter == availableAttachments.end());
         auto targetAttachment = targetIter->second;
         Utils::Log::Exception("The available attachment's format do not match the render pass.", descriptor.format != targetAttachment->VkFormat_());
-        views.emplace_back(targetAttachment->VkImageView_());
+        auto viewIter = availableAttachmentViews.find(descriptorPair.first);
+        views.emplace_back(targetAttachment->ImageView_(viewIter == availableAttachmentViews.end() ? "DefaultImageView" : viewIter->second).vkImageView);
         _attachments.emplace(descriptorPair.first, targetAttachment);
 
         _extent2D.width = std::max(_extent2D.width, targetAttachment->VkExtent3D_().width);

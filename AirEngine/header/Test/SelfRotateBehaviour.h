@@ -2,7 +2,6 @@
 #include "Behaviour/Behaviour.h"
 #include <string>
 #include "Asset/Mesh.h"
-#include "Asset/Texture2D.h"
 
 namespace AirEngine
 {

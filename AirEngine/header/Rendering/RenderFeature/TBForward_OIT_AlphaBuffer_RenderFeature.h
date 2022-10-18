@@ -3,6 +3,7 @@
 #include "Core/Graphic/Rendering/RenderPassBase.h"
 #include "Core/Graphic/Instance/Buffer.h"
 #include "Core/Graphic/Instance/Image.h"
+#include "Core/Graphic/Instance/ImageSampler.h"
 #include <glm/glm.hpp>
 
 #define LIST_SIZE_FACTOR 4
@@ -85,6 +86,7 @@ namespace AirEngine
 				Core::Graphic::Rendering::RenderPassBase* _blendRenderPass;
 				Core::Graphic::Rendering::Shader* _blendShader;
 				Asset::Mesh* _fullScreenMesh;
+				Core::Graphic::Instance::ImageSampler* _sampler;
 
 				Core::Graphic::Rendering::RenderFeatureDataBase* OnCreateRenderFeatureData(Camera::CameraBase* camera)override;
 				void OnResolveRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera)override;

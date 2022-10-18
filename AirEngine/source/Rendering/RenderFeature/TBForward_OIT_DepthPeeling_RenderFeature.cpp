@@ -226,7 +226,7 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatu
 			cameraColorImage->VkFormat_(),
 			VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT,
 			cameraColorImage->VkMemoryPropertyFlags_(),
-			cameraColorImage->VkImageAspectFlags_()
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
 		);
 	}
 	for (auto& depthAttachment : featureData->depthAttachments)
@@ -236,7 +236,7 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatu
 			cameraDepthImage->VkFormat_(),
 			VkImageUsageFlagBits::VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
 			cameraDepthImage->VkMemoryPropertyFlags_(),
-			cameraDepthImage->VkImageAspectFlags_()
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT
 		);
 	}
 	featureData->thresholdDepthTexture = Core::Graphic::Instance::Image::Create2DImage(
@@ -244,7 +244,7 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatu
 		cameraDepthImage->VkFormat_(),
 		VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
 		cameraDepthImage->VkMemoryPropertyFlags_(),
-		cameraDepthImage->VkImageAspectFlags_()
+		VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT
 	);
 
 	for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
@@ -261,7 +261,7 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatu
 	featureData->blendMaterial = new Core::Graphic::Rendering::Material(_blendShader);
 	for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
 	{
-		featureData->blendMaterial->SetSlotData("colorTexture_" + std::to_string(i), { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), featureData->colorAttachments[i]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}});
+		featureData->blendMaterial->SetSampledImage2D("colorTexture_" + std::to_string(i), featureData->colorAttachments[i], _textureSampler);
 	}
 	featureData->blendMaterial->SetUniformBuffer("attachmentSizeInfo", featureData->attachmentSizeInfoBuffer);
 
@@ -327,10 +327,10 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatu
 			material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
 			material->SetUniformBuffer("meshObjectInfo", rendererComponent->ObjectInfoBuffer());
 			material->SetUniformBuffer("lightInfos", Core::Graphic::CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
-			material->SetTextureCube("ambientLightTexture", Core::Graphic::CoreObject::Instance::LightManager().AmbientTextureCube());
+			material->SetSampledImageCube("ambientLightTexture", ambientLightTexture, _textureSampler);
 			material->SetStorageBuffer("transparentLightIndexLists", featureData->transparentLightIndexListsBuffer);
-			material->SetSlotData("thresholdDepthTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), featureData->thresholdDepthTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
-			material->SetSlotData("depthTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), featureData->depthTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
+			featureData->blendMaterial->SetSampledImage2D("thresholdDepthTexture", featureData->thresholdDepthTexture, _textureSampler);
+			featureData->blendMaterial->SetSampledImage2D("depthTexture", featureData->depthTexture, _textureSampler);
 			material->SetUniformBuffer("attachmentSizeInfo", featureData->attachmentSizeInfoBuffer);
 		}
 	}

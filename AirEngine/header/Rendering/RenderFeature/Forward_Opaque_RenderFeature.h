@@ -3,6 +3,7 @@
 #include "Core/Graphic/Rendering/RenderPassBase.h"
 #include "Core/Graphic/Instance/Buffer.h"
 #include "Core/Graphic/Instance/Image.h"
+#include "Core/Graphic/Instance/ImageSampler.h"
 
 namespace AirEngine
 {
@@ -37,6 +38,7 @@ namespace AirEngine
 			private:
 				Core::Graphic::Rendering::RenderPassBase* _renderPass;
 				std::string _renderPassName;
+				Core::Graphic::Instance::ImageSampler* _sampler;
 
 				Core::Graphic::Rendering::RenderFeatureDataBase* OnCreateRenderFeatureData(Camera::CameraBase* camera)override;
 				void OnResolveRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera)override;

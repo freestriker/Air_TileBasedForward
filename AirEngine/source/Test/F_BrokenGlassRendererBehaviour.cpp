@@ -7,6 +7,8 @@
 #include "Utils/Time.h"
 #include "Core/Graphic/Rendering/Material.h"
 #include "Core/Graphic/Rendering/Shader.h"
+#include "Core/Graphic/Instance/Image.h"
+#include "Core/Graphic/Instance/ImageSampler.h"
 
 RTTR_REGISTRATION
 {
@@ -29,10 +31,17 @@ void AirEngine::Test::F_BrokenGlassRendererBehaviour::OnStart()
 {
 	auto mesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\Square.ply");
 	auto shader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\F_Transparent_BrokenGlass_Shader.shader");
-	auto diffuse = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Texture2D>("..\\Asset\\Texture\\BrokenGlassTexture2D.json");
+	auto diffuse = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>("..\\Asset\\Texture\\BrokenGlassTexture2D.json");
+	auto sampler = new Core::Graphic::Instance::ImageSampler(
+		VkFilter::VK_FILTER_NEAREST,
+		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
+		VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+		0.0f,
+		VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
+	);
 
 	auto material = new Core::Graphic::Rendering::Material(shader);
-	material->SetTexture2D("diffuseTexture", diffuse);
+	material->SetSampledImage2D("diffuseTexture", diffuse, sampler);
 
 	auto renderer = GameObject()->GetComponent<Renderer::Renderer>();
 	renderer->AddMaterial(material);

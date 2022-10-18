@@ -18,7 +18,6 @@ namespace AirEngine
 			{
 				class Buffer;
 				class Image;
-				class NewImage;
 			}
 			namespace Rendering
 			{
@@ -67,7 +66,6 @@ namespace AirEngine
 					void AddPipelineBarrier(VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, std::vector <ImageMemoryBarrier*> imageMemoryBarriers, std::vector <BufferMemoryBarrier*> bufferMemoryBarriers);
 					void CopyImage(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Image* dstImage, VkImageLayout dstImageLayout);
 					void CopyBufferToImage(Instance::Buffer* srcBuffer, Instance::Image* dstImage, VkImageLayout dstImageLayout);
-					void CopyBufferToImage(Instance::Buffer* srcBuffer, Instance::NewImage* dstImage, VkImageLayout dstImageLayout);
 					void CopyImageToBuffer(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Buffer* dstBuffer);
 					void FillBuffer(Instance::Buffer* dstBuffer, uint32_t data);
 					void CopyBuffer(Instance::Buffer* srcBuffer, Instance::Buffer* dstBuffer);
@@ -86,7 +84,6 @@ namespace AirEngine
 					void DrawMesh(Asset::Mesh* mesh, Rendering::Material* material);
 					void Dispatch(Rendering::Material* material, uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ);
 					void Blit(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Image* dstImage, VkImageLayout dstImageLayout, VkFilter filter);
-					void Blit(Instance::Image* srcImage, VkImageLayout srcImageLayout, VkImage dstImage, VkImageLayout dstImageLayout, VkOffset3D offset1, VkOffset3D offset2, VkFilter filter);
 					
 					CommandPool* ParentCommandPool();
 				};

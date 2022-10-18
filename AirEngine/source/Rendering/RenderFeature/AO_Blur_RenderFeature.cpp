@@ -192,12 +192,12 @@ void AirEngine::Rendering::RenderFeature::AO_Blur_RenderFeature::OnResolveRender
 	///Material
 	{
 		featureData->horizontalMaterial->SetUniformBuffer("blurInfo", featureData->horizontalBlurInfoBuffer);
-		featureData->horizontalMaterial->SetSlotData("normalTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), featureData->normalTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
-		featureData->horizontalMaterial->SetSlotData("occlusionTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), featureData->occlusionTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
+		featureData->horizontalMaterial->SetSampledImage2D("normalTexture", featureData->normalTexture, _textureSampler);
+		featureData->horizontalMaterial->SetSampledImage2D("occlusionTexture", featureData->occlusionTexture, _textureSampler);
 		
 		featureData->verticalMaterial->SetUniformBuffer("blurInfo", featureData->verticalBlurInfoBuffer);
-		featureData->verticalMaterial->SetSlotData("normalTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), featureData->normalTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
-		featureData->verticalMaterial->SetSlotData("occlusionTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), featureData->temporaryOcclusionTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
+		featureData->verticalMaterial->SetSampledImage2D("normalTexture", featureData->normalTexture, _textureSampler);
+		featureData->verticalMaterial->SetSampledImage2D("occlusionTexture", featureData->temporaryOcclusionTexture, _textureSampler);
 	}
 }
 

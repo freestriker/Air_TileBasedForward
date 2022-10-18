@@ -160,7 +160,7 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_Sh
 	material->SetUniformBuffer("csmShadowReceiverInfo", csmShadowReceiverInfoBuffer);
 	for (int i = 0; i < CASCADE_COUNT; i++)
 	{
-		material->SetSlotData("shadowTexture_" + std::to_string(i), {0}, {{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, sampler->VkSampler_(), shadowImages[i]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}});
+		material->SetSampledImage2D("shadowTexture_" + std::to_string(i), shadowImages[i], sampler);
 	}
 }
 

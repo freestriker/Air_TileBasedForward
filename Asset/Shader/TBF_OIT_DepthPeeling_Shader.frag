@@ -3,8 +3,6 @@
 
 #include "TBF_OIT_DepthPeeling_Lighting.glsl"
 
-layout(set = START_SET_INDEX + 0, binding = 0) uniform sampler2D diffuseTexture;
-
 layout(location = 0) in vec2 inTexCoords;
 layout(location = 1) in vec3 inWorldPosition;
 layout(location = 2) in vec3 inWorldNormal;
@@ -31,5 +29,5 @@ void main()
         specular += SpecularLighting(lightInfos.ortherLightInfos[transparentLightIndexList.indexes[i]], viewDirection, inWorldPosition, worldNormal, 80.0);
     }
 
-    ColorAttachment = texture(diffuseTexture, inTexCoords) * vec4(diffuse + specular + ambient * 0.5, 1);
+    ColorAttachment = vec4(1, 1, 1, 0.3) * vec4(diffuse + specular + ambient * 0.5, 1);
 }

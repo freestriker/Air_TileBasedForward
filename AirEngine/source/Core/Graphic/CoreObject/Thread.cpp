@@ -250,7 +250,7 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 				glm::vec2 attachmentSize = { windowExtent.width, windowExtent.height };
 				attachmentSizeBuffer->WriteData(&attachmentSize, sizeof(glm::vec2));
 				pm->SetUniformBuffer("attachmentSizeInfo", attachmentSizeBuffer);
-				pm->SetSlotData("colorTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, ps->VkSampler_(), mainCamera->attachments["ColorAttachment"]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
+				pm->SetSampledImage2D("colorTexture", mainCamera->attachments["ColorAttachment"], ps);
 				AddTask(
 					[mainCamera, prp, pm, ps, frameBuffer, fm](Command::CommandPool* graphicCommandPool, Command::CommandPool* computeCommandPool)
 					{

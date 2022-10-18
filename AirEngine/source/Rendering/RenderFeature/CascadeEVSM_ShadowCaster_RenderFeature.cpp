@@ -290,7 +290,7 @@ void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature
 				{"ColorAttachment", shadowTextures[i]},
 			}
 		);
-		blitMaterials[i]->SetSlotData("depthTexture", {0}, {{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, pointSampler->VkSampler_(), depthAttachemnts[i]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}});
+		blitMaterials[i]->SetSampledImage2D("depthTexture", depthAttachemnts[i], pointSampler);
 	
 		delete temporaryShadowTextures[i];
 		temporaryShadowTextures[i] = Core::Graphic::Instance::Image::Create2DImage(
@@ -314,8 +314,8 @@ void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature
 				{"ShadowTexture", shadowTextures[i]},
 			}
 		);
-		blurMaterials[i]->SetSlotData("shadowTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, pointSampler->VkSampler_(), shadowTextures[i]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
-		blurMaterials[i + CASCADE_COUNT]->SetSlotData("shadowTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, pointSampler->VkSampler_(), temporaryShadowTextures[i]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
+		blurMaterials[i]->SetSampledImage2D("shadowTexture", shadowTextures[i], pointSampler);
+		blurMaterials[i + CASCADE_COUNT]->SetSampledImage2D("shadowTexture", temporaryShadowTextures[i], pointSampler);
 	}
 }
 
@@ -324,7 +324,7 @@ void AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature
 	material->SetUniformBuffer("cascadeEvsmShadowReceiverInfo", cascadeEvsmShadowReceiverInfoBuffer);
 	for (int i = 0; i < CASCADE_COUNT; i++)
 	{
-		material->SetSlotData("shadowTexture_" + std::to_string(i), { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, pointSampler->VkSampler_(), shadowTextures[i]->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
+		material->SetSampledImage2D("shadowTexture_" + std::to_string(i), shadowTextures[i], pointSampler);
 	}
 }
 

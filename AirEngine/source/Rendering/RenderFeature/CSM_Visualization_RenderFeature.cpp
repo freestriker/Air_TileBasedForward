@@ -169,8 +169,8 @@ void AirEngine::Rendering::RenderFeature::CSM_Visualization_RenderFeature::OnRes
 		featureData->visualizationMaterial->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
 
 		Geometry_RenderFeature::Geometry_RenderFeatureData* geometryData = static_cast<Geometry_RenderFeature::Geometry_RenderFeatureData*>(featureData->geometryRenderFeatureData);
-		featureData->visualizationMaterial->SetSlotData("depthTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), geometryData->depthTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
-		featureData->visualizationMaterial->SetSlotData("normalTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), geometryData->normalTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
+		featureData->visualizationMaterial->SetSampledImage2D("depthTexture", geometryData->depthTexture, _textureSampler);
+		featureData->visualizationMaterial->SetSampledImage2D("normalTexture", geometryData->normalTexture, _textureSampler);
 	
 		CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderFeatureData* csmData = static_cast<CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderFeatureData*>(featureData->csmRenderFeatureData);
 		csmData->SetShadowReceiverMaterialParameters(featureData->visualizationMaterial);

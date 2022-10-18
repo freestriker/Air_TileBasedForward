@@ -9,10 +9,6 @@ namespace AirEngine
 	{
 		class LightBase;
 	}
-	namespace Asset
-	{
-		class TextureCube;
-	}
 	namespace Core
 	{
 		namespace Logic
@@ -32,6 +28,7 @@ namespace AirEngine
 			namespace Instance
 			{
 				class Buffer;
+				class Image;
 			}
 			namespace Command
 			{
@@ -86,7 +83,7 @@ namespace AirEngine
 						alignas(16) LightBoundingBox lightBoundingBoxInfos[MAX_TILE_BASED_FORWARD_ORTHER_LIGHT_COUNT];
 					};
 					void SetLightInfo(std::vector<Logic::Object::Component*> lights);
-					Asset::TextureCube* AmbientTextureCube();
+					Instance::Image* AmbientTextureCube();
 					Instance::Buffer* ForwardLightInfosBuffer();
 					Instance::Buffer* TileBasedForwardLightInfosBuffer();
 					Instance::Buffer* TileBasedForwardLightBoundindBoxInfosBuffer();
@@ -98,7 +95,7 @@ namespace AirEngine
 					Instance::Buffer* _tileBasedForwardLightBoundingBoxInfosBuffer;
 
 					LightInfo _ambientLightInfo;
-					Asset::TextureCube* _ambientTextureCube;
+					Instance::Image* _ambientTextureCube;
 					LightInfo _mainLightInfo;
 					Light::LightBase* _mainLight;
 					int _ortherLightCount;

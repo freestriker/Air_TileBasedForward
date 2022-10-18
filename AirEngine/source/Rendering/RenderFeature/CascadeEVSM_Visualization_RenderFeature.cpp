@@ -169,7 +169,7 @@ void AirEngine::Rendering::RenderFeature::CascadeEVSM_Visualization_RenderFeatur
 		featureData->visualizationMaterial->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
 
 		Geometry_RenderFeature::Geometry_RenderFeatureData* geometryData = static_cast<Geometry_RenderFeature::Geometry_RenderFeatureData*>(featureData->geometryRenderFeatureData);
-		featureData->visualizationMaterial->SetSlotData("depthTexture", { 0 }, { {VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, _textureSampler->VkSampler_(), geometryData->depthTexture->VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL} });
+		featureData->visualizationMaterial->SetSampledImage2D("depthTexture", geometryData->depthTexture, _textureSampler);
 
 		CascadeEVSM_ShadowCaster_RenderFeature::CascadeEVSM_ShadowCaster_RenderFeatureData* cascadeEvsmData = static_cast<CascadeEVSM_ShadowCaster_RenderFeature::CascadeEVSM_ShadowCaster_RenderFeatureData*>(featureData->cascadeEvsmRenderFeatureData);
 		cascadeEvsmData->SetShadowReceiverMaterialParameters(featureData->visualizationMaterial);

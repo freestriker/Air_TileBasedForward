@@ -1,8 +1,5 @@
 {
-    "addressMode": 0,
-    "anisotropy": 0.0,
-    "borderColor": 3,
-    "paths": [
+    "subresourcePaths": [
         "..\\Asset\\Texture\\DefaultTextureCube_Right.png",
         "..\\Asset\\Texture\\DefaultTextureCube_Left.png",
         "..\\Asset\\Texture\\DefaultTextureCube_Front.png",
@@ -10,8 +7,17 @@
         "..\\Asset\\Texture\\DefaultTextureCube_Top.png",
         "..\\Asset\\Texture\\DefaultTextureCube_Bottom.png"
     ],
-    "filter": 1,
     "format": 50,
-    "mipmapMode": 1,
-    "sampleCount": 1
+    "imageTiling": 0,
+    "imageUsageFlags": 4,
+    "memoryPropertyFlags": 1,
+    "imageCreateFlags": 16,
+    "imageViewInfos": {
+        "DefaultImageView": {
+            "imageViewType": 3,
+            "imageAspectFlags": 1,
+            "baseArrayLayer": 0,
+            "layerCount": 6
+        }
+    }
 }
