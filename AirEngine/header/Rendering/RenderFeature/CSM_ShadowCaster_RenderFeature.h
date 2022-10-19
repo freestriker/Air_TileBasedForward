@@ -47,7 +47,7 @@ namespace AirEngine
 					Core::Graphic::Rendering::RenderPassBase* shadowMapRenderPass;
 					Core::Graphic::Instance::ImageSampler* sampler;
 
-					std::array<Core::Graphic::Instance::Image*, CASCADE_COUNT> shadowImages;
+					Core::Graphic::Instance::Image* shadowImageArray;
 					std::array<Core::Graphic::Rendering::FrameBuffer*, CASCADE_COUNT> shadowFrameBuffers;
 					Core::Graphic::Instance::Buffer* lightCameraInfoBuffer;
 					Core::Graphic::Instance::Buffer* lightCameraInfoHostStagingBuffer;
@@ -55,7 +55,7 @@ namespace AirEngine
 				public:
 					std::array<float, CASCADE_COUNT> frustumSegmentScales;
 					std::array<float, CASCADE_COUNT> lightCameraCompensationDistances;
-					std::array<uint32_t, CASCADE_COUNT> shadowImageResolutions;
+					uint32_t shadowImageResolutions;
 					std::array <glm::vec2, CASCADE_COUNT> bias;
 					float overlapScale;
 					int sampleHalfWidth;

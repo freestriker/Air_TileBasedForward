@@ -96,7 +96,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::OnResolveRendererData(Co
 	auto csmShadowMapFeatureData = rendererData->RenderFeatureData<RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderFeatureData>("CSM_ShadowCaster_RenderFeature");
 	csmShadowMapFeatureData->frustumSegmentScales = { 0.1, 0.2, 0.3, 0.4 };
 	csmShadowMapFeatureData->lightCameraCompensationDistances = { 5, 5, 5, 5 };
-	csmShadowMapFeatureData->shadowImageResolutions = { 2048, 2048, 1024, 1024 };
+	csmShadowMapFeatureData->shadowImageResolutions = 2048;
 	csmShadowMapFeatureData->sampleHalfWidth = 2;
 	csmShadowMapFeatureData->bias = {
 		glm::vec2{ 0.0000f, 0.0075f },
