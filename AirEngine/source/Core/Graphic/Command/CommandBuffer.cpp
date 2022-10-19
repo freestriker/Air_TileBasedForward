@@ -112,11 +112,21 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::AddPipelineBarrier(VkPipe
 }
 void AirEngine::Core::Graphic::Command::CommandBuffer::CopyImage(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Image* dstImage, VkImageLayout dstImageLayout)
 {
-
     VkImageCopy copy = {};
     copy.srcSubresource = srcImage->ImageView_().vkImageSubresourceLayers;
     copy.srcOffset = { 0, 0, 0 };
     copy.dstSubresource = dstImage->ImageView_().vkImageSubresourceLayers;
+    copy.srcOffset = { 0, 0, 0 };
+    copy.extent = dstImage->VkExtent3D_();
+
+    vkCmdCopyImage(_vkCommandBuffer, srcImage->VkImage_(), srcImageLayout, dstImage->VkImage_(), dstImageLayout, 1, &copy);
+}
+void AirEngine::Core::Graphic::Command::CommandBuffer::CopyImage(Instance::Image* srcImage, std::string srcImageViewName, VkImageLayout srcImageLayout, Instance::Image* dstImage, std::string dstImageViewName, VkImageLayout dstImageLayout)
+{
+    VkImageCopy copy = {};
+    copy.srcSubresource = srcImage->ImageView_(srcImageViewName).vkImageSubresourceLayers;
+    copy.srcOffset = { 0, 0, 0 };
+    copy.dstSubresource = dstImage->ImageView_(dstImageViewName).vkImageSubresourceLayers;
     copy.srcOffset = { 0, 0, 0 };
     copy.extent = dstImage->VkExtent3D_();
 

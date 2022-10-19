@@ -38,7 +38,7 @@ AirEngine::Rendering::Renderer::TBForwardRenderer::TBForwardRenderer()
 	UseRenderFeature("TBForward_Opaque_RenderFeature", new RenderFeature::TBForward_Opaque_RenderFeature());
 	UseRenderFeature("Background_RenderFeature", new RenderFeature::Background_RenderFeature());
 
-	UseRenderFeature("TBForward_OIT_AlphaBuffer_RenderFeature", new RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeature());
+	UseRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", new RenderFeature::TBForward_OIT_DepthPeeling_RenderFeature());
 
 	UseRenderFeature("SSAO_Occlusion_RenderFeature", new RenderFeature::SSAO_Occlusion_RenderFeature());
 	UseRenderFeature("SSAO_Blur_RenderFeature", new RenderFeature::AO_Blur_RenderFeature());
@@ -73,7 +73,6 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::OnResolveRendererData(Co
 	auto lightListFeatureData = rendererData->RenderFeatureData<RenderFeature::TBForward_LightList_RenderFeature::TBForward_LightList_RenderFeatureData>("TBForward_LightList_RenderFeature");
 	auto opaqueFeatureData = rendererData->RenderFeatureData<RenderFeature::TBForward_Opaque_RenderFeature::TBForward_Opaque_RenderFeatureData>("TBForward_Opaque_RenderFeature");
 	auto depthPeelingFeatureData = rendererData->RenderFeatureData<RenderFeature::TBForward_OIT_DepthPeeling_RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatureData>("TBForward_OIT_DepthPeeling_RenderFeature");
-	auto alphaBufferFeatureData = rendererData->RenderFeatureData<RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeatureData>("TBForward_OIT_AlphaBuffer_RenderFeature");
 
 	///SSAO
 	{
@@ -97,7 +96,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::OnResolveRendererData(Co
 	auto csmShadowMapFeatureData = rendererData->RenderFeatureData<RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderFeatureData>("CSM_ShadowCaster_RenderFeature");
 	csmShadowMapFeatureData->frustumSegmentScales = { 0.1, 0.2, 0.3, 0.4 };
 	csmShadowMapFeatureData->lightCameraCompensationDistances = { 5, 5, 5, 5 };
-	csmShadowMapFeatureData->shadowImageResolutions = { 2048, 2048, 1024, 1024 };
+	csmShadowMapFeatureData->shadowImageResolutions = 2048;
 	csmShadowMapFeatureData->sampleHalfWidth = 2;
 	csmShadowMapFeatureData->bias = {
 		glm::vec2{ 0.0000f, 0.0075f },
@@ -109,7 +108,8 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::OnResolveRendererData(Co
 	opaqueFeatureData->opaqueLightIndexListsBuffer = lightListFeatureData->opaqueLightIndexListsBuffer;
 	opaqueFeatureData->csmShadowMapRenderFeatureData = csmShadowMapFeatureData;
 
-	alphaBufferFeatureData->transparentLightIndexListsBuffer = lightListFeatureData->transparentLightIndexListsBuffer;
+	depthPeelingFeatureData->transparentLightIndexListsBuffer = lightListFeatureData->transparentLightIndexListsBuffer;
+	depthPeelingFeatureData->depthTexture = geometryFeatureData->depthTexture;
 }
 
 void AirEngine::Rendering::Renderer::TBForwardRenderer::OnDestroyRendererData(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -132,7 +132,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::PrepareRenderer(Core::Gr
 
 	PrepareRenderFeature("SSAO_Cover_RenderFeature", rendererData);
 
-	PrepareRenderFeature("TBForward_OIT_AlphaBuffer_RenderFeature", rendererData);
+	PrepareRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", rendererData);
 }
 
 void AirEngine::Rendering::Renderer::TBForwardRenderer::ExcuteRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*> const* rendererComponents)
@@ -150,7 +150,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::ExcuteRenderer(Core::Gra
 
 	ExcuteRenderFeature("SSAO_Cover_RenderFeature", rendererData, camera, rendererComponents);
 
-	ExcuteRenderFeature("TBForward_OIT_AlphaBuffer_RenderFeature", rendererData, camera, rendererComponents);
+	ExcuteRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", rendererData, camera, rendererComponents);
 }
 
 void AirEngine::Rendering::Renderer::TBForwardRenderer::SubmitRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -168,7 +168,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::SubmitRenderer(Core::Gra
 
 	SubmitRenderFeature("SSAO_Cover_RenderFeature", rendererData);
 
-	SubmitRenderFeature("TBForward_OIT_AlphaBuffer_RenderFeature", rendererData);
+	SubmitRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", rendererData);
 }
 
 void AirEngine::Rendering::Renderer::TBForwardRenderer::FinishRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -186,5 +186,5 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::FinishRenderer(Core::Gra
 
 	FinishRenderFeature("SSAO_Cover_RenderFeature", rendererData);
 
-	FinishRenderFeature("TBForward_OIT_AlphaBuffer_RenderFeature", rendererData);
+	FinishRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", rendererData);
 }

@@ -71,10 +71,10 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_Sh
 	creator.AddDependency(
 		"DrawSubpass",
 		"VK_SUBPASS_EXTERNAL",
-		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
-		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-		VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
-		VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+		0,
+		0
 	);
 }
 
@@ -89,17 +89,16 @@ AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_ShadowC
 
 AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderFeatureData::CSM_ShadowCaster_RenderFeatureData()
 	: RenderFeatureDataBase()
-	, shadowImages()
+	, shadowImageArray(nullptr)
 	, shadowFrameBuffers()
 	, lightCameraInfoBuffer(nullptr)
 	, lightCameraInfoHostStagingBuffer(nullptr)
 	, frustumSegmentScales()
 	, lightCameraCompensationDistances()
-	, shadowImageResolutions()
+	, shadowImageResolutions(1024)
 {
 	frustumSegmentScales.fill(1.0 / CASCADE_COUNT);
 	lightCameraCompensationDistances.fill(20);
-	shadowImageResolutions.fill(1024);
 	bias.fill({ 0.00005 , 0.0065 });
 	overlapScale = 0.3;
 	sampleHalfWidth = 1;
@@ -134,22 +133,36 @@ AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::~CSM_Shadow
 
 void AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderFeatureData::Refresh()
 {
+	VkExtent2D extent = { shadowImageResolutions, shadowImageResolutions };
+	delete shadowImageArray;
+	shadowImageArray = Core::Graphic::Instance::Image::Create2DImageArray(
+		extent,
+		VkFormat::VK_FORMAT_D32_SFLOAT,
+		VkImageUsageFlagBits::VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT,
+		VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT,
+		CASCADE_COUNT
+	);
 	for (auto i = 0; i < CASCADE_COUNT; i++)
 	{
-		VkExtent2D extent = { shadowImageResolutions[i], shadowImageResolutions[i]};
-		delete shadowImages[i];
-		delete shadowFrameBuffers[i];
-		shadowImages[i] = Core::Graphic::Instance::Image::Create2DImage(
-			extent,
-			VkFormat::VK_FORMAT_D32_SFLOAT,
-			VkImageUsageFlagBits::VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT,
-			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-			VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT
+		shadowImageArray->AddImageView(
+			"SingleImageView_" + std::to_string(i), 
+			VkImageViewType::VK_IMAGE_VIEW_TYPE_2D, 
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT, 
+			i, 
+			1
 		);
+	}
+	for (auto i = 0; i < CASCADE_COUNT; i++)
+	{
+		delete shadowFrameBuffers[i];
 		shadowFrameBuffers[i] = new Core::Graphic::Rendering::FrameBuffer(
 			shadowMapRenderPass,
 			{
-				{"DepthAttachment", shadowImages[i]},
+				{"DepthAttachment", shadowImageArray}
+			},
+			{
+				{"DepthAttachment", "SingleImageView_" + std::to_string(i)}
 			}
 		);
 	}
@@ -158,10 +171,7 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_Sh
 void AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderFeatureData::SetShadowReceiverMaterialParameters(Core::Graphic::Rendering::Material* material)
 {
 	material->SetUniformBuffer("csmShadowReceiverInfo", csmShadowReceiverInfoBuffer);
-	for (int i = 0; i < CASCADE_COUNT; i++)
-	{
-		material->SetSampledImage2D("shadowTexture_" + std::to_string(i), shadowImages[i], sampler);
-	}
+	material->SetSampledImage2D("shadowTextureArray", shadowImageArray, sampler);
 }
 
 AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::OnCreateRenderFeatureData(Camera::CameraBase* camera)
@@ -202,9 +212,9 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::OnDest
 	delete featureData->lightCameraInfoBuffer;
 	delete featureData->lightCameraInfoHostStagingBuffer;
 	delete featureData->csmShadowReceiverInfoBuffer;
+	delete featureData->shadowImageArray;
 	for (auto i = 0; i < CASCADE_COUNT; i++)
 	{
-		delete featureData->shadowImages[i];
 		delete featureData->shadowFrameBuffers[i];
 	}
 	delete featureData;
@@ -338,7 +348,7 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::OnExcu
 			csmShadowReceiverInfo.thresholdVZ[i * 2 + 0].x = subAngularPointVPositions[i][0].z;
 			csmShadowReceiverInfo.thresholdVZ[i * 2 + 1].x = subAngularPointVPositions[i][4].z;
 
-			csmShadowReceiverInfo.texelSize[i] = { 1.0f / featureData->shadowImageResolutions[i], 1.0f / featureData->shadowImageResolutions[i], 0, 0};
+			csmShadowReceiverInfo.texelSize[i] = { 1.0f / featureData->shadowImageResolutions, 1.0f / featureData->shadowImageResolutions, 0, 0};
 			
 			csmShadowReceiverInfo.bias[i] = glm::vec4(featureData->bias[i], 0, 0);
 		}
@@ -415,6 +425,22 @@ void AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::OnExcu
 		}
 
 		commandBuffer->EndRenderPass();
+	}
+
+	///Wait shadow texture ready
+	{
+		auto shadowTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
+		(
+			featureData->shadowImageArray,
+			VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+			VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+			VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
+			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+		);
+		commandBuffer->AddPipelineImageBarrier(
+			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
+			{ &shadowTextureBarrier }
+		);
 	}
 
 	commandBuffer->EndRecord();

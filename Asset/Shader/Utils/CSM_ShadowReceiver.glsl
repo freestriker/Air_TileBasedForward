@@ -1,10 +1,10 @@
 #ifndef _CSM_SHADOW_RECEIVER_GLSL_
 #define _CSM_SHADOW_RECEIVER_GLSL_
 
-#ifdef CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX
-#define CSM_SHADOW_RECEIVER_DESCRIPTOR_COUNT 5
-
 #define CASCADE_COUNT 4
+
+#ifdef CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX
+#define CSM_SHADOW_RECEIVER_DESCRIPTOR_COUNT 2
 
 layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 0, binding = 0) uniform CsmShadowReceiverInfo
 {
@@ -17,40 +17,9 @@ layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 0, binding = 0) unifor
     int sampleHalfWidth;
 }csmShadowReceiverInfo;
 
-layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 1, binding = 0) uniform sampler2D shadowTexture_0;
-layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 2, binding = 0) uniform sampler2D shadowTexture_1;
-layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 3, binding = 0) uniform sampler2D shadowTexture_2;
-layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 4, binding = 0) uniform sampler2D shadowTexture_3;
+layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 1, binding = 0) uniform sampler2DArray shadowTextureArray;
 
-float SampleShadowTexture(int cascadIndex, vec2 aPosition)
-{
-    float depth;
-    switch(cascadIndex)
-    {
-        case 0:
-        {
-            depth = texture(shadowTexture_0, aPosition).r;
-            break;
-        }
-        case 1:
-        {
-            depth = texture(shadowTexture_1, aPosition).r;
-            break;
-        }
-        case 2:
-        {
-            depth = texture(shadowTexture_2, aPosition).r;
-            break;
-        }
-        case 3:
-        {
-            depth = texture(shadowTexture_3, aPosition).r;
-            break;
-        }
-    }
-    return depth;
-}
-
+#define SampleShadowTexture(cascadIndex, aPosition) (texture(shadowTextureArray, vec3(aPosition, cascadIndex)).r)
 
 float GetShadowIntensity(in vec3 vPosition, in vec3 wNormal)
 {

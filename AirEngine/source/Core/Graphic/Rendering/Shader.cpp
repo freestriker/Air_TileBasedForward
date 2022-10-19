@@ -273,6 +273,26 @@ void AirEngine::Core::Graphic::Rendering::Shader::_CreateDescriptorLayouts(_Pipe
 	std::map<uint32_t, std::map<uint32_t, VkDescriptorSetLayoutBinding>> setBindings = std::map<uint32_t, std::map<uint32_t, VkDescriptorSetLayoutBinding>>();
 	for (const auto& shaderModuleWrapper : pipelineData.shaderModuleWrappers)
 	{
+		///push_constant
+		{
+			uint32_t pushConstantSize = 0;
+			SpvReflectResult result = spvReflectEnumeratePushConstantBlocks(&shaderModuleWrapper.reflectModule, &pushConstantSize, nullptr);
+			assert(result == SPV_REFLECT_RESULT_SUCCESS);
+			std::vector< SpvReflectBlockVariable*> blockVariables = std::vector< SpvReflectBlockVariable*>(pushConstantSize, nullptr);
+			result = spvReflectEnumeratePushConstantBlocks(&shaderModuleWrapper.reflectModule, &pushConstantSize, blockVariables.data());
+			assert(result == SPV_REFLECT_RESULT_SUCCESS);
+
+			for (auto blockVariable : blockVariables)
+			{
+				VkPushConstantRange range{};
+				range.stageFlags = shaderModuleWrapper.stage;
+				range.offset = blockVariable->offset;
+				range.size = blockVariable->size;
+
+				pipelineData.pushConstantRanges.push_back(range);
+			}
+		}
+
 		uint32_t count = 0;
 		SpvReflectResult result = spvReflectEnumerateDescriptorSets(&shaderModuleWrapper.reflectModule, &count, NULL);
 		assert(result == SPV_REFLECT_RESULT_SUCCESS);
@@ -280,7 +300,6 @@ void AirEngine::Core::Graphic::Rendering::Shader::_CreateDescriptorLayouts(_Pipe
 		std::vector<SpvReflectDescriptorSet*> reflectSets(count);
 		result = spvReflectEnumerateDescriptorSets(&shaderModuleWrapper.reflectModule, &count, reflectSets.data());
 		assert(result == SPV_REFLECT_RESULT_SUCCESS);
-
 		for (size_t i_set = 0; i_set < reflectSets.size(); ++i_set)
 		{
 			const SpvReflectDescriptorSet& refl_set = *(reflectSets[i_set]);
@@ -318,6 +337,7 @@ void AirEngine::Core::Graphic::Rendering::Shader::_CreateDescriptorLayouts(_Pipe
 						SlotDescriptor newSlotLayout = SlotDescriptor();
 						newSlotLayout.name = refl_binding.name;
 						newSlotLayout.setIndex = refl_set.set;
+						newSlotLayout.isArray = refl_binding.array.dims_count > 0;
 						if (refl_binding.descriptor_type == SpvReflectDescriptorType::SPV_REFLECT_DESCRIPTOR_TYPE_UNIFORM_BUFFER)
 						{
 							newSlotLayout.slotType = ShaderSlotType::UNIFORM_BUFFER;
@@ -453,6 +473,8 @@ void AirEngine::Core::Graphic::Rendering::Shader::_CreateGraphicPipeline(_Pipeli
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(pipelineData.descriptorSetLayouts.size());
 	pipelineLayoutInfo.pSetLayouts = pipelineData.descriptorSetLayouts.data();
+	pipelineLayoutInfo.pushConstantRangeCount = static_cast<uint32_t>(pipelineData.pushConstantRanges.size());
+	pipelineLayoutInfo.pPushConstantRanges = pipelineData.pushConstantRanges.data();
 
 	Utils::Log::Exception("Failed to create pipeline layout.", vkCreatePipelineLayout(CoreObject::Instance::VkDevice_(), &pipelineLayoutInfo, nullptr, &_vkPipelineLayout));
 
@@ -482,6 +504,8 @@ void AirEngine::Core::Graphic::Rendering::Shader::_CreateComputePipeline(_Pipeli
 	pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
 	pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(pipelineData.descriptorSetLayouts.size());
 	pipelineLayoutInfo.pSetLayouts = pipelineData.descriptorSetLayouts.data();
+	pipelineLayoutInfo.pushConstantRangeCount = static_cast<uint32_t>(pipelineData.pushConstantRanges.size());
+	pipelineLayoutInfo.pPushConstantRanges = pipelineData.pushConstantRanges.data();
 
 	Utils::Log::Exception("Failed to create pipeline layout.", vkCreatePipelineLayout(CoreObject::Instance::VkDevice_(), &pipelineLayoutInfo, nullptr, &_vkPipelineLayout));
 

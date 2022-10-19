@@ -185,6 +185,48 @@ AirEngine::Core::Graphic::Instance::Image::~Image()
 	}
 }
 
+void AirEngine::Core::Graphic::Instance::Image::AddImageView(std::string name, VkImageViewType imageViewType, VkImageAspectFlags imageAspectFlags, uint32_t baseArrayLayer, uint32_t layerCount)
+{
+	ImageViewInfo imageViewInfo{};
+	imageViewInfo.imageViewType = imageViewType;
+	imageViewInfo.imageAspectFlags = imageAspectFlags;
+	imageViewInfo.baseArrayLayer = baseArrayLayer;
+	imageViewInfo.layerCount = layerCount;
+
+	_imageImfo.imageViewInfos.emplace(name, imageViewInfo);
+
+	ImageView imageView = {};
+
+	imageView.vkImageSubresourceRange.aspectMask = imageAspectFlags;
+	imageView.vkImageSubresourceRange.baseMipLevel = 0;
+	imageView.vkImageSubresourceRange.levelCount = 1;
+	imageView.vkImageSubresourceRange.baseArrayLayer = baseArrayLayer;
+	imageView.vkImageSubresourceRange.layerCount = layerCount;
+
+	imageView.vkImageSubresourceLayers.aspectMask = imageAspectFlags;
+	imageView.vkImageSubresourceLayers.mipLevel = 0;
+	imageView.vkImageSubresourceLayers.baseArrayLayer = baseArrayLayer;
+	imageView.vkImageSubresourceLayers.layerCount = layerCount;
+
+	VkImageViewCreateInfo imageViewCreateInfo{};
+	imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+	imageViewCreateInfo.image = _vkImage;
+	imageViewCreateInfo.viewType = VkImageViewType::VK_IMAGE_VIEW_TYPE_2D;
+	imageViewCreateInfo.format = _imageImfo.format;
+	imageViewCreateInfo.subresourceRange = imageView.vkImageSubresourceRange;
+
+	Utils::Log::Exception("Failed to create image view.", vkCreateImageView(CoreObject::Instance::VkDevice_(), &imageViewCreateInfo, nullptr, &imageView.vkImageView));
+
+	_imageViews.emplace(name, imageView);
+}
+
+void AirEngine::Core::Graphic::Instance::Image::RemoveImageView(std::string name)
+{
+	vkDestroyImageView(Core::Graphic::CoreObject::Instance::VkDevice_(), _imageViews[name].vkImageView, nullptr);
+	_imageViews.erase(name);
+	_imageImfo.imageViewInfos.erase(name);
+}
+
 const AirEngine::Core::Graphic::Instance::Image::ImageView& AirEngine::Core::Graphic::Instance::Image::ImageView_(std::string imageViewName)
 {
 	return _imageViews[imageViewName];

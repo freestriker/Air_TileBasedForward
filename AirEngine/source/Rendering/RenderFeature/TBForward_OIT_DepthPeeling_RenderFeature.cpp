@@ -87,16 +87,16 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatu
 		"VK_SUBPASS_EXTERNAL",
 		"DrawSubpass",
 		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
 		0,
 		0
 	);
 	settings.AddDependency(
 		"DrawSubpass",
 		"VK_SUBPASS_EXTERNAL",
-		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT | VkPipelineStageFlagBits::VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT,
 		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-		VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
+		VkAccessFlagBits::VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT,
 		VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT
 	);
 }
@@ -149,13 +149,13 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatu
 AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatureData::TBForward_OIT_DepthPeeling_RenderFeatureData()
 	: RenderFeatureDataBase()
 	, frameBuffers()
-	, colorAttachments()
-	, depthAttachments()
+	, colorAttachmentArray(nullptr)
+	, depthAttachmentArray()
 	, thresholdDepthTexture(nullptr)
 	, blendMaterial(nullptr)
 	, transparentLightIndexListsBuffer(nullptr)
 	, blendFrameBuffer(nullptr)
-	, attachmentSizeInfoBuffer(nullptr)
+	, depthPeelingInfoBuffer(nullptr)
 {
 
 }
@@ -211,34 +211,52 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatu
 
 	auto extent = camera->attachments["ColorAttachment"]->VkExtent2D_();
 
-	featureData->attachmentSizeInfoBuffer = new Core::Graphic::Instance::Buffer(
-		sizeof(AttachmentSizeInfo),
+	featureData->depthPeelingInfoBuffer = new Core::Graphic::Instance::Buffer(
+		sizeof(DepthPeelingInfo),
 		VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
 		VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 	);
-	AttachmentSizeInfo attachmentSizeInfo = {glm::vec2(extent.width, extent.height), glm::vec2(1, 1) / glm::vec2(extent.width, extent.height) };
-	featureData->attachmentSizeInfoBuffer->WriteData(&attachmentSizeInfo, sizeof(AttachmentSizeInfo));
+	DepthPeelingInfo attachmentSizeInfo = {glm::vec2(1, 1) / glm::vec2(extent.width, extent.height) };
+	featureData->depthPeelingInfoBuffer->WriteData(&attachmentSizeInfo, sizeof(DepthPeelingInfo));
 
-	for (auto& colorAtttachment : featureData->colorAttachments)
+	featureData->colorAttachmentArray = Core::Graphic::Instance::Image::Create2DImageArray(
+		cameraColorImage->VkExtent2D_(),
+		cameraColorImage->VkFormat_(),
+		VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT,
+		cameraColorImage->VkMemoryPropertyFlags_(),
+		VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
+		DEPTH_PEELING_STEP_COUNT
+	);
+	for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
 	{
-		colorAtttachment = Core::Graphic::Instance::Image::Create2DImage(
-			cameraColorImage->VkExtent2D_(),
-			cameraColorImage->VkFormat_(),
-			VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT,
-			cameraColorImage->VkMemoryPropertyFlags_(),
-			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
+		featureData->colorAttachmentArray->AddImageView(
+			"SingleImageView_" + std::to_string(i),
+			VkImageViewType::VK_IMAGE_VIEW_TYPE_2D,
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
+			i,
+			1
 		);
 	}
-	for (auto& depthAttachment : featureData->depthAttachments)
+
+	featureData->depthAttachmentArray = Core::Graphic::Instance::Image::Create2DImageArray(
+		cameraDepthImage->VkExtent2D_(),
+		cameraDepthImage->VkFormat_(),
+		VkImageUsageFlagBits::VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
+		cameraDepthImage->VkMemoryPropertyFlags_(),
+		VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT,
+		DEPTH_PEELING_STEP_COUNT
+	);
+	for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
 	{
-		depthAttachment = Core::Graphic::Instance::Image::Create2DImage(
-			cameraDepthImage->VkExtent2D_(),
-			cameraDepthImage->VkFormat_(),
-			VkImageUsageFlagBits::VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
-			cameraDepthImage->VkMemoryPropertyFlags_(),
-			VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT
+		featureData->depthAttachmentArray->AddImageView(
+			"SingleImageView_" + std::to_string(i),
+			VkImageViewType::VK_IMAGE_VIEW_TYPE_2D,
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT,
+			i,
+			1
 		);
 	}
+
 	featureData->thresholdDepthTexture = Core::Graphic::Instance::Image::Create2DImage(
 		cameraDepthImage->VkExtent2D_(),
 		cameraDepthImage->VkFormat_(),
@@ -252,18 +270,18 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatu
 		featureData->frameBuffers[i] = new Core::Graphic::Rendering::FrameBuffer(
 			_renderPass,
 			{
-				{"ColorAttachment", featureData->colorAttachments[i]},
-				{"DepthAttachment", featureData->depthAttachments[i]}
+				{"ColorAttachment", featureData->colorAttachmentArray},
+				{"DepthAttachment", featureData->depthAttachmentArray}
+			},
+			{
+				{"ColorAttachment", "SingleImageView_" + std::to_string(i)},
+				{"DepthAttachment", "SingleImageView_" + std::to_string(i)}
 			}
 		);
 	}
 
 	featureData->blendMaterial = new Core::Graphic::Rendering::Material(_blendShader);
-	for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
-	{
-		featureData->blendMaterial->SetSampledImage2D("colorTexture_" + std::to_string(i), featureData->colorAttachments[i], _textureSampler);
-	}
-	featureData->blendMaterial->SetUniformBuffer("attachmentSizeInfo", featureData->attachmentSizeInfoBuffer);
+	featureData->blendMaterial->SetSampledImage2D("colorTextureArray", featureData->colorAttachmentArray, _textureSampler);
 
 	featureData->blendFrameBuffer = new Core::Graphic::Rendering::FrameBuffer(
 		_blendRenderPass,
@@ -278,14 +296,14 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatu
 	auto featureData = static_cast<TBForward_OIT_DepthPeeling_RenderFeatureData*>(renderFeatureData);
 	for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
 	{
-		delete featureData->colorAttachments[i];
+		delete featureData->colorAttachmentArray;
 		delete featureData->frameBuffers[i];
-		delete featureData->depthAttachments[i];
+		delete featureData->depthAttachmentArray;
 	}
 	delete featureData->thresholdDepthTexture;
 	delete featureData->blendMaterial;
 	delete featureData->blendFrameBuffer;
-	delete featureData->attachmentSizeInfoBuffer;
+	delete featureData->depthPeelingInfoBuffer;
 
 	delete featureData;
 }
@@ -329,9 +347,9 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatu
 			material->SetUniformBuffer("lightInfos", Core::Graphic::CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
 			material->SetSampledImageCube("ambientLightTexture", ambientLightTexture, _textureSampler);
 			material->SetStorageBuffer("transparentLightIndexLists", featureData->transparentLightIndexListsBuffer);
-			featureData->blendMaterial->SetSampledImage2D("thresholdDepthTexture", featureData->thresholdDepthTexture, _textureSampler);
-			featureData->blendMaterial->SetSampledImage2D("depthTexture", featureData->depthTexture, _textureSampler);
-			material->SetUniformBuffer("attachmentSizeInfo", featureData->attachmentSizeInfoBuffer);
+			material->SetSampledImage2D("thresholdDepthTexture", featureData->thresholdDepthTexture, _textureSampler);
+			material->SetSampledImage2D("depthTexture", featureData->depthTexture, _textureSampler);
+			material->SetUniformBuffer("depthPeelingInfo", featureData->depthPeelingInfoBuffer);
 		}
 	}
 
@@ -396,7 +414,7 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatu
 					);
 				}
 
-				commandBuffer->CopyImage(featureData->depthAttachments[i - 1], VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, featureData->thresholdDepthTexture, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+				commandBuffer->CopyImage(featureData->depthAttachmentArray, "SingleImageView_" + std::to_string(i - 1), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, featureData->thresholdDepthTexture, "DefaultImageView", VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 			}
 
 			///Wait threshold depth texture ready
@@ -436,26 +454,14 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatu
 			}
 		}
 
-		///Wait color last attachment ready
-		{
-			auto colorAttachmentBarrier = Core::Graphic::Command::ImageMemoryBarrier
-			(
-				featureData->colorAttachments[DEPTH_PEELING_STEP_COUNT - 1],
-				VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-				VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-				VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-			);
-			commandBuffer->AddPipelineImageBarrier(
-				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
-				{ &colorAttachmentBarrier }
-			);
-		}
-
 		///Blend
 		{
+			auto extent = featureData->blendFrameBuffer->Extent2D();
+			BlendInfo info{ glm::vec2(1, 1) / glm::vec2(extent.width, extent.height), DEPTH_PEELING_STEP_COUNT };
+
 			commandBuffer->BeginRenderPass(_blendRenderPass, featureData->blendFrameBuffer);
 
+			commandBuffer->PushConstant(featureData->blendMaterial, VK_SHADER_STAGE_FRAGMENT_BIT, info);
 			commandBuffer->DrawMesh(_fullScreenMesh, featureData->blendMaterial);
 
 			commandBuffer->EndRenderPass();
