@@ -2,11 +2,10 @@
 #extension GL_GOOGLE_include_directive: enable
 
 layout(set = 0, binding = 0) uniform sampler2DArray colorTextureArray;
-layout (set = 1, binding = 0) uniform BlendInfo
+layout (push_constant) uniform BlendInfo
 {
-    vec2 size;
     vec2 texelSize;
-    int arraySize;
+    int depthPeelingStepCount;
 } blendInfo;
 
 layout(location = 0) out vec4 ColorAttachment;
@@ -19,7 +18,7 @@ void main()
 
     vec2 aPosition = gl_FragCoord.xy * blendInfo.texelSize;
 
-    for(int i = 0; i < blendInfo.arraySize; i++)
+    for(int i = 0; i < blendInfo.depthPeelingStepCount; i++)
     {
         src = texture(colorTextureArray, vec3(aPosition, i));
         color = vec4(dst.a * src.a * src.rgb + dst.rgb, (1 - src.a) * dst.a);

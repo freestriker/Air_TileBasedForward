@@ -58,11 +58,11 @@ namespace AirEngine
 				private:
 					Core::Graphic::Rendering::FrameBuffer* frameBuffers[DEPTH_PEELING_STEP_COUNT];
 					Core::Graphic::Instance::Image* colorAttachmentArray;
-					Core::Graphic::Instance::Image* depthAttachments[DEPTH_PEELING_STEP_COUNT];
+					Core::Graphic::Instance::Image* depthAttachmentArray;
 					Core::Graphic::Instance::Image* thresholdDepthTexture;
 					Core::Graphic::Rendering::Material* blendMaterial;
 					Core::Graphic::Rendering::FrameBuffer* blendFrameBuffer;
-					Core::Graphic::Instance::Buffer* blendInfoBuffer;
+					Core::Graphic::Instance::Buffer* depthPeelingInfoBuffer;
 				public:
 					Core::Graphic::Instance::Buffer* transparentLightIndexListsBuffer;
 					Core::Graphic::Instance::Image* depthTexture;
@@ -74,11 +74,14 @@ namespace AirEngine
 				CONSTRUCTOR(TBForward_OIT_DepthPeeling_RenderFeature)
 
 			private:
+				struct DepthPeelingInfo
+				{
+					alignas(8) glm::vec2 texelSize;
+				};
 				struct BlendInfo
 				{
-					alignas(8) glm::vec2 size;
 					alignas(8) glm::vec2 texelSize;
-					alignas(4) int arraySize;
+					alignas(4) int depthPeelingStepCount;
 				};
 				Core::Graphic::Rendering::RenderPassBase* _renderPass;
 				std::string _renderPassName;
