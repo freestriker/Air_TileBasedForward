@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include "Core/Graphic/Rendering/Material.h"
 
 namespace AirEngine
 {
@@ -60,6 +61,8 @@ namespace AirEngine
 				public:
 					void Reset();
 					void BeginRecord(VkCommandBufferUsageFlags flag);
+					template<typename TConstant>
+					void PushConstant(Rendering::Material* material, VkShaderStageFlagBits stage, TConstant&& constant);
 					void AddPipelineImageBarrier(VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, std::vector <ImageMemoryBarrier*> imageMemoryBarriers);
 					void AddPipelineImageBarrier(VkDependencyFlags dependencyFlag, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, std::vector<ImageMemoryBarrier*> imageMemoryBarriers);
 					void AddPipelineBufferBarrier(VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, std::vector <BufferMemoryBarrier*> bufferMemoryBarriers);
@@ -87,6 +90,11 @@ namespace AirEngine
 					
 					CommandPool* ParentCommandPool();
 				};
+				template<typename TConstant>
+				inline void CommandBuffer::PushConstant(Rendering::Material* material, VkShaderStageFlagBits stage, TConstant&& constant)
+				{
+					vkCmdPushConstants(_vkCommandBuffer, material->Shader()->VkPipelineLayout_(), stage, 0, sizeof(TConstant), &constant);
+				}
 			}
 		}
 	}

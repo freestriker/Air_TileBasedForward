@@ -105,6 +105,7 @@ namespace AirEngine
 						std::map<std::string, std::vector<char>> spirvs{};
 						std::vector<_ShaderModuleWrapper> shaderModuleWrappers{};
 						std::vector< VkPipelineShaderStageCreateInfo> stageInfos{};
+						std::vector< VkPushConstantRange> pushConstantRanges{};
 
 						VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 						VkVertexInputBindingDescription vertexInputBindingDescription{};

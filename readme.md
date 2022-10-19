@@ -8,5 +8,6 @@ MY_GLM_PATH E:\Projects\glm
 5、使用vs2022打开项目，切换到Debug模式，运行  
 6、若需要使用RenderDoc，需要把项目ThirdParty/目录下所有的dll文件拷贝至解决方案x64/Debug目录
 # 思路
-<https://zhuanlan.zhihu.com/p/545054374> 
-<https://zhuanlan.zhihu.com/p/561948497>
+<https://zhuanlan.zhihu.com/p/545054374>  
+<https://zhuanlan.zhihu.com/p/561948497>  
+<https://zhuanlan.zhihu.com/p/568383387>
