@@ -57,7 +57,7 @@ vec3 SpecularDirectionalLighting(in LightInfo lightInfo, in vec3 worldView, in v
     vec3 fresnel; \
     { \
         vec3 F0 = mix(vec3(0.04), albedo, metallic); \
-        fresnel = F0 + (1.0 - F0) * pow(1.0 - cosnv, 5.0); \
+        fresnel = F0 + (1.0 - F0) * pow(1.0 - coshv, 5.0); \
     } \
  \
     float distribution; \
@@ -146,18 +146,22 @@ vec3 PbrLighting(in LightInfo lightInfo, in vec3 wPosition, in vec3 wView, in ve
         case INVALID_LIGHT:
         {
             outRadiance = vec3(0, 0, 0);
+            break;
         }
         case DIRECTIONL_LIGHT:
         {
             PBR_DIRECTIONAL_LIGHTING(outRadiance, lightInfo, wView, wNormal, albedo, roughness, metallic);
+            break;
         }
         case POINT_LIGHT:
         {
             PBR_POINT_LIGHTING(outRadiance, lightInfo, wPosition, wView, wNormal, albedo, roughness, metallic);
+            break;
         }
         case SPOT_LIGHT:
         {
             PBR_SPOT_LIGHTING(outRadiance, lightInfo, wPosition, wView, wNormal, albedo, roughness, metallic);
+            break;
         }
 
     }

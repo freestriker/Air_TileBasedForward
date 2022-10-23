@@ -1,8 +1,8 @@
 {
     "subresourcePaths": [
-        "..\\Asset\\Texture\\MetalFloor_Normal.jpg"
+        "..\\Asset\\Texture\\MetalFloor_Normal.png"
     ],
-    "format": 29,
+    "format": 50,
     "imageTiling": 0,
     "imageUsageFlags": 4,
     "memoryPropertyFlags": 1,

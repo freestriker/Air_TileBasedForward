@@ -40,6 +40,7 @@
 #include "Test/TBF_OIT_RenderBehaviour.h"
 #include "Test/QuadMoveBehaviour.h"
 #include "Test/RendererDataController.h"
+#include "Test/TBF_Opaque_Pbr_RendererBehaviour.h"
 
 AirEngine::Core::Logic::CoreObject::Thread::LogicThread AirEngine::Core::Logic::CoreObject::Thread::_logicThread = AirEngine::Core::Logic::CoreObject::Thread::LogicThread();
 
@@ -459,12 +460,18 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 
 	///TBForward opaque
 	{
-		Logic::Object::GameObject* opaqueRendererGo = new Logic::Object::GameObject("WallRenderer");
-		renderers->AddChild(opaqueRendererGo);
-		opaqueRendererGo->AddComponent(new Renderer::Renderer());
-		opaqueRendererGo->AddComponent(new Test::TBF_WallRendererBehaviour());
-		opaqueRendererGo->AddComponent(new Test::SelfRotateBehaviour(60));
-		opaqueRendererGo->transform.SetScale(glm::vec3(0.8, 0.8, 0.8));
+		Logic::Object::GameObject* pbrRendererGo = new Logic::Object::GameObject("PbrRenderer");
+		renderers->AddChild(pbrRendererGo);
+		pbrRendererGo->AddComponent(new Test::TBF_Opaque_Pbr_RendererBehaviour());
+		pbrRendererGo->AddComponent(new Test::SelfRotateBehaviour(60));
+		pbrRendererGo->transform.SetScale(glm::vec3(0.8, 0.8, 0.8));
+
+		//Logic::Object::GameObject* opaqueRendererGo = new Logic::Object::GameObject("WallRenderer");
+		//renderers->AddChild(opaqueRendererGo);
+		//opaqueRendererGo->AddComponent(new Renderer::Renderer());
+		//opaqueRendererGo->AddComponent(new Test::TBF_WallRendererBehaviour());
+		//opaqueRendererGo->AddComponent(new Test::SelfRotateBehaviour(60));
+		//opaqueRendererGo->transform.SetScale(glm::vec3(0.8, 0.8, 0.8));
 
 		//Logic::Object::GameObject* glassMeshRendererGo = new Logic::Object::GameObject("GlassRenderer");
 		//renderers->AddChild(glassMeshRendererGo);
@@ -581,7 +588,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	directionalLightGo->transform.SetEulerRotation(glm::vec3(-30, 0, 0));
 	auto directionalLight = new Light::DirectionalLight();
 	directionalLight->color = { 1, 239.0 / 255, 213.0 / 255, 1 };
-	directionalLight->intensity = 0.6f;
+	directionalLight->intensity = 8;
 	directionalLightGo->AddComponent(directionalLight);
 
 	Logic::Object::GameObject* skyBoxGo = new Logic::Object::GameObject("SkyBox");

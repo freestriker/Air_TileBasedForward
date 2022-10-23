@@ -1,8 +1,8 @@
 {
     "subresourcePaths": [
-        "..\\Asset\\Texture\\MetalFloor_Albedo.jpg"
+        "..\\Asset\\Texture\\MetalFloor_Albedo.png"
     ],
-    "format": 29,
+    "format": 50,
     "imageTiling": 0,
     "imageUsageFlags": 4,
     "memoryPropertyFlags": 1,

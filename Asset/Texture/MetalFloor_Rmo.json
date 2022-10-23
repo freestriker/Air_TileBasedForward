@@ -1,8 +1,8 @@
 {
     "subresourcePaths": [
-        "..\\Asset\\Texture\\MetalFloor_Rmo.jpg"
+        "..\\Asset\\Texture\\MetalFloor_Rmo.png"
     ],
-    "format": 23,
+    "format": 44,
     "imageTiling": 0,
     "imageUsageFlags": 4,
     "memoryPropertyFlags": 1,
