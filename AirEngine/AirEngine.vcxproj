@@ -198,6 +198,7 @@
     <ClCompile Include="source\Test\TBF_GlassRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\TBF_MirrorRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\TBF_OIT_RenderBehaviour.cpp" />
+    <ClCompile Include="source\Test\TBF_Opaque_Pbr_Mirror_RendererBehaviour.cpp" />
     <ClCompile Include="source\Test\TBF_Opaque_Pbr_RendererBehaviour.cpp" />
     <ClCompile Include="source\Test\TBF_WallRendererBehaviour.cpp" />
     <ClCompile Include="source\Utils\ChildBrotherTree.cpp" />
@@ -302,6 +303,7 @@
     <ClInclude Include="header\Test\TBF_GlassRendererBehaviour.h" />
     <ClInclude Include="header\Test\TBF_MirrorRendererBehaviour.h" />
     <ClInclude Include="header\Test\TBF_OIT_RenderBehaviour.h" />
+    <ClInclude Include="header\Test\TBF_Opaque_Pbr_Mirror_RendererBehaviour.h" />
     <ClInclude Include="header\Test\TBF_Opaque_Pbr_RendererBehaviour.h" />
     <ClInclude Include="header\Test\TBF_WallRendererBehaviour.h" />
     <ClInclude Include="header\Utils\ChildBrotherTree.h" />

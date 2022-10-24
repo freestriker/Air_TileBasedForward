@@ -41,6 +41,7 @@
 #include "Test/QuadMoveBehaviour.h"
 #include "Test/RendererDataController.h"
 #include "Test/TBF_Opaque_Pbr_RendererBehaviour.h"
+#include "Test/TBF_Opaque_Pbr_Mirror_RendererBehaviour.h"
 
 AirEngine::Core::Logic::CoreObject::Thread::LogicThread AirEngine::Core::Logic::CoreObject::Thread::_logicThread = AirEngine::Core::Logic::CoreObject::Thread::LogicThread();
 
@@ -482,9 +483,16 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		Logic::Object::GameObject* mirrorMeshRendererGo = new Logic::Object::GameObject("MirrorRenderer");
 		renderers->AddChild(mirrorMeshRendererGo);
 		mirrorMeshRendererGo->AddComponent(new Renderer::Renderer());
-		mirrorMeshRendererGo->AddComponent(new Test::TBF_MirrorRendererBehaviour());
+		mirrorMeshRendererGo->AddComponent(new Test::TBF_Opaque_Pbr_Mirror_RendererBehaviour());
 		mirrorMeshRendererGo->AddComponent(new Test::SelfRotateBehaviour(45));
 		mirrorMeshRendererGo->transform.SetTranslation(glm::vec3(-3, 0, 0));
+
+		//Logic::Object::GameObject* mirrorMeshRendererGo = new Logic::Object::GameObject("MirrorRenderer");
+		//renderers->AddChild(mirrorMeshRendererGo);
+		//mirrorMeshRendererGo->AddComponent(new Renderer::Renderer());
+		//mirrorMeshRendererGo->AddComponent(new Test::TBF_MirrorRendererBehaviour());
+		//mirrorMeshRendererGo->AddComponent(new Test::SelfRotateBehaviour(45));
+		//mirrorMeshRendererGo->transform.SetTranslation(glm::vec3(-3, 0, 0));
 
 		for (int i = -2; i <= 2; i++)
 		{
@@ -612,7 +620,8 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		auto pointLight = new Light::PointLight();
 		pointLight->color = { 1, 1, 0, 1 };
 		pointLight->minRange = 0.01;
-		pointLight->maxRange = 4;
+		pointLight->maxRange = 10;
+		pointLight->intensity = 20;
 		pointLightGo->AddComponent(pointLight);
 	}
 	{
@@ -622,7 +631,8 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		auto pointLight = new Light::PointLight();
 		pointLight->color = { 1, 0, 0, 1 };
 		pointLight->minRange = 0.01;
-		pointLight->maxRange = 4;
+		pointLight->maxRange = 10;
+		pointLight->intensity = 20;
 		pointLightGo->AddComponent(pointLight);
 	}
 	{
@@ -632,7 +642,8 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		auto pointLight = new Light::PointLight();
 		pointLight->color = { 0, 1, 0, 1 };
 		pointLight->minRange = 0.01;
-		pointLight->maxRange = 4;
+		pointLight->maxRange = 10;
+		pointLight->intensity = 20;
 		pointLightGo->AddComponent(pointLight);
 	}
 	{
@@ -642,7 +653,8 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		auto pointLight = new Light::PointLight();
 		pointLight->color = { 0, 0, 1, 1 };
 		pointLight->minRange = 0.01;
-		pointLight->maxRange = 4;
+		pointLight->maxRange = 10;
+		pointLight->intensity = 20;
 		pointLightGo->AddComponent(pointLight);
 	}
 
