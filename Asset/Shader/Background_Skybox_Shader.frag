@@ -9,9 +9,10 @@ layout(location = 0) out vec4 ColorAttachment;
 
 void main() 
 {
-    vec3 ndcPosition = vec3(PositionA2N(gl_FragCoord.xy * attachmentSizeInfo.texelSize), 1);
+    vec2 iPosition = gl_FragCoord.xy * attachmentSizeInfo.texelSize;
+    vec3 ndcPosition = IMAGE_TO_NDC_SPACE(iPosition, 1);
     vec3 wPosition = PositionN2W(ndcPosition, cameraInfo.info);
-    vec3 observeDirection = CameraWObserveDirection(wPosition, cameraInfo.info);
+    vec3 observeDirection = VIEW_DIRECTION(cameraInfo.info, wPosition);
 
-    ColorAttachment = texture(backgroundTexture, observeDirection);
+    ColorAttachment = vec4(texture(backgroundTexture, observeDirection).rgb, 1);
 }

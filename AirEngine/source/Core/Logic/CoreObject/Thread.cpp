@@ -40,6 +40,8 @@
 #include "Test/TBF_OIT_RenderBehaviour.h"
 #include "Test/QuadMoveBehaviour.h"
 #include "Test/RendererDataController.h"
+#include "Test/TBF_Opaque_Pbr_RendererBehaviour.h"
+#include "Test/TBF_Opaque_Pbr_Mirror_RendererBehaviour.h"
 
 AirEngine::Core::Logic::CoreObject::Thread::LogicThread AirEngine::Core::Logic::CoreObject::Thread::_logicThread = AirEngine::Core::Logic::CoreObject::Thread::LogicThread();
 
@@ -459,12 +461,18 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 
 	///TBForward opaque
 	{
-		Logic::Object::GameObject* opaqueRendererGo = new Logic::Object::GameObject("WallRenderer");
-		renderers->AddChild(opaqueRendererGo);
-		opaqueRendererGo->AddComponent(new Renderer::Renderer());
-		opaqueRendererGo->AddComponent(new Test::TBF_WallRendererBehaviour());
-		opaqueRendererGo->AddComponent(new Test::SelfRotateBehaviour(60));
-		opaqueRendererGo->transform.SetScale(glm::vec3(0.8, 0.8, 0.8));
+		Logic::Object::GameObject* pbrRendererGo = new Logic::Object::GameObject("PbrRenderer");
+		renderers->AddChild(pbrRendererGo);
+		pbrRendererGo->AddComponent(new Test::TBF_Opaque_Pbr_RendererBehaviour());
+		pbrRendererGo->AddComponent(new Test::SelfRotateBehaviour(60));
+		pbrRendererGo->transform.SetScale(glm::vec3(0.8, 0.8, 0.8));
+
+		//Logic::Object::GameObject* opaqueRendererGo = new Logic::Object::GameObject("WallRenderer");
+		//renderers->AddChild(opaqueRendererGo);
+		//opaqueRendererGo->AddComponent(new Renderer::Renderer());
+		//opaqueRendererGo->AddComponent(new Test::TBF_WallRendererBehaviour());
+		//opaqueRendererGo->AddComponent(new Test::SelfRotateBehaviour(60));
+		//opaqueRendererGo->transform.SetScale(glm::vec3(0.8, 0.8, 0.8));
 
 		//Logic::Object::GameObject* glassMeshRendererGo = new Logic::Object::GameObject("GlassRenderer");
 		//renderers->AddChild(glassMeshRendererGo);
@@ -475,9 +483,16 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		Logic::Object::GameObject* mirrorMeshRendererGo = new Logic::Object::GameObject("MirrorRenderer");
 		renderers->AddChild(mirrorMeshRendererGo);
 		mirrorMeshRendererGo->AddComponent(new Renderer::Renderer());
-		mirrorMeshRendererGo->AddComponent(new Test::TBF_MirrorRendererBehaviour());
+		mirrorMeshRendererGo->AddComponent(new Test::TBF_Opaque_Pbr_Mirror_RendererBehaviour());
 		mirrorMeshRendererGo->AddComponent(new Test::SelfRotateBehaviour(45));
 		mirrorMeshRendererGo->transform.SetTranslation(glm::vec3(-3, 0, 0));
+
+		//Logic::Object::GameObject* mirrorMeshRendererGo = new Logic::Object::GameObject("MirrorRenderer");
+		//renderers->AddChild(mirrorMeshRendererGo);
+		//mirrorMeshRendererGo->AddComponent(new Renderer::Renderer());
+		//mirrorMeshRendererGo->AddComponent(new Test::TBF_MirrorRendererBehaviour());
+		//mirrorMeshRendererGo->AddComponent(new Test::SelfRotateBehaviour(45));
+		//mirrorMeshRendererGo->transform.SetTranslation(glm::vec3(-3, 0, 0));
 
 		for (int i = -2; i <= 2; i++)
 		{
@@ -486,8 +501,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 				if (i == 0 && j == 0) continue;
 				Logic::Object::GameObject* sphereGroupRendererGo = new Logic::Object::GameObject("SphereGroup_" + std::to_string(i) + " " + std::to_string(j));
 				renderers->AddChild(sphereGroupRendererGo);
-				sphereGroupRendererGo->AddComponent(new Renderer::Renderer());
-				sphereGroupRendererGo->AddComponent(new Test::TBF_WallRendererBehaviour("..\\Asset\\Mesh\\NineSphere.ply"));
+				sphereGroupRendererGo->AddComponent(new Test::TBF_Opaque_Pbr_RendererBehaviour("..\\Asset\\Mesh\\NineSphere.ply", "..\\Asset\\Texture\\MetalFloor"));
 				sphereGroupRendererGo->transform.SetEulerRotation(glm::vec3(-90, 0, 0));
 				sphereGroupRendererGo->transform.SetTranslation(glm::vec3(i * 20, j * 20, 0));
 			}
@@ -502,7 +516,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 			{
 				Logic::Object::GameObject* quadRendererGo = new Logic::Object::GameObject("QuadRenderer_" + std::to_string(i) + " " + std::to_string(j));
 				renderers->AddChild(quadRendererGo);
-				quadRendererGo->AddComponent(new Renderer::Renderer());
+				quadRendererGo->AddComponent(new Test::TBF_Opaque_Pbr_RendererBehaviour("..\\Asset\\Mesh\\LargeQuad.ply", "..\\Asset\\Texture\\MetalFloor"));
 				quadRendererGo->AddComponent(new Test::QuadMoveBehaviour());
 				quadRendererGo->transform.SetEulerRotation(glm::vec3(-90, 0, 0));
 				quadRendererGo->transform.SetTranslation(glm::vec3(i * 20, j * 20, -1));
@@ -581,7 +595,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	directionalLightGo->transform.SetEulerRotation(glm::vec3(-30, 0, 0));
 	auto directionalLight = new Light::DirectionalLight();
 	directionalLight->color = { 1, 239.0 / 255, 213.0 / 255, 1 };
-	directionalLight->intensity = 0.6f;
+	directionalLight->intensity = 8;
 	directionalLightGo->AddComponent(directionalLight);
 
 	Logic::Object::GameObject* skyBoxGo = new Logic::Object::GameObject("SkyBox");
@@ -605,7 +619,8 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		auto pointLight = new Light::PointLight();
 		pointLight->color = { 1, 1, 0, 1 };
 		pointLight->minRange = 0.01;
-		pointLight->maxRange = 4;
+		pointLight->maxRange = 10;
+		pointLight->intensity = 20;
 		pointLightGo->AddComponent(pointLight);
 	}
 	{
@@ -615,7 +630,8 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		auto pointLight = new Light::PointLight();
 		pointLight->color = { 1, 0, 0, 1 };
 		pointLight->minRange = 0.01;
-		pointLight->maxRange = 4;
+		pointLight->maxRange = 10;
+		pointLight->intensity = 20;
 		pointLightGo->AddComponent(pointLight);
 	}
 	{
@@ -625,7 +641,8 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		auto pointLight = new Light::PointLight();
 		pointLight->color = { 0, 1, 0, 1 };
 		pointLight->minRange = 0.01;
-		pointLight->maxRange = 4;
+		pointLight->maxRange = 10;
+		pointLight->intensity = 20;
 		pointLightGo->AddComponent(pointLight);
 	}
 	{
@@ -635,7 +652,8 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		auto pointLight = new Light::PointLight();
 		pointLight->color = { 0, 0, 1, 1 };
 		pointLight->minRange = 0.01;
-		pointLight->maxRange = 4;
+		pointLight->maxRange = 10;
+		pointLight->intensity = 20;
 		pointLightGo->AddComponent(pointLight);
 	}
 

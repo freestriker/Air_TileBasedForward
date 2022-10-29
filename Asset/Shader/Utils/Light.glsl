@@ -45,6 +45,129 @@ vec3 SpecularDirectionalLighting(in LightInfo lightInfo, in vec3 worldView, in v
     return color.xyz;
 }
 
+#define PBR_LIGHTING(outRadiance, lightRadiance, wLight, wView, wNormal, albedo, roughness, metallic) \
+{ \
+    vec3 wH = normalize(-wView - wLight); \
+ \
+    float coshv = max(dot(wH, -wView), 0); \
+    float coshn = max(dot(wNormal, wH), 0); \
+    float cosnv = max(dot(wNormal, -wView), 0); \
+    float cosnl = max(dot(wNormal, -wLight), 0); \
+ \
+    vec3 fresnel; \
+    { \
+        vec3 F0 = mix(vec3(0.04), albedo, metallic); \
+        fresnel = F0 + (1.0 - F0) * pow(1.0 - coshv, 5.0); \
+    } \
+ \
+    float distribution; \
+    { \
+        float a2 = roughness * roughness; \
+        float cosTheta2 = coshn * coshn; \
+\
+        float d = (cosTheta2 * (a2 - 1) + 1); \
+\
+        distribution = a2 / (PI * d * d); \
+    } \
+ \
+    float inGeomery; \
+    { \
+        float r = (roughness + 1.0); \
+        float k = (r * r) / 8.0; \
+\
+        inGeomery = cosnl / (cosnl * (1 - k) + k); \
+    } \
+ \
+    float outGeomery; \
+    { \
+        float r = (roughness + 1.0); \
+        float k = (r * r) / 8.0; \
+\
+        outGeomery = cosnv / (cosnv * (1 - k) + k); \
+    } \
+ \
+    float geometry = inGeomery * outGeomery; \
+ \
+    vec3 kd = (vec3(1) - fresnel) * (1 - metallic); \
+ \
+    vec3 diffuse = kd * albedo / PI; \
+    vec3 specular = distribution * fresnel * geometry / ( 4 * cosnv * cosnl + 0.0001); \
+ \
+    outRadiance = (diffuse + specular) * lightRadiance * cosnl; \
+} 
+
+#define PBR_DIRECTIONAL_LIGHTING(outRadiance, lightInfo, wView, wNormal, albedo, roughness, metallic) \
+{ \
+    vec3 wLight = lightInfo.direction; \
+    vec3 lightRadiance = lightInfo.intensity * lightInfo.color.rgb; \
+ \
+    PBR_LIGHTING(outRadiance, lightRadiance, wLight, wView, wNormal, albedo, roughness, metallic);\
+}
+
+#define PBR_POINT_LIGHTING(outRadiance, lightInfo, wPosition, wView, wNormal, albedo, roughness, metallic) \
+{ \
+    float d = distance(lightInfo.position, wPosition); \
+    float k1 = 1.0 / max(lightInfo.minRange, d); \
+    float disAttenuation = k1 * k1; \
+    float win = pow(max(1 - pow(d / lightInfo.maxRange, 4), 0), 2); \
+ \
+    vec3 wLight = normalize(wPosition - lightInfo.position); \
+    vec3 lightRadiance = lightInfo.intensity * disAttenuation * win * lightInfo.color.rgb; \
+ \
+    PBR_LIGHTING(outRadiance, lightRadiance, wLight, wView, wNormal, albedo, roughness, metallic);\
+}
+
+#define PBR_SPOT_LIGHTING(outRadiance, lightInfo, wPosition, wView, wNormal, albedo, roughness, metallic) \
+{ \
+    vec3 wLight = normalize(wPosition - lightInfo.position); \
+\
+    float d = distance(lightInfo.position, wPosition); \
+    float k1 = 1.0 / max(lightInfo.minRange, d); \
+    float disAttenuation = k1 * k1; \
+ \
+    float win = pow(max(1 - pow(d / lightInfo.maxRange, 4), 0), 2); \
+ \
+    float innerCos = cos(ANGLE_TO_RADIANS * lightInfo.extraParameter.x); \
+    float outerCos = cos(ANGLE_TO_RADIANS * lightInfo.extraParameter.y); \
+    float dirCos = dot(lightInfo.direction, wLight); \
+    float t = clamp((dirCos - outerCos) / (innerCos - outerCos), 0.0, 1.0); \
+    float dirAttenuation = t * t; \
+ \
+    vec3 lightRadiance = lightInfo.intensity * dirAttenuation * disAttenuation * win * lightInfo.color.rgb; \
+ \
+    PBR_LIGHTING(outRadiance, lightRadiance, wLight, wView, wNormal, albedo, roughness, metallic);\
+}
+
+vec3 PbrLighting(in LightInfo lightInfo, in vec3 wPosition, in vec3 wView, in vec3 wNormal, in vec3 albedo, float roughness, float metallic)
+{
+    vec3 outRadiance;
+    switch(lightInfo.type)
+    {
+        case INVALID_LIGHT:
+        {
+            outRadiance = vec3(0, 0, 0);
+            break;
+        }
+        case DIRECTIONL_LIGHT:
+        {
+            PBR_DIRECTIONAL_LIGHTING(outRadiance, lightInfo, wView, wNormal, albedo, roughness, metallic);
+            break;
+        }
+        case POINT_LIGHT:
+        {
+            PBR_POINT_LIGHTING(outRadiance, lightInfo, wPosition, wView, wNormal, albedo, roughness, metallic);
+            break;
+        }
+        case SPOT_LIGHT:
+        {
+            PBR_SPOT_LIGHTING(outRadiance, lightInfo, wPosition, wView, wNormal, albedo, roughness, metallic);
+            break;
+        }
+
+    }
+    return outRadiance;
+}
+
 vec3 DiffusePointLighting(in LightInfo lightInfo, in vec3 worldNormal, in vec3 worldPosition)
 {
     vec3 lightingDirection = normalize(worldPosition - lightInfo.position);

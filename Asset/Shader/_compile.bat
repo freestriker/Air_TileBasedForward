@@ -1,3 +1,9 @@
+glslangValidator.exe -t -V TBF_Opaque_Pbr_Shader.vert -IUtils/ -o Spv/TBF_Opaque_Pbr_Shader.vert.spv
+glslangValidator.exe -t -V TBF_Opaque_Pbr_Shader.frag -IUtils/ -o Spv/TBF_Opaque_Pbr_Shader.frag.spv
+
+glslangValidator.exe -t -V TBF_Opaque_Pbr_Mirror_Shader.vert -IUtils/ -o Spv/TBF_Opaque_Pbr_Mirror_Shader.vert.spv
+glslangValidator.exe -t -V TBF_Opaque_Pbr_Mirror_Shader.frag -IUtils/ -o Spv/TBF_Opaque_Pbr_Mirror_Shader.frag.spv
+
 glslangValidator.exe -t -V F_Opaque_Wall_Shader.vert -IUtils/ -o Spv/F_Opaque_Wall_Shader.vert.spv
 glslangValidator.exe -t -V F_Opaque_Wall_Shader.frag -IUtils/ -o Spv/F_Opaque_Wall_Shader.frag.spv
 
