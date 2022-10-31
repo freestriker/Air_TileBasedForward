@@ -296,6 +296,12 @@ void AirEngine::Core::Graphic::Instance::Image::OnLoad(Core::Graphic::Command::C
 			if ((fileType != FREE_IMAGE_FORMAT::FIF_UNKNOWN) && FreeImage_FIFSupportsReading(fileType))
 			{
 				FIBITMAP* bitmap = FreeImage_Load(fileType, subresourcePath);
+				if (_imageImfo.targetType != FREE_IMAGE_TYPE::FIT_UNKNOWN)
+				{
+					FIBITMAP* newBitmap = FreeImage_ConvertToType(bitmap, _imageImfo.targetType);
+					FreeImage_Unload(bitmap);
+					bitmap = newBitmap;
+				}
 
 				uint32_t subPixelDepth = FreeImage_GetBPP(bitmap);
 				uint32_t subPitch = FreeImage_GetPitch(bitmap);

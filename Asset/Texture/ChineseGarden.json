@@ -1,0 +1,19 @@
+{
+    "subresourcePaths": [
+        "..\\Asset\\Texture\\ChineseGarden.hdr"
+    ],
+    "format": 109,
+    "targetType": 12,
+    "imageTiling": 0,
+    "imageUsageFlags": 4,
+    "memoryPropertyFlags": 1,
+    "imageCreateFlags": 0,
+    "imageViewInfos": {
+        "DefaultImageView": {
+            "imageViewType": 1,
+            "imageAspectFlags": 1,
+            "baseArrayLayer": 0,
+            "layerCount": 1
+        }
+    }
+}

@@ -5,6 +5,7 @@
 #include "Core/IO/Asset/AssetBase.h"
 #include <json.hpp>
 #include <map>
+#include <FreeImage/FreeImage.h>
 
 namespace AirEngine
 {
@@ -36,6 +37,7 @@ namespace AirEngine
 					{
 						std::vector<std::string> subresourcePaths;
 						VkFormat format;
+						FREE_IMAGE_TYPE targetType;
 						VkImageTiling imageTiling;
 						VkImageUsageFlags imageUsageFlags;
 						VkMemoryPropertyFlags memoryPropertyFlags;
@@ -46,6 +48,7 @@ namespace AirEngine
 							ImageInfo,
 							subresourcePaths,
 							format,
+							targetType,
 							imageTiling,
 							imageUsageFlags,
 							memoryPropertyFlags,

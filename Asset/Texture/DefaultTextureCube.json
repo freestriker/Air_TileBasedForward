@@ -8,6 +8,7 @@
         "..\\Asset\\Texture\\DefaultTextureCube_Bottom.png"
     ],
     "format": 50,
+    "targetType": 0,
     "imageTiling": 0,
     "imageUsageFlags": 4,
     "memoryPropertyFlags": 1,

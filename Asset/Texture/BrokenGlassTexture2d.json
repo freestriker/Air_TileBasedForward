@@ -3,6 +3,7 @@
         "..\\Asset\\Texture\\BrokenGlassTesture2D.png"
     ],
     "format": 50,
+    "targetType": 0,
     "imageTiling": 0,
     "imageUsageFlags": 4,
     "memoryPropertyFlags": 1,
