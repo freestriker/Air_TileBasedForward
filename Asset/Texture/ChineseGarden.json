@@ -8,7 +8,7 @@
     "imageUsageFlags": 4,
     "memoryPropertyFlags": 1,
     "imageCreateFlags": 0,
-    "autoGenerateMipmap": true,
+    "autoGenerateMipmap": false,
     "imageViewInfos": {
         "DefaultImageView": {
             "imageViewType": 1,
