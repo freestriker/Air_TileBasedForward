@@ -12,8 +12,10 @@
         "DefaultImageView": {
             "imageViewType": 1,
             "imageAspectFlags": 1,
-            "baseArrayLayer": 0,
-            "layerCount": 1
+            "baseLayer": 0,
+            "layerCount": 1,
+            "baseMipmapLevel": 0,
+            "mipmapLevelCount": 1
         }
     }
 }

@@ -21,6 +21,7 @@ AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::I
 	newImage->_vkExtent2D = extent;
 	newImage->_isNative = false;
 	newImage->_layerCount = 1;
+	newImage->_mipmapCount = 1;
 	newImage->_imageImfo.subresourcePaths = { };
 	newImage->_imageImfo.format = format;
 	newImage->_imageImfo.imageTiling = imageTiling;
@@ -33,6 +34,8 @@ AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::I
 			{
 				VkImageViewType::VK_IMAGE_VIEW_TYPE_2D,
 				aspect,
+				0,
+				1,
 				0,
 				1
 			}
@@ -51,6 +54,7 @@ AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::I
 	newImage->_vkExtent2D = extent;
 	newImage->_isNative = true;
 	newImage->_layerCount = 1;
+	newImage->_mipmapCount = 1;
 	newImage->_imageImfo.subresourcePaths = { };
 	newImage->_imageImfo.format = format;
 	newImage->_imageImfo.imageTiling = VkImageTiling::VK_IMAGE_TILING_OPTIMAL;
@@ -63,6 +67,8 @@ AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::I
 			{
 				VkImageViewType::VK_IMAGE_VIEW_TYPE_2D,
 				aspect,
+				0,
+				1,
 				0,
 				1
 			}
@@ -78,11 +84,6 @@ AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::I
 	imageView.vkImageSubresourceRange.levelCount = 1;
 	imageView.vkImageSubresourceRange.baseArrayLayer = 0;
 	imageView.vkImageSubresourceRange.layerCount = 1;
-
-	imageView.vkImageSubresourceLayers.aspectMask = aspect;
-	imageView.vkImageSubresourceLayers.mipLevel = 0;
-	imageView.vkImageSubresourceLayers.baseArrayLayer = 0;
-	imageView.vkImageSubresourceLayers.layerCount = 1;
 
 	VkImageViewCreateInfo imageViewCreateInfo{};
 	imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -105,6 +106,7 @@ AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::I
 	newImage->_vkExtent2D = extent;
 	newImage->_isNative = false;
 	newImage->_layerCount = arraySize;
+	newImage->_mipmapCount = 1;
 	newImage->_imageImfo.subresourcePaths = { };
 	newImage->_imageImfo.format = format;
 	newImage->_imageImfo.imageTiling = imageTiling;
@@ -118,7 +120,9 @@ AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::I
 				VkImageViewType::VK_IMAGE_VIEW_TYPE_2D_ARRAY,
 				aspect,
 				0,
-				arraySize
+				arraySize,
+				0,
+				1
 			}
 		}
 	};
@@ -135,6 +139,7 @@ AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::I
 	newImage->_vkExtent2D = extent;
 	newImage->_isNative = false;
 	newImage->_layerCount = 6;
+	newImage->_mipmapCount = 1;
 	newImage->_imageImfo.subresourcePaths = { };
 	newImage->_imageImfo.format = format;
 	newImage->_imageImfo.imageTiling = imageTiling;
@@ -148,7 +153,9 @@ AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::I
 				VkImageViewType::VK_IMAGE_VIEW_TYPE_2D,
 				aspect,
 				0,
-				6
+				6,
+				0,
+				1
 			}
 		}
 	};
@@ -185,28 +192,25 @@ AirEngine::Core::Graphic::Instance::Image::~Image()
 	}
 }
 
-void AirEngine::Core::Graphic::Instance::Image::AddImageView(std::string name, VkImageViewType imageViewType, VkImageAspectFlags imageAspectFlags, uint32_t baseArrayLayer, uint32_t layerCount)
+void AirEngine::Core::Graphic::Instance::Image::AddImageView(std::string name, VkImageViewType imageViewType, VkImageAspectFlags imageAspectFlags, uint32_t baseArrayLayer, uint32_t layerCount, uint32_t baseMipmapLevel, uint32_t mipmapLevelCount)
 {
 	ImageViewInfo imageViewInfo{};
 	imageViewInfo.imageViewType = imageViewType;
 	imageViewInfo.imageAspectFlags = imageAspectFlags;
-	imageViewInfo.baseArrayLayer = baseArrayLayer;
+	imageViewInfo.baseLayer = baseArrayLayer;
 	imageViewInfo.layerCount = layerCount;
+	imageViewInfo.baseMipmapLevel = baseMipmapLevel;
+	imageViewInfo.mipmapLevelCount = mipmapLevelCount;
 
 	_imageImfo.imageViewInfos.emplace(name, imageViewInfo);
 
 	ImageView imageView = {};
 
 	imageView.vkImageSubresourceRange.aspectMask = imageAspectFlags;
-	imageView.vkImageSubresourceRange.baseMipLevel = 0;
-	imageView.vkImageSubresourceRange.levelCount = 1;
+	imageView.vkImageSubresourceRange.baseMipLevel = baseMipmapLevel;
+	imageView.vkImageSubresourceRange.levelCount = mipmapLevelCount;
 	imageView.vkImageSubresourceRange.baseArrayLayer = baseArrayLayer;
 	imageView.vkImageSubresourceRange.layerCount = layerCount;
-
-	imageView.vkImageSubresourceLayers.aspectMask = imageAspectFlags;
-	imageView.vkImageSubresourceLayers.mipLevel = 0;
-	imageView.vkImageSubresourceLayers.baseArrayLayer = baseArrayLayer;
-	imageView.vkImageSubresourceLayers.layerCount = layerCount;
 
 	VkImageViewCreateInfo imageViewCreateInfo{};
 	imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -227,7 +231,7 @@ void AirEngine::Core::Graphic::Instance::Image::RemoveImageView(std::string name
 	_imageImfo.imageViewInfos.erase(name);
 }
 
-const AirEngine::Core::Graphic::Instance::Image::ImageView& AirEngine::Core::Graphic::Instance::Image::ImageView_(std::string imageViewName)
+AirEngine::Core::Graphic::Instance::Image::ImageView& AirEngine::Core::Graphic::Instance::Image::ImageView_(std::string imageViewName)
 {
 	return _imageViews[imageViewName];
 }
@@ -287,6 +291,7 @@ void AirEngine::Core::Graphic::Instance::Image::OnLoad(Core::Graphic::Command::C
 		uint32_t pitch = 0;
 		VkExtent2D& extent2D = _vkExtent2D;
 		uint32_t& layerCount = _layerCount;
+		_mipmapCount = 1;
 
 		for (size_t i = 0; i < _imageImfo.subresourcePaths.size(); i++)
 		{
@@ -393,7 +398,7 @@ void AirEngine::Core::Graphic::Instance::Image::CreateVulkanInstance()
 		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageInfo.imageType = VkImageType::VK_IMAGE_TYPE_2D;
 		imageInfo.extent = { _vkExtent2D.width, _vkExtent2D.height, 1 };
-		imageInfo.mipLevels = 1;
+		imageInfo.mipLevels = _mipmapCount;
 		imageInfo.arrayLayers = _layerCount;
 		imageInfo.format = _imageImfo.format;
 		imageInfo.tiling = _imageImfo.imageTiling;
@@ -424,15 +429,10 @@ void AirEngine::Core::Graphic::Instance::Image::CreateVulkanInstance()
 			ImageView imageView = {};
 
 			imageView.vkImageSubresourceRange.aspectMask = imageInfoPair.second.imageAspectFlags;
-			imageView.vkImageSubresourceRange.baseMipLevel = 0;
-			imageView.vkImageSubresourceRange.levelCount = 1;
-			imageView.vkImageSubresourceRange.baseArrayLayer = imageInfoPair.second.baseArrayLayer;
+			imageView.vkImageSubresourceRange.baseMipLevel = imageInfoPair.second.baseMipmapLevel;
+			imageView.vkImageSubresourceRange.levelCount = imageInfoPair.second.mipmapLevelCount;
+			imageView.vkImageSubresourceRange.baseArrayLayer = imageInfoPair.second.baseLayer;
 			imageView.vkImageSubresourceRange.layerCount = imageInfoPair.second.layerCount;
-
-			imageView.vkImageSubresourceLayers.aspectMask = imageInfoPair.second.imageAspectFlags;
-			imageView.vkImageSubresourceLayers.mipLevel = 0;
-			imageView.vkImageSubresourceLayers.baseArrayLayer = imageInfoPair.second.baseArrayLayer;
-			imageView.vkImageSubresourceLayers.layerCount = imageInfoPair.second.layerCount;
 
 			VkImageViewCreateInfo imageViewCreateInfo{};
 			imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -446,4 +446,39 @@ void AirEngine::Core::Graphic::Instance::Image::CreateVulkanInstance()
 			_imageViews.emplace(imageInfoPair.first, imageView);
 		}
 	}
+}
+
+VkImageView AirEngine::Core::Graphic::Instance::Image::ImageView::VkImageView_()
+{
+	return vkImageView;
+}
+
+const VkImageSubresourceRange& AirEngine::Core::Graphic::Instance::Image::ImageView::VkImageSubresourceRange_()
+{
+	return vkImageSubresourceRange;
+}
+
+uint32_t AirEngine::Core::Graphic::Instance::Image::ImageView::BaseMipmapLevel()
+{
+	return vkImageSubresourceRange.baseMipLevel;
+}
+
+uint32_t AirEngine::Core::Graphic::Instance::Image::ImageView::MipmapLevelCount()
+{
+	return vkImageSubresourceRange.levelCount;
+}
+
+uint32_t AirEngine::Core::Graphic::Instance::Image::ImageView::BaseLayer()
+{
+	return vkImageSubresourceRange.baseArrayLayer;
+}
+
+uint32_t AirEngine::Core::Graphic::Instance::Image::ImageView::LayerCount()
+{
+	return vkImageSubresourceRange.layerCount;
+}
+
+VkImageAspectFlags AirEngine::Core::Graphic::Instance::Image::ImageView::VkImageAspectFlags_()
+{
+	return vkImageSubresourceRange.aspectMask;
 }

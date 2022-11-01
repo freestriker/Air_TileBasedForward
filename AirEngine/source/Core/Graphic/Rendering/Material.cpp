@@ -179,7 +179,7 @@ void AirEngine::Core::Graphic::Rendering::Material::SetSampledImageCube(std::str
 		_slots[slotName].descriptorSet->UpdateBindingData(
 			{ 0 },
 			{
-				{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, sampler->VkSampler_(), imageCube->ImageView_(imageViewName).vkImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}
+				{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, sampler->VkSampler_(), imageCube->ImageView_(imageViewName).VkImageView_(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}
 			}
 			);
 	}
@@ -208,7 +208,7 @@ void AirEngine::Core::Graphic::Rendering::Material::SetSampledImage2D(std::strin
 		_slots[slotName].descriptorSet->UpdateBindingData(
 			{ 0 },
 			{
-				{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, sampler->VkSampler_(), image2D->ImageView_(imageViewName).vkImageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}
+				{VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, sampler->VkSampler_(), image2D->ImageView_(imageViewName).VkImageView_(), VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL}
 			}
 			);
 	}
@@ -237,7 +237,7 @@ void AirEngine::Core::Graphic::Rendering::Material::SetStorageImage2D(std::strin
 		_slots[slotName].descriptorSet->UpdateBindingData(
 			{ 0 },
 			{
-				{VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_NULL_HANDLE, image2D->ImageView_(imageViewName).vkImageView, VkImageLayout::VK_IMAGE_LAYOUT_GENERAL}
+				{VkDescriptorType::VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, VK_NULL_HANDLE, image2D->ImageView_(imageViewName).VkImageView_(), VkImageLayout::VK_IMAGE_LAYOUT_GENERAL}
 			}
 			);
 	}

@@ -23,14 +23,18 @@ namespace AirEngine
 					{
 						VkImageViewType imageViewType;
 						VkImageAspectFlags imageAspectFlags;
-						uint32_t baseArrayLayer;
+						uint32_t baseLayer;
 						uint32_t layerCount;
+						uint32_t baseMipmapLevel;
+						uint32_t mipmapLevelCount;
 						NLOHMANN_DEFINE_TYPE_INTRUSIVE(
 							ImageViewInfo,
 							imageViewType,
 							imageAspectFlags,
-							baseArrayLayer,
-							layerCount
+							baseLayer,
+							layerCount,
+							baseMipmapLevel,
+							mipmapLevelCount
 						)
 					};
 					struct ImageInfo
@@ -58,9 +62,18 @@ namespace AirEngine
 					};
 					struct ImageView
 					{
+						friend class Image;
+					private:
 						VkImageView vkImageView;
 						VkImageSubresourceRange vkImageSubresourceRange;
-						VkImageSubresourceLayers vkImageSubresourceLayers;
+					public:
+						VkImageView VkImageView_();
+						const VkImageSubresourceRange& VkImageSubresourceRange_();
+						uint32_t BaseMipmapLevel();
+						uint32_t MipmapLevelCount();
+						uint32_t BaseLayer();
+						uint32_t LayerCount();
+						VkImageAspectFlags VkImageAspectFlags_();
 					};
 
 				private:
@@ -71,6 +84,7 @@ namespace AirEngine
 					VkExtent2D _vkExtent2D;
 					std::map<std::string, ImageView> _imageViews;
 					uint32_t _layerCount;
+					uint32_t _mipmapCount;
 
 				public:
 					static Image* Create2DImage(
@@ -114,10 +128,10 @@ namespace AirEngine
 					Image(Image&&) = delete;
 					Image& operator=(Image&&) = delete;
 
-					void AddImageView(std::string name, VkImageViewType imageViewType, VkImageAspectFlags imageAspectFlags, uint32_t baseArrayLayer, uint32_t layerCount);
+					void AddImageView(std::string name, VkImageViewType imageViewType, VkImageAspectFlags imageAspectFlags, uint32_t baseArrayLayer, uint32_t layerCount, uint32_t baseMipmapLevel = 0, uint32_t mipmapLevelCount = 1);
 					void RemoveImageView(std::string name);
 
-					const ImageView& ImageView_(std::string imageViewName = "DefaultImageView");
+					ImageView& ImageView_(std::string imageViewName = "DefaultImageView");
 					VkImage VkImage_();
 					VkExtent3D VkExtent3D_();
 					VkExtent2D VkExtent2D_();
