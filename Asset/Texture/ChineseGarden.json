@@ -1,6 +1,6 @@
 {
-    "subresourcePaths": [
-        "..\\Asset\\Texture\\ChineseGarden.hdr"
+    "mipmapLayerSourcePaths": [
+        ["..\\Asset\\Texture\\ChineseGarden.hdr"]
     ],
     "format": 109,
     "targetType": 12,
@@ -8,6 +8,7 @@
     "imageUsageFlags": 4,
     "memoryPropertyFlags": 1,
     "imageCreateFlags": 0,
+    "autoGenerateMipmap": true,
     "imageViewInfos": {
         "DefaultImageView": {
             "imageViewType": 1,

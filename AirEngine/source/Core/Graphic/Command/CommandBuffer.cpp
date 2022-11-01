@@ -143,10 +143,32 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::CopyImage(Instance::Image
         copy.dstSubresource.layerCount = dstLayerCount;
         copy.dstSubresource.mipLevel = dstMipmapLevel + i;
         copy.dstOffset = { 0, 0, 0 };
-        copy.extent = dstImage->VkExtent3D_();
+        copy.extent = srcImageView.VkExtent3D_(srcMipmapLevel + i);
     }
 
     vkCmdCopyImage(_vkCommandBuffer, srcImage->VkImage_(), srcImageLayout, dstImage->VkImage_(), dstImageLayout, static_cast<uint32_t>(copys.size()), copys.data());
+}
+void AirEngine::Core::Graphic::Command::CommandBuffer::CopyBufferToImage(Instance::Buffer* srcBuffer, Instance::Image* dstImage, std::string&& imageViewName, VkImageLayout dstImageLayout, uint32_t mipmapLevelOffset)
+{
+    auto& dstImageView = dstImage->ImageView_(imageViewName);
+
+    auto aspectFlag = dstImageView.VkImageAspectFlags_();
+    auto srcBaseLayer = dstImageView.BaseLayer();
+    auto srcLayerCount = dstImageView.LayerCount();
+    auto srcMipmapLevel = dstImageView.BaseMipmapLevel();
+
+    VkBufferImageCopy copy{};
+    copy.bufferOffset = 0;
+    copy.bufferRowLength = 0;
+    copy.bufferImageHeight = 0;
+    copy.imageSubresource.aspectMask = aspectFlag;
+    copy.imageSubresource.baseArrayLayer = srcBaseLayer;
+    copy.imageSubresource.layerCount = srcLayerCount;
+    copy.imageSubresource.mipLevel = srcMipmapLevel + mipmapLevelOffset;
+    copy.imageOffset = { 0, 0, 0 };
+    copy.imageExtent = dstImageView.VkExtent3D_(srcMipmapLevel + mipmapLevelOffset);
+
+    vkCmdCopyBufferToImage(_vkCommandBuffer, srcBuffer->VkBuffer_(), dstImage->VkImage_(), dstImageLayout, 1, &copy);
 }
 void AirEngine::Core::Graphic::Command::CommandBuffer::AddPipelineImageBarrier(VkDependencyFlags dependencyFlag, VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, std::vector<ImageMemoryBarrier*> imageMemoryBarriers)
 {
@@ -168,25 +190,7 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::AddPipelineImageBarrier(V
 
 void AirEngine::Core::Graphic::Command::CommandBuffer::CopyBufferToImage(Instance::Buffer* srcBuffer, Instance::Image* dstImage, VkImageLayout dstImageLayout, uint32_t mipmapLevelOffset)
 {
-    auto& srcImageView = dstImage->ImageView_();
-
-    auto aspectFlag = srcImageView.VkImageAspectFlags_();
-    auto srcBaseLayer = srcImageView.BaseLayer();
-    auto srcLayerCount = srcImageView.LayerCount();
-    auto srcMipmapLevel = srcImageView.BaseMipmapLevel();
-
-    VkBufferImageCopy copy{};
-    copy.bufferOffset = 0;
-    copy.bufferRowLength = 0;
-    copy.bufferImageHeight = 0;
-    copy.imageSubresource.aspectMask = aspectFlag;
-    copy.imageSubresource.baseArrayLayer = srcBaseLayer;
-    copy.imageSubresource.layerCount = srcLayerCount;
-    copy.imageSubresource.mipLevel = srcMipmapLevel + mipmapLevelOffset;
-    copy.imageOffset = { 0, 0, 0 };
-    copy.imageExtent = dstImage->VkExtent3D_();
-
-    vkCmdCopyBufferToImage(_vkCommandBuffer, srcBuffer->VkBuffer_(), dstImage->VkImage_(), dstImageLayout, 1, &copy);
+    CopyBufferToImage(srcBuffer, dstImage, "DefaultImageView", dstImageLayout, mipmapLevelOffset);
 }
 
 void AirEngine::Core::Graphic::Command::CommandBuffer::CopyImageToBuffer(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Buffer* dstBuffer, uint32_t mipmapLevelOffset)
@@ -207,7 +211,7 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::CopyImageToBuffer(Instanc
     copy.imageSubresource.layerCount = srcLayerCount;
     copy.imageSubresource.mipLevel = srcMipmapLevel + mipmapLevelOffset;
     copy.imageOffset = { 0, 0, 0 };
-    copy.imageExtent = srcImage->VkExtent3D_();
+    copy.imageExtent = srcImageView.VkExtent3D_(srcMipmapLevel + mipmapLevelOffset);
 
     vkCmdCopyImageToBuffer(_vkCommandBuffer, srcImage->VkImage_(), srcImageLayout, dstBuffer->VkBuffer_(), 1, &copy);
 }
@@ -461,14 +465,14 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::Dispatch(Rendering::Mater
     vkCmdDispatch(_vkCommandBuffer, groupCountX, groupCountY, groupCountZ);
 }
 
-void AirEngine::Core::Graphic::Command::CommandBuffer::Blit(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Image* dstImage, VkImageLayout dstImageLayout, VkFilter filter)
+void AirEngine::Core::Graphic::Command::CommandBuffer::Blit(Instance::Image* srcImage, std::string&& srcImageViewName, VkImageLayout srcImageLayout, Instance::Image* dstImage, std::string&& dstImageViewName, VkImageLayout dstImageLayout, VkFilter filter)
 {
-    auto& srcImageView = srcImage->ImageView_();
-    auto& dstImageView = dstImage->ImageView_();
+    auto& srcImageView = srcImage->ImageView_(srcImageViewName);
+    auto& dstImageView = dstImage->ImageView_(dstImageViewName);
 
     auto src = srcImage->VkExtent3D_();
     auto dst = dstImage->VkExtent3D_();
-    
+
     auto aspectFlag = srcImageView.VkImageAspectFlags_();
     auto srcBaseLayer = srcImageView.BaseLayer();
     auto srcLayerCount = srcImageView.LayerCount();
@@ -483,21 +487,28 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::Blit(Instance::Image* src
     for (int i = 0; i < srcMipmapLevelCount; i++)
     {
         auto& blit = blits[i];
+        auto srcExtent = srcImageView.VkExtent3D_(srcMipmapLevel + i);
+        auto dstExtent = dstImageView.VkExtent3D_(dstMipmapLevel + i);
         blit.srcSubresource.aspectMask = aspectFlag;
         blit.srcSubresource.baseArrayLayer = srcBaseLayer;
         blit.srcSubresource.layerCount = srcLayerCount;
         blit.srcSubresource.mipLevel = srcMipmapLevel + i;
         blit.srcOffsets[0] = { 0, 0, 0 };
-        blit.srcOffsets[1] = *reinterpret_cast<VkOffset3D*>(&src);
+        blit.srcOffsets[1] = { static_cast<int>(srcExtent .width), static_cast<int>(srcExtent .height), static_cast<int>(srcExtent .depth)};
         blit.dstSubresource.aspectMask = aspectFlag;
         blit.dstSubresource.baseArrayLayer = dstBaseLayer;
         blit.dstSubresource.layerCount = dstLayerCount;
         blit.dstSubresource.mipLevel = dstMipmapLevel + i;
         blit.dstOffsets[0] = { 0, 0, 0 };
-        blit.dstOffsets[1] = *reinterpret_cast<VkOffset3D*>(&dst);
+        blit.dstOffsets[1] = { static_cast<int>(dstExtent.width), static_cast<int>(dstExtent.height), static_cast<int>(dstExtent.depth) };
     }
 
     vkCmdBlitImage(_vkCommandBuffer, srcImage->VkImage_(), srcImageLayout, dstImage->VkImage_(), dstImageLayout, static_cast<uint32_t>(blits.size()), blits.data(), filter);
+}
+
+void AirEngine::Core::Graphic::Command::CommandBuffer::Blit(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Image* dstImage, VkImageLayout dstImageLayout, VkFilter filter)
+{
+    Blit(srcImage, "DefaultImageView", srcImageLayout, dstImage, "DefaultImageView", dstImageLayout, filter);
 }
 
 AirEngine::Core::Graphic::Command::CommandPool* AirEngine::Core::Graphic::Command::CommandBuffer::ParentCommandPool()

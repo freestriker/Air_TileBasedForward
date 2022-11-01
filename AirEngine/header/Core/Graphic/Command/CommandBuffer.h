@@ -69,6 +69,7 @@ namespace AirEngine
 					void AddPipelineBarrier(VkPipelineStageFlags srcStageMask, VkPipelineStageFlags dstStageMask, std::vector <ImageMemoryBarrier*> imageMemoryBarriers, std::vector <BufferMemoryBarrier*> bufferMemoryBarriers);
 					void CopyImage(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Image* dstImage, VkImageLayout dstImageLayout);
 					void CopyImage(Instance::Image* srcImage, std::string srcImageViewName, VkImageLayout srcImageLayout, Instance::Image* dstImage, std::string dstImageViewName, VkImageLayout dstImageLayout);
+					void CopyBufferToImage(Instance::Buffer* srcBuffer, Instance::Image* dstImage, std::string&& imageViewName, VkImageLayout dstImageLayout, uint32_t mipmapLevelOffset = 0);
 					void CopyBufferToImage(Instance::Buffer* srcBuffer, Instance::Image* dstImage, VkImageLayout dstImageLayout, uint32_t mipmapLevelOffset = 0);
 					void CopyImageToBuffer(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Buffer* dstBuffer, uint32_t mipmapLevelOffset = 0);
 					void FillBuffer(Instance::Buffer* dstBuffer, uint32_t data);
@@ -87,6 +88,7 @@ namespace AirEngine
 					void EndRenderPass();
 					void DrawMesh(Asset::Mesh* mesh, Rendering::Material* material);
 					void Dispatch(Rendering::Material* material, uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ);
+					void Blit(Instance::Image* srcImage, std::string&& srcImageViewName, VkImageLayout srcImageLayout, Instance::Image* dstImage, std::string&& dstImageViewName, VkImageLayout dstImageLayout, VkFilter filter);
 					void Blit(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Image* dstImage, VkImageLayout dstImageLayout, VkFilter filter);
 					
 					CommandPool* ParentCommandPool();

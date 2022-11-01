@@ -1,5 +1,5 @@
-{    "subresourcePaths": [
-        "..\\Asset\\Texture\\WallNormalTexture2D.png"
+{    "mipmapLayerSourcePaths": [
+        ["..\\Asset\\Texture\\WallNormalTexture2D.png"]
     ],
     "format": 50,
     "targetType": 0,
@@ -7,6 +7,7 @@
     "imageUsageFlags": 4,
     "memoryPropertyFlags": 1,
     "imageCreateFlags": 0,
+    "autoGenerateMipmap": false,
     "imageViewInfos": {
         "DefaultImageView": {
             "imageViewType": 1,

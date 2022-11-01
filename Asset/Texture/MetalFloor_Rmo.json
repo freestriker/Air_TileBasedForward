@@ -1,6 +1,6 @@
 {
-    "subresourcePaths": [
-        "..\\Asset\\Texture\\MetalFloor_Rmo.png"
+    "mipmapLayerSourcePaths": [
+        ["..\\Asset\\Texture\\MetalFloor_Rmo.png"]
     ],
     "format": 44,
     "targetType": 0,
@@ -8,6 +8,7 @@
     "imageUsageFlags": 4,
     "memoryPropertyFlags": 1,
     "imageCreateFlags": 0,
+    "autoGenerateMipmap": false,
     "imageViewInfos": {
         "DefaultImageView": {
             "imageViewType": 1,

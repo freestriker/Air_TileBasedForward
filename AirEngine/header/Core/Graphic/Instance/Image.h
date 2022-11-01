@@ -39,24 +39,26 @@ namespace AirEngine
 					};
 					struct ImageInfo
 					{
-						std::vector<std::string> subresourcePaths;
+						std::vector<std::vector<std::string>> mipmapLayerSourcePaths;
 						VkFormat format;
 						FREE_IMAGE_TYPE targetType;
 						VkImageTiling imageTiling;
 						VkImageUsageFlags imageUsageFlags;
 						VkMemoryPropertyFlags memoryPropertyFlags;
 						VkImageCreateFlags imageCreateFlags;
+						bool autoGenerateMipmap;
 						std::map<std::string, ImageViewInfo> imageViewInfos;
 
 						NLOHMANN_DEFINE_TYPE_INTRUSIVE(
 							ImageInfo,
-							subresourcePaths,
+							mipmapLayerSourcePaths,
 							format,
 							targetType,
 							imageTiling,
 							imageUsageFlags,
 							memoryPropertyFlags,
 							imageCreateFlags,
+							autoGenerateMipmap,
 							imageViewInfos
 						)
 					};
@@ -66,6 +68,7 @@ namespace AirEngine
 					private:
 						VkImageView vkImageView;
 						VkImageSubresourceRange vkImageSubresourceRange;
+						std::vector<VkExtent2D>* vkExtent2Ds;
 					public:
 						VkImageView VkImageView_();
 						const VkImageSubresourceRange& VkImageSubresourceRange_();
@@ -74,6 +77,8 @@ namespace AirEngine
 						uint32_t BaseLayer();
 						uint32_t LayerCount();
 						VkImageAspectFlags VkImageAspectFlags_();
+						VkExtent2D VkExtent2D_(uint32_t levelIndex);
+						VkExtent3D VkExtent3D_(uint32_t levelIndex);
 					};
 
 				private:
@@ -82,9 +87,10 @@ namespace AirEngine
 					VkImage _vkImage;
 					Memory* _memory;
 					VkExtent2D _vkExtent2D;
+					std::vector<VkExtent2D> _vkExtent2Ds;
 					std::map<std::string, ImageView> _imageViews;
 					uint32_t _layerCount;
-					uint32_t _mipmapCount;
+					uint32_t _mipmapLevelCount;
 
 				public:
 					static Image* Create2DImage(

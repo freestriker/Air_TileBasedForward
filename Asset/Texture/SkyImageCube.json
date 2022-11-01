@@ -1,11 +1,11 @@
 {
-    "subresourcePaths": [
-        "..\\Asset\\Texture\\DefaultTextureCube_Right.png",
+    "mipmapLayerSourcePaths": [
+        ["..\\Asset\\Texture\\DefaultTextureCube_Right.png",
         "..\\Asset\\Texture\\DefaultTextureCube_Left.png",
         "..\\Asset\\Texture\\DefaultTextureCube_Front.png",
         "..\\Asset\\Texture\\DefaultTextureCube_Back.png",
         "..\\Asset\\Texture\\DefaultTextureCube_Top.png",
-        "..\\Asset\\Texture\\DefaultTextureCube_Bottom.png"
+        "..\\Asset\\Texture\\DefaultTextureCube_Bottom.png"]
     ],
     "format": 50,
     "targetType": 0,
@@ -13,6 +13,7 @@
     "imageUsageFlags": 4,
     "memoryPropertyFlags": 1,
     "imageCreateFlags": 16,
+    "autoGenerateMipmap": false,
     "imageViewInfos": {
         "DefaultImageView": {
             "imageViewType": 3,

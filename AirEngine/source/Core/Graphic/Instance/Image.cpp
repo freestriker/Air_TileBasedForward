@@ -13,16 +13,18 @@
 #include "Core/Graphic/Instance/Image.h"
 #include "Core/Graphic/Instance/ImageSampler.h"
 #include "Core/Graphic/Command/ImageMemoryBarrier.h"
+#include <glm/glm.hpp>
 
 AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::Image::Create2DImage(VkExtent2D extent, VkFormat format, VkImageUsageFlags imageUsage, VkMemoryPropertyFlags memoryProperty, VkImageAspectFlags aspect, VkImageTiling imageTiling)
 {
 	auto newImage = new Image();
 
 	newImage->_vkExtent2D = extent;
+	newImage->_vkExtent2Ds.push_back(extent);
 	newImage->_isNative = false;
 	newImage->_layerCount = 1;
-	newImage->_mipmapCount = 1;
-	newImage->_imageImfo.subresourcePaths = { };
+	newImage->_mipmapLevelCount = 1;
+	newImage->_imageImfo.mipmapLayerSourcePaths = { };
 	newImage->_imageImfo.format = format;
 	newImage->_imageImfo.imageTiling = imageTiling;
 	newImage->_imageImfo.imageUsageFlags = imageUsage;
@@ -52,10 +54,11 @@ AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::I
 	auto newImage = new Image();
 
 	newImage->_vkExtent2D = extent;
+	newImage->_vkExtent2Ds.push_back(extent);
 	newImage->_isNative = true;
 	newImage->_layerCount = 1;
-	newImage->_mipmapCount = 1;
-	newImage->_imageImfo.subresourcePaths = { };
+	newImage->_mipmapLevelCount = 1;
+	newImage->_imageImfo.mipmapLayerSourcePaths = { };
 	newImage->_imageImfo.format = format;
 	newImage->_imageImfo.imageTiling = VkImageTiling::VK_IMAGE_TILING_OPTIMAL;
 	newImage->_imageImfo.imageUsageFlags = imageUsage;
@@ -85,6 +88,8 @@ AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::I
 	imageView.vkImageSubresourceRange.baseArrayLayer = 0;
 	imageView.vkImageSubresourceRange.layerCount = 1;
 
+	imageView.vkExtent2Ds = &newImage->_vkExtent2Ds;
+
 	VkImageViewCreateInfo imageViewCreateInfo{};
 	imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	imageViewCreateInfo.image = vkImage;
@@ -104,10 +109,11 @@ AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::I
 	auto newImage = new Image();
 
 	newImage->_vkExtent2D = extent;
+	newImage->_vkExtent2Ds.push_back(extent);
 	newImage->_isNative = false;
 	newImage->_layerCount = arraySize;
-	newImage->_mipmapCount = 1;
-	newImage->_imageImfo.subresourcePaths = { };
+	newImage->_mipmapLevelCount = 1;
+	newImage->_imageImfo.mipmapLayerSourcePaths = { };
 	newImage->_imageImfo.format = format;
 	newImage->_imageImfo.imageTiling = imageTiling;
 	newImage->_imageImfo.imageUsageFlags = imageUsage;
@@ -137,10 +143,11 @@ AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::I
 	auto newImage = new Image();
 
 	newImage->_vkExtent2D = extent;
+	newImage->_vkExtent2Ds.push_back(extent);
 	newImage->_isNative = false;
 	newImage->_layerCount = 6;
-	newImage->_mipmapCount = 1;
-	newImage->_imageImfo.subresourcePaths = { };
+	newImage->_mipmapLevelCount = 1;
+	newImage->_imageImfo.mipmapLayerSourcePaths = { };
 	newImage->_imageImfo.format = format;
 	newImage->_imageImfo.imageTiling = imageTiling;
 	newImage->_imageImfo.imageUsageFlags = imageUsage;
@@ -212,10 +219,12 @@ void AirEngine::Core::Graphic::Instance::Image::AddImageView(std::string name, V
 	imageView.vkImageSubresourceRange.baseArrayLayer = baseArrayLayer;
 	imageView.vkImageSubresourceRange.layerCount = layerCount;
 
+	imageView.vkExtent2Ds = &_vkExtent2Ds;
+
 	VkImageViewCreateInfo imageViewCreateInfo{};
 	imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
 	imageViewCreateInfo.image = _vkImage;
-	imageViewCreateInfo.viewType = VkImageViewType::VK_IMAGE_VIEW_TYPE_2D;
+	imageViewCreateInfo.viewType = imageViewType;
 	imageViewCreateInfo.format = _imageImfo.format;
 	imageViewCreateInfo.subresourceRange = imageView.vkImageSubresourceRange;
 
@@ -282,111 +291,210 @@ void AirEngine::Core::Graphic::Instance::Image::OnLoad(Core::Graphic::Command::C
 		input_file.close();
 	}
 
-	//Load bitmap
-	std::vector<std::vector<unsigned char>> byteDatas;
-	size_t perLayerSize = 0;
+	///Pre load
+	uint32_t needStagingLevelCount = 0;
 	{
-		bool inited = false;
-		uint32_t pixelDepth = 0;
-		uint32_t pitch = 0;
-		VkExtent2D& extent2D = _vkExtent2D;
-		uint32_t& layerCount = _layerCount;
-		_mipmapCount = 1;
-
-		for (size_t i = 0; i < _imageImfo.subresourcePaths.size(); i++)
+		needStagingLevelCount = static_cast<uint32_t>(_imageImfo.mipmapLayerSourcePaths.size());
+		_layerCount = static_cast<uint32_t>(_imageImfo.mipmapLayerSourcePaths[0].size());
+	}
+	
+	//Load bitmap
+	
+	std::vector<BYTE*> layerByteDatas(needStagingLevelCount, nullptr);
+	std::vector<size_t> perLayerSizes(needStagingLevelCount, 0);
+	std::vector<VkExtent2D> perLayerExtents(needStagingLevelCount, {0, 0});
+	{
+		for (int levelIndex = 0; levelIndex < needStagingLevelCount; levelIndex++)
 		{
-			auto subresourcePath = _imageImfo.subresourcePaths[i].c_str();
-			auto fileType = FreeImage_GetFileType(subresourcePath);
-			if (fileType == FREE_IMAGE_FORMAT::FIF_UNKNOWN) fileType = FreeImage_GetFIFFromFilename(subresourcePath);
-			if ((fileType != FREE_IMAGE_FORMAT::FIF_UNKNOWN) && FreeImage_FIFSupportsReading(fileType))
+			uint32_t pixelDepth = 0;
+			uint32_t pitch = 0;
+			auto& perLayerExtent = perLayerExtents[levelIndex];
+			auto& perLayerSize = perLayerSizes[levelIndex];
+			auto& allLayerByteData = layerByteDatas[levelIndex];
+
+			for (int layerIndex = 0; layerIndex < _layerCount; layerIndex++)
 			{
-				FIBITMAP* bitmap = FreeImage_Load(fileType, subresourcePath);
-				if (_imageImfo.targetType != FREE_IMAGE_TYPE::FIT_UNKNOWN)
+				auto path = _imageImfo.mipmapLayerSourcePaths[levelIndex][layerIndex].c_str();
+
+				auto fileType = FreeImage_GetFileType(path);
+				if (fileType == FREE_IMAGE_FORMAT::FIF_UNKNOWN) fileType = FreeImage_GetFIFFromFilename(path);
+				if ((fileType != FREE_IMAGE_FORMAT::FIF_UNKNOWN) && FreeImage_FIFSupportsReading(fileType))
 				{
-					FIBITMAP* newBitmap = FreeImage_ConvertToType(bitmap, _imageImfo.targetType);
+					FIBITMAP* bitmap = FreeImage_Load(fileType, path);
+					if (_imageImfo.targetType != FREE_IMAGE_TYPE::FIT_UNKNOWN)
+					{
+						FIBITMAP* newBitmap = FreeImage_ConvertToType(bitmap, _imageImfo.targetType);
+						FreeImage_Unload(bitmap);
+						bitmap = newBitmap;
+					}
+
+					if (layerIndex == 0)
+					{
+						pixelDepth = FreeImage_GetBPP(bitmap);
+						pitch = FreeImage_GetPitch(bitmap);
+						perLayerExtent = VkExtent2D{FreeImage_GetWidth(bitmap), FreeImage_GetHeight(bitmap)};
+						perLayerSize = static_cast<size_t>(perLayerExtent.width) * perLayerExtent.height * pixelDepth / 8;
+						allLayerByteData = static_cast<BYTE*>(std::malloc(perLayerSize * _layerCount));
+					}
+
+					FreeImage_ConvertToRawBits(allLayerByteData + perLayerSize * layerIndex, bitmap, pitch, pixelDepth, FI_RGBA_RED_MASK, FI_RGBA_GREEN_MASK, FI_RGBA_BLUE_MASK, 0L);
 					FreeImage_Unload(bitmap);
-					bitmap = newBitmap;
-				}
-
-				uint32_t subPixelDepth = FreeImage_GetBPP(bitmap);
-				uint32_t subPitch = FreeImage_GetPitch(bitmap);
-				VkExtent2D subExtent2D = VkExtent2D{ FreeImage_GetWidth(bitmap), FreeImage_GetHeight(bitmap) };
-
-				if (!inited)
-				{
-					inited = true;
-
-					pixelDepth = subPixelDepth;
-					pitch = subPitch;
-					extent2D = subExtent2D;
-					perLayerSize = static_cast<size_t>(extent2D.width) * extent2D.height * subPixelDepth / 8;
-					byteDatas = std::vector<std::vector<unsigned char>>(_imageImfo.subresourcePaths.size(), std::vector<unsigned char>(perLayerSize));
-					layerCount = static_cast<uint32_t>(_imageImfo.subresourcePaths.size());
 				}
 				else
 				{
-					if (pixelDepth != subPixelDepth || pitch != subPitch || extent2D.width != subExtent2D.width || extent2D.height != subExtent2D.height)
-					{
-						Utils::Log::Exception("Failed to load subresource file: " + _imageImfo.subresourcePaths[i] + " , because of wrong file info.");
-					}
+					Utils::Log::Exception("Failed to open subresource file: " + _imageImfo.mipmapLayerSourcePaths[levelIndex][layerIndex] + " .");
 				}
-				FreeImage_ConvertToRawBits(byteDatas[i].data(), bitmap, subPitch, subPixelDepth, FI_RGBA_RED_MASK, FI_RGBA_GREEN_MASK, FI_RGBA_BLUE_MASK, 0L);
-				FreeImage_Unload(bitmap);
-			}
-			else
-			{
-				Utils::Log::Exception("Failed to open subresource file: " + _imageImfo.subresourcePaths[i] + " .");
 			}
 		}
 	}
 
-	CreateVulkanInstance();
-
-	//Create staging buffer
-	Core::Graphic::Instance::Buffer stagingBuffer = Core::Graphic::Instance::Buffer(
-		perLayerSize * _layerCount,
-		VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-	);
-	stagingBuffer.WriteData([perLayerSize, &byteDatas](void* transferDst) {
-		for (int i = 0; i < byteDatas.size(); i++)
+	///Late load
+	std::vector< Core::Graphic::Instance::Buffer*> perLevelStagingBufffers(needStagingLevelCount, nullptr);
+	{
+		_vkExtent2D = perLayerExtents[0];
+		if (_imageImfo.autoGenerateMipmap)
 		{
-			memcpy(static_cast<char*>(transferDst) + i * perLayerSize, byteDatas[i].data(), perLayerSize);
+			_mipmapLevelCount = static_cast<uint32_t>(std::floor(std::log2(std::max(_vkExtent2D.width, _vkExtent2D.height)))) + 1;
 		}
-	});
+		else
+		{
+			_mipmapLevelCount = needStagingLevelCount;
+		}
+		_vkExtent2Ds.resize(_mipmapLevelCount);
+		_vkExtent2Ds[0] = perLayerExtents[0];
+		for (int levelIndex = 1; levelIndex < _mipmapLevelCount; levelIndex++)
+		{
+			_vkExtent2Ds[levelIndex].width = _vkExtent2Ds[levelIndex - 1].width / 2 < 1 ? 1 : _vkExtent2Ds[levelIndex - 1].width / 2;
+			_vkExtent2Ds[levelIndex].height = _vkExtent2Ds[levelIndex - 1].height / 2 < 1 ? 1 : _vkExtent2Ds[levelIndex - 1].height / 2;
+		}
 
+		//Create staging buffer
+		for (int levelIndex = 0; levelIndex < needStagingLevelCount; levelIndex++)
+		{
+			perLevelStagingBufffers[levelIndex] = new Core::Graphic::Instance::Buffer(
+				perLayerSizes[levelIndex] * _layerCount,
+				VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+				VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+			);
+			perLevelStagingBufffers[levelIndex]->WriteData(layerByteDatas[levelIndex], perLayerSizes[levelIndex] * _layerCount);
+			delete layerByteDatas[levelIndex];
+		}
+	}
+
+	///Create instance
+	{
+		CreateVulkanInstance();
+		AddImageView(
+			"Transfer_AllLevel",
+			_imageImfo.imageViewInfos["DefaultImageView"].imageViewType,
+			ImageView_().VkImageAspectFlags_(),
+			0,
+			_layerCount,
+			0,
+			_mipmapLevelCount
+		);
+		for (int levelIndex = 0; levelIndex < _mipmapLevelCount; levelIndex++)
+		{
+			AddImageView(
+				"Transfer_Level" + std::to_string(levelIndex),
+				_imageImfo.imageViewInfos["DefaultImageView"].imageViewType,
+				ImageView_().VkImageAspectFlags_(),
+				0,
+				_layerCount,
+				levelIndex,
+				1
+			);
+		}
+	}
 
 	//Copy buffer to image
 	{
 		transferCommandBuffer->Reset();
 		transferCommandBuffer->BeginRecord(VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
-		Core::Graphic::Command::ImageMemoryBarrier imageTransferStartBarrier = Core::Graphic::Command::ImageMemoryBarrier(
-			this,
-			VK_IMAGE_LAYOUT_UNDEFINED,
-			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			0,
-			VK_ACCESS_TRANSFER_WRITE_BIT
-		);
-		transferCommandBuffer->AddPipelineImageBarrier(
-			VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
-			{ &imageTransferStartBarrier }
-		);
-		transferCommandBuffer->CopyBufferToImage(&stagingBuffer, this, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-		Core::Graphic::Command::ImageMemoryBarrier imageTransferEndBarrier = Core::Graphic::Command::ImageMemoryBarrier(
-			this,
-			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-			VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-			VK_ACCESS_TRANSFER_WRITE_BIT,
-			0
-		);
-		transferCommandBuffer->AddPipelineImageBarrier(
-			VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-			{ &imageTransferEndBarrier }
-		);
+		{
+			Core::Graphic::Command::ImageMemoryBarrier barrier = Core::Graphic::Command::ImageMemoryBarrier(
+				this,
+				"Transfer_AllLevel",
+				VK_IMAGE_LAYOUT_UNDEFINED,
+				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				0,
+				VK_ACCESS_TRANSFER_WRITE_BIT
+			);
+			transferCommandBuffer->AddPipelineImageBarrier(
+				VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+				{ &barrier }
+			);
+		}
+		for (int levelIndex = 0; levelIndex < needStagingLevelCount; levelIndex++)
+		{
+			transferCommandBuffer->CopyBufferToImage(perLevelStagingBufffers[levelIndex], this, "Transfer_Level" + std::to_string(levelIndex), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+		}
+		for (int generateLevelIndex = needStagingLevelCount; generateLevelIndex < _mipmapLevelCount; generateLevelIndex++)
+		{
+			{
+				Core::Graphic::Command::ImageMemoryBarrier barrier = Core::Graphic::Command::ImageMemoryBarrier(
+					this,
+					"Transfer_Level" + std::to_string(generateLevelIndex - 1),
+					VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+					VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+					VK_ACCESS_TRANSFER_WRITE_BIT,
+					VK_ACCESS_TRANSFER_READ_BIT
+				);
+				transferCommandBuffer->AddPipelineImageBarrier(
+					VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+					{ &barrier }
+				);
+			}
+			transferCommandBuffer->Blit(
+				this, "Transfer_Level" + std::to_string(generateLevelIndex - 1), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+				this, "Transfer_Level" + std::to_string(generateLevelIndex), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				VK_FILTER_LINEAR
+			);
+			{
+				Core::Graphic::Command::ImageMemoryBarrier barrier = Core::Graphic::Command::ImageMemoryBarrier(
+					this,
+					"Transfer_Level" + std::to_string(generateLevelIndex - 1),
+					VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+					VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+					VK_ACCESS_TRANSFER_READ_BIT,
+					0
+				);
+				transferCommandBuffer->AddPipelineImageBarrier(
+					VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT,
+					{ &barrier }
+				);
+			}
+		}
+		{
+			Core::Graphic::Command::ImageMemoryBarrier barrier = Core::Graphic::Command::ImageMemoryBarrier(
+				this,
+				VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				VK_ACCESS_TRANSFER_WRITE_BIT,
+				0
+			);
+			transferCommandBuffer->AddPipelineImageBarrier(
+				VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+				{ &barrier }
+			);
+		}
 
 		transferCommandBuffer->EndRecord();
 		transferCommandBuffer->Submit();
 		transferCommandBuffer->WaitForFinish();
+	}
+
+	///Destroy
+	{
+		for (int levelIndex = 0; levelIndex < needStagingLevelCount; levelIndex++)
+		{
+			delete perLevelStagingBufffers[levelIndex];
+		}
+		RemoveImageView("Transfer_AllLevel");
+		for (int levelIndex = 0; levelIndex < _mipmapLevelCount; levelIndex++)
+		{
+			RemoveImageView("Transfer_Level" + std::to_string(levelIndex));
+		}
 	}
 }
 
@@ -398,12 +506,12 @@ void AirEngine::Core::Graphic::Instance::Image::CreateVulkanInstance()
 		imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageInfo.imageType = VkImageType::VK_IMAGE_TYPE_2D;
 		imageInfo.extent = { _vkExtent2D.width, _vkExtent2D.height, 1 };
-		imageInfo.mipLevels = _mipmapCount;
+		imageInfo.mipLevels = _mipmapLevelCount;
 		imageInfo.arrayLayers = _layerCount;
 		imageInfo.format = _imageImfo.format;
 		imageInfo.tiling = _imageImfo.imageTiling;
 		imageInfo.initialLayout = VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED;
-		imageInfo.usage = _imageImfo.imageUsageFlags | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+		imageInfo.usage = _imageImfo.imageUsageFlags | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 		imageInfo.samples = VkSampleCountFlagBits::VK_SAMPLE_COUNT_1_BIT;
 		imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		imageInfo.flags = _imageImfo.imageCreateFlags;
@@ -433,6 +541,7 @@ void AirEngine::Core::Graphic::Instance::Image::CreateVulkanInstance()
 			imageView.vkImageSubresourceRange.levelCount = imageInfoPair.second.mipmapLevelCount;
 			imageView.vkImageSubresourceRange.baseArrayLayer = imageInfoPair.second.baseLayer;
 			imageView.vkImageSubresourceRange.layerCount = imageInfoPair.second.layerCount;
+			imageView.vkExtent2Ds = &_vkExtent2Ds;
 
 			VkImageViewCreateInfo imageViewCreateInfo{};
 			imageViewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -481,4 +590,14 @@ uint32_t AirEngine::Core::Graphic::Instance::Image::ImageView::LayerCount()
 VkImageAspectFlags AirEngine::Core::Graphic::Instance::Image::ImageView::VkImageAspectFlags_()
 {
 	return vkImageSubresourceRange.aspectMask;
+}
+
+VkExtent2D AirEngine::Core::Graphic::Instance::Image::ImageView::VkExtent2D_(uint32_t levelIndex)
+{
+	return (*vkExtent2Ds)[levelIndex];
+}
+
+VkExtent3D AirEngine::Core::Graphic::Instance::Image::ImageView::VkExtent3D_(uint32_t levelIndex)
+{
+	return { (*vkExtent2Ds)[levelIndex].width, (*vkExtent2Ds)[levelIndex] .height, 1};
 }
