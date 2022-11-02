@@ -323,7 +323,12 @@ void AirEngine::Core::Graphic::Instance::Image::OnLoad(Core::Graphic::Command::C
 					FIBITMAP* bitmap = FreeImage_Load(fileType, path);
 					if (_imageImfo.targetType != FREE_IMAGE_TYPE::FIT_UNKNOWN)
 					{
-						FIBITMAP* newBitmap = FreeImage_ConvertToType(bitmap, _imageImfo.targetType);
+						pixelDepth = FreeImage_GetBPP(bitmap);
+						pitch = FreeImage_GetPitch(bitmap);
+						perLayerExtent = VkExtent2D{ FreeImage_GetWidth(bitmap), FreeImage_GetHeight(bitmap) };
+						perLayerSize = static_cast<size_t>(perLayerExtent.width) * perLayerExtent.height * pixelDepth / 8;
+						allLayerByteData = static_cast<BYTE*>(std::malloc(perLayerSize * _layerCount));
+						FIBITMAP* newBitmap = FreeImage_ConvertToType(bitmap, _imageImfo.targetType, FALSE);
 						FreeImage_Unload(bitmap);
 						bitmap = newBitmap;
 					}

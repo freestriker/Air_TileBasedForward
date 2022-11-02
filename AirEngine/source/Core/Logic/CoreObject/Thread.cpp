@@ -397,7 +397,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 {
 	Graphic::CoreObject::Instance::RenderPipelineManager().SwitchRenderPipeline(new Rendering::RenderPipeline::ForwardRenderPipeline());
 	
-	auto hdrTest = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>("..\\Asset\\Texture\\ChineseGarden.json");
+	auto hdrTest = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>("..\\Asset\\Texture\\WorkShop.json");
 
 	//Camera
 	Object::GameObject* cameraGo = new Logic::Object::GameObject("Camera");

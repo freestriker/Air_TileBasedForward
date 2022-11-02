@@ -28,8 +28,8 @@ glslangValidator.exe -t -V TBF_Opaque_White_Shader.frag -IUtils/ -o Spv/TBF_Opaq
 glslangValidator.exe -t -V Background_Skybox_Shader.vert -IUtils/ -o Spv/Background_Skybox_Shader.vert.spv
 glslangValidator.exe -t -V Background_Skybox_Shader.frag -IUtils/ -o Spv/Background_Skybox_Shader.frag.spv
 
-glslangValidator.exe -t -V Background_ChineseGarden_Shader.vert -IUtils/ -o Spv/Background_ChineseGarden_Shader.vert.spv
-glslangValidator.exe -t -V Background_ChineseGarden_Shader.frag -IUtils/ -o Spv/Background_ChineseGarden_Shader.frag.spv
+glslangValidator.exe -t -V Background_Hdr_Shader.vert -IUtils/ -o Spv/Background_Hdr_Shader.vert.spv
+glslangValidator.exe -t -V Background_Hdr_Shader.frag -IUtils/ -o Spv/Background_Hdr_Shader.frag.spv
 
 glslangValidator.exe -t -V F_Transparent_BrokenGlass_Shader.vert -IUtils/ -o Spv/F_Transparent_BrokenGlass_Shader.vert.spv
 glslangValidator.exe -t -V F_Transparent_BrokenGlass_Shader.frag -IUtils/ -o Spv/F_Transparent_BrokenGlass_Shader.frag.spv
