@@ -22,7 +22,7 @@ void main()
     vec3 ndcPosition = IMAGE_TO_NDC_SPACE(iPosition, 1);
     vec3 wPosition = PositionN2W(ndcPosition, cameraInfo.info);
     vec3 observeDirection = VIEW_DIRECTION(cameraInfo.info, wPosition);
-    vec3 d = vec3(observeDirection.x, observeDirection.z, -observeDirection.y);
+    vec3 d = vec3(observeDirection.x, observeDirection.y, observeDirection.z);
     vec2 uv = SampleSphericalMap(d);
     vec3 hdrColor = texture(backgroundTexture, uv).rgb;
     hdrColor = hdrColor / (vec3(1) + hdrColor);

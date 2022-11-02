@@ -9,6 +9,7 @@
     "memoryPropertyFlags": 1,
     "imageCreateFlags": 0,
     "autoGenerateMipmap": false,
+    "topDown": false,
     "imageViewInfos": {
         "DefaultImageView": {
             "imageViewType": 1,

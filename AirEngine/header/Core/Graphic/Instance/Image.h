@@ -47,6 +47,7 @@ namespace AirEngine
 						VkMemoryPropertyFlags memoryPropertyFlags;
 						VkImageCreateFlags imageCreateFlags;
 						bool autoGenerateMipmap;
+						bool topDown;
 						std::map<std::string, ImageViewInfo> imageViewInfos;
 
 						NLOHMANN_DEFINE_TYPE_INTRUSIVE(
@@ -59,6 +60,7 @@ namespace AirEngine
 							memoryPropertyFlags,
 							imageCreateFlags,
 							autoGenerateMipmap,
+							topDown,
 							imageViewInfos
 						)
 					};
