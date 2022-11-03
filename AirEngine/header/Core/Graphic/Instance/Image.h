@@ -145,7 +145,9 @@ namespace AirEngine
 					VkExtent2D VkExtent2D_();
 					uint32_t LayerCount();
 					VkFormat VkFormat_();
+					VkImageUsageFlags VkImageUsageFlags_();
 					VkMemoryPropertyFlags VkMemoryPropertyFlags_();
+					VkImageTiling VkImageTiling_();
 					Memory& Memory_();
 
 				private:

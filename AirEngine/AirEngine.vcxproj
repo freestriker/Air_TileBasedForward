@@ -178,6 +178,7 @@
     <ClCompile Include="source\Rendering\RenderFeature\Geometry_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\GTAO_Occlusion_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\HBAO_Occlusion_RenderFeature.cpp" />
+    <ClCompile Include="source\Rendering\RenderFeature\SplitHdrToCubeMap_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\SSAO_Occlusion_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\TBForward_LightList_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\TBForward_OIT_AlphaBuffer_RenderFeature.cpp" />
@@ -283,6 +284,7 @@
     <ClInclude Include="header\Rendering\RenderFeature\Geometry_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\GTAO_Occlusion_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\HBAO_Occlusion_RenderFeature.h" />
+    <ClInclude Include="header\Rendering\RenderFeature\SplitHdrToCubeMap_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\SSAO_Occlusion_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\TBForward_LightList_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\TBForward_OIT_AlphaBuffer_RenderFeature.h" />

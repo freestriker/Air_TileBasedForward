@@ -56,6 +56,7 @@ namespace AirEngine
 				{
 				private:
 					std::map<std::string, RenderFeatureBase*> _renderFeatures;	
+					std::vector<std::string> _renderFeatureUseOrder;
 				protected:
 					RendererBase();
 					virtual ~RendererBase();

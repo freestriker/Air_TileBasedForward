@@ -40,6 +40,7 @@ void AirEngine::Core::Graphic::Rendering::RendererBase::UseRenderFeature(std::st
 {
 	Utils::Log::Exception("Already contains render feature named: " + renderFeatureName + ".", _renderFeatures.count(renderFeatureName) != 0);
 	_renderFeatures[renderFeatureName] = renderFeature;
+	_renderFeatureUseOrder.push_back(renderFeatureName);
 }
 
 void AirEngine::Core::Graphic::Rendering::RendererBase::PrepareRenderFeature(std::string renderFeatureName, RendererDataBase* rendererData)
@@ -79,15 +80,15 @@ void AirEngine::Core::Graphic::Rendering::RendererBase::FinishRenderFeature(std:
 AirEngine::Core::Graphic::Rendering::RendererDataBase* AirEngine::Core::Graphic::Rendering::RendererBase::CreateRendererData(Camera::CameraBase* camera)
 {
 	AirEngine::Core::Graphic::Rendering::RendererDataBase* rendererData = OnCreateRendererData(camera);
-	for (const auto& renderFeaturePair : _renderFeatures)
+	for (const auto& renderFeatureName : _renderFeatureUseOrder)
 	{
-		rendererData->_renderFeatureWrappers[renderFeaturePair.first].renderFeatureData = renderFeaturePair.second->OnCreateRenderFeatureData(camera);
+		rendererData->_renderFeatureWrappers[renderFeatureName].renderFeatureData = _renderFeatures[renderFeatureName]->OnCreateRenderFeatureData(camera);
 	}
 
 	OnResolveRendererData(rendererData, camera);
-	for (const auto& renderFeaturePair : _renderFeatures)
+	for (const auto& renderFeatureName : _renderFeatureUseOrder)
 	{
-		renderFeaturePair.second->OnResolveRenderFeatureData(rendererData->_renderFeatureWrappers[renderFeaturePair.first].renderFeatureData, camera);
+		_renderFeatures[renderFeatureName]->OnResolveRenderFeatureData(rendererData->_renderFeatureWrappers[renderFeatureName].renderFeatureData, camera);
 	}
 	return rendererData;
 }

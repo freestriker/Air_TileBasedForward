@@ -260,9 +260,19 @@ VkFormat AirEngine::Core::Graphic::Instance::Image::VkFormat_()
 	return _imageImfo.format;
 }
 
+VkImageUsageFlags AirEngine::Core::Graphic::Instance::Image::VkImageUsageFlags_()
+{
+	return _imageImfo.imageUsageFlags;
+}
+
 VkMemoryPropertyFlags AirEngine::Core::Graphic::Instance::Image::VkMemoryPropertyFlags_()
 {
 	return _imageImfo.memoryPropertyFlags;
+}
+
+VkImageTiling AirEngine::Core::Graphic::Instance::Image::VkImageTiling_()
+{
+	return _imageImfo.imageTiling;
 }
 
 AirEngine::Core::Graphic::Instance::Memory& AirEngine::Core::Graphic::Instance::Image::Memory_()
