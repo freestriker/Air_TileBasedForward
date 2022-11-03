@@ -439,154 +439,61 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		backgroundRendererGo->AddComponent(new Test::Background_SkyboxRendererBehaviour());
 	}
 
-	///////Forward opaque
-	////{
-	////	Logic::Object::GameObject* opaqueRendererGo = new Logic::Object::GameObject("WallRenderer");
-	////	renderers->AddChild(opaqueRendererGo);
-	////	opaqueRendererGo->AddComponent(new Renderer::Renderer());
-	////	opaqueRendererGo->AddComponent(new Test::F_WallRendererBehaviour());
-	////	opaqueRendererGo->AddComponent(new Test::SelfRotateBehaviour(60));
-	////	opaqueRendererGo->transform.SetScale(glm::vec3(0.8, 0.8, 0.8));
+	///TBForward opaque
+	{
+		Logic::Object::GameObject* pbrRendererGo = new Logic::Object::GameObject("PbrRenderer");
+		renderers->AddChild(pbrRendererGo);
+		pbrRendererGo->AddComponent(new Test::TBF_Opaque_Pbr_RendererBehaviour());
+		pbrRendererGo->AddComponent(new Test::SelfRotateBehaviour(60));
+		pbrRendererGo->transform.SetScale(glm::vec3(0.8, 0.8, 0.8));
 
-	////	Logic::Object::GameObject* glassMeshRendererGo = new Logic::Object::GameObject("GlassRenderer");
-	////	renderers->AddChild(glassMeshRendererGo);
-	////	glassMeshRendererGo->AddComponent(new Renderer::Renderer());
-	////	glassMeshRendererGo->AddComponent(new Test::F_GlassRendererBehaviour());
-	////	glassMeshRendererGo->transform.SetTranslation(glm::vec3(3, 0, 0));
+		Logic::Object::GameObject* mirrorMeshRendererGo = new Logic::Object::GameObject("MirrorRenderer");
+		renderers->AddChild(mirrorMeshRendererGo);
+		mirrorMeshRendererGo->AddComponent(new Renderer::Renderer());
+		mirrorMeshRendererGo->AddComponent(new Test::TBF_Opaque_Pbr_Mirror_RendererBehaviour());
+		mirrorMeshRendererGo->AddComponent(new Test::SelfRotateBehaviour(45));
+		mirrorMeshRendererGo->transform.SetTranslation(glm::vec3(-3, 0, 0));
 
-	////	Logic::Object::GameObject* mirrorMeshRendererGo = new Logic::Object::GameObject("MirrorRenderer");
-	////	renderers->AddChild(mirrorMeshRendererGo);
-	////	mirrorMeshRendererGo->AddComponent(new Renderer::Renderer());
-	////	mirrorMeshRendererGo->AddComponent(new Test::F_MirrorRendererBehaviour());
-	////	mirrorMeshRendererGo->transform.SetTranslation(glm::vec3(-3, 0, 0));
-	////}
+		for (int i = -2; i <= 2; i++)
+		{
+			for (int j = -2; j <= 2; j++)
+			{
+				if (i == 0 && j == 0) continue;
+				Logic::Object::GameObject* sphereGroupRendererGo = new Logic::Object::GameObject("SphereGroup_" + std::to_string(i) + " " + std::to_string(j));
+				renderers->AddChild(sphereGroupRendererGo);
+				sphereGroupRendererGo->AddComponent(new Test::TBF_Opaque_Pbr_RendererBehaviour("..\\Asset\\Mesh\\NineSphere.ply", "..\\Asset\\Texture\\MetalFloor"));
+				sphereGroupRendererGo->transform.SetTranslation(glm::vec3(i * 20, 0, j * 20));
+			}
+		}
+	}
 
-	/////TBForward opaque
-	//{
-	//	Logic::Object::GameObject* pbrRendererGo = new Logic::Object::GameObject("PbrRenderer");
-	//	renderers->AddChild(pbrRendererGo);
-	//	pbrRendererGo->AddComponent(new Test::TBF_Opaque_Pbr_RendererBehaviour());
-	//	pbrRendererGo->AddComponent(new Test::SelfRotateBehaviour(60));
-	//	pbrRendererGo->transform.SetScale(glm::vec3(0.8, 0.8, 0.8));
+	///TBForward quad mover
+	{
+		for (int i = -2; i <= 2; i++)
+		{
+			for (int j = -2; j <= 2; j++)
+			{
+				Logic::Object::GameObject* quadRendererGo = new Logic::Object::GameObject("QuadRenderer_" + std::to_string(i) + " " + std::to_string(j));
+				renderers->AddChild(quadRendererGo);
+				quadRendererGo->AddComponent(new Test::TBF_Opaque_Pbr_RendererBehaviour("..\\Asset\\Mesh\\LargeQuad.ply", "..\\Asset\\Texture\\MetalFloor"));
+				quadRendererGo->AddComponent(new Test::QuadMoveBehaviour());
+				quadRendererGo->transform.SetTranslation(glm::vec3(i * 20, -1, j * 20));
+				quadRendererGo->transform.SetScale({ 10, 1, 10 });
+			}
+		}
+	}
 
-	//	//Logic::Object::GameObject* opaqueRendererGo = new Logic::Object::GameObject("WallRenderer");
-	//	//renderers->AddChild(opaqueRendererGo);
-	//	//opaqueRendererGo->AddComponent(new Renderer::Renderer());
-	//	//opaqueRendererGo->AddComponent(new Test::TBF_WallRendererBehaviour());
-	//	//opaqueRendererGo->AddComponent(new Test::SelfRotateBehaviour(60));
-	//	//opaqueRendererGo->transform.SetScale(glm::vec3(0.8, 0.8, 0.8));
-
-	//	//Logic::Object::GameObject* glassMeshRendererGo = new Logic::Object::GameObject("GlassRenderer");
-	//	//renderers->AddChild(glassMeshRendererGo);
-	//	//glassMeshRendererGo->AddComponent(new Renderer::Renderer());
-	//	//glassMeshRendererGo->AddComponent(new Test::TBF_GlassRendererBehaviour());
-	//	//glassMeshRendererGo->transform.SetTranslation(glm::vec3(3, 0, 0));
-
-	//	Logic::Object::GameObject* mirrorMeshRendererGo = new Logic::Object::GameObject("MirrorRenderer");
-	//	renderers->AddChild(mirrorMeshRendererGo);
-	//	mirrorMeshRendererGo->AddComponent(new Renderer::Renderer());
-	//	mirrorMeshRendererGo->AddComponent(new Test::TBF_Opaque_Pbr_Mirror_RendererBehaviour());
-	//	mirrorMeshRendererGo->AddComponent(new Test::SelfRotateBehaviour(45));
-	//	mirrorMeshRendererGo->transform.SetTranslation(glm::vec3(-3, 0, 0));
-
-	//	//Logic::Object::GameObject* mirrorMeshRendererGo = new Logic::Object::GameObject("MirrorRenderer");
-	//	//renderers->AddChild(mirrorMeshRendererGo);
-	//	//mirrorMeshRendererGo->AddComponent(new Renderer::Renderer());
-	//	//mirrorMeshRendererGo->AddComponent(new Test::TBF_MirrorRendererBehaviour());
-	//	//mirrorMeshRendererGo->AddComponent(new Test::SelfRotateBehaviour(45));
-	//	//mirrorMeshRendererGo->transform.SetTranslation(glm::vec3(-3, 0, 0));
-
-	//	for (int i = -2; i <= 2; i++)
-	//	{
-	//		for (int j = -2; j <= 2; j++)
-	//		{
-	//			if (i == 0 && j == 0) continue;
-	//			Logic::Object::GameObject* sphereGroupRendererGo = new Logic::Object::GameObject("SphereGroup_" + std::to_string(i) + " " + std::to_string(j));
-	//			renderers->AddChild(sphereGroupRendererGo);
-	//			sphereGroupRendererGo->AddComponent(new Test::TBF_Opaque_Pbr_RendererBehaviour("..\\Asset\\Mesh\\NineSphere.ply", "..\\Asset\\Texture\\MetalFloor"));
-	//			sphereGroupRendererGo->transform.SetEulerRotation(glm::vec3(-90, 0, 0));
-	//			sphereGroupRendererGo->transform.SetTranslation(glm::vec3(i * 20, 0, j * 20));
-	//		}
-	//	}
-	//}
-
-	/////TBForward quad mover
-	//{
-	//	for (int i = -2; i <= 2; i++)
-	//	{
-	//		for (int j = -2; j <= 2; j++)
-	//		{
-	//			Logic::Object::GameObject* quadRendererGo = new Logic::Object::GameObject("QuadRenderer_" + std::to_string(i) + " " + std::to_string(j));
-	//			renderers->AddChild(quadRendererGo);
-	//			quadRendererGo->AddComponent(new Test::TBF_Opaque_Pbr_RendererBehaviour("..\\Asset\\Mesh\\LargeQuad.ply", "..\\Asset\\Texture\\MetalFloor"));
-	//			quadRendererGo->AddComponent(new Test::QuadMoveBehaviour());
-	//			quadRendererGo->transform.SetEulerRotation(glm::vec3(-90, 0, 0));
-	//			quadRendererGo->transform.SetTranslation(glm::vec3(i * 20, -1, j * 20));
-	//			quadRendererGo->transform.SetScale({ 10, 10, 1 });
-	//		}
-	//	}
-	//}
-
-	/////Forward transparent
-	//{
-	//	Logic::Object::GameObject* transparentRenderers = new Logic::Object::GameObject("TransparentRenderers");
-	//	renderers->AddChild(transparentRenderers);
-	//	{
-	//		Logic::Object::GameObject* transparentRendererGo = new Logic::Object::GameObject("F_TransparentRenderer1");
-	//		transparentRenderers->AddChild(transparentRendererGo);
-	//		transparentRendererGo->AddComponent(new Renderer::Renderer());
-	//		transparentRendererGo->AddComponent(new Test::F_BrokenGlassRendererBehaviour());
-	//		transparentRendererGo->transform.SetScale(glm::vec3(2, 2, 2));
-	//		transparentRendererGo->transform.SetTranslation(glm::vec3(2, 2, 0));
-	//	}
-	//	{
-	//		Logic::Object::GameObject* transparentRendererGo = new Logic::Object::GameObject("F_TransparentRenderer2");
-	//		transparentRenderers->AddChild(transparentRendererGo);
-	//		transparentRendererGo->AddComponent(new Renderer::Renderer());
-	//		transparentRendererGo->AddComponent(new Test::F_BrokenGlassRendererBehaviour());
-	//		transparentRendererGo->transform.SetScale(glm::vec3(2, 2, 2));
-	//		transparentRendererGo->transform.SetTranslation(glm::vec3(-2, 2, 0));
-	//	}
-	//	{
-	//		Logic::Object::GameObject* transparentRendererGo = new Logic::Object::GameObject("F_TransparentRenderer3");
-	//		transparentRenderers->AddChild(transparentRendererGo);
-	//		transparentRendererGo->AddComponent(new Renderer::Renderer());
-	//		transparentRendererGo->AddComponent(new Test::F_BrokenGlassRendererBehaviour());
-	//		transparentRendererGo->transform.SetScale(glm::vec3(2, 2, 2));
-	//		transparentRendererGo->transform.SetEulerRotation(glm::vec3(90, 0, 0));
-	//		transparentRendererGo->transform.SetTranslation(glm::vec3(-2, 0, 2));
-	//	}
-	//	{
-	//		Logic::Object::GameObject* transparentRendererGo = new Logic::Object::GameObject("F_TransparentRenderer4");
-	//		transparentRenderers->AddChild(transparentRendererGo);
-	//		transparentRendererGo->AddComponent(new Renderer::Renderer());
-	//		transparentRendererGo->AddComponent(new Test::F_BrokenGlassRendererBehaviour());
-	//		transparentRendererGo->transform.SetScale(glm::vec3(2, 2, 2));
-	//		transparentRendererGo->transform.SetEulerRotation(glm::vec3(90, 0, 0));
-	//		transparentRendererGo->transform.SetTranslation(glm::vec3(2, 0, 2));
-	//	}
-	//	{
-	//		Logic::Object::GameObject* transparentRendererGo = new Logic::Object::GameObject("F_TransparentRenderer5");
-	//		transparentRenderers->AddChild(transparentRendererGo);
-	//		transparentRendererGo->AddComponent(new Renderer::Renderer());
-	//		transparentRendererGo->AddComponent(new Test::F_BrokenGlassRendererBehaviour());
-	//		transparentRendererGo->transform.SetScale(glm::vec3(2, 2, 2));
-	//		transparentRendererGo->transform.SetEulerRotation(glm::vec3(90, 90, 90));
-	//		transparentRendererGo->transform.SetTranslation(glm::vec3(4, 0, 0));
-	//	}
-	//}
-
-	/////OIT
-	//Logic::Object::GameObject* oitRenderers = new Logic::Object::GameObject("OitRenderers");
-	//renderers->AddChild(oitRenderers);
-	//oitRenderers->transform.SetTranslation({3, 0, 0});
-	//{
-	//	Logic::Object::GameObject* oitRendererGo = new Logic::Object::GameObject("OitRenderer");
-	//	oitRenderers->AddChild(oitRendererGo);
-	//	oitRendererGo->AddComponent(new Renderer::Renderer());
-	//	oitRendererGo->AddComponent(new Test::TBF_OIT_RenderBehaviour("WhiteTexture2D"));
-	//	oitRendererGo->AddComponent(new Test::SelfRotateBehaviour(35));
-	//}
+	///OIT
+	Logic::Object::GameObject* oitRenderers = new Logic::Object::GameObject("OitRenderers");
+	renderers->AddChild(oitRenderers);
+	oitRenderers->transform.SetTranslation({3, 0, 0});
+	{
+		Logic::Object::GameObject* oitRendererGo = new Logic::Object::GameObject("OitRenderer");
+		oitRenderers->AddChild(oitRendererGo);
+		oitRendererGo->AddComponent(new Renderer::Renderer());
+		oitRendererGo->AddComponent(new Test::TBF_OIT_RenderBehaviour("WhiteTexture2D"));
+		oitRendererGo->AddComponent(new Test::SelfRotateBehaviour(35));
+	}
 
 	//Lights
 	Logic::Object::GameObject* lights = new Logic::Object::GameObject("Lights");
