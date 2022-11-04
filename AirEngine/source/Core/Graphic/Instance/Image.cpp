@@ -157,7 +157,7 @@ AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::I
 		{
 			"DefaultImageView",
 			{
-				VkImageViewType::VK_IMAGE_VIEW_TYPE_2D,
+				VkImageViewType::VK_IMAGE_VIEW_TYPE_CUBE,
 				aspect,
 				0,
 				6,

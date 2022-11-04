@@ -65,9 +65,9 @@ void AirEngine::Rendering::RenderFeature::SplitHdrToCubeMap_RenderFeature::Split
 		"ColorAttachment",
 		VK_FORMAT_R32G32B32A32_SFLOAT,
 		VK_SAMPLE_COUNT_1_BIT,
-		VK_ATTACHMENT_LOAD_OP_LOAD,
+		VK_ATTACHMENT_LOAD_OP_DONT_CARE,
 		VK_ATTACHMENT_STORE_OP_STORE,
-		VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+		VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
 		VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
 	);
 	settings.AddSubpass(
@@ -79,9 +79,9 @@ void AirEngine::Rendering::RenderFeature::SplitHdrToCubeMap_RenderFeature::Split
 		"VK_SUBPASS_EXTERNAL",
 		"DrawSubpass",
 		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
 		0,
-		0
+		VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
 	);
 	settings.AddDependency(
 		"DrawSubpass",
@@ -100,6 +100,8 @@ AirEngine::Rendering::RenderFeature::SplitHdrToCubeMap_RenderFeature::SplitHdrTo
 	, _targetCubeImage(nullptr)
 	, _sourceImage(nullptr)
 	, _cubeMesh(nullptr)
+	, _splitShader(nullptr)
+	, _sourceImageSampler()
 	, resolution()
 	, hdrTexturePath()
 {
@@ -133,11 +135,11 @@ void AirEngine::Rendering::RenderFeature::SplitHdrToCubeMap_RenderFeature::OnRes
 {
 	auto featureData = static_cast<SplitHdrToCubeMap_RenderFeatureData*>(renderFeatureData);
 	featureData->_sourceImage = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(featureData->hdrTexturePath);
-	featureData->_splitShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\SplitHdrToCubeMap_Shader.shader");
-	featureData->_cubeMesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\Quad.ply");
+	featureData->_splitShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>(featureData->shaderPath);
+	featureData->_cubeMesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\Box.ply");
 	featureData->_targetCubeImage = Core::Graphic::Instance::Image::CreateCubeImage(
 		featureData->resolution,
-		featureData->format,
+		VK_FORMAT_R32G32B32A32_SFLOAT,
 		VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT,
 		VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 		VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
@@ -170,7 +172,7 @@ void AirEngine::Rendering::RenderFeature::SplitHdrToCubeMap_RenderFeature::OnRes
 		VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
 	);
 	featureData->_splitMaterial = new Core::Graphic::Rendering::Material(featureData->_splitShader);
-	featureData->_splitMaterial->SetSampledImage2D("sourceImage", featureData->_sourceImage, featureData->_sourceImageSampler);
+	featureData->_splitMaterial->SetSampledImage2D("hdrTexture", featureData->_sourceImage, featureData->_sourceImageSampler);
 }
 
 void AirEngine::Rendering::RenderFeature::SplitHdrToCubeMap_RenderFeature::OnDestroyRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)
@@ -198,26 +200,9 @@ void AirEngine::Rendering::RenderFeature::SplitHdrToCubeMap_RenderFeature::OnExc
 
 	struct SplitInfo
 	{
+		glm::mat4 view;
 		glm::mat4 viewProjection;
 	};
-	{
-		const float aspectRatio = 1;
-		const float farFlat = 10;
-		const float nearFlat = 1;
-		double halfFov = 90 * std::acos(-1.0) / 360.0;
-		double cot = 1.0 / std::tan(halfFov);
-		float flatDistence = 10.0 - 0.1;
-
-		auto projection = glm::mat4(
-			cot / aspectRatio, 0, 0, 0,
-			0, cot, 0, 0,
-			0, 0, -farFlat / flatDistence, -1,
-			0, 0, -nearFlat * farFlat / flatDistence, 0
-		);
-
-		glm::rotate(glm::rotate(glm::rotate(glm::mat4(1), 0.0f, { 1, 0, 0 }), 90.0f, { 0, 1, 0 }), 0.0f, { 0, 0, 1 });
-	}
-
 	commandBuffer->Reset();
 	commandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
@@ -229,11 +214,11 @@ void AirEngine::Rendering::RenderFeature::SplitHdrToCubeMap_RenderFeature::OnExc
 		{
 			const float aspectRatio = 1;
 			const float farFlat = 10;
-			const float nearFlat = 1;
-			double halfFov = 90 * std::acos(-1.0) / 360.0;
-			double cot = 1.0 / std::tan(halfFov);
-			float flatDistence = 10.0 - 0.1;
-			auto projection = glm::mat4(
+			const float nearFlat = 0.5;
+			const float flatDistence = farFlat - nearFlat;
+			const double halfFov = 90 * std::acos(-1.0) / 360.0;
+			const double cot = 1.0 / std::tan(halfFov);
+			const auto projection = glm::mat4(
 				cot / aspectRatio, 0, 0, 0,
 				0, cot, 0, 0,
 				0, 0, -farFlat / flatDistence, -1,
@@ -274,8 +259,13 @@ void AirEngine::Rendering::RenderFeature::SplitHdrToCubeMap_RenderFeature::OnExc
 					break;
 				}
 			}
-			auto view = glm::rotate(glm::rotate(glm::rotate(glm::mat4(1), rotation.x, { 1, 0, 0 }), rotation.y, { 0, 1, 0 }), rotation.z, { 0, 0, 1 });
+			auto model = glm::rotate(glm::rotate(glm::rotate(glm::mat4(1), glm::radians(rotation.x), { 1, 0, 0 }), glm::radians(rotation.y), { 0, 1, 0 }), glm::radians(rotation.z), { 0, 0, 1 });
+			glm::vec3 eye = model * glm::vec4(0, 0, 0, 1);
+			glm::vec3 center = glm::normalize(model * glm::vec4(0, 0, -1, 1));
+			glm::vec3 up = glm::normalize(glm::vec3(model * glm::vec4(0, 1, 0, 0)));
+			auto view = glm::lookAt(eye, center, up);
 
+			splitInfo.view = view;
 			splitInfo.viewProjection = projection * view;
 		}
 

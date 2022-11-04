@@ -3,6 +3,7 @@
 #include "Rendering/Renderer/TBForwardRenderer.h"
 #include "Rendering/Renderer/AmbientOcclusionRenderer.h"
 #include "Rendering/Renderer/ShadowVisualizationRenderer.h"
+#include "Rendering/Renderer/BuildAssetRenderer.h"
 
 RTTR_REGISTRATION
 {
@@ -21,6 +22,7 @@ AirEngine::Rendering::RenderPipeline::ForwardRenderPipeline::ForwardRenderPipeli
 	UseRenderer("TBForwardRenderer", new Renderer::TBForwardRenderer());
 	UseRenderer("AmbientOcclusionRenderer", new Renderer::AmbientOcclusionRenderer());
 	UseRenderer("ShadowVisualizationRenderer", new Renderer::ShadowVisualizationRenderer());
+	UseRenderer("BuildAssetRenderer", new Renderer::BuildAssetRenderer());
 }
 
 AirEngine::Rendering::RenderPipeline::ForwardRenderPipeline::~ForwardRenderPipeline()
@@ -28,4 +30,5 @@ AirEngine::Rendering::RenderPipeline::ForwardRenderPipeline::~ForwardRenderPipel
 	delete static_cast<Renderer::ForwardRenderer*>(Renderer("ForwardRenderer"));
 	delete static_cast<Renderer::TBForwardRenderer*>(Renderer("TBForwardRenderer"));
 	delete static_cast<Renderer::ShadowVisualizationRenderer*>(Renderer("ShadowVisualizationRenderer"));
+	delete static_cast<Renderer::BuildAssetRenderer*>(Renderer("BuildAssetRenderer"));
 }

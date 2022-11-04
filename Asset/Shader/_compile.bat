@@ -1,6 +1,9 @@
 glslangValidator.exe -t -V TBF_Opaque_Pbr_Shader.vert -IUtils/ -o Spv/TBF_Opaque_Pbr_Shader.vert.spv
 glslangValidator.exe -t -V TBF_Opaque_Pbr_Shader.frag -IUtils/ -o Spv/TBF_Opaque_Pbr_Shader.frag.spv
 
+glslangValidator.exe -t -V SplitHdrToCubeMap_Shader.vert -IUtils/ -o Spv/SplitHdrToCubeMap_Shader.vert.spv
+glslangValidator.exe -t -V SplitHdrToCubeMap_Shader.frag -IUtils/ -o Spv/SplitHdrToCubeMap_Shader.frag.spv
+
 glslangValidator.exe -t -V TBF_Opaque_Pbr_Mirror_Shader.vert -IUtils/ -o Spv/TBF_Opaque_Pbr_Mirror_Shader.vert.spv
 glslangValidator.exe -t -V TBF_Opaque_Pbr_Mirror_Shader.frag -IUtils/ -o Spv/TBF_Opaque_Pbr_Mirror_Shader.frag.spv
 

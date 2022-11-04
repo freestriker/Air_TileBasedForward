@@ -58,8 +58,8 @@ namespace AirEngine
 					Asset::Mesh* _cubeMesh;
 				public:
 					std::string hdrTexturePath;
+					std::string shaderPath;
 					VkExtent2D resolution;
-					VkFormat format;
 
 					CONSTRUCTOR(SplitHdrToCubeMap_RenderFeatureData)
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderFeatureDataBase)

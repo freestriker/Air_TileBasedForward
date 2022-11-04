@@ -296,10 +296,10 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatu
 	auto featureData = static_cast<TBForward_OIT_DepthPeeling_RenderFeatureData*>(renderFeatureData);
 	for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
 	{
-		delete featureData->colorAttachmentArray;
 		delete featureData->frameBuffers[i];
-		delete featureData->depthAttachmentArray;
 	}
+	delete featureData->colorAttachmentArray;
+	delete featureData->depthAttachmentArray;
 	delete featureData->thresholdDepthTexture;
 	delete featureData->blendMaterial;
 	delete featureData->blendFrameBuffer;
