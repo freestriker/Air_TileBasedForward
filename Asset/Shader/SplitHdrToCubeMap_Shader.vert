@@ -14,6 +14,6 @@ layout(push_constant) uniform SamplePointInfo
 
 void main() 
 {
-    worldPosition = (splitInfo.view * vec4(vertexPosition, 1.0)).xyz;
+    worldPosition = (vec4(vertexPosition, 1.0)).xyz;
     gl_Position = splitInfo.viewProjection * vec4(vertexPosition, 1.0);
 }
