@@ -3,7 +3,7 @@
         ["..\\Asset\\Texture\\workshop_2k.exr"]
     ],
     "format": 109,
-    "targetType": 12,
+    "targetType": 0,
     "imageTiling": 0,
     "imageUsageFlags": 4,
     "memoryPropertyFlags": 1,

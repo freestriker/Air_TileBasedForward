@@ -8,7 +8,7 @@
   "cullMode": 0,
   "dstAlphaBlendFactor": 0,
   "dstColorBlendFactor": 0,
-  "shaderPaths": ["..\\Asset\\Shader\\Spv\\SplitHdrToCubeMap_Shader.vert.spv", "..\\Asset\\Shader\\Spv\\SplitHdrToCubeMap_Shader.frag.spv"],
+  "shaderPaths": ["..\\Asset\\Shader\\Spv\\SplitHdrToHdrCubeImage_Shader.vert.spv", "..\\Asset\\Shader\\Spv\\SplitHdrToHdrCubeImage_Shader.frag.spv"],
   "srcAlphaBlendFactor": 0,
   "srcColorBlendFactor": 0,
   "depthTestEnable": 0,

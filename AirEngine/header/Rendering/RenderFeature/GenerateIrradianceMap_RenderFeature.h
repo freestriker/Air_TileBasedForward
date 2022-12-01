@@ -33,41 +33,41 @@ namespace AirEngine
 	{
 		namespace RenderFeature
 		{
-			class SplitHdrToCubeMap_RenderFeature final : public Core::Graphic::Rendering::RenderFeatureBase
+			class GenerateIrradianceMap_RenderFeature final : public Core::Graphic::Rendering::RenderFeatureBase
 			{
 			public:
-				class SplitHdrToCubeMap_RenderPass final : public Core::Graphic::Rendering::RenderPassBase
+				class GenerateIrradianceMap_RenderPass final : public Core::Graphic::Rendering::RenderPassBase
 				{
 				private:
 					void OnPopulateRenderPassSettings(RenderPassSettings& settings)override;
 				public:
-					CONSTRUCTOR(SplitHdrToCubeMap_RenderPass)
+					CONSTRUCTOR(GenerateIrradianceMap_RenderPass)
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderPassBase)
 				};
 
-				class SplitHdrToCubeMap_RenderFeatureData final : public Core::Graphic::Rendering::RenderFeatureDataBase
+				class GenerateIrradianceMap_RenderFeatureData final : public Core::Graphic::Rendering::RenderFeatureDataBase
 				{
-					friend class SplitHdrToCubeMap_RenderFeature;
+					friend class GenerateIrradianceMap_RenderFeature;
 				private:
 					std::array< Core::Graphic::Rendering::FrameBuffer*, 6> _frameBuffers;
-					Core::Graphic::Rendering::Shader* _splitShader;
-					Core::Graphic::Rendering::Material* _splitMaterial;
+					Core::Graphic::Rendering::Shader* _generateShader;
+					Core::Graphic::Rendering::Material* _generateMaterial;
 					Core::Graphic::Instance::Image* _targetCubeImage;
-					Core::Graphic::Instance::Image* _sourceImage;
-					Core::Graphic::Instance::ImageSampler* _sourceImageSampler;
-					Asset::Mesh* _cubeMesh;
+					Core::Graphic::Instance::ImageSampler* _environmentImageSampler;
+					Core::Graphic::Instance::Image* _environmentImage;
+					Asset::Mesh* _boxMesh;
+					uint32_t _sliceIndex;
 				public:
-					std::string hdrTexturePath;
-					std::string shaderPath;
 					VkExtent2D resolution;
+					uint32_t stepCount;
+					uint32_t sliceCount;
+					std::string environmentImagePath;
 
-					Core::Graphic::Instance::Image* EnvironmentImage();
-
-					CONSTRUCTOR(SplitHdrToCubeMap_RenderFeatureData)
+					CONSTRUCTOR(GenerateIrradianceMap_RenderFeatureData)
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderFeatureDataBase)
 				};
 
-				CONSTRUCTOR(SplitHdrToCubeMap_RenderFeature)
+				CONSTRUCTOR(GenerateIrradianceMap_RenderFeature)
 
 			private:
 				Core::Graphic::Rendering::RenderPassBase* _renderPass;

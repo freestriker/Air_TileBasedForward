@@ -106,6 +106,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="header\Rendering\RenderFeature\GenerateIrradianceMap_RenderFeature.h" />
     <ClCompile Include="source\Core\Graphic\Instance\Image.cpp" />
     <ClCompile Include="source\Rendering\Renderer\AmbientOcclusionRenderer.cpp" />
     <ClCompile Include="source\Rendering\Renderer\BuildAssetRenderer.cpp" />
@@ -176,6 +177,7 @@
     <ClCompile Include="source\Rendering\PresentRenderPass.cpp" />
     <ClCompile Include="source\Rendering\Renderer\ForwardRenderer.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\Forward_Transparent_RenderFeature.cpp" />
+    <ClCompile Include="source\Rendering\RenderFeature\GenerateIrradianceMap_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\Geometry_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\GTAO_Occlusion_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\HBAO_Occlusion_RenderFeature.cpp" />

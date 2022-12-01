@@ -18,6 +18,7 @@ vec2 SampleSphericalMap(vec3 v)
 void main() 
 {
     vec3 observeDirection = normalize(worldPosition);
+    observeDirection.z = -observeDirection.z;
     vec2 uv = SampleSphericalMap(observeDirection);
     vec3 hdrColor = texture(hdrTexture, uv).rgb;
     ColorAttachment = vec4(hdrColor, 1);

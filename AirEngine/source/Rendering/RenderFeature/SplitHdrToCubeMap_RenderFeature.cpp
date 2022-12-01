@@ -19,12 +19,12 @@
 #include "Core/Graphic/Instance/Image.h"
 #include <glm/glm.hpp>
 
-#define RIGHT_INDEX 0
-#define LEFT_INDEX 1
-#define TOP_INDEX 2
-#define BOTTOM_INDEX 3
-#define FRONT_INDEX 4
-#define BACK_INDEX 5
+#define X_POSITIVE_INDEX 0
+#define X_NEGATIVE_INDEX 1
+#define Y_POSITIVE_INDEX 2
+#define Y_NEGATIVE_INDEX 3
+#define Z_POSITIVE_INDEX 4
+#define Z_NEGATIVE_INDEX 5
 
 RTTR_REGISTRATION
 {
@@ -68,7 +68,7 @@ void AirEngine::Rendering::RenderFeature::SplitHdrToCubeMap_RenderFeature::Split
 		VK_ATTACHMENT_LOAD_OP_DONT_CARE,
 		VK_ATTACHMENT_STORE_OP_STORE,
 		VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-		VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+		VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
 	);
 	settings.AddSubpass(
 		"DrawSubpass",
@@ -145,7 +145,7 @@ void AirEngine::Rendering::RenderFeature::SplitHdrToCubeMap_RenderFeature::OnRes
 		VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
 		VkImageTiling::VK_IMAGE_TILING_OPTIMAL
 	);
-	for (int i = RIGHT_INDEX; i <= BACK_INDEX; i++)
+	for (int i = X_POSITIVE_INDEX; i <= Z_NEGATIVE_INDEX; i++)
 	{
 		featureData->_targetCubeImage->AddImageView(
 			"ColorAttachmentView_" + std::to_string(i), 
@@ -181,7 +181,7 @@ void AirEngine::Rendering::RenderFeature::SplitHdrToCubeMap_RenderFeature::OnDes
 	Core::IO::CoreObject::Instance::AssetManager().Unload(featureData->_sourceImage);
 	Core::IO::CoreObject::Instance::AssetManager().Unload(featureData->_splitShader);
 	Core::IO::CoreObject::Instance::AssetManager().Unload(featureData->_cubeMesh);
-	for (int i = RIGHT_INDEX; i <= BACK_INDEX; i++)
+	for (int i = X_POSITIVE_INDEX; i <= Z_NEGATIVE_INDEX; i++)
 	{
 		delete featureData->_frameBuffers[i];
 	}
@@ -206,7 +206,7 @@ void AirEngine::Rendering::RenderFeature::SplitHdrToCubeMap_RenderFeature::OnExc
 	commandBuffer->Reset();
 	commandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
 
-	for (int i = RIGHT_INDEX; i <= BACK_INDEX; i++)
+	for (int i = X_POSITIVE_INDEX; i <= Z_NEGATIVE_INDEX; i++)
 	{
 		SplitInfo splitInfo{};
 
@@ -228,34 +228,34 @@ void AirEngine::Rendering::RenderFeature::SplitHdrToCubeMap_RenderFeature::OnExc
 			glm::vec3 rotation{};
 			switch (i)
 			{
-				case RIGHT_INDEX:
+				case X_POSITIVE_INDEX:
 				{
 					rotation = {0, -90, 0};
 					break;
 				}
-				case LEFT_INDEX:
+				case X_NEGATIVE_INDEX:
 				{
 					rotation = { 0, 90, 0 };
 					break;
 				}
-				case TOP_INDEX:
-				{
-					rotation = { -90, 0, 0 };
-					break;
-				}
-				case BOTTOM_INDEX:
+				case Y_POSITIVE_INDEX:
 				{
 					rotation = { 90, 0, 0 };
 					break;
 				}
-				case FRONT_INDEX:
+				case Y_NEGATIVE_INDEX:
 				{
-					rotation = { 0, 180, 0 };
+					rotation = { -90, 0, 0 };
 					break;
 				}
-				case BACK_INDEX:
+				case Z_POSITIVE_INDEX:
 				{
 					rotation = { 0, 0, 0 };
+					break;
+				}
+				case Z_NEGATIVE_INDEX:
+				{
+					rotation = { 0, 180, 0 };
 					break;
 				}
 			}
@@ -288,4 +288,9 @@ void AirEngine::Rendering::RenderFeature::SplitHdrToCubeMap_RenderFeature::OnSub
 void AirEngine::Rendering::RenderFeature::SplitHdrToCubeMap_RenderFeature::OnFinish(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer)
 {
 	commandBuffer->WaitForFinish();
+}
+
+AirEngine::Core::Graphic::Instance::Image* AirEngine::Rendering::RenderFeature::SplitHdrToCubeMap_RenderFeature::SplitHdrToCubeMap_RenderFeatureData::EnvironmentImage()
+{
+	return _targetCubeImage;
 }

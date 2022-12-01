@@ -24,16 +24,18 @@ void AirEngine::Test::CameraMoveBehaviour::OnAwake()
 void AirEngine::Test::CameraMoveBehaviour::OnStart()
 {
 	//const double pi = std::acos(-1.0);
-	//_rotation = std::fmod((_rotation + 90), 360.0f);
+	/////Clockwise
+	//_rotation = std::fmod((_rotation + 270), 360.0f);
 	//float x = std::cos(_rotation / 180 * pi) * 5;
-	//float z = -std::sin(_rotation / 180 * pi) * 5;
+	//float z = std::sin(_rotation / 180 * pi) * 5;
 	//GameObject()->transform.SetTranslation({ x, 0, z });
-	//GameObject()->transform.SetEulerRotation({ 90, 90 - _rotation, -(0) });
+	//GameObject()->transform.SetEulerRotation({ 0, 90 - _rotation, 0 });
 }
 
 void AirEngine::Test::CameraMoveBehaviour::OnUpdate()
 {
 	const double pi = std::acos(-1.0);
+	///Clockwise
 	_rotation = std::fmod((_rotation + 15 * Core::Logic::CoreObject::Instance::time.DeltaDuration()), 360.0f);
 	float x = std::cos(_rotation / 180 * pi) * 5;
 	float z = std::sin(_rotation / 180 * pi) * 5;
