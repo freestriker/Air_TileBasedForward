@@ -333,7 +333,7 @@ void AirEngine::Core::Graphic::Instance::Image::OnLoad(Core::Graphic::Command::C
 					FIBITMAP* bitmap = FreeImage_Load(fileType, path);
 					if (_imageImfo.targetType != FREE_IMAGE_TYPE::FIT_UNKNOWN)
 					{
-						FIBITMAP* newBitmap = FreeImage_ConvertToType(bitmap, _imageImfo.targetType, FALSE);
+						FIBITMAP* newBitmap = FreeImage_ConvertToType(bitmap, _imageImfo.targetType);
 						FreeImage_Unload(bitmap);
 						bitmap = newBitmap;
 					}
@@ -347,7 +347,13 @@ void AirEngine::Core::Graphic::Instance::Image::OnLoad(Core::Graphic::Command::C
 						allLayerByteData = static_cast<BYTE*>(std::malloc(perLayerSize * _layerCount));
 					}
 
-					FreeImage_ConvertToRawBits(allLayerByteData + perLayerSize * layerIndex, bitmap, pitch, pixelDepth, FI_RGBA_RED_MASK, FI_RGBA_GREEN_MASK, FI_RGBA_BLUE_MASK, _imageImfo.topDown ? TRUE : FALSE);
+					if (_imageImfo.topDown)
+					{
+						FreeImage_FlipVertical(bitmap);
+					}
+
+					memcpy(allLayerByteData + perLayerSize * layerIndex, FreeImage_GetBits(bitmap), perLayerSize);
+
 					FreeImage_Unload(bitmap);
 				}
 				else
