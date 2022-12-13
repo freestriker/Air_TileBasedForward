@@ -217,6 +217,7 @@
     <ClCompile Include="source\Utils\Time.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\stb\stb_image.h" />
     <ClInclude Include="header\Asset\AudioClip.h" />
     <ClInclude Include="header\Asset\Mesh.h" />
     <ClInclude Include="header\Audio\AudioListener.h" />
@@ -320,6 +321,7 @@
     <ClInclude Include="header\Utils\OrientedBoundingBox.h" />
     <ClInclude Include="header\Utils\RandomSphericalCoordinateGenerator.h" />
     <ClInclude Include="header\Utils\SpirvReflect.h" />
+    <ClInclude Include="header\Utils\stb_image.h" />
     <ClInclude Include="header\Utils\ThreadBase.h" />
     <ClInclude Include="header\Utils\Time.h" />
     <ClInclude Include="header\Camera\PerspectiveCamera.h" />

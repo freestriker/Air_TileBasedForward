@@ -47,35 +47,31 @@ void main()
         return;
     }
 
-    vec3 viewDirection = normalize(worldPosition);
-    viewDirection.z = -viewDirection.z;
-
-    vec3 xAxis, yAxis, zAxis;
-    // if(abs(viewDirection.z) == 1)
-    // {
-    //     zAxis = viewDirection; 
-    //     yAxis = vec3(0, 1, 0);
-    //     xAxis =  vec3(1, 0, 0);
-    // }
-    // else
+    mat3 matrix;
     {
-        zAxis = viewDirection;
+        vec3 xAxis, yAxis, zAxis;
+        zAxis = normalize(worldPosition);
+        zAxis.z = - zAxis.z;
         yAxis =  normalize(cross(zAxis, vec3(1, 0, 0)));
         xAxis = normalize(cross(yAxis, zAxis));
+        matrix = mat3(xAxis, yAxis, zAxis);
     }
-    
-    uint perSliceStepCount = generateInfo.stepCount / generateInfo.sliceCount;
-    uint startStepIndex = generateInfo.sliceIndex * perSliceStepCount;
-    // uint perSliceStepCount = 1;
-    // uint startStepIndex = 0;
-    vec3 irradiance = vec3(0, 0, 0);
-    for(uint i = 0; i < perSliceStepCount; i++)
-    {
-        vec2 hammersley = Hammersley(startStepIndex + i, generateInfo.stepCount);
-        vec3 displacement = HemisphereSample(hammersley.x, hammersley.y);
-        vec3 sampleDirection = normalize(mat3(xAxis, yAxis, zAxis) * displacement);
 
-        irradiance += texture(environmentImage, sampleDirection).rgb;
+    uint perSliceStepCount = (generateInfo.stepCount + generateInfo.sliceCount - 1) / generateInfo.sliceCount;
+    uint startStepIndex = generateInfo.sliceIndex * perSliceStepCount;
+    vec3 irradiance = vec3(0, 0, 0);
+    for(uint stepOffset = 0; stepOffset < perSliceStepCount; stepOffset++)
+    {
+        uint stepIndex = stepOffset + startStepIndex;
+
+        if(stepIndex >= generateInfo.stepCount) break;
+
+        vec2 hammersley = Hammersley(stepIndex, generateInfo.stepCount);
+        vec3 displacement = HemisphereSample(hammersley.x, hammersley.y);
+        vec3 sampleDirection = normalize(matrix * displacement);
+        
+        vec3 intensity = texture(environmentImage, sampleDirection).rgb;
+        irradiance += intensity;
     }
     irradiance /= float(generateInfo.stepCount);
 
