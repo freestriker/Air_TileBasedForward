@@ -505,13 +505,13 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	directionalLight->intensity = 8;
 	directionalLightGo->AddComponent(directionalLight);
 
-	Logic::Object::GameObject* skyBoxGo = new Logic::Object::GameObject("SkyBox");
-	lights->AddChild(skyBoxGo);
-	auto skyBox = new Light::AmbientLight();
-	skyBox->color = { 1, 1, 1, 1 };
-	skyBox->intensity = 0.8f;
-	skyBox->ambientLightTextureCube = IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>("..\\Asset\\Texture\\DefaultTextureCube.json");
-	skyBoxGo->AddComponent(skyBox);
+	Logic::Object::GameObject* iblGo = new Logic::Object::GameObject("SkyBox");
+	lights->AddChild(iblGo);
+	auto iblLight = new Light::AmbientLight();
+	iblLight->color = { 1, 1, 1, 1 };
+	iblLight->intensity = 0.5f;
+	iblLight->_irradianceCubeImage = IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>("..\\Asset\\Texture\\WorkShop_IrradianceMap_Exr_CubeImage.json");
+	iblGo->AddComponent(iblLight);
 
 	float sr6 = std::pow(6.0f, 0.5f);
 	float sr2 = std::pow(2.0f, 0.5f);

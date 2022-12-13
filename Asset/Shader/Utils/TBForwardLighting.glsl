@@ -37,7 +37,7 @@ layout(set = 2, binding = 0) uniform LightInfos
     LightInfo[MAX_ORTHER_LIGHT_COUNT] ortherLightInfos;
 } lightInfos;
 
-layout(set = 3, binding = 0) uniform samplerCube ambientLightTexture;
+layout(set = 3, binding = 0) uniform samplerCube irradianceCubeImage;
 
 struct LightIndexList
 {
@@ -67,7 +67,7 @@ layout (set = 5, binding = 0) readonly buffer TransparentLightIndexLists
 
 vec3 AmbinentLighting(in vec3 direction)
 {
-    vec4 color  = lightInfos.ambientLightInfo.intensity * lightInfos.ambientLightInfo.color * texture(ambientLightTexture, normalize(direction));
+    vec4 color  = lightInfos.ambientLightInfo.intensity * lightInfos.ambientLightInfo.color * texture(irradianceCubeImage, normalize(direction));
     return color.xyz;
 }
 

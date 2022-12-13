@@ -345,7 +345,7 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatu
 			material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
 			material->SetUniformBuffer("meshObjectInfo", rendererComponent->ObjectInfoBuffer());
 			material->SetUniformBuffer("lightInfos", Core::Graphic::CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
-			material->SetSampledImageCube("ambientLightTexture", ambientLightTexture, _textureSampler);
+			Core::Graphic::CoreObject::Instance::LightManager().SetAmbientLightParameters(material, _textureSampler);
 			material->SetStorageBuffer("transparentLightIndexLists", featureData->transparentLightIndexListsBuffer);
 			material->SetSampledImage2D("thresholdDepthTexture", featureData->thresholdDepthTexture, _textureSampler);
 			material->SetSampledImage2D("depthTexture", featureData->depthTexture, _textureSampler);

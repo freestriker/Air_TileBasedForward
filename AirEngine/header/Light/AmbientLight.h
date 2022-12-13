@@ -16,7 +16,7 @@ namespace AirEngine
 			void OnSetLightInfo(LightInfo& info)override;
 			void OnSetBoundingBoxInfo(std::array<glm::vec4, 8>& boundingBoxVertexes)override;
 		public:
-			Core::Graphic::Instance::Image* ambientLightTextureCube;
+			Core::Graphic::Instance::Image* _irradianceCubeImage;
 
 			AmbientLight();
 			~AmbientLight();

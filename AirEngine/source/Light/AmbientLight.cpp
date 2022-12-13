@@ -23,7 +23,7 @@ void AirEngine::Light::AmbientLight::OnSetBoundingBoxInfo(std::array<glm::vec4, 
 
 AirEngine::Light::AmbientLight::AmbientLight()
 	: LightBase(LightType::AMBIENT)
-	, ambientLightTextureCube(nullptr)
+	, _irradianceCubeImage(nullptr)
 {
 }
 

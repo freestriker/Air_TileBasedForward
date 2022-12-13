@@ -68,8 +68,8 @@ void AirEngine::Rendering::Renderer::BuildAssetRenderer::OnResolveRendererData(C
 	irradianceRenderFeature->environmentImagePath = "..\\Asset\\Texture\\WorkShop_Exr_CubeImage.json";
 	//irradianceRenderFeature->stepCount = 1;
 	//irradianceRenderFeature->sliceCount = 1;
-	irradianceRenderFeature->stepCount = 256 * 256 * 4 * 4;
-	irradianceRenderFeature->sliceCount = 256;
+	irradianceRenderFeature->stepCount = 256 * 256 * 4 * 4 * 4;
+	irradianceRenderFeature->sliceCount = 256 * 4;
 	irradianceRenderFeature->resolution = { 128, 128 };
 }
 
