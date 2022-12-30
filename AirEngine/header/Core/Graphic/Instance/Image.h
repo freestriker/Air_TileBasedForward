@@ -126,7 +126,8 @@ namespace AirEngine
 						VkImageUsageFlags imageUsage,
 						VkMemoryPropertyFlags memoryProperty,
 						VkImageAspectFlags aspect,
-						VkImageTiling imageTiling = VkImageTiling::VK_IMAGE_TILING_OPTIMAL
+						VkImageTiling imageTiling = VkImageTiling::VK_IMAGE_TILING_OPTIMAL,
+						uint32_t mipmapLevelCount = 1
 					);
 
 					Image();
@@ -143,6 +144,7 @@ namespace AirEngine
 					VkImage VkImage_();
 					VkExtent3D VkExtent3D_();
 					VkExtent2D VkExtent2D_();
+					VkExtent2D VkExtent2D_(uint32_t const mipmapLevel) const;
 					uint32_t LayerCount();
 					VkFormat VkFormat_();
 					VkImageUsageFlags VkImageUsageFlags_();

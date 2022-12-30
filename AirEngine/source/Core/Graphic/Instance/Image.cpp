@@ -138,15 +138,30 @@ AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::I
 	return newImage;
 }
 
-AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::Image::CreateCubeImage(VkExtent2D extent, VkFormat format, VkImageUsageFlags imageUsage, VkMemoryPropertyFlags memoryProperty, VkImageAspectFlags aspect, VkImageTiling imageTiling)
+AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::Image::CreateCubeImage(VkExtent2D extent, VkFormat format, VkImageUsageFlags imageUsage, VkMemoryPropertyFlags memoryProperty, VkImageAspectFlags aspect, VkImageTiling imageTiling, uint32_t mipmapLevelCount)
 {
 	auto newImage = new Image();
 
 	newImage->_vkExtent2D = extent;
-	newImage->_vkExtent2Ds.push_back(extent);
+	newImage->_vkExtent2Ds.emplace_back(extent);
+	if(mipmapLevelCount != 1)
+	{
+		uint32_t maxMipmapLevelCount = static_cast<uint32_t>(std::floor(std::log2(std::max(extent.width, extent.height)))) + 1;
+		mipmapLevelCount = std::min(maxMipmapLevelCount, mipmapLevelCount);
+		newImage->_vkExtent2Ds.resize(mipmapLevelCount);
+		for (int levelIndex = 1; levelIndex < mipmapLevelCount; levelIndex++)
+		{
+			newImage->_vkExtent2Ds[levelIndex].width = newImage->_vkExtent2Ds[levelIndex - 1].width / 2 < 1 ? 1 : newImage->_vkExtent2Ds[levelIndex - 1].width / 2;
+			newImage->_vkExtent2Ds[levelIndex].height = newImage->_vkExtent2Ds[levelIndex - 1].height / 2 < 1 ? 1 : newImage->_vkExtent2Ds[levelIndex - 1].height / 2;
+		}
+	}
+	else
+	{
+		newImage->_vkExtent2Ds.resize(1);
+	}
 	newImage->_isNative = false;
 	newImage->_layerCount = 6;
-	newImage->_mipmapLevelCount = 1;
+	newImage->_mipmapLevelCount = mipmapLevelCount;
 	newImage->_imageImfo.mipmapLayerSourcePaths = { };
 	newImage->_imageImfo.format = format;
 	newImage->_imageImfo.imageTiling = imageTiling;
@@ -162,7 +177,7 @@ AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Instance::I
 				0,
 				6,
 				0,
-				1
+				mipmapLevelCount
 			}
 		}
 	};
@@ -288,6 +303,11 @@ VkExtent3D AirEngine::Core::Graphic::Instance::Image::VkExtent3D_()
 VkExtent2D AirEngine::Core::Graphic::Instance::Image::VkExtent2D_()
 {
 	return _vkExtent2D;
+}
+
+VkExtent2D AirEngine::Core::Graphic::Instance::Image::VkExtent2D_(uint32_t const mipmapLevel) const
+{
+	return _vkExtent2Ds[mipmapLevel];
 }
 
 void AirEngine::Core::Graphic::Instance::Image::OnLoad(Core::Graphic::Command::CommandBuffer* transferCommandBuffer)
@@ -465,6 +485,7 @@ void AirEngine::Core::Graphic::Instance::Image::OnLoad(Core::Graphic::Command::C
 				this, "Transfer_Level" + std::to_string(generateLevelIndex - 1), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
 				this, "Transfer_Level" + std::to_string(generateLevelIndex), VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 				VK_FILTER_LINEAR
+				//_imageImfo.imageViewInfos["Transfer_Level" + std::to_string(generateLevelIndex)].imageViewType == VkImageViewType::VK_IMAGE_VIEW_TYPE_CUBE ? VK_FILTER_CUBIC_IMG : VK_FILTER_LINEAR
 			);
 			{
 				Core::Graphic::Command::ImageMemoryBarrier barrier = Core::Graphic::Command::ImageMemoryBarrier(

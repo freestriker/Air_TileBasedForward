@@ -3,7 +3,7 @@
 #include "Core/Graphic/Rendering/RenderPassBase.h"
 #include "Core/Graphic/Instance/Buffer.h"
 #include "Core/Graphic/Instance/Image.h"
-#include <glm/vec2.hpp>
+#include <glm/glm.hpp>
 #include <array>
 
 namespace AirEngine
@@ -36,12 +36,21 @@ namespace AirEngine
 			class GeneratePrefilteredMap_RenderFeature final : public Core::Graphic::Rendering::RenderFeatureBase
 			{
 			public:
-				class GenerateIrradianceMap_RenderPass final : public Core::Graphic::Rendering::RenderPassBase
+				class GeneratePrefilteredMap_Add_RenderPass final : public Core::Graphic::Rendering::RenderPassBase
 				{
 				private:
 					void OnPopulateRenderPassSettings(RenderPassSettings& settings)override;
 				public:
-					CONSTRUCTOR(GenerateIrradianceMap_RenderPass)
+					CONSTRUCTOR(GeneratePrefilteredMap_Add_RenderPass)
+					RTTR_ENABLE(Core::Graphic::Rendering::RenderPassBase)
+				};
+
+				class GeneratePrefilteredMap_Division_RenderPass final : public Core::Graphic::Rendering::RenderPassBase
+				{
+				private:
+					void OnPopulateRenderPassSettings(RenderPassSettings& settings)override;
+				public:
+					CONSTRUCTOR(GeneratePrefilteredMap_Division_RenderPass)
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderPassBase)
 				};
 
@@ -49,12 +58,14 @@ namespace AirEngine
 				{
 					friend class GeneratePrefilteredMap_RenderFeature;
 				private:
-					std::array< Core::Graphic::Rendering::FrameBuffer*, 6> _frameBuffers;
-					Core::Graphic::Rendering::Shader* _generateShader0;
-					Core::Graphic::Rendering::Material* _generateMaterial0;
-					Core::Graphic::Rendering::Shader* _generateShader1;
-					Core::Graphic::Rendering::Material* _generateMaterial1;
-					Core::Graphic::Instance::Buffer* _infoBuffer;
+					std::vector< Core::Graphic::Rendering::FrameBuffer*> _frameBuffers;
+					Core::Graphic::Rendering::Shader* _accumulateShader;
+					Core::Graphic::Rendering::Material* _accumulateMaterial;
+					Core::Graphic::Rendering::Shader* _weightShader;
+					Core::Graphic::Rendering::Material* _weightMaterial;
+					Core::Graphic::Rendering::Shader* _divisionShader;
+					Core::Graphic::Rendering::Material* _divisionMaterial;
+					Core::Graphic::Instance::Buffer* _weightInfoBuffer;
 					Core::Graphic::Instance::Image* _targetCubeImage;
 					Core::Graphic::Instance::ImageSampler* _environmentImageSampler;
 					Core::Graphic::Instance::Image* _environmentImage;
@@ -75,16 +86,22 @@ namespace AirEngine
 				CONSTRUCTOR(GeneratePrefilteredMap_RenderFeature)
 
 			public:
-				struct PushConstantInfo
+				struct AddPushConstantInfo
 				{
 					alignas(4) uint32_t stepCount;
 					alignas(4) uint32_t sliceCount;
 					alignas(4) uint32_t sliceIndex;
 					alignas(4) uint32_t resolution;
 					alignas(4) uint32_t faceIndex;
+					alignas(4) float roughness;
 					alignas(16) glm::mat4 viewProjection;
 				};
-				struct Info
+				struct DivisionPushConstantInfo
+				{
+					alignas(4) uint32_t sliceCount;
+					alignas(4) uint32_t sliceIndex;
+				};
+				struct WeightInfo
 				{
 					alignas(4) float weight;
 				};

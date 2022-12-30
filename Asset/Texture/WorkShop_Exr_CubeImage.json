@@ -13,7 +13,7 @@
     "imageUsageFlags": 4,
     "memoryPropertyFlags": 1,
     "imageCreateFlags": 16,
-    "autoGenerateMipmap": false,
+    "autoGenerateMipmap": true,
     "topDown": true,
     "imageViewInfos": {
         "DefaultImageView": {

@@ -4,6 +4,14 @@ glslangValidator.exe -t -V TBF_Opaque_Pbr_Shader.frag -IUtils/ -o Spv/TBF_Opaque
 glslangValidator.exe -t -V GenerateIrradianceMap_Shader.vert -IUtils/ -o Spv/GenerateIrradianceMap_Shader.vert.spv
 glslangValidator.exe -t -V GenerateIrradianceMap_Shader.frag -IUtils/ -o Spv/GenerateIrradianceMap_Shader.frag.spv
 
+glslangValidator.exe -t -V GeneratePrefilteredMap_Add_Shader.vert -IUtils/ -o Spv/GeneratePrefilteredMap_Add_Shader.vert.spv
+glslangValidator.exe -t -V GeneratePrefilteredMap_Add_Shader.frag -IUtils/ -o Spv/GeneratePrefilteredMap_Add_Shader.frag.spv
+
+glslangValidator.exe -t -V GeneratePrefilteredMap_Weight_Shader.comp -IUtils/ -o Spv/GeneratePrefilteredMap_Weight_Shader.comp.spv
+
+glslangValidator.exe -t -V GeneratePrefilteredMap_Division_Shader.vert -IUtils/ -o Spv/GeneratePrefilteredMap_Division_Shader.vert.spv
+glslangValidator.exe -t -V GeneratePrefilteredMap_Division_Shader.frag -IUtils/ -o Spv/GeneratePrefilteredMap_Division_Shader.frag.spv
+
 glslangValidator.exe -t -V SplitHdrToBackgroundCubeImage_Shader.vert -IUtils/ -o Spv/SplitHdrToBackgroundCubeImage_Shader.vert.spv
 glslangValidator.exe -t -V SplitHdrToBackgroundCubeImage_Shader.frag -IUtils/ -o Spv/SplitHdrToBackgroundCubeImage_Shader.frag.spv
 
