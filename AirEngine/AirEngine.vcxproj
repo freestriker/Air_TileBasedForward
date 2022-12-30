@@ -34,12 +34,12 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
-    <QtInstall>6.2.4_msvc2019_64</QtInstall>
+    <QtInstall>6.4.1_msvc2019_64</QtInstall>
     <QtModules>quick</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
-    <QtInstall>6.2.4_msvc2019_64</QtInstall>
+    <QtInstall>6.4.1_msvc2019_64</QtInstall>
     <QtModules>quick</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
@@ -178,6 +178,7 @@
     <ClCompile Include="source\Rendering\Renderer\ForwardRenderer.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\Forward_Transparent_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\GenerateIrradianceMap_RenderFeature.cpp" />
+    <ClCompile Include="source\Rendering\RenderFeature\GenerateLutMap_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\GeneratePrefilteredMap_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\Geometry_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\GTAO_Occlusion_RenderFeature.cpp" />
@@ -287,6 +288,7 @@
     <ClInclude Include="header\Rendering\RenderFeature\CSM_ShadowCaster_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\Forward_Opaque_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\Forward_Transparent_RenderFeature.h" />
+    <ClInclude Include="header\Rendering\RenderFeature\GenerateLutMap_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\GeneratePrefilteredMap_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\Geometry_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\GTAO_Occlusion_RenderFeature.h" />

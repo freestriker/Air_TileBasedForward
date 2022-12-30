@@ -432,16 +432,12 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::EndRenderPass()
 void AirEngine::Core::Graphic::Command::CommandBuffer::DrawMesh(Asset::Mesh* mesh, Rendering::Material* material)
 {
     auto sets = material->VkDescriptorSets();
-    if (material->Shader()->ShaderType_() == Rendering::Shader::ShaderType::GRAPHIC)
+    vkCmdBindPipeline(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->Shader()->VkPipeline_());
+    if (!sets.empty())
     {
-        vkCmdBindPipeline(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->Shader()->VkPipeline_());
         vkCmdBindDescriptorSets(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->PipelineLayout(), 0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
     }
-    else if (material->Shader()->ShaderType_() == Rendering::Shader::ShaderType::COMPUTE)
-    {
-        vkCmdBindPipeline(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, material->Shader()->VkPipeline_());
-        vkCmdBindDescriptorSets(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, material->PipelineLayout(), 0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
-    }
+
     VkBuffer vertexBuffers[] = { mesh->VertexBuffer().VkBuffer_() };
     VkDeviceSize offsets[] = { 0 };
     vkCmdBindVertexBuffers(_vkCommandBuffer, 0, 1, vertexBuffers, offsets);
@@ -452,16 +448,8 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::DrawMesh(Asset::Mesh* mes
 void AirEngine::Core::Graphic::Command::CommandBuffer::Dispatch(Rendering::Material* material, uint32_t groupCountX, uint32_t groupCountY, uint32_t groupCountZ)
 {
     auto sets = material->VkDescriptorSets();
-    if (material->Shader()->ShaderType_() == Rendering::Shader::ShaderType::GRAPHIC)
-    {
-        vkCmdBindPipeline(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->Shader()->VkPipeline_());
-        vkCmdBindDescriptorSets(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, material->PipelineLayout(), 0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
-    }
-    else if (material->Shader()->ShaderType_() == Rendering::Shader::ShaderType::COMPUTE)
-    {
-        vkCmdBindPipeline(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, material->Shader()->VkPipeline_());
-        vkCmdBindDescriptorSets(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, material->PipelineLayout(), 0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
-    }
+    vkCmdBindPipeline(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, material->Shader()->VkPipeline_());
+    vkCmdBindDescriptorSets(_vkCommandBuffer, VK_PIPELINE_BIND_POINT_COMPUTE, material->PipelineLayout(), 0, static_cast<uint32_t>(sets.size()), sets.data(), 0, nullptr);
     vkCmdDispatch(_vkCommandBuffer, groupCountX, groupCountY, groupCountZ);
 }
 
