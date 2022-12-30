@@ -54,18 +54,32 @@ namespace AirEngine
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderPassBase)
 				};
 
+				class GenerateLutMap_Unpack_RenderPass final : public Core::Graphic::Rendering::RenderPassBase
+				{
+				private:
+					void OnPopulateRenderPassSettings(RenderPassSettings& settings)override;
+				public:
+					CONSTRUCTOR(GenerateLutMap_Unpack_RenderPass)
+					RTTR_ENABLE(Core::Graphic::Rendering::RenderPassBase)
+				};
+
 				class GenerateLutMap_RenderFeatureData final : public Core::Graphic::Rendering::RenderFeatureDataBase
 				{
 					friend class GenerateLutMap_RenderFeature;
 				private:
 					Core::Graphic::Rendering::FrameBuffer* _accumulationFrameBuffer;
 					Core::Graphic::Rendering::FrameBuffer* _packFrameBuffer;
+					Core::Graphic::Rendering::FrameBuffer* _unpackFrameBuffer;
 					Core::Graphic::Rendering::Shader* _accumulationShader;
 					Core::Graphic::Rendering::Material* _accumulationMaterial;
 					Core::Graphic::Rendering::Shader* _packShader;
 					Core::Graphic::Rendering::Material* _packMaterial;
+					Core::Graphic::Rendering::Shader* _unpackShader;
+					Core::Graphic::Rendering::Material* _unpackMaterial;
 					Core::Graphic::Instance::Image* _accumulationImage;
 					Core::Graphic::Instance::Image* _packImage;
+					Core::Graphic::Instance::Image* _unpackSourceImage;
+					Core::Graphic::Instance::Image* _unpackImage;
 					Core::Graphic::Instance::ImageSampler* _sampler;
 					Asset::Mesh* _planeMesh;
 					uint32_t _sliceIndex;
@@ -99,6 +113,7 @@ namespace AirEngine
 			private:
 				Core::Graphic::Rendering::RenderPassBase* _accumulationRenderPass;
 				Core::Graphic::Rendering::RenderPassBase* _packRenderPass;
+				Core::Graphic::Rendering::RenderPassBase* _unpackRenderPass;
 
 				Core::Graphic::Rendering::RenderFeatureDataBase* OnCreateRenderFeatureData(Camera::CameraBase* camera)override;
 				void OnResolveRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera)override;

@@ -10,6 +10,9 @@ glslangValidator.exe -t -V GenerateLutMap_Accumulation_Shader.frag -IUtils/ -o S
 glslangValidator.exe -t -V GenerateLutMap_Pack_Shader.vert -IUtils/ -o Spv/GenerateLutMap_Pack_Shader.vert.spv
 glslangValidator.exe -t -V GenerateLutMap_Pack_Shader.frag -IUtils/ -o Spv/GenerateLutMap_Pack_Shader.frag.spv
 
+glslangValidator.exe -t -V GenerateLutMap_Unpack_Shader.vert -IUtils/ -o Spv/GenerateLutMap_Unpack_Shader.vert.spv
+glslangValidator.exe -t -V GenerateLutMap_Unpack_Shader.frag -IUtils/ -o Spv/GenerateLutMap_Unpack_Shader.frag.spv
+
 glslangValidator.exe -t -V GeneratePrefilteredMap_Add_Shader.vert -IUtils/ -o Spv/GeneratePrefilteredMap_Add_Shader.vert.spv
 glslangValidator.exe -t -V GeneratePrefilteredMap_Add_Shader.frag -IUtils/ -o Spv/GeneratePrefilteredMap_Add_Shader.frag.spv
 

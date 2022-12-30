@@ -34,6 +34,12 @@ RTTR_REGISTRATION
 			rttr::policy::ctor::as_raw_ptr
 		)
 		;
+	rttr::registration::class_<AirEngine::Rendering::RenderFeature::GenerateLutMap_RenderFeature::GenerateLutMap_Unpack_RenderPass>("AirEngine::Rendering::RenderFeature::GenerateLutMap_RenderFeature::GenerateLutMap_Unpack_RenderPass")
+		.constructor<>()
+		(
+			rttr::policy::ctor::as_raw_ptr
+		)
+		;
 	rttr::registration::class_<AirEngine::Rendering::RenderFeature::GenerateLutMap_RenderFeature::GenerateLutMap_RenderFeatureData>("AirEngine::Rendering::RenderFeature::GenerateLutMap_RenderFeature::GenerateLutMap_RenderFeatureData")
 		.constructor<>()
 		(
@@ -110,7 +116,7 @@ void AirEngine::Rendering::RenderFeature::GenerateLutMap_RenderFeature::Generate
 		"PackAttachment",
 		VK_FORMAT_R8G8B8A8_UINT,
 		VK_SAMPLE_COUNT_1_BIT,
-		VK_ATTACHMENT_LOAD_OP_LOAD,
+		VK_ATTACHMENT_LOAD_OP_DONT_CARE,
 		VK_ATTACHMENT_STORE_OP_STORE,
 		VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
 		VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
@@ -138,16 +144,66 @@ void AirEngine::Rendering::RenderFeature::GenerateLutMap_RenderFeature::Generate
 	);
 }
 
+AirEngine::Rendering::RenderFeature::GenerateLutMap_RenderFeature::GenerateLutMap_Unpack_RenderPass::GenerateLutMap_Unpack_RenderPass()
+	: RenderPassBase()
+{
+
+}
+
+AirEngine::Rendering::RenderFeature::GenerateLutMap_RenderFeature::GenerateLutMap_Unpack_RenderPass::~GenerateLutMap_Unpack_RenderPass()
+{
+
+}
+
+void AirEngine::Rendering::RenderFeature::GenerateLutMap_RenderFeature::GenerateLutMap_Unpack_RenderPass::OnPopulateRenderPassSettings(RenderPassSettings& settings)
+{
+	settings.AddColorAttachment(
+		"UnpackAttachment",
+		VK_FORMAT_R32G32_SFLOAT,
+		VK_SAMPLE_COUNT_1_BIT,
+		VK_ATTACHMENT_LOAD_OP_DONT_CARE,
+		VK_ATTACHMENT_STORE_OP_STORE,
+		VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+		VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
+	);
+	settings.AddSubpass(
+		"DrawSubpass",
+		VK_PIPELINE_BIND_POINT_GRAPHICS,
+		{ "UnpackAttachment" }
+	);
+	settings.AddDependency(
+		"VK_SUBPASS_EXTERNAL",
+		"DrawSubpass",
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+		0,
+		0
+	);
+	settings.AddDependency(
+		"DrawSubpass",
+		"VK_SUBPASS_EXTERNAL",
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
+		0,
+		0
+	);
+}
+
 AirEngine::Rendering::RenderFeature::GenerateLutMap_RenderFeature::GenerateLutMap_RenderFeatureData::GenerateLutMap_RenderFeatureData()
 	: RenderFeatureDataBase()
-	, _accumulationFrameBuffer()
-	, _packFrameBuffer()
+	, _accumulationFrameBuffer(nullptr)
+	, _packFrameBuffer(nullptr)
+	, _unpackFrameBuffer(nullptr)
 	, _accumulationShader(nullptr)
 	, _accumulationMaterial(nullptr)
 	, _packShader(nullptr)
 	, _packMaterial(nullptr)
-	, _packImage(nullptr)
+	, _unpackShader(nullptr)
+	, _unpackMaterial(nullptr)
 	, _accumulationImage(nullptr)
+	, _packImage(nullptr)
+	, _unpackSourceImage(nullptr)
+	, _unpackImage(nullptr)
 	, _sampler(nullptr)
 	, _planeMesh(nullptr)
 	, _sliceIndex(0)
@@ -168,6 +224,7 @@ AirEngine::Rendering::RenderFeature::GenerateLutMap_RenderFeature::GenerateLutMa
 	: RenderFeatureBase()
 	, _accumulationRenderPass(Core::Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass<GenerateLutMap_Accumulation_RenderPass>())
 	, _packRenderPass(Core::Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass<GenerateLutMap_Pack_RenderPass>())
+	, _unpackRenderPass(Core::Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass<GenerateLutMap_Unpack_RenderPass>())
 {
 
 }
@@ -176,6 +233,7 @@ AirEngine::Rendering::RenderFeature::GenerateLutMap_RenderFeature::~GenerateLutM
 {
 	Core::Graphic::CoreObject::Instance::RenderPassManager().UnloadRenderPass<GenerateLutMap_Accumulation_RenderPass>();
 	Core::Graphic::CoreObject::Instance::RenderPassManager().UnloadRenderPass<GenerateLutMap_Pack_RenderPass>();
+	Core::Graphic::CoreObject::Instance::RenderPassManager().UnloadRenderPass<GenerateLutMap_Unpack_RenderPass>();
 }
 
 AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering::RenderFeature::GenerateLutMap_RenderFeature::OnCreateRenderFeatureData(Camera::CameraBase* camera)
@@ -219,6 +277,22 @@ void AirEngine::Rendering::RenderFeature::GenerateLutMap_RenderFeature::OnResolv
 		}
 	);
 
+	featureData->_unpackSourceImage = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>("..\\Asset\\Texture\\LutImage.json");
+	featureData->_unpackImage = Core::Graphic::Instance::Image::Create2DImage(
+		featureData->resolution,
+		VK_FORMAT_R32G32_SFLOAT,
+		VkImageUsageFlagBits::VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT,
+		VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+		VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
+		VkImageTiling::VK_IMAGE_TILING_OPTIMAL
+	);
+	featureData->_unpackFrameBuffer = new Core::Graphic::Rendering::FrameBuffer(
+		_unpackRenderPass,
+		{
+			{"UnpackAttachment", featureData->_unpackImage}
+		}
+	);
+
 	featureData->_sampler = new Core::Graphic::Instance::ImageSampler(
 		VkFilter::VK_FILTER_NEAREST,
 		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
@@ -233,6 +307,10 @@ void AirEngine::Rendering::RenderFeature::GenerateLutMap_RenderFeature::OnResolv
 	featureData->_packShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\GenerateLutMap_Pack_Shader.shader");
 	featureData->_packMaterial = new Core::Graphic::Rendering::Material(featureData->_packShader);
 	featureData->_packMaterial->SetSampledImage2D("accumulationImage", featureData->_accumulationImage, featureData->_sampler);
+
+	featureData->_unpackShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\GenerateLutMap_Unpack_Shader.shader");
+	featureData->_unpackMaterial = new Core::Graphic::Rendering::Material(featureData->_unpackShader);
+	featureData->_unpackMaterial->SetSampledImage2D("packImage", featureData->_unpackSourceImage, featureData->_sampler);
 }
 
 void AirEngine::Rendering::RenderFeature::GenerateLutMap_RenderFeature::OnDestroyRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)
@@ -241,6 +319,7 @@ void AirEngine::Rendering::RenderFeature::GenerateLutMap_RenderFeature::OnDestro
 
 	delete featureData->_accumulationFrameBuffer;
 	delete featureData->_packFrameBuffer;
+	delete featureData->_unpackFrameBuffer;
 
 	delete featureData->_accumulationMaterial;
 	Core::IO::CoreObject::Instance::AssetManager().Unload(featureData->_accumulationShader);
@@ -248,8 +327,13 @@ void AirEngine::Rendering::RenderFeature::GenerateLutMap_RenderFeature::OnDestro
 	delete featureData->_packMaterial;
 	Core::IO::CoreObject::Instance::AssetManager().Unload(featureData->_packShader);
 
+	delete featureData->_unpackMaterial;
+	Core::IO::CoreObject::Instance::AssetManager().Unload(featureData->_unpackShader);
+
 	delete featureData->_accumulationImage;
 	delete featureData->_packImage;
+	Core::IO::CoreObject::Instance::AssetManager().Unload(featureData->_unpackSourceImage);
+	delete featureData->_unpackImage;
 	delete featureData->_sampler;
 
 	Core::IO::CoreObject::Instance::AssetManager().Unload(featureData->_planeMesh);
@@ -280,22 +364,13 @@ void AirEngine::Rendering::RenderFeature::GenerateLutMap_RenderFeature::OnExcute
 					VkAccessFlagBits::VK_ACCESS_NONE,
 					VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT
 				);
-				auto packImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
-				(
-					featureData->_packImage,
-					VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-					VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-					VkAccessFlagBits::VK_ACCESS_NONE,
-					VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT
-				);
 				commandBuffer->AddPipelineImageBarrier(
 					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-					{ &accumulationImageBarrier, &packImageBarrier }
+					{ &accumulationImageBarrier }
 				);
 			}
 
 			commandBuffer->ClearColorImage(featureData->_accumulationImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, { 0.0f, 0.0f, 0.0f, 0.0f });
-			commandBuffer->ClearColorImage(featureData->_packImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, { 0u, 0u, 0u, 0u });
 
 			{
 				auto accumulationImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
@@ -309,14 +384,22 @@ void AirEngine::Rendering::RenderFeature::GenerateLutMap_RenderFeature::OnExcute
 				auto packImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
 				(
 					featureData->_packImage,
-					VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+					VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
 					VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-					VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
-					VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT
-				);
+					VkAccessFlagBits::VK_ACCESS_NONE,
+					VkAccessFlagBits::VK_ACCESS_NONE
+				); 
+				auto unpackImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
+				(
+					featureData->_unpackImage,
+					VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+					VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
+					VkAccessFlagBits::VK_ACCESS_NONE,
+					VkAccessFlagBits::VK_ACCESS_NONE
+				); 
 				commandBuffer->AddPipelineImageBarrier(
 					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-					{ &accumulationImageBarrier, &packImageBarrier }
+					{ &accumulationImageBarrier, &packImageBarrier, &unpackImageBarrier }
 				);
 			}
 		}
@@ -367,6 +450,19 @@ void AirEngine::Rendering::RenderFeature::GenerateLutMap_RenderFeature::OnExcute
 		commandBuffer->BeginRenderPass(_packRenderPass, featureData->_packFrameBuffer);
 		commandBuffer->PushConstant(featureData->_packMaterial, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, packInfo);
 		commandBuffer->DrawMesh(featureData->_planeMesh, featureData->_packMaterial);
+		commandBuffer->EndRenderPass();
+	}
+
+	{
+		const PackPushConstantInfo unpackInfo
+		{
+			featureData->stepCount,
+			featureData->resolution.width
+		};
+
+		commandBuffer->BeginRenderPass(_unpackRenderPass, featureData->_unpackFrameBuffer);
+		commandBuffer->PushConstant(featureData->_unpackMaterial, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, unpackInfo);
+		commandBuffer->DrawMesh(featureData->_planeMesh, featureData->_unpackMaterial);
 		commandBuffer->EndRenderPass();
 	}
 
