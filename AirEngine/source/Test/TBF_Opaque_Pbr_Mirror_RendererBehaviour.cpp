@@ -41,7 +41,6 @@ void AirEngine::Test::TBF_Opaque_Pbr_Mirror_RendererBehaviour::OnStart()
 		auto background = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>("..\\Asset\\Texture\\DefaultTextureCube.json");
 		auto shader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\TBF_Opaque_Pbr_Mirror_Shader.shader");
 		auto material = new Core::Graphic::Rendering::Material(shader);
-		material->SetSampledImageCube("backgroundTexture", background, sampler);
 		renderer->AddMaterial(material);
 	}
 

@@ -49,7 +49,7 @@
     "memoryPropertyFlags": 1,
     "imageCreateFlags": 16,
     "autoGenerateMipmap": false,
-    "topDown": false,
+    "topDown": true,
     "imageViewInfos": {
         "DefaultImageView": {
             "imageViewType": 3,

@@ -511,6 +511,8 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	iblLight->color = { 1, 1, 1, 1 };
 	iblLight->intensity = 0.5f;
 	iblLight->_irradianceCubeImage = IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>("..\\Asset\\Texture\\WorkShop_IrradianceMap_Exr_CubeImage.json");
+	iblLight->_prefilteredCubeImage = IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>("..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_CubeImage.json");
+	iblLight->_lutImage = IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>("..\\Asset\\Texture\\LutImage.json");
 	iblGo->AddComponent(iblLight);
 
 	float sr6 = std::pow(6.0f, 0.5f);

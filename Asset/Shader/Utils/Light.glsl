@@ -168,22 +168,35 @@ vec3 PbrLighting(in LightInfo lightInfo, in vec3 wPosition, in vec3 wView, in ve
     return outRadiance;
 }
 
-#define PBR_IBL_LIGHTING(outRadiance, lightInfo, wPosition, wView, wNormal, albedo, roughness, metallic, irradianceImage) \
+#define PBR_IBL_LIGHTING(outRadiance, lightInfo, wPosition, wView, wNormal, albedo, roughness, metallic, irradianceImage, prefilteredImage, lutImage) \
 { \
+    vec3 wiLight = reflect(wView, wNormal); \
     float cosnv = max(dot(wNormal, -wView), 0); \
  \
-    vec3 iblSampleDirection = vec3(wNormal.xy, -wNormal.z); \
+    vec3 normalSampleDirection = vec3(wNormal.xy, -wNormal.z); \
+    vec3 iLightSampleDirection = vec3(wiLight.xy, -wiLight.z); \
+ \
+    float maxPrefilteredImageRoughnessLevelIndex = lightInfo.extraParameter.x; \
  \
     vec3 fresnel; \
     { \
         vec3 F0 = mix(vec3(0.04), albedo, metallic); \
-        fresnel = F0 + (1.0 - F0) * pow(1.0 - cosnv, 5.0); \
+        fresnel = F0 + (max(vec3(1.0 - roughness), F0) - F0) * pow(1.0 - cosnv, 5.0); \
     } \
  \
-    vec3 irradiance = texture(irradianceImage, iblSampleDirection).rgb * lightInfo.color.rgb * lightInfo.intensity; \
-    vec3 diffuse = irradiance * albedo; \
+    vec3 irradiance = texture(irradianceImage, normalSampleDirection).rgb; \
+    vec3 diffuse = (vec3(1.0) - fresnel) * albedo * irradiance; \
  \
-    outRadiance = (vec3(1.0) - fresnel) * diffuse; \
+    vec3 prefiltered = textureLod(prefilteredImage, iLightSampleDirection,  roughness * maxPrefilteredImageRoughnessLevelIndex).rgb; \
+    vec2 parameter = vec2(0, 0); \
+    { \
+        uvec4 packed4 = texture(lutImage, vec2(cosnv, roughness)).rgba; \
+        uint packed = (packed4.r << 24) | (packed4.g << 16) | (packed4.b << 8) | (packed4.a); \
+        parameter = unpackHalf2x16(packed); \
+    } \
+    vec3 specular = prefiltered * (fresnel * parameter.x + parameter.y); \
+ \
+    outRadiance = (diffuse + specular) * lightInfo.color.rgb * lightInfo.intensity; \
 }
 
 vec3 DiffusePointLighting(in LightInfo lightInfo, in vec3 worldNormal, in vec3 worldPosition)

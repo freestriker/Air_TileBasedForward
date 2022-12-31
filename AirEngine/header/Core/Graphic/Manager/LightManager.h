@@ -102,6 +102,8 @@ namespace AirEngine
 
 					LightInfo _ambientLightInfo;
 					Instance::Image* _irradianceCubeImage;
+					Instance::Image* _prefilteredCubeImage;
+					Instance::Image* _lutImage;
 					LightInfo _mainLightInfo;
 					Light::LightBase* _mainLight;
 					int _ortherLightCount;
