@@ -1,0 +1,28 @@
+{
+    "mipmapLayerSourcePaths": [
+        ["..\\Asset\\Texture\\WorkShop_Linear_XPositive.png",
+        "..\\Asset\\Texture\\WorkShop_Linear_XNegative.png",
+        "..\\Asset\\Texture\\WorkShop_Linear_YPositive.png",
+        "..\\Asset\\Texture\\WorkShop_Linear_YNegative.png",
+        "..\\Asset\\Texture\\WorkShop_Linear_ZPositive.png",
+        "..\\Asset\\Texture\\WorkShop_Linear_ZNegative.png"]
+    ],
+    "format": 44,
+    "targetType": 0,
+    "imageTiling": 0,
+    "imageUsageFlags": 4,
+    "memoryPropertyFlags": 1,
+    "imageCreateFlags": 16,
+    "autoGenerateMipmap": false,
+    "topDown": true,
+    "imageViewInfos": {
+        "DefaultImageView": {
+            "imageViewType": 3,
+            "imageAspectFlags": 1,
+            "baseLayer": 0,
+            "layerCount": 6,
+            "baseMipmapLevel": 0,
+            "mipmapLevelCount": 1
+        }
+    }
+}

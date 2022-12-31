@@ -20,11 +20,13 @@ AirEngine::Core::Graphic::Rendering::FrameBuffer::FrameBuffer(Rendering::RenderP
         auto targetAttachment = targetIter->second;
         Utils::Log::Exception("The available attachment's format do not match the render pass.", descriptor.format != targetAttachment->VkFormat_());
         auto viewIter = availableAttachmentViews.find(descriptorPair.first);
-        views.emplace_back(targetAttachment->ImageView_(viewIter == availableAttachmentViews.end() ? "DefaultImageView" : viewIter->second).vkImageView);
+        auto& targetImageView = targetAttachment->ImageView_(viewIter == availableAttachmentViews.end() ? "DefaultImageView" : viewIter->second);
+        views.emplace_back(targetImageView.VkImageView_());
         _attachments.emplace(descriptorPair.first, targetAttachment);
 
-        _extent2D.width = std::max(_extent2D.width, targetAttachment->VkExtent3D_().width);
-        _extent2D.height = std::max(_extent2D.height, targetAttachment->VkExtent3D_().height);
+        auto atrgetImageViewExtent2D = targetAttachment->VkExtent2D_(targetImageView.BaseMipmapLevel());
+        _extent2D.width = std::max(_extent2D.width, atrgetImageViewExtent2D.width);
+        _extent2D.height = std::max(_extent2D.height, atrgetImageViewExtent2D.height);
     }
 
     VkFramebufferCreateInfo framebufferInfo{};

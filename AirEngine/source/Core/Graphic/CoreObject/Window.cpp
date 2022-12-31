@@ -140,14 +140,6 @@ void AirEngine::Core::Graphic::CoreObject::Window::Start()
     _qVulkanInstance->setApiVersion(supportVersion);
     _qVulkanInstance->setLayers(QByteArrayList()
         << "VK_LAYER_KHRONOS_validation"
-        << "VK_LAYER_RENDERDOC_Capture"
-        << "VK_LAYER_GOOGLE_threading"
-        << "VK_LAYER_LUNARG_parameter_validation"
-        << "VK_LAYER_LUNARG_object_tracker"
-        << "VK_LAYER_LUNARG_core_validation"
-        << "VK_LAYER_LUNARG_image"
-        << "VK_LAYER_LUNARG_swapchain"
-        << "VK_LAYER_GOOGLE_unique_objects"
     );
     if (!_qVulkanInstance->create())
         qFatal("Failed to create Vulkan instance: %d", _qVulkanInstance->errorCode());
@@ -155,10 +147,14 @@ void AirEngine::Core::Graphic::CoreObject::Window::Start()
     _window = new VulkanWindow();
     _window->setPreferredColorFormats({VkFormat::VK_FORMAT_B8G8R8A8_SRGB});
     _window->setVulkanInstance(_qVulkanInstance);
+    //auto sde = _window->supportedDeviceExtensions();
+    ////_window->setEnabledFeaturesModifier([](VkPhysicalDeviceFeatures& feature)->void {
+    ////    
+    ////});
     _window->setDeviceExtensions(QByteArrayList()
         << "VK_EXT_shader_atomic_float"
         << VK_KHR_MAINTENANCE1_EXTENSION_NAME
-    );
+    ); 
     auto queuePrioritieMapPtr = new std::map<uint32_t, std::vector<float>>();
     _window->setQueueCreateInfoModifier([](const VkQueueFamilyProperties* properties, uint32_t queueFamilyCount, QList<VkDeviceQueueCreateInfo>& infos)->void
     {
@@ -166,6 +162,7 @@ void AirEngine::Core::Graphic::CoreObject::Window::Start()
         infos[0].queueCount = 4;
         infos[0].pQueuePriorities = p->data();
     });
+    
     _window->resize(800, 450);
     _window->show();
 

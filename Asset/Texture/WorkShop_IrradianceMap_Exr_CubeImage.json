@@ -1,0 +1,28 @@
+{
+    "mipmapLayerSourcePaths": [
+        ["..\\Asset\\Texture\\WorkShop_IrradianceMap_Exr_XPositive.exr",
+        "..\\Asset\\Texture\\WorkShop_IrradianceMap_Exr_XNegative.exr",
+        "..\\Asset\\Texture\\WorkShop_IrradianceMap_Exr_YPositive.exr",
+        "..\\Asset\\Texture\\WorkShop_IrradianceMap_Exr_YNegative.exr",
+        "..\\Asset\\Texture\\WorkShop_IrradianceMap_Exr_ZPositive.exr",
+        "..\\Asset\\Texture\\WorkShop_IrradianceMap_Exr_ZNegative.exr"]
+    ],
+    "format": 109,
+    "targetType": 0,
+    "imageTiling": 0,
+    "imageUsageFlags": 4,
+    "memoryPropertyFlags": 1,
+    "imageCreateFlags": 16,
+    "autoGenerateMipmap": false,
+    "topDown": true,
+    "imageViewInfos": {
+        "DefaultImageView": {
+            "imageViewType": 3,
+            "imageAspectFlags": 1,
+            "baseLayer": 0,
+            "layerCount": 6,
+            "baseMipmapLevel": 0,
+            "mipmapLevelCount": 1
+        }
+    }
+}

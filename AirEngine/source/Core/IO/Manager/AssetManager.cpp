@@ -10,14 +10,13 @@ AirEngine::Core::IO::Manager::AssetManager::~AssetManager()
 {
 }
 
-void AirEngine::Core::IO::Manager::AssetManager::Unload(Asset::AssetBase*& asset)
+void AirEngine::Core::IO::Manager::AssetManager::Unload(Asset::AssetBase* asset)
 {
 	if (asset != nullptr)
 	{
 		std::unique_lock<std::mutex> wrapperLock(asset->_wrapper->mutex);
 
 		asset->_wrapper->referenceCount--;
-		asset = nullptr;
 	}
 }
 

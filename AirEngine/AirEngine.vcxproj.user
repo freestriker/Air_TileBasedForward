@@ -13,9 +13,9 @@
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <QtLastBackgroundBuild>2022-09-21T11:57:33.4965554Z</QtLastBackgroundBuild>
+    <QtLastBackgroundBuild>2022-11-03T12:20:20.3118272Z</QtLastBackgroundBuild>
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <QtLastBackgroundBuild>2022-09-21T11:57:33.5753445Z</QtLastBackgroundBuild>
+    <QtLastBackgroundBuild>2022-11-03T12:20:20.4370022Z</QtLastBackgroundBuild>
   </PropertyGroup>
 </Project>

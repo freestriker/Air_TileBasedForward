@@ -44,13 +44,13 @@ void AirEngine::Test::QuadMoveBehaviour::OnUpdate()
 	if (Core::Logic::CoreObject::Instance::InputManager().KeyStatus(Core::Logic::Manager::InputKeyType::Key_Q) == AirEngine::Core::Logic::Manager::ButtonStatusType::Pressed)
 	{
 		auto t = GameObject()->transform.Translation();
-		t.z += moveSpeed * Core::Logic::CoreObject::Instance::time.DeltaDuration();
+		t.y += moveSpeed * Core::Logic::CoreObject::Instance::time.DeltaDuration();
 		GameObject()->transform.SetTranslation(t);
 	}
 	else if (Core::Logic::CoreObject::Instance::InputManager().KeyStatus(Core::Logic::Manager::InputKeyType::Key_E) == AirEngine::Core::Logic::Manager::ButtonStatusType::Pressed)
 	{
 		auto t = GameObject()->transform.Translation();
-		t.z -= moveSpeed * Core::Logic::CoreObject::Instance::time.DeltaDuration();
+		t.y -= moveSpeed * Core::Logic::CoreObject::Instance::time.DeltaDuration();
 		GameObject()->transform.SetTranslation(t);
 	}
 }

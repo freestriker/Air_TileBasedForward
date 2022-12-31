@@ -20,9 +20,26 @@ void AirEngine::Test::Background_SkyboxRendererBehaviour::OnAwake()
 
 void AirEngine::Test::Background_SkyboxRendererBehaviour::OnStart()
 {
+	//auto mesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\BackgroundMesh.ply");
+	//auto shader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\Background_Hdr_Shader.shader");
+	//auto background = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>("..\\Asset\\Texture\\WorkShop.json");
+	//auto sampler = new Core::Graphic::Instance::ImageSampler(
+	//	VkFilter::VK_FILTER_LINEAR,
+	//	VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
+	//	VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+	//	0.0f,
+	//	VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
+	//);
+	//auto material = new Core::Graphic::Rendering::Material(shader);
+	//material->SetSampledImage2D("backgroundTexture", background, sampler);
+	//auto renderer = GameObject()->GetComponent<Renderer::Renderer>();
+	//renderer->AddMaterial(material);
+	//renderer->mesh = mesh;
+
 	auto mesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\BackgroundMesh.ply");
 	auto shader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\Background_Skybox_Shader.shader");
-	auto background = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>("..\\Asset\\Texture\\SkyImageCube.json");
+	//auto background = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>("..\\Asset\\Texture\\SkyImageCube.json");
+	auto background = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>("..\\Asset\\Texture\\WorkShop_Linear_CubeImage.json");
 	auto sampler = new Core::Graphic::Instance::ImageSampler(
 		VkFilter::VK_FILTER_NEAREST,
 		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
@@ -30,10 +47,8 @@ void AirEngine::Test::Background_SkyboxRendererBehaviour::OnStart()
 		0.0f,
 		VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
 	);
-
 	auto material = new Core::Graphic::Rendering::Material(shader);
 	material->SetSampledImageCube("backgroundTexture", background, sampler);
-
 	auto renderer = GameObject()->GetComponent<Renderer::Renderer>();
 	renderer->AddMaterial(material);
 	renderer->mesh = mesh;

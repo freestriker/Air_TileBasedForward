@@ -34,12 +34,12 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
-    <QtInstall>6.2.4_msvc2019_64</QtInstall>
+    <QtInstall>6.4.1_msvc2019_64</QtInstall>
     <QtModules>quick</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
-    <QtInstall>6.2.4_msvc2019_64</QtInstall>
+    <QtInstall>6.4.1_msvc2019_64</QtInstall>
     <QtModules>quick</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
@@ -106,8 +106,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="header\Rendering\RenderFeature\GenerateIrradianceMap_RenderFeature.h" />
     <ClCompile Include="source\Core\Graphic\Instance\Image.cpp" />
     <ClCompile Include="source\Rendering\Renderer\AmbientOcclusionRenderer.cpp" />
+    <ClCompile Include="source\Rendering\Renderer\BuildAssetRenderer.cpp" />
     <ClCompile Include="source\Rendering\Renderer\ShadowVisualizationRenderer.cpp" />
     <ClCompile Include="source\Rendering\Renderer\TBForwardRenderer.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\AO_Blur_RenderFeature.cpp" />
@@ -175,9 +177,13 @@
     <ClCompile Include="source\Rendering\PresentRenderPass.cpp" />
     <ClCompile Include="source\Rendering\Renderer\ForwardRenderer.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\Forward_Transparent_RenderFeature.cpp" />
+    <ClCompile Include="source\Rendering\RenderFeature\GenerateIrradianceMap_RenderFeature.cpp" />
+    <ClCompile Include="source\Rendering\RenderFeature\GenerateLutMap_RenderFeature.cpp" />
+    <ClCompile Include="source\Rendering\RenderFeature\GeneratePrefilteredMap_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\Geometry_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\GTAO_Occlusion_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\HBAO_Occlusion_RenderFeature.cpp" />
+    <ClCompile Include="source\Rendering\RenderFeature\SplitHdrToCubeMap_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\SSAO_Occlusion_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\TBForward_LightList_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\TBForward_OIT_AlphaBuffer_RenderFeature.cpp" />
@@ -213,6 +219,7 @@
     <ClCompile Include="source\Utils\Time.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\stb\stb_image.h" />
     <ClInclude Include="header\Asset\AudioClip.h" />
     <ClInclude Include="header\Asset\Mesh.h" />
     <ClInclude Include="header\Audio\AudioListener.h" />
@@ -267,6 +274,7 @@
     <ClInclude Include="header\Renderer\Renderer.h" />
     <ClInclude Include="header\Rendering\PresentRenderPass.h" />
     <ClInclude Include="header\Rendering\Renderer\AmbientOcclusionRenderer.h" />
+    <ClInclude Include="header\Rendering\Renderer\BuildAssetRenderer.h" />
     <ClInclude Include="header\Rendering\Renderer\ForwardRenderer.h" />
     <ClInclude Include="header\Rendering\Renderer\ShadowVisualizationRenderer.h" />
     <ClInclude Include="header\Rendering\Renderer\TBForwardRenderer.h" />
@@ -280,9 +288,12 @@
     <ClInclude Include="header\Rendering\RenderFeature\CSM_ShadowCaster_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\Forward_Opaque_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\Forward_Transparent_RenderFeature.h" />
+    <ClInclude Include="header\Rendering\RenderFeature\GenerateLutMap_RenderFeature.h" />
+    <ClInclude Include="header\Rendering\RenderFeature\GeneratePrefilteredMap_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\Geometry_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\GTAO_Occlusion_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\HBAO_Occlusion_RenderFeature.h" />
+    <ClInclude Include="header\Rendering\RenderFeature\SplitHdrToCubeMap_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\SSAO_Occlusion_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\TBForward_LightList_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\TBForward_OIT_AlphaBuffer_RenderFeature.h" />
@@ -314,6 +325,7 @@
     <ClInclude Include="header\Utils\OrientedBoundingBox.h" />
     <ClInclude Include="header\Utils\RandomSphericalCoordinateGenerator.h" />
     <ClInclude Include="header\Utils\SpirvReflect.h" />
+    <ClInclude Include="header\Utils\stb_image.h" />
     <ClInclude Include="header\Utils\ThreadBase.h" />
     <ClInclude Include="header\Utils\Time.h" />
     <ClInclude Include="header\Camera\PerspectiveCamera.h" />

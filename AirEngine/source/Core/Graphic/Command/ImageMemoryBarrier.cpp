@@ -12,7 +12,7 @@ AirEngine::Core::Graphic::Command::ImageMemoryBarrier::ImageMemoryBarrier(Instan
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.image = image->VkImage_();
-	barrier.subresourceRange = image->ImageView_(imageViewName).vkImageSubresourceRange;
+	barrier.subresourceRange = image->ImageView_(imageViewName).VkImageSubresourceRange_();
 	barrier.srcAccessMask = srcAccessFlags;
 	barrier.dstAccessMask = dstAccessFlags;
 }
@@ -27,7 +27,7 @@ AirEngine::Core::Graphic::Command::ImageMemoryBarrier::ImageMemoryBarrier(Instan
 	barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
 	barrier.image = image->VkImage_();
-	barrier.subresourceRange = image->ImageView_().vkImageSubresourceRange;
+	barrier.subresourceRange = image->ImageView_().VkImageSubresourceRange_();
 	barrier.srcAccessMask = srcAccessFlags;
 	barrier.dstAccessMask = dstAccessFlags;
 }

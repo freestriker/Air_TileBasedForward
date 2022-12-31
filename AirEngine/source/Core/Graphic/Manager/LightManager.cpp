@@ -8,7 +8,9 @@
 AirEngine::Core::Graphic::Manager::LightManager::LightManager()
 	: _forwardLightInfosBuffer(nullptr)
 	, _tileBasedForwardLightInfosBuffer(nullptr)
-	, _ambientTextureCube(nullptr)
+	, _irradianceCubeImage(nullptr)
+	, _prefilteredCubeImage(nullptr)
+	, _lutImage(nullptr)
 	, _ambientLightInfo()
 	, _mainLightInfo()
 	, _ortherLightInfos()
@@ -65,7 +67,9 @@ void AirEngine::Core::Graphic::Manager::LightManager::SetLightInfo(std::vector<L
 	{
 		auto data = skyBoxIterator->second->GetLightInfo();
 		_ambientLightInfo = *reinterpret_cast<const LightInfo*>(data);
-		_ambientTextureCube = static_cast<Light::AmbientLight*>(skyBoxIterator->second)->ambientLightTextureCube;
+		_irradianceCubeImage = static_cast<Light::AmbientLight*>(skyBoxIterator->second)->_irradianceCubeImage;
+		_prefilteredCubeImage = static_cast<Light::AmbientLight*>(skyBoxIterator->second)->_prefilteredCubeImage;
+		_lutImage = static_cast<Light::AmbientLight*>(skyBoxIterator->second)->_lutImage;
 	}
 	else
 	{
@@ -140,7 +144,7 @@ void AirEngine::Core::Graphic::Manager::LightManager::SetLightInfo(std::vector<L
 
 AirEngine::Core::Graphic::Instance::Image* AirEngine::Core::Graphic::Manager::LightManager::AmbientTextureCube()
 {
-	return _ambientTextureCube;
+	return _irradianceCubeImage;
 }
 
 AirEngine::Core::Graphic::Instance::Buffer* AirEngine::Core::Graphic::Manager::LightManager::ForwardLightInfosBuffer()
@@ -166,4 +170,11 @@ AirEngine::Core::Graphic::Manager::LightManager::LightInfo AirEngine::Core::Grap
 AirEngine::Light::LightBase* AirEngine::Core::Graphic::Manager::LightManager::MainLight()
 {
 	return _mainLight;
+}
+
+void AirEngine::Core::Graphic::Manager::LightManager::SetAmbientLightParameters(Rendering::Material* material, Instance::ImageSampler* sampler) const
+{
+	material->SetSampledImageCube("irradianceCubeImage", _irradianceCubeImage, sampler);
+	material->SetSampledImageCube("prefilteredCubeImage", _prefilteredCubeImage, sampler);
+	material->SetSampledImage2D("lutImage", _lutImage, sampler);
 }

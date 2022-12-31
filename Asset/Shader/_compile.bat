@@ -1,6 +1,32 @@
 glslangValidator.exe -t -V TBF_Opaque_Pbr_Shader.vert -IUtils/ -o Spv/TBF_Opaque_Pbr_Shader.vert.spv
 glslangValidator.exe -t -V TBF_Opaque_Pbr_Shader.frag -IUtils/ -o Spv/TBF_Opaque_Pbr_Shader.frag.spv
 
+glslangValidator.exe -t -V GenerateIrradianceMap_Shader.vert -IUtils/ -o Spv/GenerateIrradianceMap_Shader.vert.spv
+glslangValidator.exe -t -V GenerateIrradianceMap_Shader.frag -IUtils/ -o Spv/GenerateIrradianceMap_Shader.frag.spv
+
+glslangValidator.exe -t -V GenerateLutMap_Accumulation_Shader.vert -IUtils/ -o Spv/GenerateLutMap_Accumulation_Shader.vert.spv
+glslangValidator.exe -t -V GenerateLutMap_Accumulation_Shader.frag -IUtils/ -o Spv/GenerateLutMap_Accumulation_Shader.frag.spv
+
+glslangValidator.exe -t -V GenerateLutMap_Pack_Shader.vert -IUtils/ -o Spv/GenerateLutMap_Pack_Shader.vert.spv
+glslangValidator.exe -t -V GenerateLutMap_Pack_Shader.frag -IUtils/ -o Spv/GenerateLutMap_Pack_Shader.frag.spv
+
+glslangValidator.exe -t -V GenerateLutMap_Unpack_Shader.vert -IUtils/ -o Spv/GenerateLutMap_Unpack_Shader.vert.spv
+glslangValidator.exe -t -V GenerateLutMap_Unpack_Shader.frag -IUtils/ -o Spv/GenerateLutMap_Unpack_Shader.frag.spv
+
+glslangValidator.exe -t -V GeneratePrefilteredMap_Add_Shader.vert -IUtils/ -o Spv/GeneratePrefilteredMap_Add_Shader.vert.spv
+glslangValidator.exe -t -V GeneratePrefilteredMap_Add_Shader.frag -IUtils/ -o Spv/GeneratePrefilteredMap_Add_Shader.frag.spv
+
+glslangValidator.exe -t -V GeneratePrefilteredMap_Weight_Shader.comp -IUtils/ -o Spv/GeneratePrefilteredMap_Weight_Shader.comp.spv
+
+glslangValidator.exe -t -V GeneratePrefilteredMap_Division_Shader.vert -IUtils/ -o Spv/GeneratePrefilteredMap_Division_Shader.vert.spv
+glslangValidator.exe -t -V GeneratePrefilteredMap_Division_Shader.frag -IUtils/ -o Spv/GeneratePrefilteredMap_Division_Shader.frag.spv
+
+glslangValidator.exe -t -V SplitHdrToBackgroundCubeImage_Shader.vert -IUtils/ -o Spv/SplitHdrToBackgroundCubeImage_Shader.vert.spv
+glslangValidator.exe -t -V SplitHdrToBackgroundCubeImage_Shader.frag -IUtils/ -o Spv/SplitHdrToBackgroundCubeImage_Shader.frag.spv
+
+glslangValidator.exe -t -V SplitHdrToHdrCubeImage_Shader.vert -IUtils/ -o Spv/SplitHdrToHdrCubeImage_Shader.vert.spv
+glslangValidator.exe -t -V SplitHdrToHdrCubeImage_Shader.frag -IUtils/ -o Spv/SplitHdrToHdrCubeImage_Shader.frag.spv
+
 glslangValidator.exe -t -V TBF_Opaque_Pbr_Mirror_Shader.vert -IUtils/ -o Spv/TBF_Opaque_Pbr_Mirror_Shader.vert.spv
 glslangValidator.exe -t -V TBF_Opaque_Pbr_Mirror_Shader.frag -IUtils/ -o Spv/TBF_Opaque_Pbr_Mirror_Shader.frag.spv
 
@@ -27,6 +53,9 @@ glslangValidator.exe -t -V TBF_Opaque_White_Shader.frag -IUtils/ -o Spv/TBF_Opaq
 
 glslangValidator.exe -t -V Background_Skybox_Shader.vert -IUtils/ -o Spv/Background_Skybox_Shader.vert.spv
 glslangValidator.exe -t -V Background_Skybox_Shader.frag -IUtils/ -o Spv/Background_Skybox_Shader.frag.spv
+
+glslangValidator.exe -t -V Background_Hdr_Shader.vert -IUtils/ -o Spv/Background_Hdr_Shader.vert.spv
+glslangValidator.exe -t -V Background_Hdr_Shader.frag -IUtils/ -o Spv/Background_Hdr_Shader.frag.spv
 
 glslangValidator.exe -t -V F_Transparent_BrokenGlass_Shader.vert -IUtils/ -o Spv/F_Transparent_BrokenGlass_Shader.vert.spv
 glslangValidator.exe -t -V F_Transparent_BrokenGlass_Shader.frag -IUtils/ -o Spv/F_Transparent_BrokenGlass_Shader.frag.spv

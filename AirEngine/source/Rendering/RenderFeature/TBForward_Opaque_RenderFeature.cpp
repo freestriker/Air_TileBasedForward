@@ -239,7 +239,7 @@ void AirEngine::Rendering::RenderFeature::TBForward_Opaque_RenderFeature::OnExcu
 			material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
 			material->SetUniformBuffer("meshObjectInfo", rendererComponent->ObjectInfoBuffer());
 			material->SetUniformBuffer("lightInfos", Core::Graphic::CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
-			material->SetSampledImageCube("ambientLightTexture", ambientLightTexture, _sampler);
+			Core::Graphic::CoreObject::Instance::LightManager().SetAmbientLightParameters(material, _sampler);
 			material->SetStorageBuffer("opaqueLightIndexLists", featureData->opaqueLightIndexListsBuffer);
 
 			if (shadowRenderFeatureData)

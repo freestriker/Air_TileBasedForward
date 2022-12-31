@@ -296,10 +296,10 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatu
 	auto featureData = static_cast<TBForward_OIT_DepthPeeling_RenderFeatureData*>(renderFeatureData);
 	for (int i = 0; i < DEPTH_PEELING_STEP_COUNT; i++)
 	{
-		delete featureData->colorAttachmentArray;
 		delete featureData->frameBuffers[i];
-		delete featureData->depthAttachmentArray;
 	}
+	delete featureData->colorAttachmentArray;
+	delete featureData->depthAttachmentArray;
 	delete featureData->thresholdDepthTexture;
 	delete featureData->blendMaterial;
 	delete featureData->blendFrameBuffer;
@@ -345,7 +345,7 @@ void AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatu
 			material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
 			material->SetUniformBuffer("meshObjectInfo", rendererComponent->ObjectInfoBuffer());
 			material->SetUniformBuffer("lightInfos", Core::Graphic::CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
-			material->SetSampledImageCube("ambientLightTexture", ambientLightTexture, _textureSampler);
+			Core::Graphic::CoreObject::Instance::LightManager().SetAmbientLightParameters(material, _textureSampler);
 			material->SetStorageBuffer("transparentLightIndexLists", featureData->transparentLightIndexListsBuffer);
 			material->SetSampledImage2D("thresholdDepthTexture", featureData->thresholdDepthTexture, _textureSampler);
 			material->SetSampledImage2D("depthTexture", featureData->depthTexture, _textureSampler);

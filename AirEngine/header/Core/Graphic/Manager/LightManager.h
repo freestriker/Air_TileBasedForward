@@ -29,11 +29,16 @@ namespace AirEngine
 			{
 				class Buffer;
 				class Image;
+				class ImageSampler;
 			}
 			namespace Command
 			{
 				class CommandPool;
 				class CommandBuffer;
+			}
+			namespace Rendering
+			{
+				class Material;
 			}
 			namespace Manager
 			{
@@ -89,13 +94,16 @@ namespace AirEngine
 					Instance::Buffer* TileBasedForwardLightBoundindBoxInfosBuffer();
 					LightInfo MainLightInfo();
 					Light::LightBase* MainLight();
+					void SetAmbientLightParameters(Rendering::Material* material, Instance::ImageSampler* sampler) const;
 				private:
 					Instance::Buffer* _forwardLightInfosBuffer;
 					Instance::Buffer* _tileBasedForwardLightInfosBuffer;
 					Instance::Buffer* _tileBasedForwardLightBoundingBoxInfosBuffer;
 
 					LightInfo _ambientLightInfo;
-					Instance::Image* _ambientTextureCube;
+					Instance::Image* _irradianceCubeImage;
+					Instance::Image* _prefilteredCubeImage;
+					Instance::Image* _lutImage;
 					LightInfo _mainLightInfo;
 					Light::LightBase* _mainLight;
 					int _ortherLightCount;

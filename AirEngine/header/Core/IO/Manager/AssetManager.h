@@ -44,7 +44,7 @@ namespace AirEngine
 					std::future< TAsset*> LoadAsync(std::string path);
 					template<typename TAsset>
 					TAsset* Load(std::string path);
-					void Unload(Asset::AssetBase*& asset);
+					void Unload(Asset::AssetBase* asset);
 					void Unload(std::string path);
 					void Collect();
 				};

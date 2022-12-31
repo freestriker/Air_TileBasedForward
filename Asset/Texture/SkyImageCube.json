@@ -1,23 +1,28 @@
 {
-    "subresourcePaths": [
-        "..\\Asset\\Texture\\DefaultTextureCube_Right.png",
-        "..\\Asset\\Texture\\DefaultTextureCube_Left.png",
-        "..\\Asset\\Texture\\DefaultTextureCube_Front.png",
-        "..\\Asset\\Texture\\DefaultTextureCube_Back.png",
-        "..\\Asset\\Texture\\DefaultTextureCube_Top.png",
-        "..\\Asset\\Texture\\DefaultTextureCube_Bottom.png"
+    "mipmapLayerSourcePaths": [
+        ["..\\Asset\\Texture\\Sky_Right.png",
+        "..\\Asset\\Texture\\Sky_Left.png",
+        "..\\Asset\\Texture\\Sky_Top.png",
+        "..\\Asset\\Texture\\Sky_Bottom.png",
+        "..\\Asset\\Texture\\Sky_Front.png",
+        "..\\Asset\\Texture\\Sky_Back.png"]
     ],
     "format": 50,
+    "targetType": 0,
     "imageTiling": 0,
     "imageUsageFlags": 4,
     "memoryPropertyFlags": 1,
     "imageCreateFlags": 16,
+    "autoGenerateMipmap": false,
+    "topDown": true,
     "imageViewInfos": {
         "DefaultImageView": {
             "imageViewType": 3,
             "imageAspectFlags": 1,
-            "baseArrayLayer": 0,
-            "layerCount": 6
+            "baseLayer": 0,
+            "layerCount": 6,
+            "baseMipmapLevel": 0,
+            "mipmapLevelCount": 1
         }
     }
 }
