@@ -29,8 +29,8 @@ AirEngine::Rendering::Renderer::BuildAssetRenderer::BuildAssetRenderer()
 	UseRenderFeature("Background_RenderFeature", new RenderFeature::Background_RenderFeature());
 	//UseRenderFeature("SplitHdrToHdrCubeImage_RenderFeature", new RenderFeature::SplitHdrToCubeMap_RenderFeature());
 	//UseRenderFeature("SplitHdrToBackgroundCubeImage_RenderFeature", new RenderFeature::SplitHdrToCubeMap_RenderFeature());
-	UseRenderFeature("GenerateIrradianceMap_RenderFeature", new RenderFeature::GenerateIrradianceMap_RenderFeature());
-	//UseRenderFeature("GeneratePrefilteredMap_RenderFeature", new RenderFeature::GeneratePrefilteredMap_RenderFeature());
+	//UseRenderFeature("GenerateIrradianceMap_RenderFeature", new RenderFeature::GenerateIrradianceMap_RenderFeature());
+	UseRenderFeature("GeneratePrefilteredMap_RenderFeature", new RenderFeature::GeneratePrefilteredMap_RenderFeature());
 	//UseRenderFeature("GenerateLutMap_RenderFeature", new RenderFeature::GenerateLutMap_RenderFeature());
 }
 
@@ -68,18 +68,18 @@ void AirEngine::Rendering::Renderer::BuildAssetRenderer::OnResolveRendererData(C
 	//toBackgroundRenderFeature->shaderPath = "..\\Asset\\Shader\\SplitHdrToBackgroundCubeImage_Shader.shader";
 	//toBackgroundRenderFeature->resolution = { 1024, 1024 };
 
-	auto irradianceRenderFeature = static_cast<RenderFeature::GenerateIrradianceMap_RenderFeature::GenerateIrradianceMap_RenderFeatureData*>(rendererData->RenderFeatureData("GenerateIrradianceMap_RenderFeature"));
-	irradianceRenderFeature->environmentImagePath = "..\\Asset\\Texture\\WorkShop_Exr_CubeImage.json";
-	irradianceRenderFeature->stepCount = 256 * 256 * 4 * 2 * 2;
-	irradianceRenderFeature->sliceCount = 256 * 4 * 2;
-	irradianceRenderFeature->resolution = { 512, 512 };
-
-	//auto irradianceRenderFeature = static_cast<RenderFeature::GeneratePrefilteredMap_RenderFeature::GeneratePrefilteredMap_RenderFeatureData*>(rendererData->RenderFeatureData("GeneratePrefilteredMap_RenderFeature"));
+	//auto irradianceRenderFeature = static_cast<RenderFeature::GenerateIrradianceMap_RenderFeature::GenerateIrradianceMap_RenderFeatureData*>(rendererData->RenderFeatureData("GenerateIrradianceMap_RenderFeature"));
 	//irradianceRenderFeature->environmentImagePath = "..\\Asset\\Texture\\WorkShop_Exr_CubeImage.json";
-	//irradianceRenderFeature->stepCount = 256 * 256 * 4 * 2;
-	//irradianceRenderFeature->sliceCount = 256 * 4;
+	//irradianceRenderFeature->stepCount = 256 * 256 * 4 * 2 * 2;
+	//irradianceRenderFeature->sliceCount = 256 * 4 * 2;
 	//irradianceRenderFeature->resolution = { 512, 512 };
-	//irradianceRenderFeature->roughnessLevelCount = 5;
+
+	auto prefilteredRenderFeature = static_cast<RenderFeature::GeneratePrefilteredMap_RenderFeature::GeneratePrefilteredMap_RenderFeatureData*>(rendererData->RenderFeatureData("GeneratePrefilteredMap_RenderFeature"));
+	prefilteredRenderFeature->environmentImagePath = "..\\Asset\\Texture\\WorkShop_Exr_CubeImage.json";
+	prefilteredRenderFeature->stepCount = 256 * 256 * 4 * 4;
+	prefilteredRenderFeature->sliceCount = 256 * 4;
+	prefilteredRenderFeature->resolution = { 512, 512 };
+	prefilteredRenderFeature->roughnessLevelCount = 5;
 
 	//auto lutRenderFeature = static_cast<RenderFeature::GenerateLutMap_RenderFeature::GenerateLutMap_RenderFeatureData*>(rendererData->RenderFeatureData("GenerateLutMap_RenderFeature"));
 	//lutRenderFeature->stepCount = 256 * 256 * 4;
@@ -97,8 +97,8 @@ void AirEngine::Rendering::Renderer::BuildAssetRenderer::PrepareRenderer(Core::G
 	PrepareRenderFeature("Background_RenderFeature", rendererData);
 	//PrepareRenderFeature("SplitHdrToHdrCubeImage_RenderFeature", rendererData);
 	//PrepareRenderFeature("SplitHdrToBackgroundCubeImage_RenderFeature", rendererData);
-	PrepareRenderFeature("GenerateIrradianceMap_RenderFeature", rendererData);
-	//PrepareRenderFeature("GeneratePrefilteredMap_RenderFeature", rendererData);
+	//PrepareRenderFeature("GenerateIrradianceMap_RenderFeature", rendererData);
+	PrepareRenderFeature("GeneratePrefilteredMap_RenderFeature", rendererData);
 	//PrepareRenderFeature("GenerateLutMap_RenderFeature", rendererData);
 }
 
@@ -107,8 +107,8 @@ void AirEngine::Rendering::Renderer::BuildAssetRenderer::ExcuteRenderer(Core::Gr
 	ExcuteRenderFeature("Background_RenderFeature", rendererData, camera, rendererComponents);
 	//ExcuteRenderFeature("SplitHdrToHdrCubeImage_RenderFeature", rendererData, camera, rendererComponents);
 	//ExcuteRenderFeature("SplitHdrToBackgroundCubeImage_RenderFeature", rendererData, camera, rendererComponents);
-	ExcuteRenderFeature("GenerateIrradianceMap_RenderFeature", rendererData, camera, rendererComponents);
-	//ExcuteRenderFeature("GeneratePrefilteredMap_RenderFeature", rendererData, camera, rendererComponents);
+	//ExcuteRenderFeature("GenerateIrradianceMap_RenderFeature", rendererData, camera, rendererComponents);
+	ExcuteRenderFeature("GeneratePrefilteredMap_RenderFeature", rendererData, camera, rendererComponents);
 	//ExcuteRenderFeature("GenerateLutMap_RenderFeature", rendererData, camera, rendererComponents);
 }
 
@@ -117,8 +117,8 @@ void AirEngine::Rendering::Renderer::BuildAssetRenderer::SubmitRenderer(Core::Gr
 	SubmitRenderFeature("Background_RenderFeature", rendererData);
 	//SubmitRenderFeature("SplitHdrToHdrCubeImage_RenderFeature", rendererData);
 	//SubmitRenderFeature("SplitHdrToBackgroundCubeImage_RenderFeature", rendererData);
-	SubmitRenderFeature("GenerateIrradianceMap_RenderFeature", rendererData);
-	//SubmitRenderFeature("GeneratePrefilteredMap_RenderFeature", rendererData);
+	//SubmitRenderFeature("GenerateIrradianceMap_RenderFeature", rendererData);
+	SubmitRenderFeature("GeneratePrefilteredMap_RenderFeature", rendererData);
 	//SubmitRenderFeature("GenerateLutMap_RenderFeature", rendererData);
 }
 
@@ -127,7 +127,7 @@ void AirEngine::Rendering::Renderer::BuildAssetRenderer::FinishRenderer(Core::Gr
 	FinishRenderFeature("Background_RenderFeature", rendererData);
 	//FinishRenderFeature("SplitHdrToHdrCubeImage_RenderFeature", rendererData);
 	//FinishRenderFeature("SplitHdrToBackgroundCubeImage_RenderFeature", rendererData);
-	FinishRenderFeature("GenerateIrradianceMap_RenderFeature", rendererData);
-	//FinishRenderFeature("GeneratePrefilteredMap_RenderFeature", rendererData);
+	//FinishRenderFeature("GenerateIrradianceMap_RenderFeature", rendererData);
+	FinishRenderFeature("GeneratePrefilteredMap_RenderFeature", rendererData);
 	//FinishRenderFeature("GenerateLutMap_RenderFeature", rendererData);
 }

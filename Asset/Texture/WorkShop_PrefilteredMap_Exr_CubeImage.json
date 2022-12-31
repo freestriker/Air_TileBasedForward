@@ -1,0 +1,63 @@
+{
+    "mipmapLayerSourcePaths": 
+    [
+        [
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness0.00_XPositive.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness0.00_XNegative.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness0.00_YPositive.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness0.00_YNegative.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness0.00_ZPositive.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness0.00_ZNegative.exr"
+        ],
+        [
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness0.25_XPositive.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness0.25_XNegative.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness0.25_YPositive.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness0.25_YNegative.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness0.25_ZPositive.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness0.25_ZNegative.exr"
+        ],
+        [
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness0.50_XPositive.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness0.50_XNegative.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness0.50_YPositive.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness0.50_YNegative.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness0.50_ZPositive.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness0.50_ZNegative.exr"
+        ],
+        [
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness0.75_XPositive.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness0.75_XNegative.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness0.75_YPositive.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness0.75_YNegative.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness0.75_ZPositive.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness0.75_ZNegative.exr"
+        ],
+        [
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness1.00_XPositive.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness1.00_XNegative.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness1.00_YPositive.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness1.00_YNegative.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness1.00_ZPositive.exr",
+            "..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_Rougness1.00_ZNegative.exr"
+        ]
+    ],
+    "format": 109,
+    "targetType": 0,
+    "imageTiling": 0,
+    "imageUsageFlags": 4,
+    "memoryPropertyFlags": 1,
+    "imageCreateFlags": 16,
+    "autoGenerateMipmap": false,
+    "topDown": false,
+    "imageViewInfos": {
+        "DefaultImageView": {
+            "imageViewType": 3,
+            "imageAspectFlags": 1,
+            "baseLayer": 0,
+            "layerCount": 6,
+            "baseMipmapLevel": 0,
+            "mipmapLevelCount": 5
+        }
+    }
+}
