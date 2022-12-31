@@ -16,6 +16,6 @@ layout(push_constant) uniform GenerateVertexStageInfo
 
 void main() 
 {
-    worldPosition = (vec4(vertexPosition, 1.0)).xyz;
+    worldPosition = vertexPosition;
     gl_Position = generateInfo.viewProjection * vec4(vertexPosition, 1.0);
 }
