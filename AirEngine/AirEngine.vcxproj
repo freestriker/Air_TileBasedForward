@@ -219,7 +219,6 @@
     <ClCompile Include="source\Utils\Time.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\stb\stb_image.h" />
     <ClInclude Include="header\Asset\AudioClip.h" />
     <ClInclude Include="header\Asset\Mesh.h" />
     <ClInclude Include="header\Audio\AudioListener.h" />

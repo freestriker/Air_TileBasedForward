@@ -185,7 +185,7 @@ vec3 PbrLighting(in LightInfo lightInfo, in vec3 wPosition, in vec3 wView, in ve
     } \
  \
     vec3 irradiance = texture(irradianceImage, normalSampleDirection).rgb; \
-    vec3 diffuse = (vec3(1.0) - fresnel) * albedo * irradiance; \
+    vec3 diffuse = (vec3(1.0) - fresnel) * (1 - metallic) * albedo * irradiance; \
  \
     vec3 prefiltered = textureLod(prefilteredImage, iLightSampleDirection,  roughness * maxPrefilteredImageRoughnessLevelIndex).rgb; \
     vec2 parameter = vec2(0, 0); \
