@@ -36,21 +36,12 @@ namespace AirEngine
 			class GeneratePrefilteredMap_RenderFeature final : public Core::Graphic::Rendering::RenderFeatureBase
 			{
 			public:
-				class GeneratePrefilteredMap_Add_RenderPass final : public Core::Graphic::Rendering::RenderPassBase
+				class GeneratePrefilteredMap_RenderPass final : public Core::Graphic::Rendering::RenderPassBase
 				{
 				private:
 					void OnPopulateRenderPassSettings(RenderPassSettings& settings)override;
 				public:
-					CONSTRUCTOR(GeneratePrefilteredMap_Add_RenderPass)
-					RTTR_ENABLE(Core::Graphic::Rendering::RenderPassBase)
-				};
-
-				class GeneratePrefilteredMap_Division_RenderPass final : public Core::Graphic::Rendering::RenderPassBase
-				{
-				private:
-					void OnPopulateRenderPassSettings(RenderPassSettings& settings)override;
-				public:
-					CONSTRUCTOR(GeneratePrefilteredMap_Division_RenderPass)
+					CONSTRUCTOR(GeneratePrefilteredMap_RenderPass)
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderPassBase)
 				};
 
@@ -59,18 +50,13 @@ namespace AirEngine
 					friend class GeneratePrefilteredMap_RenderFeature;
 				private:
 					std::vector< Core::Graphic::Rendering::FrameBuffer*> _frameBuffers;
-					Core::Graphic::Rendering::Shader* _accumulateShader;
-					Core::Graphic::Rendering::Material* _accumulateMaterial;
-					Core::Graphic::Rendering::Shader* _weightShader;
-					Core::Graphic::Rendering::Material* _weightMaterial;
-					Core::Graphic::Rendering::Shader* _divisionShader;
-					Core::Graphic::Rendering::Material* _divisionMaterial;
+					Core::Graphic::Rendering::Shader* _generateShader;
+					Core::Graphic::Rendering::Material* _generateMaterial;
 					Core::Graphic::Instance::Buffer* _weightInfoBuffer;
 					Core::Graphic::Instance::Image* _targetCubeImage;
 					Core::Graphic::Instance::ImageSampler* _environmentImageSampler;
 					Core::Graphic::Instance::Image* _environmentImage;
 					Asset::Mesh* _boxMesh;
-					Asset::Mesh* _planeMesh;
 					uint32_t _sliceIndex;
 				public:
 					VkExtent2D resolution;

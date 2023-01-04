@@ -13,13 +13,8 @@ glslangValidator.exe -t -V GenerateLutMap_Pack_Shader.frag -IUtils/ -o Spv/Gener
 glslangValidator.exe -t -V GenerateLutMap_Unpack_Shader.vert -IUtils/ -o Spv/GenerateLutMap_Unpack_Shader.vert.spv
 glslangValidator.exe -t -V GenerateLutMap_Unpack_Shader.frag -IUtils/ -o Spv/GenerateLutMap_Unpack_Shader.frag.spv
 
-glslangValidator.exe -t -V GeneratePrefilteredMap_Add_Shader.vert -IUtils/ -o Spv/GeneratePrefilteredMap_Add_Shader.vert.spv
-glslangValidator.exe -t -V GeneratePrefilteredMap_Add_Shader.frag -IUtils/ -o Spv/GeneratePrefilteredMap_Add_Shader.frag.spv
-
-glslangValidator.exe -t -V GeneratePrefilteredMap_Weight_Shader.comp -IUtils/ -o Spv/GeneratePrefilteredMap_Weight_Shader.comp.spv
-
-glslangValidator.exe -t -V GeneratePrefilteredMap_Division_Shader.vert -IUtils/ -o Spv/GeneratePrefilteredMap_Division_Shader.vert.spv
-glslangValidator.exe -t -V GeneratePrefilteredMap_Division_Shader.frag -IUtils/ -o Spv/GeneratePrefilteredMap_Division_Shader.frag.spv
+glslangValidator.exe -t -V GeneratePrefilteredMap_Shader.vert -IUtils/ -o Spv/GeneratePrefilteredMap_Shader.vert.spv
+glslangValidator.exe -t -V GeneratePrefilteredMap_Shader.frag -IUtils/ -o Spv/GeneratePrefilteredMap_Shader.frag.spv
 
 glslangValidator.exe -t -V SplitHdrToBackgroundCubeImage_Shader.vert -IUtils/ -o Spv/SplitHdrToBackgroundCubeImage_Shader.vert.spv
 glslangValidator.exe -t -V SplitHdrToBackgroundCubeImage_Shader.frag -IUtils/ -o Spv/SplitHdrToBackgroundCubeImage_Shader.frag.spv

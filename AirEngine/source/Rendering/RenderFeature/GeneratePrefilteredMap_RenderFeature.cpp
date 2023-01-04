@@ -76,13 +76,7 @@ const static std::array<glm::mat4, 6> FACE_VIEW_PROJECTION_MATRIXES
 
 RTTR_REGISTRATION
 {
-	rttr::registration::class_<AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::GeneratePrefilteredMap_Add_RenderPass>("AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::GeneratePrefilteredMap_Add_RenderPass")
-		.constructor<>()
-		(
-			rttr::policy::ctor::as_raw_ptr
-		)
-		;
-	rttr::registration::class_<AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::GeneratePrefilteredMap_Division_RenderPass>("AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::GeneratePrefilteredMap_Division_RenderPass")
+	rttr::registration::class_<AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::GeneratePrefilteredMap_RenderPass>("AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::GeneratePrefilteredMap_RenderPass")
 		.constructor<>()
 		(
 			rttr::policy::ctor::as_raw_ptr
@@ -102,63 +96,18 @@ RTTR_REGISTRATION
 		;
 }
 
-AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::GeneratePrefilteredMap_Add_RenderPass::GeneratePrefilteredMap_Add_RenderPass()
+AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::GeneratePrefilteredMap_RenderPass::GeneratePrefilteredMap_RenderPass()
 	: RenderPassBase()
 {
 
 }
 
-AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::GeneratePrefilteredMap_Add_RenderPass::~GeneratePrefilteredMap_Add_RenderPass()
+AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::GeneratePrefilteredMap_RenderPass::~GeneratePrefilteredMap_RenderPass()
 {
 
 }
 
-void AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::GeneratePrefilteredMap_Add_RenderPass::OnPopulateRenderPassSettings(RenderPassSettings& settings)
-{
-	settings.AddColorAttachment(
-		"ColorAttachment",
-		VK_FORMAT_R32G32B32A32_SFLOAT,
-		VK_SAMPLE_COUNT_1_BIT,
-		VK_ATTACHMENT_LOAD_OP_LOAD,
-		VK_ATTACHMENT_STORE_OP_STORE,
-		VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-		VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL
-	);
-	settings.AddSubpass(
-		"DrawSubpass",
-		VK_PIPELINE_BIND_POINT_GRAPHICS,
-		{ "ColorAttachment" }
-	);
-	settings.AddDependency(
-		"VK_SUBPASS_EXTERNAL",
-		"DrawSubpass",
-		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-		0,
-		0
-	);
-	settings.AddDependency(
-		"DrawSubpass",
-		"VK_SUBPASS_EXTERNAL",
-		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-		0,
-		0
-	);
-}
-
-AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::GeneratePrefilteredMap_Division_RenderPass::GeneratePrefilteredMap_Division_RenderPass()
-	: RenderPassBase()
-{
-
-}
-
-AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::GeneratePrefilteredMap_Division_RenderPass::~GeneratePrefilteredMap_Division_RenderPass()
-{
-
-}
-
-void AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::GeneratePrefilteredMap_Division_RenderPass::OnPopulateRenderPassSettings(RenderPassSettings& settings)
+void AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::GeneratePrefilteredMap_RenderPass::OnPopulateRenderPassSettings(RenderPassSettings& settings)
 {
 	settings.AddColorAttachment(
 		"ColorAttachment",
@@ -195,15 +144,12 @@ void AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::
 AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::GeneratePrefilteredMap_RenderFeatureData::GeneratePrefilteredMap_RenderFeatureData()
 	: RenderFeatureDataBase()
 	, _frameBuffers()
-	, _accumulateMaterial(nullptr)
-	, _divisionMaterial(nullptr)
+	, _generateMaterial(nullptr)
 	, _targetCubeImage(nullptr)
 	, _environmentImage(nullptr)
 	, _weightInfoBuffer(nullptr)
 	, _boxMesh(nullptr)
-	, _planeMesh(nullptr)
-	, _accumulateShader(nullptr)
-	, _divisionShader(nullptr)
+	, _generateShader(nullptr)
 	, _environmentImageSampler()
 	, resolution({ 256, 256 })
 	, stepCount(256 * 256)
@@ -221,14 +167,14 @@ AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::Gener
 
 AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::GeneratePrefilteredMap_RenderFeature()
 	: RenderFeatureBase()
-	, _renderPass(Core::Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass<GeneratePrefilteredMap_Add_RenderPass>())
+	, _renderPass(Core::Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass<GeneratePrefilteredMap_RenderPass>())
 {
 
 }
 
 AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::~GeneratePrefilteredMap_RenderFeature()
 {
-	Core::Graphic::CoreObject::Instance::RenderPassManager().UnloadRenderPass<GeneratePrefilteredMap_Add_RenderPass>();
+	Core::Graphic::CoreObject::Instance::RenderPassManager().UnloadRenderPass<GeneratePrefilteredMap_RenderPass>();
 }
 
 AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::OnCreateRenderFeatureData(Camera::CameraBase* camera)
@@ -242,7 +188,6 @@ void AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::
 
 	featureData->_environmentImage = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(featureData->environmentImagePath);
 	featureData->_boxMesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\Box.ply");
-	featureData->_planeMesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\BackgroundMesh.ply");
 
 	featureData->_targetCubeImage = Core::Graphic::Instance::Image::CreateCubeImage(
 		featureData->resolution,
@@ -261,24 +206,6 @@ void AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::
 	);
 
 	featureData->_frameBuffers.resize(featureData->roughnessLevelCount * 6);
-	featureData->_targetCubeImage->AddImageView(
-		"CubeImageView_Roughness0",
-		VK_IMAGE_VIEW_TYPE_2D,
-		VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
-		0,
-		6,
-		0,
-		1
-	);
-	featureData->_targetCubeImage->AddImageView(
-		"CubeImageView_NoRoughness0",
-		VK_IMAGE_VIEW_TYPE_2D,
-		VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
-		0,
-		6,
-		1,
-		featureData->roughnessLevelCount - 1
-	);
 	for (uint32_t faceIndex = X_POSITIVE_INDEX; faceIndex <= Z_NEGATIVE_INDEX; faceIndex++)
 	{
 		for (uint32_t roughnessIndex = 0; roughnessIndex < featureData->roughnessLevelCount; roughnessIndex++)
@@ -312,18 +239,10 @@ void AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::
 		VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
 	);
 
-	featureData->_accumulateShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\GeneratePrefilteredMap_Add_Shader.shader");
-	featureData->_accumulateMaterial = new Core::Graphic::Rendering::Material(featureData->_accumulateShader);
-	featureData->_accumulateMaterial->SetSampledImageCube("environmentImage", featureData->_environmentImage, featureData->_environmentImageSampler);
-	
-	featureData->_weightShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\GeneratePrefilteredMap_Weight_Shader.shader");
-	featureData->_weightMaterial = new Core::Graphic::Rendering::Material(featureData->_weightShader);
-	featureData->_weightMaterial->SetStorageBuffer("weightInfo", featureData->_weightInfoBuffer);
-	featureData->_weightMaterial->SetSampledImage2D("prefilteredImage", featureData->_targetCubeImage, featureData->_environmentImageSampler, "ColorAttachmentView_Face0_Roughness0");
-
-	featureData->_divisionShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\GeneratePrefilteredMap_Division_Shader.shader");
-	featureData->_divisionMaterial = new Core::Graphic::Rendering::Material(featureData->_divisionShader);
-	featureData->_divisionMaterial->SetStorageBuffer("weightInfo", featureData->_weightInfoBuffer);
+	featureData->_generateShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\GeneratePrefilteredMap_Shader.shader");
+	featureData->_generateMaterial = new Core::Graphic::Rendering::Material(featureData->_generateShader);
+	featureData->_generateMaterial->SetSampledImageCube("environmentImage", featureData->_environmentImage, featureData->_environmentImageSampler);
+	featureData->_generateMaterial->SetStorageBuffer("weightInfo", featureData->_weightInfoBuffer);
 
 	featureData->_sliceIndex = 0;
 }
@@ -331,10 +250,8 @@ void AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::
 void AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::OnDestroyRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)
 {
 	auto featureData = static_cast<GeneratePrefilteredMap_RenderFeatureData*>(renderFeatureData);
-	Core::IO::CoreObject::Instance::AssetManager().Unload(featureData->_accumulateShader);
-	Core::IO::CoreObject::Instance::AssetManager().Unload(featureData->_divisionShader);
+	Core::IO::CoreObject::Instance::AssetManager().Unload(featureData->_generateShader);
 	Core::IO::CoreObject::Instance::AssetManager().Unload(featureData->_boxMesh);
-	Core::IO::CoreObject::Instance::AssetManager().Unload(featureData->_planeMesh);
 	Core::IO::CoreObject::Instance::AssetManager().Unload(featureData->_environmentImage);
 	for (uint32_t faceIndex = X_POSITIVE_INDEX; faceIndex <= Z_NEGATIVE_INDEX; faceIndex++)
 	{
@@ -346,8 +263,7 @@ void AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::
 	delete featureData->_targetCubeImage;
 	delete featureData->_weightInfoBuffer;
 	delete featureData->_environmentImageSampler;
-	delete featureData->_accumulateMaterial;
-	delete featureData->_divisionMaterial;
+	delete featureData->_generateMaterial;
 }
 
 void AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::OnPrepare(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)
@@ -434,7 +350,7 @@ void AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::
 
 	}
 
-	if (featureData->_sliceIndex < featureData->sliceCount)
+	//if (featureData->_sliceIndex < featureData->sliceCount)
 	{
 		AddPushConstantInfo accumulateInfo{};
 		accumulateInfo.stepCount = featureData->stepCount;
@@ -452,65 +368,8 @@ void AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::
 				accumulateInfo.roughness = static_cast<float>(roughnessIndex) / (featureData->roughnessLevelCount - 1);
 
 				commandBuffer->BeginRenderPass(_renderPass, featureData->_frameBuffers[faceIndex * featureData->roughnessLevelCount + roughnessIndex]);
-				commandBuffer->PushConstant(featureData->_accumulateMaterial, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, accumulateInfo);
-				commandBuffer->DrawMesh(featureData->_boxMesh, featureData->_accumulateMaterial);
-				commandBuffer->EndRenderPass();
-			}
-		}
-	}
-
-	if (featureData->_sliceIndex == featureData->sliceCount - 1)
-	{
-		{
-			auto colorAttachmentBarrier = Core::Graphic::Command::ImageMemoryBarrier
-			(
-				featureData->_targetCubeImage,
-				"ColorAttachmentView_Face0_Roughness0",
-				VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-				VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-				VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
-				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-			);
-			commandBuffer->AddPipelineImageBarrier(
-				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-				{ &colorAttachmentBarrier }
-			);
-		}
-
-		commandBuffer->Dispatch(featureData->_weightMaterial, 1, 1, 1);
-
-		{
-			auto colorAttachmentBarrier = Core::Graphic::Command::ImageMemoryBarrier
-			(
-				featureData->_targetCubeImage,
-				"ColorAttachmentView_Face0_Roughness0",
-				VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-				VkImageLayout::VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
-				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT,
-				VkAccessFlagBits::VK_ACCESS_COLOR_ATTACHMENT_READ_BIT
-			);
-			commandBuffer->AddPipelineImageBarrier(
-				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT, VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT,
-				{ &colorAttachmentBarrier }
-			);
-		}
-	}
-
-	if (featureData->_sliceIndex >= featureData->sliceCount)
-	{
-		const DivisionPushConstantInfo divisionInfo
-		{
-			featureData->sliceCount,
-			featureData->_sliceIndex
-		};
-
-		for (uint32_t faceIndex = X_POSITIVE_INDEX; faceIndex <= Z_NEGATIVE_INDEX; faceIndex++)
-		{
-			for (uint32_t roughnessIndex = 0; roughnessIndex < featureData->roughnessLevelCount; roughnessIndex++)
-			{
-				commandBuffer->BeginRenderPass(_renderPass, featureData->_frameBuffers[faceIndex * featureData->roughnessLevelCount + roughnessIndex]);
-				commandBuffer->PushConstant(featureData->_accumulateMaterial, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, divisionInfo);
-				commandBuffer->DrawMesh(featureData->_planeMesh, featureData->_divisionMaterial);
+				commandBuffer->PushConstant(featureData->_generateMaterial, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, accumulateInfo);
+				commandBuffer->DrawMesh(featureData->_boxMesh, featureData->_generateMaterial);
 				commandBuffer->EndRenderPass();
 			}
 		}

@@ -20,10 +20,10 @@ layout(push_constant) uniform PushConstantInfo
 } pushConstantInfo;
 
 layout(set = 0, binding = 0) uniform samplerCube environmentImage;
-// layout(set = 1, binding = 0) buffer Info
-// {
-//     float weight;
-// }info;
+layout(set = 1, binding = 0) buffer WeightInfo
+{
+    float weight;
+}weightInfo;
 
 vec2 Hammersley(in uint i, in uint N)
 {
@@ -52,9 +52,14 @@ vec3 ImportanceSample(in vec2 hammersley, in mat3 matrix, in float roughness)
 
 void main() 
 {
-    if(pushConstantInfo.sliceIndex >= pushConstantInfo.sliceCount) 
+    if(pushConstantInfo.sliceIndex > pushConstantInfo.sliceCount) 
     {
         discard;
+        return;
+    }
+    else if(pushConstantInfo.sliceIndex == pushConstantInfo.sliceCount)
+    {
+        ColorAttachment = vec4(0, 0, 0, 1.0 / weightInfo.weight);
         return;
     }
 
@@ -113,10 +118,10 @@ void main()
         }
     }
 
-    // if(pushConstantInfo.faceIndex == 0 && int(gl_FragCoord.x) == 0 && int(gl_FragCoord.y) == 0)
-    // {
-    //     atomicAdd(info.weight, weight);
-    // }
+    if(pushConstantInfo.roughness == 0.0 && pushConstantInfo.faceIndex == 0 && int(gl_FragCoord.x) == 0 && int(gl_FragCoord.y) == 0)
+    {
+        weightInfo.weight += weight;
+    }
 
-    ColorAttachment = vec4(prefilteredColor, weight);
+    ColorAttachment = vec4(prefilteredColor, 1);
 }
