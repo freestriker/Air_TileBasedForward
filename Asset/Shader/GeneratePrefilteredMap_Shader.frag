@@ -15,6 +15,7 @@ layout(push_constant) uniform PushConstantInfo
     uint sliceIndex;
     uint resolution;
     uint faceIndex;
+    uint roughnessLevelIndex;
     float roughness;
     mat4 viewProjection;
 } pushConstantInfo;
@@ -22,7 +23,7 @@ layout(push_constant) uniform PushConstantInfo
 layout(set = 0, binding = 0) uniform samplerCube environmentImage;
 layout(set = 1, binding = 0) buffer WeightInfo
 {
-    float weight;
+    float weights[];
 }weightInfo;
 
 vec2 Hammersley(in uint i, in uint N)
@@ -59,7 +60,7 @@ void main()
     }
     else if(pushConstantInfo.sliceIndex == pushConstantInfo.sliceCount)
     {
-        ColorAttachment = vec4(0, 0, 0, 1.0 / weightInfo.weight);
+        ColorAttachment = vec4(0, 0, 0, 1.0 / weightInfo.weights[pushConstantInfo.roughnessLevelIndex]);
         return;
     }
 
@@ -118,9 +119,9 @@ void main()
         }
     }
 
-    if(pushConstantInfo.roughness == 0.0 && pushConstantInfo.faceIndex == 0 && int(gl_FragCoord.x) == 0 && int(gl_FragCoord.y) == 0)
+    if(pushConstantInfo.faceIndex == 0 && int(gl_FragCoord.x) == 0 && int(gl_FragCoord.y) == 0)
     {
-        weightInfo.weight += weight;
+        weightInfo.weights[pushConstantInfo.roughnessLevelIndex] += weight;
     }
 
     ColorAttachment = vec4(prefilteredColor, 1);

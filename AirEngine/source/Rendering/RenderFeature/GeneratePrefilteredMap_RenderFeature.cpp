@@ -200,7 +200,7 @@ void AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::
 	);
 
 	featureData->_weightInfoBuffer = new Core::Graphic::Instance::Buffer(
-		sizeof(WeightInfo),
+		sizeof(float) * featureData->roughnessLevelCount,
 		VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_BUFFER_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT,
 		VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
 	);
@@ -365,6 +365,7 @@ void AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::
 
 			for (uint32_t roughnessIndex = 0; roughnessIndex < featureData->roughnessLevelCount; roughnessIndex++)
 			{
+				accumulateInfo.roughnessLevelIndex = roughnessIndex;
 				accumulateInfo.roughness = static_cast<float>(roughnessIndex) / (featureData->roughnessLevelCount - 1);
 
 				commandBuffer->BeginRenderPass(_renderPass, featureData->_frameBuffers[faceIndex * featureData->roughnessLevelCount + roughnessIndex]);

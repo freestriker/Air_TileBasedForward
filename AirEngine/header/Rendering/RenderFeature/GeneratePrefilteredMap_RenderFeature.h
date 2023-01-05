@@ -79,6 +79,7 @@ namespace AirEngine
 					alignas(4) uint32_t sliceIndex;
 					alignas(4) uint32_t resolution;
 					alignas(4) uint32_t faceIndex;
+					alignas(4) uint32_t roughnessLevelIndex;
 					alignas(4) float roughness;
 					alignas(16) glm::mat4 viewProjection;
 				};
@@ -86,10 +87,6 @@ namespace AirEngine
 				{
 					alignas(4) uint32_t sliceCount;
 					alignas(4) uint32_t sliceIndex;
-				};
-				struct WeightInfo
-				{
-					alignas(4) float weight;
 				};
 
 			private:
