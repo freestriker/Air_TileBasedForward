@@ -109,7 +109,7 @@
     <ClCompile Include="header\Rendering\RenderFeature\GenerateIrradianceMap_RenderFeature.h" />
     <ClCompile Include="source\Core\Graphic\Instance\Image.cpp" />
     <ClCompile Include="source\Rendering\Renderer\AmbientOcclusionRenderer.cpp" />
-    <ClCompile Include="source\Rendering\Renderer\BuildAssetRenderer.cpp" />
+    <ClCompile Include="source\Rendering\Renderer\BuildIblRenderer.cpp" />
     <ClCompile Include="source\Rendering\Renderer\ShadowVisualizationRenderer.cpp" />
     <ClCompile Include="source\Rendering\Renderer\TBForwardRenderer.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\AO_Blur_RenderFeature.cpp" />
@@ -189,7 +189,7 @@
     <ClCompile Include="source\Rendering\RenderFeature\TBForward_OIT_AlphaBuffer_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\TBForward_OIT_DepthPeeling_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\TBForward_Opaque_RenderFeature.cpp" />
-    <ClCompile Include="source\Rendering\RenderPipeline\ForwardRenderPipeline.cpp" />
+    <ClCompile Include="source\Rendering\RenderPipeline\BaseRenderPipeline.cpp" />
     <ClCompile Include="source\Test\AudioSourceBehaviour.cpp" />
     <ClCompile Include="source\Test\Background_SkyboxRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\CameraMoveBehaviour.cpp" />
@@ -273,7 +273,7 @@
     <ClInclude Include="header\Renderer\Renderer.h" />
     <ClInclude Include="header\Rendering\PresentRenderPass.h" />
     <ClInclude Include="header\Rendering\Renderer\AmbientOcclusionRenderer.h" />
-    <ClInclude Include="header\Rendering\Renderer\BuildAssetRenderer.h" />
+    <ClInclude Include="header\Rendering\Renderer\BuildIblRenderer.h" />
     <ClInclude Include="header\Rendering\Renderer\ForwardRenderer.h" />
     <ClInclude Include="header\Rendering\Renderer\ShadowVisualizationRenderer.h" />
     <ClInclude Include="header\Rendering\Renderer\TBForwardRenderer.h" />
@@ -298,7 +298,7 @@
     <ClInclude Include="header\Rendering\RenderFeature\TBForward_OIT_AlphaBuffer_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\TBForward_OIT_DepthPeeling_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\TBForward_Opaque_RenderFeature.h" />
-    <ClInclude Include="header\Rendering\RenderPipeline\ForwardRenderPipeline.h" />
+    <ClInclude Include="header\Rendering\RenderPipeline\BaseRenderPipeline.h" />
     <ClInclude Include="header\Test\AudioSourceBehaviour.h" />
     <ClInclude Include="header\Test\Background_SkyboxRendererBehaviour.h" />
     <ClInclude Include="header\Test\CameraMoveBehaviour.h" />

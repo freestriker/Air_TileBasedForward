@@ -1,4 +1,4 @@
-#include "Rendering/Renderer/BuildAssetRenderer.h"
+#include "Rendering/Renderer/BuildIblRenderer.h"
 #include "Rendering/RenderFeature/SplitHdrToCubeMap_RenderFeature.h"
 #include <glm/glm.hpp>
 #include "Camera/CameraBase.h"
@@ -9,13 +9,13 @@
 
 RTTR_REGISTRATION
 {
-	rttr::registration::class_<AirEngine::Rendering::Renderer::BuildAssetRenderer>("AirEngine::Rendering::Renderer::BuildAssetRenderer")
+	rttr::registration::class_<AirEngine::Rendering::Renderer::BuildIblRenderer>("AirEngine::Rendering::Renderer::BuildIblRenderer")
 		.constructor<>()
 		(
 			rttr::policy::ctor::as_raw_ptr
 		)
 		;
-	rttr::registration::class_<AirEngine::Rendering::Renderer::BuildAssetRenderer::BuildAssetRendererData>("AirEngine::Rendering::Renderer::BuildAssetRenderer::BuildAssetRendererData")
+	rttr::registration::class_<AirEngine::Rendering::Renderer::BuildIblRenderer::BuildIblRendererData>("AirEngine::Rendering::Renderer::BuildIblRenderer::BuildIblRendererData")
 		.constructor<>()
 		(
 			rttr::policy::ctor::as_raw_ptr
@@ -23,7 +23,7 @@ RTTR_REGISTRATION
 		;
 }
 
-AirEngine::Rendering::Renderer::BuildAssetRenderer::BuildAssetRenderer()
+AirEngine::Rendering::Renderer::BuildIblRenderer::BuildIblRenderer()
 	: Core::Graphic::Rendering::RendererBase()
 {
 	UseRenderFeature("Background_RenderFeature", new RenderFeature::Background_RenderFeature());
@@ -34,26 +34,26 @@ AirEngine::Rendering::Renderer::BuildAssetRenderer::BuildAssetRenderer()
 	//UseRenderFeature("GenerateLutMap_RenderFeature", new RenderFeature::GenerateLutMap_RenderFeature());
 }
 
-AirEngine::Rendering::Renderer::BuildAssetRenderer::~BuildAssetRenderer()
+AirEngine::Rendering::Renderer::BuildIblRenderer::~BuildIblRenderer()
 {
 	delete static_cast<RenderFeature::SplitHdrToCubeMap_RenderFeature*>(RenderFeature("SplitHdrToHdrCubeImage_RenderFeature"));
 }
 
-AirEngine::Rendering::Renderer::BuildAssetRenderer::BuildAssetRendererData::BuildAssetRendererData()
+AirEngine::Rendering::Renderer::BuildIblRenderer::BuildIblRendererData::BuildIblRendererData()
 	: Core::Graphic::Rendering::RendererDataBase()
 {
 }
 
-AirEngine::Rendering::Renderer::BuildAssetRenderer::BuildAssetRendererData::~BuildAssetRendererData()
+AirEngine::Rendering::Renderer::BuildIblRenderer::BuildIblRendererData::~BuildIblRendererData()
 {
 }
 
-AirEngine::Core::Graphic::Rendering::RendererDataBase* AirEngine::Rendering::Renderer::BuildAssetRenderer::OnCreateRendererData(Camera::CameraBase* camera)
+AirEngine::Core::Graphic::Rendering::RendererDataBase* AirEngine::Rendering::Renderer::BuildIblRenderer::OnCreateRendererData(Camera::CameraBase* camera)
 {
-	return new BuildAssetRendererData();
+	return new BuildIblRendererData();
 }
 
-void AirEngine::Rendering::Renderer::BuildAssetRenderer::OnResolveRendererData(Core::Graphic::Rendering::RendererDataBase* rendererData, Camera::CameraBase* camera)
+void AirEngine::Rendering::Renderer::BuildIblRenderer::OnResolveRendererData(Core::Graphic::Rendering::RendererDataBase* rendererData, Camera::CameraBase* camera)
 {
 	auto backgroundRenderFeature = static_cast<RenderFeature::Background_RenderFeature::Background_RenderFeatureData*>(rendererData->RenderFeatureData("Background_RenderFeature"));
 	backgroundRenderFeature->needClearColorAttachment = true;
@@ -87,12 +87,12 @@ void AirEngine::Rendering::Renderer::BuildAssetRenderer::OnResolveRendererData(C
 	//lutRenderFeature->resolution = { 512, 512 };
 }
 
-void AirEngine::Rendering::Renderer::BuildAssetRenderer::OnDestroyRendererData(Core::Graphic::Rendering::RendererDataBase* rendererData)
+void AirEngine::Rendering::Renderer::BuildIblRenderer::OnDestroyRendererData(Core::Graphic::Rendering::RendererDataBase* rendererData)
 {
-	delete static_cast<BuildAssetRendererData*>(rendererData);
+	delete static_cast<BuildIblRendererData*>(rendererData);
 }
 
-void AirEngine::Rendering::Renderer::BuildAssetRenderer::PrepareRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
+void AirEngine::Rendering::Renderer::BuildIblRenderer::PrepareRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
 {
 	PrepareRenderFeature("Background_RenderFeature", rendererData);
 	//PrepareRenderFeature("SplitHdrToHdrCubeImage_RenderFeature", rendererData);
@@ -102,7 +102,7 @@ void AirEngine::Rendering::Renderer::BuildAssetRenderer::PrepareRenderer(Core::G
 	//PrepareRenderFeature("GenerateLutMap_RenderFeature", rendererData);
 }
 
-void AirEngine::Rendering::Renderer::BuildAssetRenderer::ExcuteRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*> const* rendererComponents)
+void AirEngine::Rendering::Renderer::BuildIblRenderer::ExcuteRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*> const* rendererComponents)
 {
 	ExcuteRenderFeature("Background_RenderFeature", rendererData, camera, rendererComponents);
 	//ExcuteRenderFeature("SplitHdrToHdrCubeImage_RenderFeature", rendererData, camera, rendererComponents);
@@ -112,7 +112,7 @@ void AirEngine::Rendering::Renderer::BuildAssetRenderer::ExcuteRenderer(Core::Gr
 	//ExcuteRenderFeature("GenerateLutMap_RenderFeature", rendererData, camera, rendererComponents);
 }
 
-void AirEngine::Rendering::Renderer::BuildAssetRenderer::SubmitRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
+void AirEngine::Rendering::Renderer::BuildIblRenderer::SubmitRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
 {
 	SubmitRenderFeature("Background_RenderFeature", rendererData);
 	//SubmitRenderFeature("SplitHdrToHdrCubeImage_RenderFeature", rendererData);
@@ -122,7 +122,7 @@ void AirEngine::Rendering::Renderer::BuildAssetRenderer::SubmitRenderer(Core::Gr
 	//SubmitRenderFeature("GenerateLutMap_RenderFeature", rendererData);
 }
 
-void AirEngine::Rendering::Renderer::BuildAssetRenderer::FinishRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
+void AirEngine::Rendering::Renderer::BuildIblRenderer::FinishRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
 {
 	FinishRenderFeature("Background_RenderFeature", rendererData);
 	//FinishRenderFeature("SplitHdrToHdrCubeImage_RenderFeature", rendererData);

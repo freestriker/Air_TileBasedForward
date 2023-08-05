@@ -11,18 +11,18 @@ namespace AirEngine
 	{
 		namespace Renderer
 		{
-			class BuildAssetRenderer final : public Core::Graphic::Rendering::RendererBase
+			class BuildIblRenderer final : public Core::Graphic::Rendering::RendererBase
 			{
 			public:
-				class BuildAssetRendererData final : public Core::Graphic::Rendering::RendererDataBase
+				class BuildIblRendererData final : public Core::Graphic::Rendering::RendererDataBase
 				{
 				public:
-					CONSTRUCTOR(BuildAssetRendererData)
+					CONSTRUCTOR(BuildIblRendererData)
 
 					RTTR_ENABLE(Core::Graphic::Rendering::RendererDataBase)
 				};
 
-				CONSTRUCTOR(BuildAssetRenderer)
+				CONSTRUCTOR(BuildIblRenderer)
 
 			private:
 				Core::Graphic::Rendering::RendererDataBase* OnCreateRendererData(Camera::CameraBase* camera)override;

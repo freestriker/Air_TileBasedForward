@@ -30,7 +30,7 @@
 #include "Audio/AudioListener.h"
 #include "Test/AudioSourceBehaviour.h"
 #include "Core/Logic/Manager/InputManager.h"
-#include "Rendering/RenderPipeline/ForwardRenderPipeline.h"
+#include "Rendering/RenderPipeline/BaseRenderPipeline.h"
 #include "Core/Graphic/Manager/RenderPipelineManager.h"
 #include "Test/F_WallRendererBehaviour.h"
 #include "Rendering/Renderer/TBForwardRenderer.h"
@@ -395,7 +395,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnThreadStart()
 
 void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 {
-	Graphic::CoreObject::Instance::RenderPipelineManager().SwitchRenderPipeline(new Rendering::RenderPipeline::ForwardRenderPipeline());
+	Graphic::CoreObject::Instance::RenderPipelineManager().SwitchRenderPipeline(new Rendering::RenderPipeline::BaseRenderPipeline());
 	
 	//Camera
 	Object::GameObject* cameraGo = new Logic::Object::GameObject("Camera");

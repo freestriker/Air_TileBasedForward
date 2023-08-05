@@ -104,10 +104,10 @@ void AirEngine::Test::RendererDataController::OnUpdate()
 		}
 		else if (camera->RendererName() == "ShadowVisualizationRenderer")
 		{
-			camera->SetRendererName("BuildAssetRenderer");
-			Utils::Log::Message("Switch Renderer mode to BuildAssetRenderer.");
+			camera->SetRendererName("BuildIblRenderer");
+			Utils::Log::Message("Switch Renderer mode to BuildIblRenderer.");
 		}
-		else if (camera->RendererName() == "BuildAssetRenderer")
+		else if (camera->RendererName() == "BuildIblRenderer")
 		{
 			camera->SetRendererName("TBForwardRenderer");
 			Utils::Log::Message("Switch Renderer mode to TBForwardRenderer.");
