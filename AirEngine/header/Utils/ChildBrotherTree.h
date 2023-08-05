@@ -92,7 +92,7 @@ namespace AirEngine
 			}
 		}
 		template<typename T>
-		inline typename T* ChildBrotherTree<T>::RemoveSelf()
+		inline T* ChildBrotherTree<T>::RemoveSelf()
 		{
 			ChildBrotherTree<T>* result = nullptr;
 			if (_parent)
@@ -160,7 +160,7 @@ namespace AirEngine
 			return _node;
 		}
 		template<typename T>
-		inline typename T* ChildBrotherTree<T>::Iterator::Node()
+		inline T* ChildBrotherTree<T>::Iterator::Node()
 		{
 			return static_cast<T*>(_node);
 		}

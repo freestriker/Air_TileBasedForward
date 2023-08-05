@@ -147,25 +147,40 @@ void AirEngine::Core::Graphic::CoreObject::Window::Start()
     _window = new VulkanWindow();
     _window->setPreferredColorFormats({VkFormat::VK_FORMAT_B8G8R8A8_SRGB});
     _window->setVulkanInstance(_qVulkanInstance);
+    uint32_t prefferedPhysicalDeviceIndex = -1;
+    {
+        auto&& availablePhysicalDevices = _window->availablePhysicalDevices();
+        uint32_t i = 0;
+        for (const auto& availablePhysicalDevice : availablePhysicalDevices)
+        {
+            if (availablePhysicalDevice.deviceType == VkPhysicalDeviceType::VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU)
+            {
+                prefferedPhysicalDeviceIndex = i;
+                break;
+            }
+            ++i;
+        }
+    }
+    _window->setPhysicalDeviceIndex(prefferedPhysicalDeviceIndex);
+
     //auto sde = _window->supportedDeviceExtensions();
     ////_window->setEnabledFeaturesModifier([](VkPhysicalDeviceFeatures& feature)->void {
     ////    
     ////});
-    _window->setDeviceExtensions(QByteArrayList()
-        << "VK_EXT_shader_atomic_float"
-        << VK_KHR_MAINTENANCE1_EXTENSION_NAME
-    ); 
-    auto queuePrioritieMapPtr = new std::map<uint32_t, std::vector<float>>();
+    //_window->setDeviceExtensions(QByteArrayList()
+    //    << "VK_EXT_shader_atomic_float"
+    //    << VK_KHR_MAINTENANCE1_EXTENSION_NAME
+    //); 
+    //auto queuePrioritieMapPtr = new std::map<uint32_t, std::vector<float>>();
     _window->setQueueCreateInfoModifier([](const VkQueueFamilyProperties* properties, uint32_t queueFamilyCount, QList<VkDeviceQueueCreateInfo>& infos)->void
     {
-        auto p = new std::vector<float>({0, 0, 0, 0});
+        auto&& pQueuePriorities = new float[4]{1.0, 1.0, 1.0, 1.0 };
         infos[0].queueCount = 4;
-        infos[0].pQueuePriorities = p->data();
+        infos[0].pQueuePriorities = pQueuePriorities;
     });
     
     _window->resize(800, 450);
     _window->show();
-
 }
 void AirEngine::Core::Graphic::CoreObject::Window::End()
 {
