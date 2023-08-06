@@ -162,7 +162,6 @@ void AirEngine::Core::Graphic::CoreObject::Window::Start()
         }
     }
     _window->setPhysicalDeviceIndex(prefferedPhysicalDeviceIndex);
-
     //auto sde = _window->supportedDeviceExtensions();
     ////_window->setEnabledFeaturesModifier([](VkPhysicalDeviceFeatures& feature)->void {
     ////    

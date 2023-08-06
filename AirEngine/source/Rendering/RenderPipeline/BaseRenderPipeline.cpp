@@ -18,7 +18,7 @@ RTTR_REGISTRATION
 AirEngine::Rendering::RenderPipeline::BaseRenderPipeline::BaseRenderPipeline()
 	: Core::Graphic::Rendering::RenderPipelineBase()
 {
-	UseRenderer("ForwardRenderer", new Renderer::ForwardRenderer());
+	//UseRenderer("ForwardRenderer", new Renderer::ForwardRenderer());
 	UseRenderer("TBForwardRenderer", new Renderer::TBForwardRenderer());
 	UseRenderer("AmbientOcclusionRenderer", new Renderer::AmbientOcclusionRenderer());
 	UseRenderer("ShadowVisualizationRenderer", new Renderer::ShadowVisualizationRenderer());
@@ -27,7 +27,7 @@ AirEngine::Rendering::RenderPipeline::BaseRenderPipeline::BaseRenderPipeline()
 
 AirEngine::Rendering::RenderPipeline::BaseRenderPipeline::~BaseRenderPipeline()
 {
-	delete static_cast<Renderer::ForwardRenderer*>(Renderer("ForwardRenderer"));
+	//delete static_cast<Renderer::ForwardRenderer*>(Renderer("ForwardRenderer"));
 	delete static_cast<Renderer::TBForwardRenderer*>(Renderer("TBForwardRenderer"));
 	delete static_cast<Renderer::ShadowVisualizationRenderer*>(Renderer("ShadowVisualizationRenderer"));
 	delete static_cast<Renderer::BuildIblRenderer*>(Renderer("BuildIblRenderer"));

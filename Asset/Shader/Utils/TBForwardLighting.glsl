@@ -8,10 +8,10 @@
 #ifndef LIGHTING_MODE
 #define LIGHTING_MODE TBFORWARD_LIGHTING
 
-#define CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX 8
+#define CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX 10
 #include "CSM_ShadowReceiver.glsl"
 
-#define TBFORWARD_LIGHTING_DESCRIPTOR_COUNT (8 + CSM_SHADOW_RECEIVER_DESCRIPTOR_COUNT)
+#define TBFORWARD_LIGHTING_DESCRIPTOR_COUNT (10 + CSM_SHADOW_RECEIVER_DESCRIPTOR_COUNT)
 
 #define START_SET_INDEX TBFORWARD_LIGHTING_DESCRIPTOR_COUNT
 
@@ -57,6 +57,14 @@ layout (set = 7, binding = 0) readonly buffer TransparentLightIndexLists
 	ivec2 tileCount;
     LightIndexList[] lists;
 }transparentLightIndexLists;
+
+layout (set = 8, binding = 0) uniform sampler2D occlusionTexture;
+layout (set = 9, binding = 0) uniform OcclusionInfo
+{
+    vec2 texelSize;
+    float intensity;
+    float power;
+} occlusionInfo;
 
 #define pixelOffset (ivec2(gl_FragCoord.xy))
 #define TILE_ID (ivec2(gl_FragCoord.xy) / TILE_WIDTH)
