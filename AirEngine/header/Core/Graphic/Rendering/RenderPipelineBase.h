@@ -16,6 +16,7 @@ namespace AirEngine
 				private:
 					std::map<std::string, RendererBase*> _renderers;
 				protected:
+					std::string _description;
 					RenderPipelineBase();
 					virtual ~RenderPipelineBase();
 					RenderPipelineBase(const RenderPipelineBase&) = delete;
@@ -26,7 +27,14 @@ namespace AirEngine
 					void UseRenderer(std::string rendererName, RendererBase* renderer);
 				public:
 					RendererBase* Renderer(std::string rendererName);
-
+					inline const std::map<std::string, RendererBase*>& Renderers() const
+					{
+						return _renderers;
+					}
+					inline const std::string& Description()const
+					{
+						return _description;
+					}
 					RTTR_ENABLE(Core::Logic::Object::Object)
 				};
 			}

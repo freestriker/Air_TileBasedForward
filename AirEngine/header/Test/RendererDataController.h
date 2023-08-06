@@ -9,6 +9,7 @@ namespace AirEngine
 		class RendererDataController : public AirEngine::Behaviour::Behaviour
 		{
 		public:
+			std::string OutputRendererDescriptions();
 			RendererDataController();
 			~RendererDataController();
 			RendererDataController(const RendererDataController&) = delete;

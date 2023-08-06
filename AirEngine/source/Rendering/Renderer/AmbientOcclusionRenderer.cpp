@@ -33,6 +33,8 @@ RTTR_REGISTRATION
 AirEngine::Rendering::Renderer::AmbientOcclusionRenderer::AmbientOcclusionRenderer()
 	: Core::Graphic::Rendering::RendererBase()
 {
+	_description = "This is a renderer for visualizing ambient occlusion effects, including: ssao, hbao and gtao.";
+
 	UseRenderFeature("Geometry_RenderFeature", new RenderFeature::Geometry_RenderFeature());
 	UseRenderFeature("ClearColorAttachment_RenderFeature", new RenderFeature::ClearColorAttachment_RenderFeature());
 

@@ -125,7 +125,7 @@ AirEngine::Rendering::RenderFeature::TBForward_Opaque_RenderFeature::TBForward_O
 		)
 	)
 {
-
+	_description = "Use forward+ to render opaque objects, mixing shadows with ambient occlusion.";
 }
 
 AirEngine::Rendering::RenderFeature::TBForward_Opaque_RenderFeature::~TBForward_Opaque_RenderFeature()

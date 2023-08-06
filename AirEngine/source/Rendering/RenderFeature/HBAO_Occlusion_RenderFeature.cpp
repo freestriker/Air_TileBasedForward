@@ -128,7 +128,7 @@ AirEngine::Rendering::RenderFeature::HBAO_Occlusion_RenderFeature::HBAO_Occlusio
 		)
 	)
 {
-
+	_description = "Use the hbao algorithm to generate occlusion maps.";
 }
 
 AirEngine::Rendering::RenderFeature::HBAO_Occlusion_RenderFeature::~HBAO_Occlusion_RenderFeature()

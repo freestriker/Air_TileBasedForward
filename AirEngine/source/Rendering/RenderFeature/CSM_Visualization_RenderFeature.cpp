@@ -123,7 +123,7 @@ AirEngine::Rendering::RenderFeature::CSM_Visualization_RenderFeature::CSM_Visual
 		)
 	)
 {
-
+	_description = "Visualize a set of cascade shadow maps in the screen space.";
 }
 
 AirEngine::Rendering::RenderFeature::CSM_Visualization_RenderFeature::~CSM_Visualization_RenderFeature()

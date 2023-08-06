@@ -26,6 +26,8 @@ RTTR_REGISTRATION
 AirEngine::Rendering::Renderer::BuildIblRenderer::BuildIblRenderer()
 	: Core::Graphic::Rendering::RendererBase()
 {
+	_description = "This is a renderer for building ibl source files that can generate: sky box, Irradiance Map, Pre Computed Environment Map, Lut Map.";
+	
 	UseRenderFeature("Background_RenderFeature", new RenderFeature::Background_RenderFeature());
 	//UseRenderFeature("SplitHdrToHdrCubeImage_RenderFeature", new RenderFeature::SplitHdrToCubeMap_RenderFeature());
 	//UseRenderFeature("SplitHdrToBackgroundCubeImage_RenderFeature", new RenderFeature::SplitHdrToCubeMap_RenderFeature());

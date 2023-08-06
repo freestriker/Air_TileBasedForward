@@ -17,6 +17,10 @@
 #include "Rendering/Renderer/TBForwardRenderer.h"
 #include "Rendering/Renderer/AmbientOcclusionRenderer.h"
 #include "Rendering/Renderer/ScreenSpaceShadowVisualizationRenderer.h"
+#include "Core/Graphic/Rendering/RenderPipelineBase.h"
+#include "Core/Graphic/Rendering/RenderFeatureBase.h"
+#include "Core/Graphic/Manager/RenderPipelineManager.h"
+#include <Core/Graphic/CoreObject/Instance.h>
 
 RTTR_REGISTRATION
 {
@@ -35,9 +39,36 @@ void AirEngine::Test::RendererDataController::OnAwake()
 {
 }
 
+std::string AirEngine::Test::RendererDataController::OutputRendererDescriptions()
+{
+	auto camera = GameObject()->GetComponent<Camera::CameraBase>();
+	auto rendererDataBase = camera->RendererData();
+
+	Utils::Log::Message("Current renderer name: " + camera->RendererName() + ".");
+	auto&& renderer = *AirEngine::Core::Graphic::CoreObject::Instance::RenderPipelineManager().RenderPipeline()->Renderer(camera->RendererName());
+	Utils::Log::Message("It contains:");
+	for (const auto& renderFeature : renderer.RendererFeatures())
+	{
+		Utils::Log::Message(renderFeature.first + ", " + renderFeature.second->Description());
+	}
+
+	return "";
+}
+
 void AirEngine::Test::RendererDataController::OnStart()
 {
-
+	auto&& renderPipeline = *AirEngine::Core::Graphic::CoreObject::Instance::RenderPipelineManager().RenderPipeline();
+	Utils::Log::Message("---------------------------------------------------------------");
+	Utils::Log::Message(renderPipeline.Description());
+	std::string names = "";
+	for (const auto& renderer : renderPipeline.Renderers())
+	{
+		names += renderer.first + " ";
+	}
+	Utils::Log::Message("It contains: " + names + ".");
+	OutputRendererDescriptions();
+	Utils::Log::Message("Use 'L' to change renderers, use 'J' to change render features.");
+	Utils::Log::Message("---------------------------------------------------------------");
 }
 
 void AirEngine::Test::RendererDataController::OnUpdate()
@@ -91,26 +122,26 @@ void AirEngine::Test::RendererDataController::OnUpdate()
 		}
 	}
 
-	/////Shadow type
-	//{
-	//	auto rendererData = dynamic_cast<Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::ScreenSpaceShadowVisualizationRendererData*>(rendererDataBase);
-	//	if (rendererData != nullptr)
-	//	{
-	//		if (Core::Logic::CoreObject::Instance::InputManager().KeyUp(Core::Logic::Manager::InputKeyType::Key_J))
-	//		{
-	//			if (rendererData->shadowType == Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::ShadowType::CSM)
-	//			{
-	//				rendererData->shadowType = Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::ShadowType::CASCADE_EVSM;
-	//				Utils::Log::Message("Switch Shadow mode to CascadeEVSM.");
-	//			}
-	//			else if (rendererData->shadowType == Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::ShadowType::CASCADE_EVSM)
-	//			{
-	//				rendererData->shadowType = Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::ShadowType::CSM;
-	//				Utils::Log::Message("Switch Shadow mode to CSM.");
-	//			}
-	//		}
-	//	}
-	//}
+	///Shadow type
+	{
+		auto rendererData = dynamic_cast<Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::ScreenSpaceShadowVisualizationRendererData*>(rendererDataBase);
+		if (rendererData != nullptr)
+		{
+			if (Core::Logic::CoreObject::Instance::InputManager().KeyUp(Core::Logic::Manager::InputKeyType::Key_J))
+			{
+				if (rendererData->shadowType == Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::ShadowType::CSM)
+				{
+					rendererData->shadowType = Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::ShadowType::CASCADE_EVSM;
+					Utils::Log::Message("Switch Shadow mode to ScreenSpaceCascadeEVSM.");
+				}
+				else if (rendererData->shadowType == Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::ShadowType::CASCADE_EVSM)
+				{
+					rendererData->shadowType = Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::ShadowType::CSM;
+					Utils::Log::Message("Switch Shadow mode to ScreenSpaceCSM.");
+				}
+			}
+		}
+	}
 
 	///Renderer type
 	if (Core::Logic::CoreObject::Instance::InputManager().KeyUp(Core::Logic::Manager::InputKeyType::Key_L))
@@ -118,24 +149,30 @@ void AirEngine::Test::RendererDataController::OnUpdate()
 		if (camera->RendererName() == "TBForwardRenderer")
 		{
 			camera->SetRendererName("AmbientOcclusionRenderer");
-			Utils::Log::Message("Switch Renderer mode to AmbientOcclusionRenderer.");
+			Utils::Log::Message("---------------------------------------------------------------");
+			OutputRendererDescriptions();
+			Utils::Log::Message("---------------------------------------------------------------");
 		}
 		else if (camera->RendererName() == "AmbientOcclusionRenderer")
 		{
 			camera->SetRendererName("ScreenSpaceShadowVisualizationRenderer");
 			Utils::Log::Message("---------------------------------------------------------------");
-			Utils::Log::Message("Switch Renderer mode to ScreenSpaceShadowVisualizationRenderer.");
+			OutputRendererDescriptions();
 			Utils::Log::Message("---------------------------------------------------------------");
 		}
 		else if (camera->RendererName() == "ScreenSpaceShadowVisualizationRenderer")
 		{
 			camera->SetRendererName("BuildIblRenderer");
-			Utils::Log::Message("Switch Renderer mode to BuildIblRenderer.");
+			Utils::Log::Message("---------------------------------------------------------------");
+			OutputRendererDescriptions();
+			Utils::Log::Message("---------------------------------------------------------------");
 		}
 		else if (camera->RendererName() == "BuildIblRenderer")
 		{
 			camera->SetRendererName("TBForwardRenderer");
-			Utils::Log::Message("Switch Renderer mode to TBForwardRenderer.");
+			Utils::Log::Message("---------------------------------------------------------------");
+			OutputRendererDescriptions();
+			Utils::Log::Message("---------------------------------------------------------------");
 		}
 	}
 }

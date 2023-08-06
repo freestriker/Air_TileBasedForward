@@ -128,7 +128,7 @@ AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::SSAO_Occlusio
 		)
 	)
 {
-
+	_description = "Use the ssao algorithm to generate occlusion maps.";
 }
 
 AirEngine::Rendering::RenderFeature::SSAO_Occlusion_RenderFeature::~SSAO_Occlusion_RenderFeature()

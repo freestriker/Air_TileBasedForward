@@ -113,7 +113,7 @@ AirEngine::Rendering::RenderFeature::Geometry_RenderFeature::Geometry_RenderFeat
 	, _geometryRenderPass(Core::Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass<Geometry_RenderPass>())
 	, _geometryRenderPassName(rttr::type::get<Geometry_RenderPass>().get_name().to_string())
 {
-
+	_description = "Generate depth maps and visual space normal maps.";
 }
 
 AirEngine::Rendering::RenderFeature::Geometry_RenderFeature::~Geometry_RenderFeature()

@@ -128,7 +128,7 @@ AirEngine::Rendering::RenderFeature::GTAO_Occlusion_RenderFeature::GTAO_Occlusio
 		)
 	)
 {
-
+	_description = "Use the gtao algorithm to generate occlusion maps.";
 }
 
 AirEngine::Rendering::RenderFeature::GTAO_Occlusion_RenderFeature::~GTAO_Occlusion_RenderFeature()

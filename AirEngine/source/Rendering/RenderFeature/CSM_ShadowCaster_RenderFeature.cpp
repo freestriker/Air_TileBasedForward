@@ -122,7 +122,7 @@ AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::CSM_ShadowC
 		)
 	)
 {
-
+	_description = "Generates a cascade of shadow maps.";
 }
 
 AirEngine::Rendering::RenderFeature::CSM_ShadowCaster_RenderFeature::~CSM_ShadowCaster_RenderFeature()

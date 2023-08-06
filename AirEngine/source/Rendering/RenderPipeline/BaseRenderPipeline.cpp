@@ -18,11 +18,13 @@ RTTR_REGISTRATION
 AirEngine::Rendering::RenderPipeline::BaseRenderPipeline::BaseRenderPipeline()
 	: Core::Graphic::Rendering::RenderPipelineBase()
 {
+	_description = "This is a basic rendering pipeline.";
+
 	//UseRenderer("ForwardRenderer", new Renderer::ForwardRenderer());
 	UseRenderer("TBForwardRenderer", new Renderer::TBForwardRenderer());
 	UseRenderer("AmbientOcclusionRenderer", new Renderer::AmbientOcclusionRenderer());
 	UseRenderer("ScreenSpaceShadowVisualizationRenderer", new Renderer::ScreenSpaceShadowVisualizationRenderer());
-	//UseRenderer("BuildIblRenderer", new Renderer::BuildIblRenderer());
+	UseRenderer("BuildIblRenderer", new Renderer::BuildIblRenderer());
 }
 
 AirEngine::Rendering::RenderPipeline::BaseRenderPipeline::~BaseRenderPipeline()
@@ -31,5 +33,5 @@ AirEngine::Rendering::RenderPipeline::BaseRenderPipeline::~BaseRenderPipeline()
 	delete static_cast<Renderer::TBForwardRenderer*>(Renderer("TBForwardRenderer"));
 	delete static_cast<Renderer::AmbientOcclusionRenderer*>(Renderer("AmbientOcclusionRenderer"));
 	delete static_cast<Renderer::ScreenSpaceShadowVisualizationRenderer*>(Renderer("ScreenSpaceShadowVisualizationRenderer"));
-	//delete static_cast<Renderer::BuildIblRenderer*>(Renderer("BuildIblRenderer"));
+	delete static_cast<Renderer::BuildIblRenderer*>(Renderer("BuildIblRenderer"));
 }

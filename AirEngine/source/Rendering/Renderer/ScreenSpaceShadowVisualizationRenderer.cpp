@@ -27,14 +27,16 @@ RTTR_REGISTRATION
 AirEngine::Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::ScreenSpaceShadowVisualizationRenderer()
 	: Core::Graphic::Rendering::RendererBase()
 {
+	_description = "This is a renderer for visualizing cascading shadows in screen space, including different cascading shadows with exponential variance cascading shadows.";
+
 	UseRenderFeature("Geometry_RenderFeature", new RenderFeature::Geometry_RenderFeature());
 	UseRenderFeature("ClearColorAttachment_RenderFeature", new RenderFeature::ClearColorAttachment_RenderFeature());
 
 	UseRenderFeature("CSM_ShadowCaster_RenderFeature", new RenderFeature::CSM_ShadowCaster_RenderFeature());
 	UseRenderFeature("CSM_Visualization_RenderFeature", new RenderFeature::CSM_Visualization_RenderFeature());
 	
-	//UseRenderFeature("CascadeEVSM_ShadowCaster_RenderFeature", new RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature());
-	//UseRenderFeature("CascadeEVSM_Visualization_RenderFeature", new RenderFeature::CascadeEVSM_Visualization_RenderFeature());
+	UseRenderFeature("CascadeEVSM_ShadowCaster_RenderFeature", new RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature());
+	UseRenderFeature("CascadeEVSM_Visualization_RenderFeature", new RenderFeature::CascadeEVSM_Visualization_RenderFeature());
 }
 
 AirEngine::Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::~ScreenSpaceShadowVisualizationRenderer()
@@ -45,8 +47,8 @@ AirEngine::Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::~ScreenS
 	delete static_cast<RenderFeature::CSM_ShadowCaster_RenderFeature*>(RenderFeature("CSM_ShadowCaster_RenderFeature"));
 	delete static_cast<RenderFeature::CSM_Visualization_RenderFeature*>(RenderFeature("CSM_Visualization_RenderFeature"));
 	
-	//delete static_cast<RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature*>(RenderFeature("CascadeEVSM_ShadowCaster_RenderFeature"));
-	//delete static_cast<RenderFeature::CascadeEVSM_Visualization_RenderFeature*>(RenderFeature("CascadeEVSM_Visualization_RenderFeature"));
+	delete static_cast<RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature*>(RenderFeature("CascadeEVSM_ShadowCaster_RenderFeature"));
+	delete static_cast<RenderFeature::CascadeEVSM_Visualization_RenderFeature*>(RenderFeature("CascadeEVSM_Visualization_RenderFeature"));
 }
 
 AirEngine::Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::ScreenSpaceShadowVisualizationRendererData::ScreenSpaceShadowVisualizationRendererData()
@@ -87,17 +89,17 @@ void AirEngine::Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::OnR
 	csmVisualizationFeatureData->csmRenderFeatureData = csmShadowMapFeatureData;
 	csmVisualizationFeatureData->geometryRenderFeatureData = geometryFeatureData;
 
-	//auto cevsmShadowMapFeatureData = rendererData->RenderFeatureData<RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::CascadeEVSM_ShadowCaster_RenderFeatureData>("CascadeEVSM_ShadowCaster_RenderFeature");
-	//cevsmShadowMapFeatureData->frustumSegmentScales = { 0.1, 0.2, 0.3, 0.4 };
-	//cevsmShadowMapFeatureData->lightCameraCompensationDistances = { 5, 5, 5, 5 };
-	//cevsmShadowMapFeatureData->shadowImageResolutions = { 2048, 2048, 1024, 1024 };
-	//cevsmShadowMapFeatureData->blurOffsets = { 1.5, 1.25, 1.0, 0.5 };
-	//cevsmShadowMapFeatureData->iterateCount = 2;
-	//cevsmShadowMapFeatureData->threshold = 0.5;
+	auto cevsmShadowMapFeatureData = rendererData->RenderFeatureData<RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::CascadeEVSM_ShadowCaster_RenderFeatureData>("CascadeEVSM_ShadowCaster_RenderFeature");
+	cevsmShadowMapFeatureData->frustumSegmentScales = { 0.1, 0.2, 0.3, 0.4 };
+	cevsmShadowMapFeatureData->lightCameraCompensationDistances = { 5, 5, 5, 5 };
+	cevsmShadowMapFeatureData->shadowImageResolutions = { 2048, 2048, 1024, 1024 };
+	cevsmShadowMapFeatureData->blurOffsets = { 1.5, 1.25, 1.0, 0.5 };
+	cevsmShadowMapFeatureData->iterateCount = 2;
+	cevsmShadowMapFeatureData->threshold = 0.5;
 
-	//auto cevsmVisualizationFeatureData = rendererData->RenderFeatureData<RenderFeature::CascadeEVSM_Visualization_RenderFeature::CascadeEVSM_Visualization_RenderFeatureData>("CascadeEVSM_Visualization_RenderFeature");
-	//cevsmVisualizationFeatureData->cascadeEvsmRenderFeatureData = cevsmShadowMapFeatureData;
-	//cevsmVisualizationFeatureData->geometryRenderFeatureData = geometryFeatureData;
+	auto cevsmVisualizationFeatureData = rendererData->RenderFeatureData<RenderFeature::CascadeEVSM_Visualization_RenderFeature::CascadeEVSM_Visualization_RenderFeatureData>("CascadeEVSM_Visualization_RenderFeature");
+	cevsmVisualizationFeatureData->cascadeEvsmRenderFeatureData = cevsmShadowMapFeatureData;
+	cevsmVisualizationFeatureData->geometryRenderFeatureData = geometryFeatureData;
 }
 
 void AirEngine::Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::OnDestroyRendererData(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -118,12 +120,12 @@ void AirEngine::Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::Pre
 			PrepareRenderFeature("CSM_Visualization_RenderFeature", rendererData);
 			break;
 		}
-		//case ShadowType::CASCADE_EVSM:
-		//{
-		//	PrepareRenderFeature("CascadeEVSM_ShadowCaster_RenderFeature", rendererData);
-		//	PrepareRenderFeature("CascadeEVSM_Visualization_RenderFeature", rendererData);
-		//	break;
-		//}
+		case ShadowType::CASCADE_EVSM:
+		{
+			PrepareRenderFeature("CascadeEVSM_ShadowCaster_RenderFeature", rendererData);
+			PrepareRenderFeature("CascadeEVSM_Visualization_RenderFeature", rendererData);
+			break;
+		}
 	}
 }
 
@@ -139,12 +141,12 @@ void AirEngine::Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::Exc
 			ExcuteRenderFeature("CSM_Visualization_RenderFeature", rendererData, camera, rendererComponents);
 			break;
 		}
-		//case ShadowType::CASCADE_EVSM:
-		//{
-		//	ExcuteRenderFeature("CascadeEVSM_ShadowCaster_RenderFeature", rendererData, camera, rendererComponents);
-		//	ExcuteRenderFeature("CascadeEVSM_Visualization_RenderFeature", rendererData, camera, rendererComponents);
-		//	break;
-		//}
+		case ShadowType::CASCADE_EVSM:
+		{
+			ExcuteRenderFeature("CascadeEVSM_ShadowCaster_RenderFeature", rendererData, camera, rendererComponents);
+			ExcuteRenderFeature("CascadeEVSM_Visualization_RenderFeature", rendererData, camera, rendererComponents);
+			break;
+		}
 	}
 }
 
@@ -160,12 +162,12 @@ void AirEngine::Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::Sub
 			SubmitRenderFeature("CSM_Visualization_RenderFeature", rendererData);
 			break;
 		}
-		//case ShadowType::CASCADE_EVSM:
-		//{
-		//	SubmitRenderFeature("CascadeEVSM_ShadowCaster_RenderFeature", rendererData);
-		//	SubmitRenderFeature("CascadeEVSM_Visualization_RenderFeature", rendererData);
-		//	break;
-		//}
+		case ShadowType::CASCADE_EVSM:
+		{
+			SubmitRenderFeature("CascadeEVSM_ShadowCaster_RenderFeature", rendererData);
+			SubmitRenderFeature("CascadeEVSM_Visualization_RenderFeature", rendererData);
+			break;
+		}
 	}
 }
 
@@ -181,11 +183,11 @@ void AirEngine::Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::Fin
 			FinishRenderFeature("CSM_Visualization_RenderFeature", rendererData);
 			break;
 		}
-		//case ShadowType::CASCADE_EVSM:
-		//{
-		//	FinishRenderFeature("CascadeEVSM_ShadowCaster_RenderFeature", rendererData);
-		//	FinishRenderFeature("CascadeEVSM_Visualization_RenderFeature", rendererData);
-		//	break;
-		//}
+		case ShadowType::CASCADE_EVSM:
+		{
+			FinishRenderFeature("CascadeEVSM_ShadowCaster_RenderFeature", rendererData);
+			FinishRenderFeature("CascadeEVSM_Visualization_RenderFeature", rendererData);
+			break;
+		}
 	}
 }

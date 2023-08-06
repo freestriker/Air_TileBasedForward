@@ -123,7 +123,7 @@ AirEngine::Rendering::RenderFeature::TBForward_Transparent_RenderFeature::TBForw
 		)
 	)
 {
-
+	_description = "Use forward+ to render transparent objects.";
 }
 
 AirEngine::Rendering::RenderFeature::TBForward_Transparent_RenderFeature::~TBForward_Transparent_RenderFeature()

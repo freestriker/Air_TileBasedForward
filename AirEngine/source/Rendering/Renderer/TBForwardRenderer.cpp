@@ -34,6 +34,8 @@ RTTR_REGISTRATION
 AirEngine::Rendering::Renderer::TBForwardRenderer::TBForwardRenderer()
 	: Core::Graphic::Rendering::RendererBase()
 {
+	_description = "This is a renderer for Forward+ that includes: opaque objects, translucent objects, ssao (Depth Stripping, Alpha Buffer, Depth Sorting), cascading shadows.";
+
 	UseRenderFeature("Background_RenderFeature", new RenderFeature::Background_RenderFeature());
 
 	UseRenderFeature("Geometry_RenderFeature", new RenderFeature::Geometry_RenderFeature());

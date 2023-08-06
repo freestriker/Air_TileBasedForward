@@ -127,7 +127,7 @@ AirEngine::Rendering::RenderFeature::AO_Blur_RenderFeature::AO_Blur_RenderFeatur
 		)
 	)
 {
-
+	_description = "Used for fuzzy ambient occlusion.";
 }
 
 AirEngine::Rendering::RenderFeature::AO_Blur_RenderFeature::~AO_Blur_RenderFeature()

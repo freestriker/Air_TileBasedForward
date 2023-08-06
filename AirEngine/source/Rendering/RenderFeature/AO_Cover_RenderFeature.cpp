@@ -121,7 +121,7 @@ AirEngine::Rendering::RenderFeature::AO_Cover_RenderFeature::AO_Cover_RenderFeat
 		)
 	)
 {
-
+	_description = "Used to apply the ambient occlusion effect to the screen.";
 }
 
 AirEngine::Rendering::RenderFeature::AO_Cover_RenderFeature::~AO_Cover_RenderFeature()
