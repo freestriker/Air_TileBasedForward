@@ -23,6 +23,11 @@ layout(set = CSM_SHADOW_RECEIVER_DESCRIPTOR_START_INDEX + 1, binding = 0) unifor
 
 float GetShadowIntensity(in vec3 vPosition, in vec3 wNormal)
 {
+    if(dot(wNormal, -csmShadowReceiverInfo.wLightDirection) < 0.0005)
+    {
+        return 1.0f;
+    }
+
     int cascadIndex = -1;
     for(int i = 0; i < CASCADE_COUNT * 2; i++)
     {

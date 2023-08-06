@@ -2,7 +2,7 @@
 #include "Rendering/Renderer/ForwardRenderer.h"
 #include "Rendering/Renderer/TBForwardRenderer.h"
 #include "Rendering/Renderer/AmbientOcclusionRenderer.h"
-#include "Rendering/Renderer/ShadowVisualizationRenderer.h"
+#include "Rendering/Renderer/ScreenSpaceShadowVisualizationRenderer.h"
 #include "Rendering/Renderer/BuildIblRenderer.h"
 
 RTTR_REGISTRATION
@@ -21,14 +21,15 @@ AirEngine::Rendering::RenderPipeline::BaseRenderPipeline::BaseRenderPipeline()
 	//UseRenderer("ForwardRenderer", new Renderer::ForwardRenderer());
 	UseRenderer("TBForwardRenderer", new Renderer::TBForwardRenderer());
 	UseRenderer("AmbientOcclusionRenderer", new Renderer::AmbientOcclusionRenderer());
-	UseRenderer("ShadowVisualizationRenderer", new Renderer::ShadowVisualizationRenderer());
-	UseRenderer("BuildIblRenderer", new Renderer::BuildIblRenderer());
+	UseRenderer("ScreenSpaceShadowVisualizationRenderer", new Renderer::ScreenSpaceShadowVisualizationRenderer());
+	//UseRenderer("BuildIblRenderer", new Renderer::BuildIblRenderer());
 }
 
 AirEngine::Rendering::RenderPipeline::BaseRenderPipeline::~BaseRenderPipeline()
 {
 	//delete static_cast<Renderer::ForwardRenderer*>(Renderer("ForwardRenderer"));
 	delete static_cast<Renderer::TBForwardRenderer*>(Renderer("TBForwardRenderer"));
-	delete static_cast<Renderer::ShadowVisualizationRenderer*>(Renderer("ShadowVisualizationRenderer"));
-	delete static_cast<Renderer::BuildIblRenderer*>(Renderer("BuildIblRenderer"));
+	delete static_cast<Renderer::AmbientOcclusionRenderer*>(Renderer("AmbientOcclusionRenderer"));
+	delete static_cast<Renderer::ScreenSpaceShadowVisualizationRenderer*>(Renderer("ScreenSpaceShadowVisualizationRenderer"));
+	//delete static_cast<Renderer::BuildIblRenderer*>(Renderer("BuildIblRenderer"));
 }

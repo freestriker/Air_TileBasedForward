@@ -11,7 +11,7 @@ namespace AirEngine
 	{
 		namespace Renderer
 		{
-			class ShadowVisualizationRenderer final : public Core::Graphic::Rendering::RendererBase
+			class ScreenSpaceShadowVisualizationRenderer final : public Core::Graphic::Rendering::RendererBase
 			{
 			public:
 				enum class ShadowType
@@ -20,16 +20,16 @@ namespace AirEngine
 					CASCADE_EVSM,
 				};
 			public:
-				class ShadowVisualizationRendererData final : public Core::Graphic::Rendering::RendererDataBase
+				class ScreenSpaceShadowVisualizationRendererData final : public Core::Graphic::Rendering::RendererDataBase
 				{
 				public:
 					ShadowType shadowType = ShadowType::CSM;
 				public:
-					CONSTRUCTOR(ShadowVisualizationRendererData)
+					CONSTRUCTOR(ScreenSpaceShadowVisualizationRendererData)
 					RTTR_ENABLE(Core::Graphic::Rendering::RendererDataBase)
 				};
 
-				CONSTRUCTOR(ShadowVisualizationRenderer)
+				CONSTRUCTOR(ScreenSpaceShadowVisualizationRenderer)
 
 			private:
 				Core::Graphic::Rendering::RendererDataBase* OnCreateRendererData(Camera::CameraBase* camera)override;

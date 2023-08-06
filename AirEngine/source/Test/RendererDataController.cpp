@@ -16,7 +16,7 @@
 #include "Camera/CameraBase.h"
 #include "Rendering/Renderer/TBForwardRenderer.h"
 #include "Rendering/Renderer/AmbientOcclusionRenderer.h"
-#include "Rendering/Renderer/ShadowVisualizationRenderer.h"
+#include "Rendering/Renderer/ScreenSpaceShadowVisualizationRenderer.h"
 
 RTTR_REGISTRATION
 {
@@ -68,26 +68,26 @@ void AirEngine::Test::RendererDataController::OnUpdate()
 		}
 	}
 
-	///Shadow type
-	{
-		auto rendererData = dynamic_cast<Rendering::Renderer::ShadowVisualizationRenderer::ShadowVisualizationRendererData*>(rendererDataBase);
-		if (rendererData != nullptr)
-		{
-			if (Core::Logic::CoreObject::Instance::InputManager().KeyUp(Core::Logic::Manager::InputKeyType::Key_J))
-			{
-				if (rendererData->shadowType == Rendering::Renderer::ShadowVisualizationRenderer::ShadowType::CSM)
-				{
-					rendererData->shadowType = Rendering::Renderer::ShadowVisualizationRenderer::ShadowType::CASCADE_EVSM;
-					Utils::Log::Message("Switch Shadow mode to CascadeEVSM.");
-				}
-				else if (rendererData->shadowType == Rendering::Renderer::ShadowVisualizationRenderer::ShadowType::CASCADE_EVSM)
-				{
-					rendererData->shadowType = Rendering::Renderer::ShadowVisualizationRenderer::ShadowType::CSM;
-					Utils::Log::Message("Switch Shadow mode to CSM.");
-				}
-			}
-		}
-	}
+	/////Shadow type
+	//{
+	//	auto rendererData = dynamic_cast<Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::ScreenSpaceShadowVisualizationRendererData*>(rendererDataBase);
+	//	if (rendererData != nullptr)
+	//	{
+	//		if (Core::Logic::CoreObject::Instance::InputManager().KeyUp(Core::Logic::Manager::InputKeyType::Key_J))
+	//		{
+	//			if (rendererData->shadowType == Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::ShadowType::CSM)
+	//			{
+	//				rendererData->shadowType = Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::ShadowType::CASCADE_EVSM;
+	//				Utils::Log::Message("Switch Shadow mode to CascadeEVSM.");
+	//			}
+	//			else if (rendererData->shadowType == Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::ShadowType::CASCADE_EVSM)
+	//			{
+	//				rendererData->shadowType = Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::ShadowType::CSM;
+	//				Utils::Log::Message("Switch Shadow mode to CSM.");
+	//			}
+	//		}
+	//	}
+	//}
 
 	///Renderer type
 	if (Core::Logic::CoreObject::Instance::InputManager().KeyUp(Core::Logic::Manager::InputKeyType::Key_L))
@@ -99,10 +99,12 @@ void AirEngine::Test::RendererDataController::OnUpdate()
 		}
 		else if (camera->RendererName() == "AmbientOcclusionRenderer")
 		{
-			camera->SetRendererName("ShadowVisualizationRenderer");
-			Utils::Log::Message("Switch Renderer mode to ShadowVisualizationRenderer.");
+			camera->SetRendererName("ScreenSpaceShadowVisualizationRenderer");
+			Utils::Log::Message("---------------------------------------------------------------");
+			Utils::Log::Message("Switch Renderer mode to ScreenSpaceShadowVisualizationRenderer.");
+			Utils::Log::Message("---------------------------------------------------------------");
 		}
-		else if (camera->RendererName() == "ShadowVisualizationRenderer")
+		else if (camera->RendererName() == "ScreenSpaceShadowVisualizationRenderer")
 		{
 			camera->SetRendererName("BuildIblRenderer");
 			Utils::Log::Message("Switch Renderer mode to BuildIblRenderer.");
