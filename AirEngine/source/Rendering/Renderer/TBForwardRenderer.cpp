@@ -13,6 +13,7 @@
 #include "Rendering/RenderFeature/HBAO_Occlusion_RenderFeature.h"
 #include "Rendering/RenderFeature/GTAO_Occlusion_RenderFeature.h"
 #include "Rendering/RenderFeature/CSM_ShadowCaster_RenderFeature.h"
+#include "Rendering/RenderFeature/TBForward_Transparent_RenderFeature.h"
 
 RTTR_REGISTRATION
 {
@@ -45,6 +46,8 @@ AirEngine::Rendering::Renderer::TBForwardRenderer::TBForwardRenderer()
 
 	UseRenderFeature("TBForward_Opaque_RenderFeature", new RenderFeature::TBForward_Opaque_RenderFeature());
 	UseRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", new RenderFeature::TBForward_OIT_DepthPeeling_RenderFeature());
+	UseRenderFeature("TBForward_OIT_AlphaBuffer_RenderFeature", new RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeature());
+	UseRenderFeature("TBForward_Transparent_RenderFeature", new RenderFeature::TBForward_Transparent_RenderFeature());
 }
 
 AirEngine::Rendering::Renderer::TBForwardRenderer::~TBForwardRenderer()
@@ -73,6 +76,8 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::OnResolveRendererData(Co
 	auto lightListFeatureData = rendererData->RenderFeatureData<RenderFeature::TBForward_LightList_RenderFeature::TBForward_LightList_RenderFeatureData>("TBForward_LightList_RenderFeature");
 	auto opaqueFeatureData = rendererData->RenderFeatureData<RenderFeature::TBForward_Opaque_RenderFeature::TBForward_Opaque_RenderFeatureData>("TBForward_Opaque_RenderFeature");
 	auto depthPeelingFeatureData = rendererData->RenderFeatureData<RenderFeature::TBForward_OIT_DepthPeeling_RenderFeature::TBForward_OIT_DepthPeeling_RenderFeatureData>("TBForward_OIT_DepthPeeling_RenderFeature");
+	auto alphaBufferFeatureData = rendererData->RenderFeatureData<RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeatureData>("TBForward_OIT_AlphaBuffer_RenderFeature");
+	auto transparentFeatureData = rendererData->RenderFeatureData<RenderFeature::TBForward_Transparent_RenderFeature::TBForward_Transparent_RenderFeatureData>("TBForward_Transparent_RenderFeature");
 
 	auto ssaoFeatureData = rendererData->RenderFeatureData<RenderFeature::SSAO_Occlusion_RenderFeature::SSAO_Occlusion_RenderFeatureData>("SSAO_Occlusion_RenderFeature");
 	ssaoFeatureData->depthTexture = geometryFeatureData->depthTexture;
@@ -104,6 +109,10 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::OnResolveRendererData(Co
 
 	depthPeelingFeatureData->transparentLightIndexListsBuffer = lightListFeatureData->transparentLightIndexListsBuffer;
 	depthPeelingFeatureData->depthTexture = geometryFeatureData->depthTexture;
+
+	alphaBufferFeatureData->transparentLightIndexListsBuffer = lightListFeatureData->transparentLightIndexListsBuffer;
+
+	transparentFeatureData->transparentLightIndexListsBuffer = lightListFeatureData->transparentLightIndexListsBuffer;
 }
 
 void AirEngine::Rendering::Renderer::TBForwardRenderer::OnDestroyRendererData(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -124,7 +133,18 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::PrepareRenderer(Core::Gr
 	PrepareRenderFeature("CSM_ShadowCaster_RenderFeature", rendererData);
 	
 	PrepareRenderFeature("TBForward_Opaque_RenderFeature", rendererData);
-	PrepareRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", rendererData);
+	switch (static_cast<TBForwardRendererData*>(rendererData)->transparentType)
+	{
+	case TransparentType::DEPTH_PEELING:
+		PrepareRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", rendererData);
+		break;
+	case TransparentType::ALPHA_BUFFER:
+		PrepareRenderFeature("TBForward_OIT_AlphaBuffer_RenderFeature", rendererData);
+		break;
+	case TransparentType::DEPTH_SORT:
+		PrepareRenderFeature("TBForward_Transparent_RenderFeature", rendererData);
+		break;
+	}
 }
 
 void AirEngine::Rendering::Renderer::TBForwardRenderer::ExcuteRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*> const* rendererComponents)
@@ -140,7 +160,18 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::ExcuteRenderer(Core::Gra
 	ExcuteRenderFeature("CSM_ShadowCaster_RenderFeature", rendererData, camera, rendererComponents);
 	
 	ExcuteRenderFeature("TBForward_Opaque_RenderFeature", rendererData, camera, rendererComponents);
-	ExcuteRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", rendererData, camera, rendererComponents);
+	switch (static_cast<TBForwardRendererData*>(rendererData)->transparentType)
+	{
+	case TransparentType::DEPTH_PEELING:
+		ExcuteRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", rendererData, camera, rendererComponents);
+		break;
+	case TransparentType::ALPHA_BUFFER:
+		ExcuteRenderFeature("TBForward_OIT_AlphaBuffer_RenderFeature", rendererData, camera, rendererComponents);
+		break;
+	case TransparentType::DEPTH_SORT:
+		ExcuteRenderFeature("TBForward_Transparent_RenderFeature", rendererData, camera, rendererComponents);
+		break;
+	}
 }
 
 void AirEngine::Rendering::Renderer::TBForwardRenderer::SubmitRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -156,7 +187,18 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::SubmitRenderer(Core::Gra
 	SubmitRenderFeature("CSM_ShadowCaster_RenderFeature", rendererData);
 
 	SubmitRenderFeature("TBForward_Opaque_RenderFeature", rendererData);
-	SubmitRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", rendererData);
+	switch (static_cast<TBForwardRendererData*>(rendererData)->transparentType)
+	{
+	case TransparentType::DEPTH_PEELING:
+		SubmitRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", rendererData);
+		break;
+	case TransparentType::ALPHA_BUFFER:
+		SubmitRenderFeature("TBForward_OIT_AlphaBuffer_RenderFeature", rendererData);
+		break;
+	case TransparentType::DEPTH_SORT:
+		SubmitRenderFeature("TBForward_Transparent_RenderFeature", rendererData);
+		break;
+	}
 }
 
 void AirEngine::Rendering::Renderer::TBForwardRenderer::FinishRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -172,5 +214,16 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::FinishRenderer(Core::Gra
 	FinishRenderFeature("CSM_ShadowCaster_RenderFeature", rendererData);
 	
 	FinishRenderFeature("TBForward_Opaque_RenderFeature", rendererData);
-	FinishRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", rendererData);
+	switch (static_cast<TBForwardRendererData*>(rendererData)->transparentType)
+	{
+	case TransparentType::DEPTH_PEELING:
+		FinishRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", rendererData);
+		break;
+	case TransparentType::ALPHA_BUFFER:
+		FinishRenderFeature("TBForward_OIT_AlphaBuffer_RenderFeature", rendererData);
+		break;
+	case TransparentType::DEPTH_SORT:
+		FinishRenderFeature("TBForward_Transparent_RenderFeature", rendererData);
+		break;
+	}
 }

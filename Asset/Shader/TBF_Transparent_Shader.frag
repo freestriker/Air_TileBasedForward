@@ -1,9 +1,7 @@
 #version 450
 #extension GL_GOOGLE_include_directive: enable
 
-#include "TileBasedForwardLighting.glsl"
-
-layout(set = START_SET_INDEX + 0, binding = 0) uniform sampler2D diffuseTexture;
+#include "TBForwardLighting.glsl"
 
 layout(location = 0) in vec2 inTexCoords;
 layout(location = 1) in vec3 inWorldPosition;
@@ -29,5 +27,5 @@ void main()
         specular += SpecularLighting(lightInfos.ortherLightInfos[transparentLightIndexList.indexes[i]], viewDirection, inWorldPosition, worldNormal, 80.0);
     }
 
-    ColorAttachment = texture(diffuseTexture, inTexCoords) * vec4((diffuse + specular + ambient) * 0.3, 1);
+    ColorAttachment = vec4((diffuse + specular + ambient) * 0.5, 0.3);
 }

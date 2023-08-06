@@ -1,7 +1,7 @@
 {
-  "renderPass": "TBF_TransparentRenderPass",
+  "renderPass": "AirEngine::Rendering::RenderFeature::TBForward_Transparent_RenderFeature::TBForward_Transparent_RenderPass",
   "subpass": "DrawSubpass",
-  "shaderPaths": ["..\\Asset\\Shader\\Spv\\TBF_TransparentShader.vert.spv", "..\\Asset\\Shader\\Spv\\TBF_TransparentShader.frag.spv"],
+  "shaderPaths": ["..\\Asset\\Shader\\Spv\\TBF_Transparent_Shader.vert.spv", "..\\Asset\\Shader\\Spv\\TBF_Transparent_Shader.frag.spv"],
   "cullMode": 0,
   "depthTestEnable": 1,
   "depthWriteEnable": 0,

@@ -189,6 +189,7 @@
     <ClCompile Include="source\Rendering\RenderFeature\TBForward_OIT_AlphaBuffer_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\TBForward_OIT_DepthPeeling_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\TBForward_Opaque_RenderFeature.cpp" />
+    <ClCompile Include="source\Rendering\RenderFeature\TBForward_Transparent_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderPipeline\BaseRenderPipeline.cpp" />
     <ClCompile Include="source\Test\AudioSourceBehaviour.cpp" />
     <ClCompile Include="source\Test\Background_SkyboxRendererBehaviour.cpp" />
@@ -298,6 +299,7 @@
     <ClInclude Include="header\Rendering\RenderFeature\TBForward_OIT_AlphaBuffer_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\TBForward_OIT_DepthPeeling_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\TBForward_Opaque_RenderFeature.h" />
+    <ClInclude Include="header\Rendering\RenderFeature\TBForward_Transparent_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderPipeline\BaseRenderPipeline.h" />
     <ClInclude Include="header\Test\AudioSourceBehaviour.h" />
     <ClInclude Include="header\Test\Background_SkyboxRendererBehaviour.h" />

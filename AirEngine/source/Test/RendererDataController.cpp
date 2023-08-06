@@ -68,6 +68,29 @@ void AirEngine::Test::RendererDataController::OnUpdate()
 		}
 	}
 
+	///transparent type
+	{
+		auto rendererData = dynamic_cast<Rendering::Renderer::TBForwardRenderer::TBForwardRendererData*>(rendererDataBase);
+		if (rendererData != nullptr && Core::Logic::CoreObject::Instance::InputManager().KeyUp(Core::Logic::Manager::InputKeyType::Key_J))
+		{
+			if (rendererData->transparentType == Rendering::Renderer::TBForwardRenderer::TransparentType::DEPTH_PEELING)
+			{
+				rendererData->transparentType = Rendering::Renderer::TBForwardRenderer::TransparentType::ALPHA_BUFFER;
+				Utils::Log::Message("Switch AO mode to HBAO.");
+			}
+			else if (rendererData->transparentType == Rendering::Renderer::TBForwardRenderer::TransparentType::ALPHA_BUFFER)
+			{
+				rendererData->transparentType = Rendering::Renderer::TBForwardRenderer::TransparentType::DEPTH_SORT;
+				Utils::Log::Message("Switch AO mode to GTAO.");
+			}
+			else if (rendererData->transparentType == Rendering::Renderer::TBForwardRenderer::TransparentType::DEPTH_SORT)
+			{
+				rendererData->transparentType = Rendering::Renderer::TBForwardRenderer::TransparentType::DEPTH_PEELING;
+				Utils::Log::Message("Switch AO mode to SSAO.");
+			}
+		}
+	}
+
 	/////Shadow type
 	//{
 	//	auto rendererData = dynamic_cast<Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::ScreenSpaceShadowVisualizationRendererData*>(rendererDataBase);

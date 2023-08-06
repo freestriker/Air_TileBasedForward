@@ -35,14 +35,18 @@ void AirEngine::Test::TBF_OIT_RenderBehaviour::OnStart()
 	auto boxMesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\Complex.ply");
 	auto dpShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\TBF_OIT_DepthPeeling_Shader.shader");
 	auto abShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\TBF_OIT_AlphaBuffer_Shader.shader");
+	auto tShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\TBF_Transparent_Shader.shader");
 
 	auto dpMaterial = new AirEngine::Core::Graphic::Rendering::Material(dpShader);
 
 	auto abMaterial = new AirEngine::Core::Graphic::Rendering::Material(abShader);
 
+	auto tMaterial = new AirEngine::Core::Graphic::Rendering::Material(tShader);
+
 	auto renderer = GameObject()->GetComponent<Renderer::Renderer>();
 	renderer->AddMaterial(dpMaterial);
 	renderer->AddMaterial(abMaterial);
+	renderer->AddMaterial(tMaterial);
 	renderer->mesh = boxMesh;
 }
 

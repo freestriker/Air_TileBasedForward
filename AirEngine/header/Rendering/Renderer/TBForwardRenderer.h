@@ -14,11 +14,17 @@ namespace AirEngine
 			class TBForwardRenderer final : public Core::Graphic::Rendering::RendererBase
 			{
 			public:
+				enum class TransparentType
+				{
+					DEPTH_PEELING,
+					ALPHA_BUFFER,
+					DEPTH_SORT
+				};
 				class TBForwardRendererData final : public Core::Graphic::Rendering::RendererDataBase
 				{
 				public:
 					CONSTRUCTOR(TBForwardRendererData)
-
+					TransparentType transparentType = TransparentType::DEPTH_PEELING;
 					RTTR_ENABLE(Core::Graphic::Rendering::RendererDataBase)
 				};
 

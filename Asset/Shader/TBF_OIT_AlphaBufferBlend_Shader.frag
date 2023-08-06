@@ -58,7 +58,9 @@ void main()
     for(uint iteratorIndex = pixelIndex; iteratorIndex != INVALID_BUFFER_INDEX; iteratorIndex = indexList.indexes[iteratorIndex])
     {
         src = colorList.colors[iteratorIndex];
+        src = clamp(src, vec4(0), vec4(1));
         color = vec4(dst.a * src.a * src.rgb + dst.rgb, (1 - src.a) * dst.a);
+        color = clamp(color, vec4(0), vec4(1));        
         dst = color;
     }
 
