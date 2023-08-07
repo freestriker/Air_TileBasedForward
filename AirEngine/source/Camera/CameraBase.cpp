@@ -51,8 +51,8 @@ void AirEngine::Camera::CameraBase::RefreshCameraInfo()
 	OnSetProjectionMatrix(_cameraInfo.projection);
 
 	glm::vec3 eye = GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, 0, 1);
-	glm::vec3 center = glm::normalize(glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, -1, 1)));
-	glm::vec3 up = glm::normalize(glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 1, 0, 0)));
+	glm::vec3 center = glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, -1, 1));
+	glm::vec3 up = glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 1, 0, 0));
 	_cameraInfo.view = glm::lookAt(eye, center, up);
 
 	_intersectionChecker.SetIntersectPlanes(_cameraInfo.clipPlanes, 6);
