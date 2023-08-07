@@ -28,6 +28,7 @@ AirEngine::Utils::Condition* AirEngine::Core::Graphic::CoreObject::Instance::_en
 std::vector<AirEngine::Core::Logic::Object::Component*> AirEngine::Core::Graphic::CoreObject::Instance::_lights = std::vector<AirEngine::Core::Logic::Object::Component*>();
 std::vector<AirEngine::Core::Logic::Object::Component*> AirEngine::Core::Graphic::CoreObject::Instance::_cameras = std::vector<AirEngine::Core::Logic::Object::Component*>();
 std::vector<AirEngine::Core::Logic::Object::Component*> AirEngine::Core::Graphic::CoreObject::Instance::_renderers = std::vector<AirEngine::Core::Logic::Object::Component*>();
+double AirEngine::Core::Graphic::CoreObject::Instance::_renderDuration{};
 
 AirEngine::Core::Graphic::CoreObject::Queue* AirEngine::Core::Graphic::CoreObject::Instance::Queue_(std::string name)
 {

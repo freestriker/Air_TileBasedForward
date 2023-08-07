@@ -149,6 +149,8 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 		Logic::CoreObject::Instance::SetNeedIterateRenderer(true);
 		Instance::StartRenderCondition().Wait();
 
+		auto&& startTime = std::chrono::system_clock::now();
+
 		//Lights
 		auto lightCopyTask = AddTask(
 			[](Command::CommandPool* graphicCommandPool, Command::CommandPool* computeCommandPool)->void 
@@ -277,6 +279,10 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 						graphicCommandPool->DestoryCommandBuffer(commandBuffer);
 					}
 				).wait();
+
+				auto&& endTime = std::chrono::system_clock::now();
+				auto&& duration = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
+				Instance::_renderDuration = double(duration.count()) * std::chrono::microseconds::period::num / std::chrono::microseconds::period::den;
 			}
 		}
 

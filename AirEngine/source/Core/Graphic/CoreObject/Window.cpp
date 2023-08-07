@@ -101,11 +101,21 @@ void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::release
 
 }
 
+const int t = 5;
+int i = 0;
 void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::startNextFrame()
 {
     //Utils::Log::Message("------------------------------------------------------------------");
     Instance::StartPresentCondition().Awake();
     Instance::EndPresentCondition().Wait();
+
+    if (i++ == 0)
+    {
+        auto&& duration = Instance::RenderDuration();
+        auto&& fps = 1.0 / duration;
+        Window::VulkanWindow_()->setTitle("AirEngine FPS:" + QString::number(fps, 'f'));
+    }
+    i %= t;
 
     _window->frameReady();
     _window->requestUpdate();
