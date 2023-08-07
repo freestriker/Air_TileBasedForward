@@ -107,17 +107,17 @@ void AirEngine::Test::RendererDataController::OnUpdate()
 			if (rendererData->transparentType == Rendering::Renderer::TBForwardRenderer::TransparentType::DEPTH_PEELING)
 			{
 				rendererData->transparentType = Rendering::Renderer::TBForwardRenderer::TransparentType::ALPHA_BUFFER;
-				Utils::Log::Message("Switch AO mode to HBAO.");
+				Utils::Log::Message("Switch transparent mode to alpha buffer.");
 			}
 			else if (rendererData->transparentType == Rendering::Renderer::TBForwardRenderer::TransparentType::ALPHA_BUFFER)
 			{
 				rendererData->transparentType = Rendering::Renderer::TBForwardRenderer::TransparentType::DEPTH_SORT;
-				Utils::Log::Message("Switch AO mode to GTAO.");
+				Utils::Log::Message("Switch transparent mode to depth sort.");
 			}
 			else if (rendererData->transparentType == Rendering::Renderer::TBForwardRenderer::TransparentType::DEPTH_SORT)
 			{
 				rendererData->transparentType = Rendering::Renderer::TBForwardRenderer::TransparentType::DEPTH_PEELING;
-				Utils::Log::Message("Switch AO mode to SSAO.");
+				Utils::Log::Message("Switch transparent mode to depth peeling.");
 			}
 		}
 	}
@@ -132,12 +132,12 @@ void AirEngine::Test::RendererDataController::OnUpdate()
 				if (rendererData->shadowType == Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::ShadowType::CSM)
 				{
 					rendererData->shadowType = Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::ShadowType::CASCADE_EVSM;
-					Utils::Log::Message("Switch Shadow mode to ScreenSpaceCascadeEVSM.");
+					Utils::Log::Message("Switch shadow mode to ScreenSpaceCascadeEVSM.");
 				}
 				else if (rendererData->shadowType == Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::ShadowType::CASCADE_EVSM)
 				{
 					rendererData->shadowType = Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::ShadowType::CSM;
-					Utils::Log::Message("Switch Shadow mode to ScreenSpaceCSM.");
+					Utils::Log::Message("Switch shadow mode to ScreenSpaceCSM.");
 				}
 			}
 		}
