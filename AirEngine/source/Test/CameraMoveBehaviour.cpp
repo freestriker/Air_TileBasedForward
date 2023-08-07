@@ -36,7 +36,26 @@ void AirEngine::Test::CameraMoveBehaviour::OnStart()
 	//GameObject()->transform.SetEulerRotation({ 0, 90 - _rotation, 0 });
 	GameObject()->transform.SetEulerRotation({ 0, 0, 0 });
 }
+glm::vec3 ToEulerAngles(glm::quat q) {
+	glm::vec3 angles;
 
+	// roll (x-axis rotation)
+	double sinr_cosp = 2 * (q.w * q.x + q.y * q.z);
+	double cosr_cosp = 1 - 2 * (q.x * q.x + q.y * q.y);
+	angles.x = std::atan2(sinr_cosp, cosr_cosp);
+
+	// pitch (y-axis rotation)
+	double sinp = std::sqrt(1 + 2 * (q.w * q.y - q.x * q.z));
+	double cosp = std::sqrt(1 - 2 * (q.w * q.y - q.x * q.z));
+	angles.y = 2 * std::atan2(sinp, cosp) - M_PI / 2;
+
+	// yaw (z-axis rotation)
+	double siny_cosp = 2 * (q.w * q.z + q.x * q.y);
+	double cosy_cosp = 1 - 2 * (q.y * q.y + q.z * q.z);
+	angles.z = std::atan2(siny_cosp, cosy_cosp);
+
+	return angles;
+}
 void AirEngine::Test::CameraMoveBehaviour::OnUpdate()
 {
 	const double pi = std::acos(-1.0);
@@ -62,7 +81,7 @@ void AirEngine::Test::CameraMoveBehaviour::OnUpdate()
 
 	//}
 	const float deltaDuration = Core::Logic::CoreObject::Instance::time.DeltaDuration();
-	const double rotationSpeed = 20;
+	const double rotationSpeed = 20.0 / 180.0 * pi;
 	glm::vec3 deltaRotation = {};
 	if (Core::Logic::CoreObject::Instance::InputManager().KeyStatus(Core::Logic::Manager::InputKeyType::Key_Left) == Core::Logic::Manager::ButtonStatusType::Pressed)
 	{
@@ -80,21 +99,40 @@ void AirEngine::Test::CameraMoveBehaviour::OnUpdate()
 	{
 		deltaRotation.x = -rotationSpeed * deltaDuration;
 	}
-	GameObject()->transform.SetEulerRotation(GameObject()->transform.EulerRotation() + deltaRotation);
+
+	auto&& src = deltaRotation;
+	glm::quat quat = glm::quat(glm::vec3(0, src.y, 0)) * glm::quat(glm::vec3(src.x, 0, 0));
+	auto&& delta = ToEulerAngles(quat);
+
+	GameObject()->transform.SetRotation(GameObject()->transform.Rotation() + delta);
 
 	const float translationSpeed = 2;
 	glm::vec3 deltaTranslation = {};
 	if (Core::Logic::CoreObject::Instance::InputManager().KeyStatus(Core::Logic::Manager::InputKeyType::Key_W) == Core::Logic::Manager::ButtonStatusType::Pressed)
 	{
-		deltaTranslation = (glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, -1, 1)) - glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, 0, 1))) * translationSpeed * deltaDuration;
-		GameObject()->transform.SetTranslation(GameObject()->transform.Translation() + deltaTranslation);
-		Utils::Log::Message(std::to_string(GameObject()->transform.Translation().x) + " " + std::to_string(GameObject()->transform.Translation().z));
+		deltaTranslation += (glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, -1, 1)) - glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, 0, 1))) * translationSpeed * deltaDuration;
 	}
 	else if (Core::Logic::CoreObject::Instance::InputManager().KeyStatus(Core::Logic::Manager::InputKeyType::Key_S) == Core::Logic::Manager::ButtonStatusType::Pressed)
 	{
-		deltaTranslation = -(glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, -1, 1)) - glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, 0, 1))) * translationSpeed * deltaDuration;
-		GameObject()->transform.SetTranslation(GameObject()->transform.Translation() + deltaTranslation);
+		deltaTranslation += (glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, 1, 1)) - glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, 0, 1))) * translationSpeed * deltaDuration;
 	}
+	if (Core::Logic::CoreObject::Instance::InputManager().KeyStatus(Core::Logic::Manager::InputKeyType::Key_A) == Core::Logic::Manager::ButtonStatusType::Pressed)
+	{
+		deltaTranslation += (glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(-1, 0, 0, 1)) - glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, 0, 1))) * translationSpeed * deltaDuration;
+	}
+	else if (Core::Logic::CoreObject::Instance::InputManager().KeyStatus(Core::Logic::Manager::InputKeyType::Key_D) == Core::Logic::Manager::ButtonStatusType::Pressed)
+	{
+		deltaTranslation += (glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(1, 0, 0, 1)) - glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, 0, 1))) * translationSpeed * deltaDuration;
+	}
+	if (Core::Logic::CoreObject::Instance::InputManager().KeyStatus(Core::Logic::Manager::InputKeyType::Key_Q) == Core::Logic::Manager::ButtonStatusType::Pressed)
+	{
+		deltaTranslation += (glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 1, 0, 1)) - glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, 0, 1))) * translationSpeed * deltaDuration;
+	}
+	else if (Core::Logic::CoreObject::Instance::InputManager().KeyStatus(Core::Logic::Manager::InputKeyType::Key_E) == Core::Logic::Manager::ButtonStatusType::Pressed)
+	{
+		deltaTranslation += (glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, -1, 0, 1)) - glm::vec3(GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, 0, 1))) * translationSpeed * deltaDuration;
+	}
+	GameObject()->transform.SetTranslation(GameObject()->transform.Translation() + deltaTranslation);
 }
 
 void AirEngine::Test::CameraMoveBehaviour::OnDestroy()
