@@ -6,6 +6,7 @@
 #include "Core/Logic/Manager/InputManager.h"
 #include "Utils/Log.h"
 #include "Core/Graphic/CoreObject/Window.h"
+#include <algorithm>
 
 RTTR_REGISTRATION
 {
@@ -91,20 +92,42 @@ void AirEngine::Test::CameraMoveBehaviour::OnUpdate()
 	{
 		deltaRotation.y = -rotationSpeed * deltaDuration;
 	}
-	if (Core::Logic::CoreObject::Instance::InputManager().KeyStatus(Core::Logic::Manager::InputKeyType::Key_Up) == Core::Logic::Manager::ButtonStatusType::Pressed)
-	{
-		deltaRotation.x = rotationSpeed * deltaDuration;
-	}
-	else if (Core::Logic::CoreObject::Instance::InputManager().KeyStatus(Core::Logic::Manager::InputKeyType::Key_Down) == Core::Logic::Manager::ButtonStatusType::Pressed)
-	{
-		deltaRotation.x = -rotationSpeed * deltaDuration;
-	}
+	//if (Core::Logic::CoreObject::Instance::InputManager().KeyStatus(Core::Logic::Manager::InputKeyType::Key_Up) == Core::Logic::Manager::ButtonStatusType::Pressed)
+	//{
+	//	deltaRotation.x = rotationSpeed * deltaDuration;
+	//}
+	//else if (Core::Logic::CoreObject::Instance::InputManager().KeyStatus(Core::Logic::Manager::InputKeyType::Key_Down) == Core::Logic::Manager::ButtonStatusType::Pressed)
+	//{
+	//	deltaRotation.x = -rotationSpeed * deltaDuration;
+	//}
 
-	auto&& src = deltaRotation;
-	glm::quat quat = glm::quat(glm::vec3(0, src.y, 0)) * glm::quat(glm::vec3(src.x, 0, 0));
-	auto&& delta = ToEulerAngles(quat);
+	//if(deltaRotation != glm::vec3())
+	//{
+	//	glm::vec3 src = GameObject()->transform.Rotation() + deltaRotation;
+	//	src.x = std::clamp(src.x, float(-89 * pi / 180.0), float(89 * pi / 180.0));
+	//	src.z = 0;
 
-	GameObject()->transform.SetRotation(GameObject()->transform.Rotation() + delta);
+	//	glm::quat srcQuat = src;
+	//	GameObject()->transform.SetRotation(src);
+
+	//	glm::vec3 zAxis = glm::normalize(GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, 1, 1) - GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, 0, 1));
+	//	glm::vec3 xAxis = glm::normalize(GameObject()->transform.ModelMatrix() * glm::vec4(1, 0, 0, 1) - GameObject()->transform.ModelMatrix() * glm::vec4(0, 0, 0, 1));
+	//	glm::vec3 dstXAxis = glm::normalize(glm::cross(glm::vec3(0, 1, 0), zAxis));
+	//	src.z = std::acos(std::clamp(glm::dot(dstXAxis, xAxis), -1.0f, 1.0f));
+
+	//	glm::quat deltaQuat = glm::quat(glm::vec3(0, 0, src.z));
+
+	//	auto&& finalQuat = deltaQuat * srcQuat;
+	//	auto&& dst = ToEulerAngles(finalQuat);
+
+	//	GameObject()->transform.SetRotation(dst);
+	//}
+
+	//auto&& src = deltaRotation;
+	//glm::quat quat = glm::quat(glm::vec3(0, src.y, 0)) * glm::quat(glm::vec3(src.x, 0, 0));
+	//auto&& delta = ToEulerAngles(quat);
+
+	GameObject()->transform.SetRotation(GameObject()->transform.Rotation() + deltaRotation);
 
 	const float translationSpeed = 2;
 	glm::vec3 deltaTranslation = {};

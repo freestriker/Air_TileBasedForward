@@ -413,6 +413,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	cameraGo->AddComponent(new Test::CameraMoveBehaviour());
 	cameraGo->AddComponent(new Audio::AudioListener());
 	cameraGo->AddComponent(new Test::RendererDataController());
+	cameraGo->transform.SetTranslation({ 0, 0, 5 });
 
 	///AudioSource
 	Logic::Object::GameObject* audioSources = new Logic::Object::GameObject("AudioSources");

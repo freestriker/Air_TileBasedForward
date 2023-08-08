@@ -40,19 +40,19 @@ void AirEngine::Test::QuadMoveBehaviour::OnStart()
 
 void AirEngine::Test::QuadMoveBehaviour::OnUpdate()
 {
-	float moveSpeed = 1;
-	if (Core::Logic::CoreObject::Instance::InputManager().KeyStatus(Core::Logic::Manager::InputKeyType::Key_Q) == AirEngine::Core::Logic::Manager::ButtonStatusType::Pressed)
-	{
-		auto t = GameObject()->transform.Translation();
-		t.y += moveSpeed * Core::Logic::CoreObject::Instance::time.DeltaDuration();
-		GameObject()->transform.SetTranslation(t);
-	}
-	else if (Core::Logic::CoreObject::Instance::InputManager().KeyStatus(Core::Logic::Manager::InputKeyType::Key_E) == AirEngine::Core::Logic::Manager::ButtonStatusType::Pressed)
-	{
-		auto t = GameObject()->transform.Translation();
-		t.y -= moveSpeed * Core::Logic::CoreObject::Instance::time.DeltaDuration();
-		GameObject()->transform.SetTranslation(t);
-	}
+	//float moveSpeed = 1;
+	//if (Core::Logic::CoreObject::Instance::InputManager().KeyStatus(Core::Logic::Manager::InputKeyType::Key_Q) == AirEngine::Core::Logic::Manager::ButtonStatusType::Pressed)
+	//{
+	//	auto t = GameObject()->transform.Translation();
+	//	t.y += moveSpeed * Core::Logic::CoreObject::Instance::time.DeltaDuration();
+	//	GameObject()->transform.SetTranslation(t);
+	//}
+	//else if (Core::Logic::CoreObject::Instance::InputManager().KeyStatus(Core::Logic::Manager::InputKeyType::Key_E) == AirEngine::Core::Logic::Manager::ButtonStatusType::Pressed)
+	//{
+	//	auto t = GameObject()->transform.Translation();
+	//	t.y -= moveSpeed * Core::Logic::CoreObject::Instance::time.DeltaDuration();
+	//	GameObject()->transform.SetTranslation(t);
+	//}
 }
 
 void AirEngine::Test::QuadMoveBehaviour::OnDestroy()
