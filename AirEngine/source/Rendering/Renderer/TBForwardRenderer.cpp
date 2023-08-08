@@ -99,8 +99,8 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::OnResolveRendererData(Co
 	csmShadowMapFeatureData->shadowImageResolutions = 2048;
 	csmShadowMapFeatureData->sampleHalfWidth = 2;
 	csmShadowMapFeatureData->bias = {
-		glm::vec2{ 0.0000f, 0.0075f },
-		glm::vec2{ 0.0000f, 0.0095f },
+		glm::vec2{ 0.0005f, 0.0075f },
+		glm::vec2{ 0.0005f, 0.0095f },
 		glm::vec2{ 0.0005f, 0.0105f },
 		glm::vec2{ 0.0005f, 0.0115f },
 	};

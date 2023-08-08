@@ -39,7 +39,7 @@ void AirEngine::Test::TBF_Opaque_Pbr_RendererBehaviour::OnStart()
 
 	auto sampler = new Core::Graphic::Instance::ImageSampler(
 		VkFilter::VK_FILTER_LINEAR,
-		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
+		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_LINEAR,
 		VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT,
 		0.0f,
 		VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK

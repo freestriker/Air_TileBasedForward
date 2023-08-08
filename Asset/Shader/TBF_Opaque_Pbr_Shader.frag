@@ -24,6 +24,7 @@ void main()
     vec3 wView = CameraWObserveDirection(inWorldPosition, cameraInfo.info);
     vec3 albedo = texture(albedoTexture, inTexCoords).rgb;
     vec3 rmo = texture(rmoTexture, inTexCoords).rgb;
+    // vec3 rmo = vec3(1, 0, 1);
 
     float shadowIntensity = GetShadowIntensity((cameraInfo.info.view * vec4(inWorldPosition, 1)).xyz, wNormal);
     

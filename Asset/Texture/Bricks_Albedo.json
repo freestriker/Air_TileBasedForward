@@ -1,0 +1,23 @@
+{
+    "mipmapLayerSourcePaths": [
+        ["..\\Asset\\Texture\\Bricks_Albedo.png"]
+    ],
+    "format": 50,
+    "targetType": 0,
+    "imageTiling": 0,
+    "imageUsageFlags": 4,
+    "memoryPropertyFlags": 1,
+    "imageCreateFlags": 0,
+    "autoGenerateMipmap": false,
+    "topDown": false,
+    "imageViewInfos": {
+        "DefaultImageView": {
+            "imageViewType": 1,
+            "imageAspectFlags": 1,
+            "baseLayer": 0,
+            "layerCount": 1,
+            "baseMipmapLevel": 0,
+            "mipmapLevelCount": 1
+        }
+    }
+}

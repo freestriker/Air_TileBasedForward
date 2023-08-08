@@ -4,6 +4,8 @@
 #include "Light/LightBase.h"
 #include <map>
 #include "Light/AmbientLight.h"
+#include "Core/Graphic/Instance/ImageSampler.h"
+#include "Core/Graphic/Instance/Image.h"
 
 AirEngine::Core::Graphic::Manager::LightManager::LightManager()
 	: _forwardLightInfosBuffer(nullptr)
@@ -20,6 +22,22 @@ AirEngine::Core::Graphic::Manager::LightManager::LightManager()
 	_forwardLightInfosBuffer = new Instance::Buffer(sizeof(ForwardLightInfos), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 	_tileBasedForwardLightInfosBuffer = new Instance::Buffer(sizeof(TileBasedForwardLightInfos), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 	_tileBasedForwardLightBoundingBoxInfosBuffer = new Instance::Buffer(sizeof(TileBasedForwardLightBoundingBoxInfos), VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+	_irradianceCubeImageSampler = new Core::Graphic::Instance::ImageSampler(
+		VkFilter::VK_FILTER_NEAREST,
+		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
+		VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+		0.0f,
+		VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
+	);
+	_prefilteredCubeImageSampler = nullptr;
+	_lutImageSampler = new Core::Graphic::Instance::ImageSampler(
+		VkFilter::VK_FILTER_NEAREST,
+		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
+		VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+		0.0f,
+		VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
+	);
 }
 
 AirEngine::Core::Graphic::Manager::LightManager::~LightManager()
@@ -70,6 +88,33 @@ void AirEngine::Core::Graphic::Manager::LightManager::SetLightInfo(std::vector<L
 		_irradianceCubeImage = static_cast<Light::AmbientLight*>(skyBoxIterator->second)->_irradianceCubeImage;
 		_prefilteredCubeImage = static_cast<Light::AmbientLight*>(skyBoxIterator->second)->_prefilteredCubeImage;
 		_lutImage = static_cast<Light::AmbientLight*>(skyBoxIterator->second)->_lutImage;
+		if (_prefilteredCubeImageSampler)
+		{
+			if (_prefilteredCubeImageSampler->MipmapLevel() != (_prefilteredCubeImage->ImageView_().MipmapLevelCount() - 1))
+			{
+				delete _prefilteredCubeImageSampler;
+				_prefilteredCubeImageSampler = new Core::Graphic::Instance::ImageSampler(
+					VkFilter::VK_FILTER_LINEAR,
+					VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_LINEAR,
+					VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+					0.0f,
+					VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK,
+					_prefilteredCubeImage->ImageView_().MipmapLevelCount() - 1
+				);
+			}
+		}
+		else
+		{
+			_prefilteredCubeImageSampler = new Core::Graphic::Instance::ImageSampler(
+				VkFilter::VK_FILTER_LINEAR,
+				VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_LINEAR,
+				VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+				0.0f,
+				VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK,
+				_prefilteredCubeImage->ImageView_().MipmapLevelCount() - 1
+			);
+
+		}
 	}
 	else
 	{
@@ -174,7 +219,7 @@ AirEngine::Light::LightBase* AirEngine::Core::Graphic::Manager::LightManager::Ma
 
 void AirEngine::Core::Graphic::Manager::LightManager::SetAmbientLightParameters(Rendering::Material* material, Instance::ImageSampler* sampler) const
 {
-	material->SetSampledImageCube("irradianceCubeImage", _irradianceCubeImage, sampler);
-	material->SetSampledImageCube("prefilteredCubeImage", _prefilteredCubeImage, sampler);
-	material->SetSampledImage2D("lutImage", _lutImage, sampler);
+	material->SetSampledImageCube("irradianceCubeImage", _irradianceCubeImage, _irradianceCubeImageSampler);
+	material->SetSampledImageCube("prefilteredCubeImage", _prefilteredCubeImage, _prefilteredCubeImageSampler);
+	material->SetSampledImage2D("lutImage", _lutImage, _lutImageSampler);
 }

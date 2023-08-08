@@ -109,6 +109,9 @@ namespace AirEngine
 					int _ortherLightCount;
 					std::array<LightInfo, MAX_ORTHER_LIGHT_COUNT> _ortherLightInfos;
 					std::array<LightBoundingBox, MAX_ORTHER_LIGHT_COUNT> _ortherLightBoundingBoxInfos;
+					Instance::ImageSampler* _irradianceCubeImageSampler;
+					Instance::ImageSampler* _prefilteredCubeImageSampler;
+					Instance::ImageSampler* _lutImageSampler;
 				};
 			}
 		}

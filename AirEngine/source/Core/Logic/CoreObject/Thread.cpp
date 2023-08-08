@@ -474,7 +474,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 			{
 				Logic::Object::GameObject* quadRendererGo = new Logic::Object::GameObject("QuadRenderer_" + std::to_string(i) + " " + std::to_string(j));
 				renderers->AddChild(quadRendererGo);
-				quadRendererGo->AddComponent(new Test::TBF_Opaque_Pbr_RendererBehaviour("..\\Asset\\Mesh\\LargeQuad.ply", "..\\Asset\\Texture\\MetalFloor"));
+				quadRendererGo->AddComponent(new Test::TBF_Opaque_Pbr_RendererBehaviour("..\\Asset\\Mesh\\LargeQuad.ply", "..\\Asset\\Texture\\Bricks"));
 				quadRendererGo->AddComponent(new Test::QuadMoveBehaviour());
 				quadRendererGo->transform.SetTranslation(glm::vec3(i * 20, -1, j * 20));
 				quadRendererGo->transform.SetScale({ 10, 1, 10 });

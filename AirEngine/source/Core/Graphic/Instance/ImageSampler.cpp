@@ -3,7 +3,7 @@
 #include <Utils/Log.h>
 #include <algorithm>
 
-AirEngine::Core::Graphic::Instance::ImageSampler::ImageSampler(VkFilter magFilter, VkFilter minFilter, VkSamplerMipmapMode mipmapMode, VkSamplerAddressMode addressModeU, VkSamplerAddressMode addressModeV, VkSamplerAddressMode addressModeW, float maxAnisotropy, VkBorderColor borderColor)
+AirEngine::Core::Graphic::Instance::ImageSampler::ImageSampler(VkFilter magFilter, VkFilter minFilter, VkSamplerMipmapMode mipmapMode, VkSamplerAddressMode addressModeU, VkSamplerAddressMode addressModeV, VkSamplerAddressMode addressModeW, float maxAnisotropy, VkBorderColor borderColor, float mipmapLevel)
 	: _magFilter(magFilter)
 	, _minFilter(minFilter)
 	, _mipmapMode(mipmapMode)
@@ -13,6 +13,7 @@ AirEngine::Core::Graphic::Instance::ImageSampler::ImageSampler(VkFilter magFilte
 	, _maxAnisotropy(std::min(maxAnisotropy, 1.0f))
 	, _anisotropyEnable(maxAnisotropy < 1.0f ? VK_FALSE : VK_TRUE)
 	, _borderColor(borderColor)
+	, _mipmapLevel(mipmapLevel)
 {
 	VkSamplerCreateInfo samplerInfo{};
 	samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -29,7 +30,7 @@ AirEngine::Core::Graphic::Instance::ImageSampler::ImageSampler(VkFilter magFilte
 	samplerInfo.compareOp = VK_COMPARE_OP_ALWAYS;
 	samplerInfo.mipmapMode = _mipmapMode;
 	samplerInfo.minLod = 0.0f;
-	samplerInfo.maxLod = 0.0f;
+	samplerInfo.maxLod = _mipmapLevel;
 	samplerInfo.mipLodBias = 0.0f;
 
 	Utils::Log::Exception("Failed to create sampler.", vkCreateSampler(Core::Graphic::CoreObject::Instance::VkDevice_(), &samplerInfo, nullptr, &_vkSampler));
@@ -45,6 +46,7 @@ AirEngine::Core::Graphic::Instance::ImageSampler::ImageSampler(VkFilter filter)
 	, _maxAnisotropy(0)
 	, _anisotropyEnable(VK_FALSE)
 	, _borderColor()
+	, _mipmapLevel(0)
 {
 	VkSamplerCreateInfo samplerInfo{};
 	samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -68,8 +70,8 @@ AirEngine::Core::Graphic::Instance::ImageSampler::ImageSampler(VkFilter filter)
 
 }
 
-AirEngine::Core::Graphic::Instance::ImageSampler::ImageSampler(VkFilter filter, VkSamplerMipmapMode mipmapMode, VkSamplerAddressMode addressMode, float maxAnisotropy, VkBorderColor borderColor)
-	: ImageSampler(filter, filter, mipmapMode, addressMode, addressMode, addressMode, maxAnisotropy, borderColor)
+AirEngine::Core::Graphic::Instance::ImageSampler::ImageSampler(VkFilter filter, VkSamplerMipmapMode mipmapMode, VkSamplerAddressMode addressMode, float maxAnisotropy, VkBorderColor borderColor, float maxAnisotrop)
+	: ImageSampler(filter, filter, mipmapMode, addressMode, addressMode, addressMode, maxAnisotropy, borderColor, maxAnisotrop)
 {
 }
 
