@@ -101,21 +101,24 @@ void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::release
 
 }
 
-const int t = 5;
 int i = 0;
+double duration = 0;
+
 void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::startNextFrame()
 {
     //Utils::Log::Message("------------------------------------------------------------------");
     Instance::StartPresentCondition().Awake();
     Instance::EndPresentCondition().Wait();
 
-    if (i++ == 0)
+    if (i == 10)
     {
-        auto&& duration = Instance::RenderDuration();
-        auto&& fps = 1.0 / duration;
-        Window::VulkanWindow_()->setTitle("AirEngine FPS:" + QString::number(fps, 'f'));
+        auto&& fps = 10.0 / duration;
+        Window::VulkanWindow_()->setTitle("AirEngine FPS:" + QString::number(fps, 'f', 2));
+        i = 0;
+        duration = 0;
     }
-    i %= t;
+    i++;
+    duration += Instance::RenderDuration();
 
     _window->frameReady();
     _window->requestUpdate();

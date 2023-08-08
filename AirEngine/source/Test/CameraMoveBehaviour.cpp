@@ -82,7 +82,7 @@ void AirEngine::Test::CameraMoveBehaviour::OnUpdate()
 
 	//}
 	const float deltaDuration = Core::Logic::CoreObject::Instance::time.DeltaDuration();
-	const double rotationSpeed = 20.0 / 180.0 * pi;
+	const double rotationSpeed = 40.0 / 180.0 * pi;
 	glm::vec3 deltaRotation = {};
 	if (Core::Logic::CoreObject::Instance::InputManager().KeyStatus(Core::Logic::Manager::InputKeyType::Key_Left) == Core::Logic::Manager::ButtonStatusType::Pressed)
 	{
@@ -129,7 +129,7 @@ void AirEngine::Test::CameraMoveBehaviour::OnUpdate()
 
 	GameObject()->transform.SetRotation(GameObject()->transform.Rotation() + deltaRotation);
 
-	const float translationSpeed = 2;
+	const float translationSpeed = 4;
 	glm::vec3 deltaTranslation = {};
 	if (Core::Logic::CoreObject::Instance::InputManager().KeyStatus(Core::Logic::Manager::InputKeyType::Key_W) == Core::Logic::Manager::ButtonStatusType::Pressed)
 	{

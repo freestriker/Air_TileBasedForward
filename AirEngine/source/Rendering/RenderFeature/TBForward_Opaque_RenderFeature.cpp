@@ -175,8 +175,8 @@ void AirEngine::Rendering::RenderFeature::TBForward_Opaque_RenderFeature::OnPrep
 	auto&& featureData = static_cast<TBForward_Opaque_RenderFeatureData*>(renderFeatureData); 
 	auto&& occlusionInfo = OcclusionInfo{ 
 		glm::vec2(1, 1) / glm::vec2(featureData->frameBuffer->Extent2D().width, featureData->frameBuffer->Extent2D().height),
-		2.5f,
-		5.0f
+		1.5f,
+		3.0f
 	};
 	featureData->occlusionInfo->WriteData(&occlusionInfo, sizeof(OcclusionInfo));
 }

@@ -14,7 +14,7 @@ void main()
 {
     vec3 wNormal = normalize(inWorldNormal);
     vec3 wView = CameraWObserveDirection(inWorldPosition, cameraInfo.info);
-    vec3 rmo = vec3(1.00, 1.00, 1.00);
+    vec3 rmo = vec3(0.00, 1.00, 1.00);
     vec3 albedo = vec3(1.0, 1.0, 1.0);
 
     float shadowIntensity = GetShadowIntensity((cameraInfo.info.view * vec4(inWorldPosition, 1)).xyz, wNormal);
@@ -28,7 +28,7 @@ void main()
 
     vec3 radiance = vec3(0, 0, 0);
 
-    radiance += PbrLighting(lightInfos.mainLightInfo, inWorldPosition, wView, wNormal, albedo, rmo.x, rmo.y) * (1 - shadowIntensity);
+    radiance += PbrLighting(lightInfos.mainLightInfo, inWorldPosition, wView, wNormal, albedo, rmo.x, rmo.y) * (1 - clamp(shadowIntensity * 6, 0, 1));
     for(int i = 0; i < opaqueLightIndexList.count; i++)
     {
         radiance += PbrLighting(lightInfos.ortherLightInfos[opaqueLightIndexList.indexes[i]], inWorldPosition, wView, wNormal, albedo, rmo.x, rmo.y);
@@ -36,7 +36,7 @@ void main()
 
     vec3 iblRadiance = vec3(0, 0, 0);
     PBR_IBL_LIGHTING(iblRadiance, lightInfos.ambientLightInfo, inWorldPosition, wView, wNormal, albedo, rmo.x, rmo.y, irradianceCubeImage, prefilteredCubeImage, lutImage);
-    radiance += iblRadiance * occlusion;
+    radiance += iblRadiance * occlusion * rmo.z;
 
-    ColorAttachment = vec4(radiance * rmo.z, 1);
+    ColorAttachment = vec4(radiance / (radiance + vec3(1)), 1);
 }

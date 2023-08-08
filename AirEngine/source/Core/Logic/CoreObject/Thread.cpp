@@ -503,14 +503,14 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	directionalLightGo->transform.SetEulerRotation(glm::vec3(-30, 0, 0));
 	auto directionalLight = new Light::DirectionalLight();
 	directionalLight->color = { 1, 239.0 / 255, 213.0 / 255, 1 };
-	directionalLight->intensity = 10;
+	directionalLight->intensity = 5;
 	directionalLightGo->AddComponent(directionalLight);
 
 	Logic::Object::GameObject* iblGo = new Logic::Object::GameObject("SkyBox");
 	lights->AddChild(iblGo);
 	auto iblLight = new Light::AmbientLight();
 	iblLight->color = { 1, 1, 1, 1 };
-	iblLight->intensity = 0.1f;
+	iblLight->intensity = 1;
 	iblLight->_irradianceCubeImage = IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>("..\\Asset\\Texture\\WorkShop_IrradianceMap_Exr_CubeImage.json");
 	iblLight->_prefilteredCubeImage = IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>("..\\Asset\\Texture\\WorkShop_PrefilteredMap_Exr_CubeImage.json");
 	iblLight->_lutImage = IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>("..\\Asset\\Texture\\LutImage.json");
