@@ -47,12 +47,12 @@ void AirEngine::Test::TBF_Opaque_Pbr_RendererBehaviour::OnStart()
 
 	{
 		auto albedoTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(_textureBasePath + "_Albedo.json");
-		//auto normalTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(_textureBasePath + "_Normal.json");
+		auto normalTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(_textureBasePath + "_Normal.json");
 		auto rmoTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(_textureBasePath + "_Rmo.json");
 		auto shader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\TBF_Opaque_Pbr_Shader.shader");
 		auto material = new Core::Graphic::Rendering::Material(shader);
 		material->SetSampledImage2D("albedoTexture", albedoTexture, sampler);
-		//material->SetSampledImage2D("normalTexture", normalTexture, sampler);
+		material->SetSampledImage2D("normalTexture", normalTexture, sampler);
 		material->SetSampledImage2D("rmoTexture", rmoTexture, sampler);
 		renderer->AddMaterial(material);
 	}

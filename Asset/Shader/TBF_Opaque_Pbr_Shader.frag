@@ -5,8 +5,8 @@
 #include "TBForwardLighting.glsl"
 
 layout(set = START_SET_INDEX + 0, binding = 0) uniform sampler2D albedoTexture;
-// layout(set = START_SET_INDEX + 1, binding = 0) uniform sampler2D normalTexture;
-layout(set = START_SET_INDEX + 1, binding = 0) uniform sampler2D rmoTexture;
+layout(set = START_SET_INDEX + 1, binding = 0) uniform sampler2D normalTexture;
+layout(set = START_SET_INDEX + 2, binding = 0) uniform sampler2D rmoTexture;
 
 layout(location = 0) in vec2 inTexCoords;
 layout(location = 1) in vec3 inWorldPosition;
@@ -18,9 +18,11 @@ layout(location = 0) out vec4 ColorAttachment;
 
 void main() 
 {
-    // vec3 wDisturbance = TBNMatrix(inWorldTangent, inWorldBitangent, inWorldNormal) * NormalC2T(texture(normalTexture, inTexCoords));
+    vec3 b = cross(normalize(inWorldBitangent), normalize(inWorldNormal));
+    vec3 t = cross(normalize(inWorldNormal), normalize(inWorldBitangent));
+    vec3 wNormal = normalize(TBNMatrix(t, b, inWorldNormal) * NormalC2T(texture(normalTexture, inTexCoords)));
     // vec3 wNormal = normalize(normalize(inWorldNormal) + wDisturbance);
-    vec3 wNormal = normalize(inWorldNormal);
+    // vec3 wNormal = normalize(inWorldNormal);
     vec3 wView = CameraWObserveDirection(inWorldPosition, cameraInfo.info);
     vec3 albedo = texture(albedoTexture, inTexCoords).rgb;
     vec3 rmo = texture(rmoTexture, inTexCoords).rgb;
@@ -49,4 +51,7 @@ void main()
     radiance += iblRadiance * occlusion * rmo.z;
 
     ColorAttachment = vec4(radiance / (radiance + vec3(1)), 1);
+    // ColorAttachment = vec4(normalize(inWorldNormal) * 0.5 + vec3(0.5), 1);
+    // ColorAttachment = vec4(normalize(inWorldTangent) * 0.5 + vec3(0.5), 1);
+    // ColorAttachment = vec4(normalize(inWorldBitangent) * 0.5 + vec3(0.5), 1);
 }
