@@ -241,7 +241,7 @@ AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::Cas
 	, _blurShader(Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\CascadeEVSM_Blur_Shader.shader"))
 	, _fullScreenMesh(Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\BackgroundMesh.ply"))
 {
-
+	_description = "Using the evsm algorithm, project a cascade of shadow maps.";
 }
 
 AirEngine::Rendering::RenderFeature::CascadeEVSM_ShadowCaster_RenderFeature::~CascadeEVSM_ShadowCaster_RenderFeature()

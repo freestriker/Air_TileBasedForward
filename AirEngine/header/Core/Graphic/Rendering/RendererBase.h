@@ -58,6 +58,7 @@ namespace AirEngine
 					std::map<std::string, RenderFeatureBase*> _renderFeatures;	
 					std::vector<std::string> _renderFeatureUseOrder;
 				protected:
+					std::string _description;
 					RendererBase();
 					virtual ~RendererBase();
 					RendererBase(const RendererBase&) = delete;
@@ -84,6 +85,15 @@ namespace AirEngine
 					virtual void SubmitRenderer(RendererDataBase* rendererData) = 0;
 					virtual void FinishRenderer(RendererDataBase* rendererData) = 0;
 					RenderFeatureBase* RenderFeature(std::string renderFeatureName);
+
+					inline const std::map<std::string, RenderFeatureBase*>& RendererFeatures() const
+					{
+						return _renderFeatures;
+					}
+					inline const std::string& Description()const
+					{
+						return _description;
+					}
 
 					RTTR_ENABLE(Core::Logic::Object::Object)
 				};

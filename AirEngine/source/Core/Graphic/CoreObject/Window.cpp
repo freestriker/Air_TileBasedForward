@@ -101,11 +101,24 @@ void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::release
 
 }
 
+int i = 0;
+double duration = 0;
+
 void AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer::startNextFrame()
 {
     //Utils::Log::Message("------------------------------------------------------------------");
     Instance::StartPresentCondition().Awake();
     Instance::EndPresentCondition().Wait();
+
+    if (i == 10)
+    {
+        auto&& fps = 10.0 / duration;
+        Window::VulkanWindow_()->setTitle("AirEngine FPS:" + QString::number(fps, 'f', 2));
+        i = 0;
+        duration = 0;
+    }
+    i++;
+    duration += Instance::RenderDuration();
 
     _window->frameReady();
     _window->requestUpdate();
@@ -162,7 +175,6 @@ void AirEngine::Core::Graphic::CoreObject::Window::Start()
         }
     }
     _window->setPhysicalDeviceIndex(prefferedPhysicalDeviceIndex);
-
     //auto sde = _window->supportedDeviceExtensions();
     ////_window->setEnabledFeaturesModifier([](VkPhysicalDeviceFeatures& feature)->void {
     ////    

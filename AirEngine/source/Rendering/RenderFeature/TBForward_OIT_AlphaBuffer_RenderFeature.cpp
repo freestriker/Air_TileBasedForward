@@ -176,7 +176,7 @@ AirEngine::Rendering::RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeature::TB
 		)
 	)
 {
-
+	_description = "Using the Alpha buffer algorithm, generate a full-screen table of pixel color and transparency.";
 }
 
 AirEngine::Rendering::RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeature::~TBForward_OIT_AlphaBuffer_RenderFeature()

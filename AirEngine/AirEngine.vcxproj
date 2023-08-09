@@ -14,7 +14,7 @@
     <ProjectGuid>{3D4FFC49-EB11-4269-A898-1C2FE062CDF2}</ProjectGuid>
     <Keyword>QtVS_v304</Keyword>
     <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">10.0</WindowsTargetPlatformVersion>
-    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0.19041.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0</WindowsTargetPlatformVersion>
     <QtMsBuild Condition="'$(QtMsBuild)'=='' OR !Exists('$(QtMsBuild)\qt.targets')">$(MSBuildProjectDirectory)\QtMsBuild</QtMsBuild>
     <ProjectName>AirEngine</ProjectName>
     <PreferredToolArchitecture>x64</PreferredToolArchitecture>
@@ -34,13 +34,13 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
-    <QtInstall>6.5.2_msvc2019_64</QtInstall>
-    <QtModules>quick</QtModules>
+    <QtInstall>6.2.4_msvc2019_64</QtInstall>
+    <QtModules>core;gui;widgets</QtModules>
     <QtBuildConfig>debug</QtBuildConfig>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
-    <QtInstall>6.5.2_msvc2019_64</QtInstall>
-    <QtModules>quick</QtModules>
+    <QtInstall>6.2.4_msvc2019_64</QtInstall>
+    <QtModules>core;gui;widgets</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
@@ -109,8 +109,8 @@
     <ClCompile Include="header\Rendering\RenderFeature\GenerateIrradianceMap_RenderFeature.h" />
     <ClCompile Include="source\Core\Graphic\Instance\Image.cpp" />
     <ClCompile Include="source\Rendering\Renderer\AmbientOcclusionRenderer.cpp" />
-    <ClCompile Include="source\Rendering\Renderer\BuildAssetRenderer.cpp" />
-    <ClCompile Include="source\Rendering\Renderer\ShadowVisualizationRenderer.cpp" />
+    <ClCompile Include="source\Rendering\Renderer\BuildIblRenderer.cpp" />
+    <ClCompile Include="source\Rendering\Renderer\ScreenSpaceShadowVisualizationRenderer.cpp" />
     <ClCompile Include="source\Rendering\Renderer\TBForwardRenderer.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\AO_Blur_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\AO_Cover_RenderFeature.cpp" />
@@ -189,7 +189,8 @@
     <ClCompile Include="source\Rendering\RenderFeature\TBForward_OIT_AlphaBuffer_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\TBForward_OIT_DepthPeeling_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\TBForward_Opaque_RenderFeature.cpp" />
-    <ClCompile Include="source\Rendering\RenderPipeline\ForwardRenderPipeline.cpp" />
+    <ClCompile Include="source\Rendering\RenderFeature\TBForward_Transparent_RenderFeature.cpp" />
+    <ClCompile Include="source\Rendering\RenderPipeline\BaseRenderPipeline.cpp" />
     <ClCompile Include="source\Test\AudioSourceBehaviour.cpp" />
     <ClCompile Include="source\Test\Background_SkyboxRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\CameraMoveBehaviour.cpp" />
@@ -273,9 +274,9 @@
     <ClInclude Include="header\Renderer\Renderer.h" />
     <ClInclude Include="header\Rendering\PresentRenderPass.h" />
     <ClInclude Include="header\Rendering\Renderer\AmbientOcclusionRenderer.h" />
-    <ClInclude Include="header\Rendering\Renderer\BuildAssetRenderer.h" />
+    <ClInclude Include="header\Rendering\Renderer\BuildIblRenderer.h" />
     <ClInclude Include="header\Rendering\Renderer\ForwardRenderer.h" />
-    <ClInclude Include="header\Rendering\Renderer\ShadowVisualizationRenderer.h" />
+    <ClInclude Include="header\Rendering\Renderer\ScreenSpaceShadowVisualizationRenderer.h" />
     <ClInclude Include="header\Rendering\Renderer\TBForwardRenderer.h" />
     <ClInclude Include="header\Rendering\RenderFeature\AO_Blur_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\AO_Cover_RenderFeature.h" />
@@ -298,7 +299,8 @@
     <ClInclude Include="header\Rendering\RenderFeature\TBForward_OIT_AlphaBuffer_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\TBForward_OIT_DepthPeeling_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\TBForward_Opaque_RenderFeature.h" />
-    <ClInclude Include="header\Rendering\RenderPipeline\ForwardRenderPipeline.h" />
+    <ClInclude Include="header\Rendering\RenderFeature\TBForward_Transparent_RenderFeature.h" />
+    <ClInclude Include="header\Rendering\RenderPipeline\BaseRenderPipeline.h" />
     <ClInclude Include="header\Test\AudioSourceBehaviour.h" />
     <ClInclude Include="header\Test\Background_SkyboxRendererBehaviour.h" />
     <ClInclude Include="header\Test\CameraMoveBehaviour.h" />

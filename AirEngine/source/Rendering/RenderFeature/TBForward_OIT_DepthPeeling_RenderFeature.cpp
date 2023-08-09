@@ -183,7 +183,7 @@ AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeature::T
 		)
 	)
 {
-
+	_description = "Using the depth peeling algorithm, generate color and translucent maps with multiple depth levels.";
 }
 
 AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeature::~TBForward_OIT_DepthPeeling_RenderFeature()

@@ -5,7 +5,7 @@
   "blendEnable": 0,
   "colorBlendOp": 0,
   "colorWriteMask": 0,
-  "cullMode": 0,
+  "cullMode": 1,
   "dstAlphaBlendFactor": 0,
   "dstColorBlendFactor": 0,
   "shaderPaths": ["..\\Asset\\Shader\\Spv\\CascadeEVSM_ShadowCaster_Shader.vert.spv", "..\\Asset\\Shader\\Spv\\CascadeEVSM_ShadowCaster_Shader.frag.spv"],

@@ -125,7 +125,7 @@ AirEngine::Rendering::RenderFeature::TBForward_Opaque_RenderFeature::TBForward_O
 		)
 	)
 {
-
+	_description = "Use forward+ to render opaque objects, mixing shadows with ambient occlusion.";
 }
 
 AirEngine::Rendering::RenderFeature::TBForward_Opaque_RenderFeature::~TBForward_Opaque_RenderFeature()
@@ -138,7 +138,17 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	auto featureData = new TBForward_Opaque_RenderFeatureData();
 	featureData->frameBuffer = new Core::Graphic::Rendering::FrameBuffer(_renderPass, camera->attachments);
 	featureData->needClearColorAttachment = false;
-
+	struct OcclusionInfo
+	{
+		alignas(8) glm::vec2 texelSize;
+		alignas(4) float intensity;
+		alignas(4) float power;
+	};
+	featureData->occlusionInfo = new Core::Graphic::Instance::Buffer{
+			sizeof(OcclusionInfo),
+			VkBufferUsageFlagBits::VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+	};
 	return featureData;
 }
 
@@ -150,10 +160,25 @@ void AirEngine::Rendering::RenderFeature::TBForward_Opaque_RenderFeature::OnDest
 {
 	auto featureData = static_cast<TBForward_Opaque_RenderFeatureData*>(renderFeatureData);
 	delete featureData->frameBuffer;
+	delete featureData->occlusionInfo;
+	delete featureData;
 }
 
 void AirEngine::Rendering::RenderFeature::TBForward_Opaque_RenderFeature::OnPrepare(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)
 {
+	struct OcclusionInfo
+	{
+		alignas(8) glm::vec2 texelSize;
+		alignas(4) float intensity;
+		alignas(4) float power;
+	}; 
+	auto&& featureData = static_cast<TBForward_Opaque_RenderFeatureData*>(renderFeatureData); 
+	auto&& occlusionInfo = OcclusionInfo{ 
+		glm::vec2(1, 1) / glm::vec2(featureData->frameBuffer->Extent2D().width, featureData->frameBuffer->Extent2D().height),
+		1.5f,
+		3.0f
+	};
+	featureData->occlusionInfo->WriteData(&occlusionInfo, sizeof(OcclusionInfo));
 }
 
 void AirEngine::Rendering::RenderFeature::TBForward_Opaque_RenderFeature::OnExcute(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*> const* rendererComponents)
@@ -241,6 +266,8 @@ void AirEngine::Rendering::RenderFeature::TBForward_Opaque_RenderFeature::OnExcu
 			material->SetUniformBuffer("lightInfos", Core::Graphic::CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
 			Core::Graphic::CoreObject::Instance::LightManager().SetAmbientLightParameters(material, _sampler);
 			material->SetStorageBuffer("opaqueLightIndexLists", featureData->opaqueLightIndexListsBuffer);
+			material->SetSampledImage2D("occlusionTexture", featureData->occlusionTexture, _sampler);
+			material->SetUniformBuffer("occlusionInfo", featureData->occlusionInfo);
 
 			if (shadowRenderFeatureData)
 			{

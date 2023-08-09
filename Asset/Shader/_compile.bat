@@ -19,6 +19,9 @@ glslangValidator.exe -t -V GeneratePrefilteredMap_Shader.frag -IUtils/ -o Spv/Ge
 glslangValidator.exe -t -V SplitHdrToBackgroundCubeImage_Shader.vert -IUtils/ -o Spv/SplitHdrToBackgroundCubeImage_Shader.vert.spv
 glslangValidator.exe -t -V SplitHdrToBackgroundCubeImage_Shader.frag -IUtils/ -o Spv/SplitHdrToBackgroundCubeImage_Shader.frag.spv
 
+glslangValidator.exe -t -V TBF_Transparent_Shader.vert -IUtils/ -o Spv/TBF_Transparent_Shader.vert.spv
+glslangValidator.exe -t -V TBF_Transparent_Shader.frag -IUtils/ -o Spv/TBF_Transparent_Shader.frag.spv
+
 glslangValidator.exe -t -V SplitHdrToHdrCubeImage_Shader.vert -IUtils/ -o Spv/SplitHdrToHdrCubeImage_Shader.vert.spv
 glslangValidator.exe -t -V SplitHdrToHdrCubeImage_Shader.frag -IUtils/ -o Spv/SplitHdrToHdrCubeImage_Shader.frag.spv
 

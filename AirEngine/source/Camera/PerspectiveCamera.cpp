@@ -44,7 +44,7 @@ void AirEngine::Camera::PerspectiveCamera::OnSetProjectionMatrix(glm::mat4& matr
 
 AirEngine::Camera::PerspectiveCamera::PerspectiveCamera(std::string rendererName, std::map<std::string, Core::Graphic::Instance::Image*> attachments)
     : CameraBase(CameraType::PERSPECTIVE, rendererName, attachments)
-    , fovAngle(60)
+    , fovAngle(45)
 {
     nearFlat = 0.5f;
 }

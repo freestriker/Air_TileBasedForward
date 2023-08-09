@@ -71,7 +71,7 @@ AirEngine::Rendering::RenderFeature::TBForward_LightList_RenderFeature::TBForwar
 		)
 	)
 {
-
+	_description = "Use compute shader to generate the light index tables used in opaque rendering and transparent rendering.";
 }
 
 AirEngine::Rendering::RenderFeature::TBForward_LightList_RenderFeature::~TBForward_LightList_RenderFeature()

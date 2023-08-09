@@ -102,7 +102,7 @@ AirEngine::Rendering::RenderFeature::Background_RenderFeature::Background_Render
 	, _renderPass(Core::Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass<Background_RenderPass>())
 	, _renderPassName(rttr::type::get<Background_RenderPass>().get_name().to_string())
 {
-
+	_description = "Used to render background sky box.";
 }
 
 AirEngine::Rendering::RenderFeature::Background_RenderFeature::~Background_RenderFeature()

@@ -1,5 +1,4 @@
 #include <QGuiApplication>
-#include <QQmlApplicationEngine>
 #include "Core/Graphic/CoreObject/Window.h"
 
 Q_LOGGING_CATEGORY(lcVk, "qt.vulkan")

@@ -87,6 +87,8 @@ namespace AirEngine
 					static std::vector<Logic::Object::Component*> _cameras;
 					static std::vector<Logic::Object::Component*> _renderers;
 
+					static double _renderDuration;
+
 					Instance();
 					static void Init();
 				public:
@@ -114,8 +116,13 @@ namespace AirEngine
 					static void ClearLight();
 					static void ClearCamera();
 					static void ClearRenderer();
+
+					static inline double RenderDuration()
+					{
+						return _renderDuration;
+					}
 				};
-			}
+			};
 		}
 	}
 }

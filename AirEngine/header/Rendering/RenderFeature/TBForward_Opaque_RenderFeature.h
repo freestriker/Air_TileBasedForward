@@ -34,6 +34,9 @@ namespace AirEngine
 
 					Core::Graphic::Rendering::RenderFeatureDataBase* csmShadowMapRenderFeatureData;
 
+					Core::Graphic::Instance::Image* occlusionTexture;
+					Core::Graphic::Instance::Buffer* occlusionInfo;
+
 					CONSTRUCTOR(TBForward_Opaque_RenderFeatureData)
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderFeatureDataBase)
 				};

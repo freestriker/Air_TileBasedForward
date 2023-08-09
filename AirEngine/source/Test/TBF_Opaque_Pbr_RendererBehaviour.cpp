@@ -39,7 +39,7 @@ void AirEngine::Test::TBF_Opaque_Pbr_RendererBehaviour::OnStart()
 
 	auto sampler = new Core::Graphic::Instance::ImageSampler(
 		VkFilter::VK_FILTER_LINEAR,
-		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
+		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_LINEAR,
 		VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT,
 		0.0f,
 		VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
@@ -47,12 +47,12 @@ void AirEngine::Test::TBF_Opaque_Pbr_RendererBehaviour::OnStart()
 
 	{
 		auto albedoTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(_textureBasePath + "_Albedo.json");
-		//auto normalTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(_textureBasePath + "_Normal.json");
+		auto normalTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(_textureBasePath + "_Normal.json");
 		auto rmoTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(_textureBasePath + "_Rmo.json");
 		auto shader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\TBF_Opaque_Pbr_Shader.shader");
 		auto material = new Core::Graphic::Rendering::Material(shader);
 		material->SetSampledImage2D("albedoTexture", albedoTexture, sampler);
-		//material->SetSampledImage2D("normalTexture", normalTexture, sampler);
+		material->SetSampledImage2D("normalTexture", normalTexture, sampler);
 		material->SetSampledImage2D("rmoTexture", rmoTexture, sampler);
 		renderer->AddMaterial(material);
 	}

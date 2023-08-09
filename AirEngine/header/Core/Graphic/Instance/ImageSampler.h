@@ -20,6 +20,7 @@ namespace AirEngine
 					VkBool32 _anisotropyEnable;
 					float _maxAnisotropy;
 					VkBorderColor _borderColor;
+					float _mipmapLevel;
 
 					VkSampler _vkSampler;
 
@@ -36,7 +37,8 @@ namespace AirEngine
 						VkSamplerAddressMode addressModeV,
 						VkSamplerAddressMode addressModeW,
 						float maxAnisotropy,
-						VkBorderColor borderColor
+						VkBorderColor borderColor,
+						float mipmapLevel = 0.0
 					);
 					ImageSampler(VkFilter filter);
 					ImageSampler(
@@ -44,10 +46,15 @@ namespace AirEngine
 						VkSamplerMipmapMode mipmapMode,
 						VkSamplerAddressMode addressMode,
 						float maxAnisotropy,
-						VkBorderColor borderColor
+						VkBorderColor borderColor,
+						float mipmapLevel = 0.0
 					);
 					~ImageSampler();
 					VkSampler VkSampler_();
+					inline float MipmapLevel()const
+					{
+						return _mipmapLevel;
+					}
 				};
 			}
 		}
