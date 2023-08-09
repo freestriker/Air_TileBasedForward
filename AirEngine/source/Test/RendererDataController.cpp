@@ -67,7 +67,7 @@ void AirEngine::Test::RendererDataController::OnStart()
 	}
 	Utils::Log::Message("It contains: " + names + ".");
 	OutputRendererDescriptions();
-	Utils::Log::Message("Use 'L' to change renderers, use 'J' to change render features.");
+	Utils::Log::Message("Use 'WASDQE' to move, use 'Left Right' to orient the camera, use 'Up Down' to adjust the volume, use 'L' to change renderers, use 'J' to change render features.");
 	Utils::Log::Message("---------------------------------------------------------------");
 }
 

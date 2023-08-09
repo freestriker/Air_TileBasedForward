@@ -453,15 +453,15 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		mirrorMeshRendererGo->AddComponent(new Test::SelfRotateBehaviour(45));
 		mirrorMeshRendererGo->transform.SetTranslation(glm::vec3(-3, 0, 0));
 
-		for (int i = -2; i <= 2; i++)
+		for (int i = -4; i <= 4; i++)
 		{
-			for (int j = -2; j <= 2; j++)
+			for (int j = -4; j <= 4; j++)
 			{
 				if (i == 0 && j == 0) continue;
 				Logic::Object::GameObject* sphereGroupRendererGo = new Logic::Object::GameObject("SphereGroup_" + std::to_string(i) + " " + std::to_string(j));
 				renderers->AddChild(sphereGroupRendererGo);
-				sphereGroupRendererGo->AddComponent(new Test::TBF_Opaque_Pbr_RendererBehaviour("..\\Asset\\Mesh\\NineSphere.ply", "..\\Asset\\Texture\\MetalFloor"));
-				sphereGroupRendererGo->transform.SetTranslation(glm::vec3(i * 20, 0, j * 20));
+				sphereGroupRendererGo->AddComponent(new Test::TBF_Opaque_Pbr_RendererBehaviour("..\\Asset\\Mesh\\Sphere.ply", "..\\Asset\\Texture\\MetalFloor"));
+				sphereGroupRendererGo->transform.SetTranslation(glm::vec3(i * 10, 0, j * 10));
 			}
 		}
 	}
