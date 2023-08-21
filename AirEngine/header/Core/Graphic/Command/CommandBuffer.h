@@ -71,6 +71,7 @@ namespace AirEngine
 					void CopyImage(Instance::Image* srcImage, std::string srcImageViewName, VkImageLayout srcImageLayout, Instance::Image* dstImage, std::string dstImageViewName, VkImageLayout dstImageLayout);
 					void CopyBufferToImage(Instance::Buffer* srcBuffer, Instance::Image* dstImage, std::string&& imageViewName, VkImageLayout dstImageLayout, uint32_t mipmapLevelOffset = 0);
 					void CopyBufferToImage(Instance::Buffer* srcBuffer, Instance::Image* dstImage, VkImageLayout dstImageLayout, uint32_t mipmapLevelOffset = 0);
+					void CopyBufferToImage(Instance::Buffer* srcBuffer, size_t srcBufferOffset, Instance::Image* dstImage, VkImageLayout dstImageLayout, uint32_t mipmapLevelOffset = 0);
 					void CopyImageToBuffer(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Buffer* dstBuffer, uint32_t mipmapLevelOffset = 0);
 					void FillBuffer(Instance::Buffer* dstBuffer, uint32_t data);
 					void CopyBuffer(Instance::Buffer* srcBuffer, Instance::Buffer* dstBuffer);
