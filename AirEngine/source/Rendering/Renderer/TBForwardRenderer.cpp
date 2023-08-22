@@ -40,7 +40,7 @@ AirEngine::Rendering::Renderer::TBForwardRenderer::TBForwardRenderer()
 	UseRenderFeature("Background_RenderFeature", new RenderFeature::Background_RenderFeature());
 
 	UseRenderFeature("Geometry_RenderFeature", new RenderFeature::Geometry_RenderFeature());
-
+	
 	UseRenderFeature("TBForward_LightList_RenderFeature", new RenderFeature::TBForward_LightList_RenderFeature());
 	UseRenderFeature("SSAO_Occlusion_RenderFeature", new RenderFeature::SSAO_Occlusion_RenderFeature());
 	UseRenderFeature("SSAO_Blur_RenderFeature", new RenderFeature::AO_Blur_RenderFeature());

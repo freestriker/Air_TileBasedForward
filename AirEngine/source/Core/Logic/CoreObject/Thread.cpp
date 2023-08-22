@@ -490,7 +490,8 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		auto&& renderer = new Renderer::Renderer();
 
 		surfaceRendererGo->AddComponent(renderer);
-		surfaceRendererGo->transform.SetTranslation({ 0, 0, 0 });
+		surfaceRendererGo->transform.SetTranslation({ 0, -1, -1 });
+		surfaceRendererGo->transform.SetScale({ 10, 1, 10 });
 
 		renderer->mesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\Surface.ply");
 		surfaceRendererGo->AddComponent(renderer);
@@ -504,22 +505,22 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		);
 
 		{
-			std::string _textureBasePath = "..\\Asset\\Texture\\Bricks";
-			auto albedoTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(_textureBasePath + "_Albedo.json");
-			auto normalTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(_textureBasePath + "_Normal.json");
-			auto rmoTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(_textureBasePath + "_Rmo.json");
-			auto shader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\TBF_Surface_Pbr_Shader.shader");
+			//std::string _textureBasePath = "..\\Asset\\Texture\\Bricks";
+			//auto albedoTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(_textureBasePath + "_Albedo.json");
+			//auto normalTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(_textureBasePath + "_Normal.json");
+			//auto rmoTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(_textureBasePath + "_Rmo.json");
+			auto shader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\IWave_Surface_Shader.shader");
 			auto material = new Core::Graphic::Rendering::Material(shader);
-			material->SetSampledImage2D("albedoTexture", albedoTexture, sampler);
-			material->SetSampledImage2D("normalTexture", normalTexture, sampler);
-			material->SetSampledImage2D("rmoTexture", rmoTexture, sampler);
+			//material->SetSampledImage2D("albedoTexture", albedoTexture, sampler);
+			//material->SetSampledImage2D("normalTexture", normalTexture, sampler);
+			//material->SetSampledImage2D("rmoTexture", rmoTexture, sampler);
 			renderer->AddMaterial(material);
 		}
-		{
-			auto geometryShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\Geometry_Shader.shader");
-			auto geometryMaterial = new Core::Graphic::Rendering::Material(geometryShader);
-			renderer->AddMaterial(geometryMaterial);
-		}
+		//{
+		//	auto geometryShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\Geometry_Shader.shader");
+		//	auto geometryMaterial = new Core::Graphic::Rendering::Material(geometryShader);
+		//	renderer->AddMaterial(geometryMaterial);
+		//}
 	}
 
 

@@ -52,14 +52,22 @@ namespace AirEngine
 					float sourceFactor;
 					float obstructionFactor;
 				};
+				struct IWaveSurfaceConstantInfo
+				{
+					glm::ivec2 minVertexPosition;
+					glm::ivec2 maxVertexPosition;
+					float heightFactor;
+				};
 				class IWave_RenderFeatureData final : public Core::Graphic::Rendering::RenderFeatureDataBase
 				{
 					friend class IWave_RenderFeature;
 				private:
 					IWaveConstantInfo iWaveConstantInfo;
+					IWaveSurfaceConstantInfo iWaveSurfaceConstantInfo;
 					bool isInitialized;
 					Core::Graphic::Rendering::Shader* iWaveShader;
 					Core::Graphic::Rendering::Material* material;
+					Core::Graphic::Rendering::FrameBuffer* frameBuffer;
 				public:
 					Core::Graphic::Instance::Buffer* stagingBuffer;
 					Core::Graphic::Instance::Image* sourceTexture;

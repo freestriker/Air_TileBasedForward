@@ -155,10 +155,14 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 
 	featureData->isInitialized = false;
 
+	featureData->iWaveSurfaceConstantInfo.heightFactor = 1;
+	featureData->iWaveSurfaceConstantInfo.minVertexPosition = { -1, -1 };
+	featureData->iWaveSurfaceConstantInfo.maxVertexPosition = { 1, 1 };
+
 	featureData->iWaveConstantInfo.imageSize = { 512, 512 };
 	featureData->iWaveConstantInfo.halfKernalSize = 6;
 	featureData->iWaveConstantInfo.deltaTime = 0;
-	featureData->iWaveConstantInfo.alpha = 0.3;
+	featureData->iWaveConstantInfo.alpha = 0.1;
 	featureData->iWaveConstantInfo.sourceFactor = 1;
 	featureData->iWaveConstantInfo.obstructionFactor = 1;
 
@@ -197,7 +201,7 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	featureData->heightImage = Core::Graphic::Instance::Image::Create2DImage(
 		imageExtent,
 		VkFormat::VK_FORMAT_R32_SFLOAT,
-		VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+		VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
 		VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 		VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
 	);
@@ -223,6 +227,7 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	featureData->material->SetStorageImage2D("heightImage", featureData->heightImage);
 	featureData->material->SetStorageImage2D("previousHeightImage", featureData->previousHeightImage);
 	featureData->material->SetStorageImage2D("verticalDerivativeImage", featureData->verticalDerivativeImage);
+	featureData->frameBuffer = new Core::Graphic::Rendering::FrameBuffer(_renderPass, camera->attachments);
 	return featureData;
 }
 
@@ -241,6 +246,7 @@ void AirEngine::Rendering::RenderFeature::IWave_RenderFeature::OnDestroyRenderFe
 	delete featureData->verticalDerivativeImage;
 	delete featureData->material;
 	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\IWave_Shader.shader");
+	delete featureData->frameBuffer;
 	delete featureData;
 }
 
@@ -260,6 +266,22 @@ void AirEngine::Rendering::RenderFeature::IWave_RenderFeature::OnExcute(Core::Gr
 	{
 		delete featureData->stagingBuffer;
 		featureData->stagingBuffer = nullptr;
+
+		{
+			auto heightImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
+			(
+				featureData->heightImage,
+				VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+				VkAccessFlagBits::VK_ACCESS_NONE,
+				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
+			);
+			commandBuffer->AddPipelineImageBarrier(
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+				{ &heightImageBarrier }
+			);
+		}
 	}
 	else
 	{
@@ -277,7 +299,7 @@ void AirEngine::Rendering::RenderFeature::IWave_RenderFeature::OnExcute(Core::Gr
 					auto&& delta = glm::ivec2(i, j);
 					auto&& target = center + delta;
 					auto&& index = target.x + target.y * featureData->iWaveConstantInfo.imageSize.x;
-					sourceTextureData[index] = ((SOURCE_RADIUS - glm::length(glm::vec2(delta))) / SOURCE_RADIUS) * 1.0;
+					sourceTextureData[index] = ((SOURCE_RADIUS - glm::length(glm::vec2(delta))) / SOURCE_RADIUS) * 0.1;
 				}
 			}
 		}
@@ -451,43 +473,40 @@ void AirEngine::Rendering::RenderFeature::IWave_RenderFeature::OnExcute(Core::Gr
 		featureData->iWaveConstantInfo.sourceFactor = 0;
 	}
 
-	/////Render
-	//{
-	//	commandBuffer->BeginRenderPass(_renderPass, featureData->frameBuffer);
+	{
+		auto heightImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
+		(
+			featureData->heightImage,
+			VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+			VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+			VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
+			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+		);
+		commandBuffer->AddPipelineImageBarrier(
+			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_VERTEX_SHADER_BIT,
+			{ &heightImageBarrier }
+		);
+	}
 
-	//	CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderFeatureData* shadowRenderFeatureData = static_cast<CSM_ShadowCaster_RenderFeature::CSM_ShadowCaster_RenderFeatureData*>(featureData->csmShadowMapRenderFeatureData);
+	///Render
+	{
+		commandBuffer->BeginRenderPass(_renderPass, featureData->frameBuffer);
 
-	//	auto viewMatrix = camera->ViewMatrix();
-	//	auto ambientLightTexture = Core::Graphic::CoreObject::Instance::LightManager().AmbientTextureCube();
-	//	for (const auto& rendererComponent : *rendererComponents)
-	//	{
-	//		auto material = rendererComponent->GetMaterial(_renderPassName);
-	//		if (material == nullptr) continue;
+		for (const auto& rendererComponent : *rendererComponents)
+		{
+			auto material = rendererComponent->GetMaterial(_renderPassName);
+			if (material == nullptr) continue;
 
-	//		auto obbVertexes = rendererComponent->mesh->OrientedBoundingBox().BoundryVertexes();
-	//		auto mvMatrix = viewMatrix * rendererComponent->GameObject()->transform.ModelMatrix();
-	//		if (rendererComponent->enableFrustumCulling && !camera->CheckInFrustum(obbVertexes, mvMatrix))
-	//		{
-	//			continue;
-	//		}
+			material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
+			material->SetUniformBuffer("meshObjectInfo", rendererComponent->ObjectInfoBuffer());
+			material->SetSampledImage2D("heightTexture", featureData->heightImage, _linearSampler);
 
-	//		material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
-	//		material->SetUniformBuffer("meshObjectInfo", rendererComponent->ObjectInfoBuffer());
-	//		material->SetUniformBuffer("lightInfos", Core::Graphic::CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
-	//		Core::Graphic::CoreObject::Instance::LightManager().SetAmbientLightParameters(material, _sampler);
-	//		material->SetStorageBuffer("opaqueLightIndexLists", featureData->opaqueLightIndexListsBuffer);
-	//		material->SetSampledImage2D("occlusionTexture", featureData->occlusionTexture, _sampler);
-	//		material->SetUniformBuffer("occlusionInfo", featureData->occlusionInfo);
-
-	//		if (shadowRenderFeatureData)
-	//		{
-	//			shadowRenderFeatureData->SetShadowReceiverMaterialParameters(material);
-	//		}
-
-	//		commandBuffer->DrawMesh(rendererComponent->mesh, material);
-	//	}
-	//	commandBuffer->EndRenderPass();
-	//}
+			commandBuffer->PushConstant(material, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT, featureData->iWaveSurfaceConstantInfo);
+			commandBuffer->DrawMesh(rendererComponent->mesh, material);
+		}
+		commandBuffer->EndRenderPass();
+	}
 
 	commandBuffer->EndRecord();
 }
