@@ -21,6 +21,7 @@ layout(push_constant) uniform IWaveSurfaceConstantInfo
     ivec2 minVertexPosition;
     ivec2 maxVertexPosition;
     float heightFactor;
+    vec2 texelSize;
 } iWaveSurfaceConstantInfo;
 
 layout(set = 0, binding = 0) uniform _CameraInfo

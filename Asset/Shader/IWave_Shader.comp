@@ -76,6 +76,7 @@ void main()
 	}
 
 	// Surface
+	float height = 0;
 	{
 		const float curHeight = imageLoad(heightImage, imagePosition).r;
 		const float preHeight = imageLoad(previousHeightImage, imagePosition).r;
@@ -92,5 +93,20 @@ void main()
 
 		imageStore(heightImage, imagePosition, vec4(newHeight));
 		imageStore(previousHeightImage, imagePosition, vec4(curHeight));
+		height = newHeight;
+		memoryBarrier();
 	}
+
+	#define TO_VALID(position, size) (min(vec2(size) - vec2(1), max(vec2(0), (position))))
+	vec3 normal = vec3(0);
+	// Normal
+	{
+        float hl = imageLoad(heightImage, ivec2(TO_VALID(imagePosition + vec2(-1, 0), iWaveConstantInfo.imageSize))).r;
+        // float hr = imageLoad(heightImage, TO_VALID(imagePosition + vec2(+1, 0), iWaveConstantInfo.imageSize)).r;
+        float hu = imageLoad(heightImage, ivec2(TO_VALID(imagePosition + vec2(0, -1), iWaveConstantInfo.imageSize))).r;
+        // float hd = imageLoad(heightImage, TO_VALID(imagePosition + vec2(0, +1), iWaveConstantInfo.imageSize)).r;
+        // vec3 leftDir = height - hl < hr - height ? height - hl : hr - height//求出最小的变换量
+        // vec3 upDir   = height - hd < hu - height ? height - hd : hu - height//求出最小的变换量
+        normal = normalize(cross(vec3(1, 0, height - hl), vec3(0, 1, hu - height)));
+    }
 }

@@ -164,7 +164,7 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	featureData->iWaveConstantInfo.imageSize = { 512, 512 };
 	featureData->iWaveConstantInfo.halfKernalSize = 6;
 	featureData->iWaveConstantInfo.deltaTime = 0;
-	featureData->iWaveConstantInfo.alpha = 0.1;
+	featureData->iWaveConstantInfo.alpha = 0.3;
 	featureData->iWaveConstantInfo.sourceFactor = 1;
 	featureData->iWaveConstantInfo.obstructionFactor = 1;
 
@@ -376,7 +376,7 @@ void AirEngine::Rendering::RenderFeature::IWave_RenderFeature::OnExcute(Core::Gr
 		}
 		auto& obstructionTextureData = featureData->obstructionTextureData;
 		{
-			constexpr int ATTENUATION_SIZE = 4;
+			constexpr int ATTENUATION_SIZE = 2;
 			const int startI = featureData->iWaveConstantInfo.imageSize.y / 2;
 			const int EndI = featureData->iWaveConstantInfo.imageSize.y;
 			const int startJ = featureData->iWaveConstantInfo.imageSize.x / 2 - 26;

@@ -16,6 +16,8 @@ layout(location = 1) in float inObstruction;
 
 layout(location = 0) out vec4 ColorAttachment;
 
+layout(set = 4, binding = 0) uniform sampler2D albedoTexture;
+
 void main() 
 {
     // vec3 b = cross(normalize(inWorldBitangent), normalize(inWorldNormal));
@@ -51,7 +53,8 @@ void main()
     // radiance += iblRadiance * occlusion * rmo.z;
 
     // ColorAttachment = vec4(radiance / (radiance + vec3(1)), 1);
-    ColorAttachment = vec4(inTexCoords * inObstruction, 0, 1);
+    vec3 color = texture(albedoTexture, inTexCoords).rgb;
+    ColorAttachment = vec4(color * inObstruction, 1);
     // ColorAttachment = vec4(normalize(inWorldNormal) * 0.5 + vec3(0.5), 1);
     // ColorAttachment = vec4(normalize(inWorldTangent) * 0.5 + vec3(0.5), 1);
     // ColorAttachment = vec4(normalize(inWorldBitangent) * 0.5 + vec3(0.5), 1);
