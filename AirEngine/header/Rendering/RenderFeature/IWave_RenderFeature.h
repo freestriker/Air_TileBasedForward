@@ -68,6 +68,9 @@ namespace AirEngine
 					Core::Graphic::Rendering::Shader* iWaveShader;
 					Core::Graphic::Rendering::Material* material;
 					Core::Graphic::Rendering::FrameBuffer* frameBuffer;
+					std::vector<float> sourceTextureData;
+					bool isSourceEmpty;
+					std::vector<float> obstructionTextureData;
 				public:
 					Core::Graphic::Instance::Buffer* stagingBuffer;
 					Core::Graphic::Instance::Image* sourceTexture;

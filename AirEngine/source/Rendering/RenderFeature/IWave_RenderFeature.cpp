@@ -22,6 +22,8 @@
 #include <cmath>
 #include <corecrt_math.h>
 #include <Core/Logic/CoreObject/Instance.h>
+#include "Core/Logic/Manager/InputManager.h"
+#include "Core/Graphic/CoreObject/Window.h"
 
 RTTR_REGISTRATION
 {
@@ -228,6 +230,9 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	featureData->material->SetStorageImage2D("previousHeightImage", featureData->previousHeightImage);
 	featureData->material->SetStorageImage2D("verticalDerivativeImage", featureData->verticalDerivativeImage);
 	featureData->frameBuffer = new Core::Graphic::Rendering::FrameBuffer(_renderPass, camera->attachments);
+	featureData->sourceTextureData = std::vector<float>(featureData->iWaveConstantInfo.imageSize.x * featureData->iWaveConstantInfo.imageSize.y, 0.0);
+	featureData->isSourceEmpty = true;
+	featureData->obstructionTextureData = std::vector<float>(featureData->iWaveConstantInfo.imageSize.x * featureData->iWaveConstantInfo.imageSize.y, 0.0);
 	return featureData;
 }
 
@@ -264,46 +269,109 @@ void AirEngine::Rendering::RenderFeature::IWave_RenderFeature::OnExcute(Core::Gr
 
 	if (featureData->isInitialized)
 	{
-		delete featureData->stagingBuffer;
-		featureData->stagingBuffer = nullptr;
+		// Paint
+		bool isSourceDirty = false;
 
+		if (!featureData->isSourceEmpty)
 		{
-			auto heightImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
-			(
-				featureData->heightImage,
-				VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-				VkAccessFlagBits::VK_ACCESS_NONE,
-				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
-			);
-			commandBuffer->AddPipelineImageBarrier(
-				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-				{ &heightImageBarrier }
-			);
+			std::fill(featureData->sourceTextureData.begin(), featureData->sourceTextureData.end(), 0);
+
+			featureData->isSourceEmpty = true;
+			isSourceDirty = true;
 		}
+		if (Core::Logic::CoreObject::Instance::InputManager().MouseStatus(Core::Logic::Manager::InputMouseType::LeftButton) == Core::Logic::Manager::ButtonStatusType::Pressed)
+		{
+			constexpr int SOURCE_BRUSH_HALF_SIZE = 6;
+			constexpr float SOURCE_RADIUS = SOURCE_BRUSH_HALF_SIZE * 1.415;
+			const auto&& cursorPosition = glm::vec2(Core::Logic::CoreObject::Instance::InputManager().Cursor());
+			const auto&& size = glm::vec2(Core::Graphic::CoreObject::Window::Extent().width, Core::Graphic::CoreObject::Window::Extent().height);
+			const auto&& uv = cursorPosition / size;
+			const auto&& center = glm::ivec2(uv * glm::vec2(featureData->iWaveConstantInfo.imageSize));
+
+			for (int i = -SOURCE_BRUSH_HALF_SIZE; i <= SOURCE_BRUSH_HALF_SIZE; i++)
+			{
+				for (int j = -SOURCE_BRUSH_HALF_SIZE; j <= SOURCE_BRUSH_HALF_SIZE; j++)
+				{
+					const auto&& delta = glm::ivec2(i, j);
+					const auto&& target = center + delta;
+					if (0 <= target.x && target.x < featureData->iWaveConstantInfo.imageSize.x && 0 <= target.y && target.y < featureData->iWaveConstantInfo.imageSize.y)
+					{
+						auto&& index = target.x + target.y * featureData->iWaveConstantInfo.imageSize.x;
+						featureData->sourceTextureData[index] = ((SOURCE_RADIUS - glm::length(glm::vec2(delta))) / SOURCE_RADIUS) * 0.05;
+					}
+				}
+			}
+
+			featureData->isSourceEmpty = false;;
+			isSourceDirty = true;
+		}
+
+		if (isSourceDirty)
+		{
+			{
+				featureData->stagingBuffer->WriteData([&](void* dataPtr)->void {
+					memcpy(dataPtr, featureData->sourceTextureData.data(), featureData->sourceTextureData.size() * sizeof(float));
+				});
+			}
+
+			{
+				auto sourceTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
+				(
+					featureData->sourceTexture,
+					VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+					VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+					VkAccessFlagBits::VK_ACCESS_NONE,
+					VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT
+				);
+				commandBuffer->AddPipelineImageBarrier(
+					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
+					{ &sourceTextureBarrier }
+				);
+			}
+
+			commandBuffer->CopyBufferToImage(featureData->stagingBuffer, 0, featureData->sourceTexture, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+
+			{
+				auto sourceTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
+				(
+					featureData->sourceTexture,
+					VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+					VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+					VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
+					VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+				);
+				commandBuffer->AddPipelineImageBarrier(
+					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
+					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+					{ &sourceTextureBarrier }
+				);
+			}
+		}
+
+		auto heightImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
+		(
+			featureData->heightImage,
+			VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+			VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+			VkAccessFlagBits::VK_ACCESS_NONE,
+			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
+		);
+		commandBuffer->AddPipelineImageBarrier(
+			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+			{ &heightImageBarrier }
+		);
 	}
 	else
 	{
 		featureData->isInitialized = true;
 
-		std::vector<float> sourceTextureData(featureData->iWaveConstantInfo.imageSize.x * featureData->iWaveConstantInfo.imageSize.y, 0.0);
+		auto& sourceTextureData = featureData->sourceTextureData;
 		{
-			auto&& center = featureData->iWaveConstantInfo.imageSize / 2;
-			constexpr int SOURCE_HALF_SIZE = 6;
-			constexpr float SOURCE_RADIUS = SOURCE_HALF_SIZE * 1.415;
-			for (int i = -SOURCE_HALF_SIZE; i <= SOURCE_HALF_SIZE; i++)
-			{
-				for (int j = -SOURCE_HALF_SIZE; j <= SOURCE_HALF_SIZE; j++)
-				{
-					auto&& delta = glm::ivec2(i, j);
-					auto&& target = center + delta;
-					auto&& index = target.x + target.y * featureData->iWaveConstantInfo.imageSize.x;
-					sourceTextureData[index] = ((SOURCE_RADIUS - glm::length(glm::vec2(delta))) / SOURCE_RADIUS) * 0.1;
-				}
-			}
+
 		}
-		std::vector<float> obstructionTextureData(featureData->iWaveConstantInfo.imageSize.x * featureData->iWaveConstantInfo.imageSize.y, 1.0);
+		auto& obstructionTextureData = featureData->obstructionTextureData;
 		{
 
 		}
@@ -470,7 +538,6 @@ void AirEngine::Rendering::RenderFeature::IWave_RenderFeature::OnExcute(Core::Gr
 		commandBuffer->PushConstant(featureData->material, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, featureData->iWaveConstantInfo);
 		constexpr int LOCAL_GROUP_WIDTH = 8;
 		commandBuffer->Dispatch(featureData->material, (featureData->iWaveConstantInfo.imageSize.x + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, (featureData->iWaveConstantInfo.imageSize.y + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, 1);
-		featureData->iWaveConstantInfo.sourceFactor = 0;
 	}
 
 	{
