@@ -14,6 +14,7 @@
 #include "Rendering/RenderFeature/GTAO_Occlusion_RenderFeature.h"
 #include "Rendering/RenderFeature/CSM_ShadowCaster_RenderFeature.h"
 #include "Rendering/RenderFeature/TBForward_Transparent_RenderFeature.h"
+//#include "Rendering/RenderFeature/IWave_RenderFeature.h"
 
 RTTR_REGISTRATION
 {
@@ -39,7 +40,7 @@ AirEngine::Rendering::Renderer::TBForwardRenderer::TBForwardRenderer()
 	UseRenderFeature("Background_RenderFeature", new RenderFeature::Background_RenderFeature());
 
 	UseRenderFeature("Geometry_RenderFeature", new RenderFeature::Geometry_RenderFeature());
-
+	
 	UseRenderFeature("TBForward_LightList_RenderFeature", new RenderFeature::TBForward_LightList_RenderFeature());
 	UseRenderFeature("SSAO_Occlusion_RenderFeature", new RenderFeature::SSAO_Occlusion_RenderFeature());
 	UseRenderFeature("SSAO_Blur_RenderFeature", new RenderFeature::AO_Blur_RenderFeature());
@@ -50,6 +51,8 @@ AirEngine::Rendering::Renderer::TBForwardRenderer::TBForwardRenderer()
 	UseRenderFeature("TBForward_OIT_DepthPeeling_RenderFeature", new RenderFeature::TBForward_OIT_DepthPeeling_RenderFeature());
 	UseRenderFeature("TBForward_OIT_AlphaBuffer_RenderFeature", new RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeature());
 	UseRenderFeature("TBForward_Transparent_RenderFeature", new RenderFeature::TBForward_Transparent_RenderFeature());
+
+	//UseRenderFeature("IWave_RenderFeature", new RenderFeature::IWave_RenderFeature());
 }
 
 AirEngine::Rendering::Renderer::TBForwardRenderer::~TBForwardRenderer()
@@ -147,6 +150,8 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::PrepareRenderer(Core::Gr
 		PrepareRenderFeature("TBForward_Transparent_RenderFeature", rendererData);
 		break;
 	}
+
+	//PrepareRenderFeature("IWave_RenderFeature", rendererData);
 }
 
 void AirEngine::Rendering::Renderer::TBForwardRenderer::ExcuteRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*> const* rendererComponents)
@@ -174,6 +179,8 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::ExcuteRenderer(Core::Gra
 		ExcuteRenderFeature("TBForward_Transparent_RenderFeature", rendererData, camera, rendererComponents);
 		break;
 	}
+
+	//ExcuteRenderFeature("IWave_RenderFeature", rendererData, camera, rendererComponents);
 }
 
 void AirEngine::Rendering::Renderer::TBForwardRenderer::SubmitRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -201,6 +208,8 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::SubmitRenderer(Core::Gra
 		SubmitRenderFeature("TBForward_Transparent_RenderFeature", rendererData);
 		break;
 	}
+
+	//SubmitRenderFeature("IWave_RenderFeature", rendererData);
 }
 
 void AirEngine::Rendering::Renderer::TBForwardRenderer::FinishRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -228,4 +237,6 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::FinishRenderer(Core::Gra
 		FinishRenderFeature("TBForward_Transparent_RenderFeature", rendererData);
 		break;
 	}
+
+	//FinishRenderFeature("IWave_RenderFeature", rendererData);
 }

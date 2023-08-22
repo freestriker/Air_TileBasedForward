@@ -193,6 +193,29 @@ void AirEngine::Core::Graphic::Command::CommandBuffer::CopyBufferToImage(Instanc
     CopyBufferToImage(srcBuffer, dstImage, "DefaultImageView", dstImageLayout, mipmapLevelOffset);
 }
 
+void AirEngine::Core::Graphic::Command::CommandBuffer::CopyBufferToImage(Instance::Buffer* srcBuffer, size_t srcBufferOffset, Instance::Image* dstImage, VkImageLayout dstImageLayout, uint32_t mipmapLevelOffset)
+{
+    auto& dstImageView = dstImage->ImageView_("DefaultImageView");
+
+    auto aspectFlag = dstImageView.VkImageAspectFlags_();
+    auto srcBaseLayer = dstImageView.BaseLayer();
+    auto srcLayerCount = dstImageView.LayerCount();
+    auto srcMipmapLevel = dstImageView.BaseMipmapLevel();
+
+    VkBufferImageCopy copy{};
+    copy.bufferOffset = srcBufferOffset;
+    copy.bufferRowLength = 0;
+    copy.bufferImageHeight = 0;
+    copy.imageSubresource.aspectMask = aspectFlag;
+    copy.imageSubresource.baseArrayLayer = srcBaseLayer;
+    copy.imageSubresource.layerCount = srcLayerCount;
+    copy.imageSubresource.mipLevel = srcMipmapLevel + mipmapLevelOffset;
+    copy.imageOffset = { 0, 0, 0 };
+    copy.imageExtent = dstImageView.VkExtent3D_(srcMipmapLevel + mipmapLevelOffset);
+
+    vkCmdCopyBufferToImage(_vkCommandBuffer, srcBuffer->VkBuffer_(), dstImage->VkImage_(), dstImageLayout, 1, &copy);
+}
+
 void AirEngine::Core::Graphic::Command::CommandBuffer::CopyImageToBuffer(Instance::Image* srcImage, VkImageLayout srcImageLayout, Instance::Buffer* dstBuffer, uint32_t mipmapLevelOffset)
 {
     auto& srcImageView = srcImage->ImageView_();

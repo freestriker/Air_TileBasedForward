@@ -1,0 +1,112 @@
+#version 450
+#extension GL_GOOGLE_include_directive: enable
+
+#define LOCAL_GROUP_WIDTH 8
+layout (local_size_x = LOCAL_GROUP_WIDTH, local_size_y = LOCAL_GROUP_WIDTH) in;
+
+layout(push_constant) uniform IWaveConstantInfo
+{
+    ivec2 imageSize;
+	int halfKernalSize;
+	float deltaTime;
+	float alpha;
+	float sourceFactor;
+	float obstructionFactor;
+} iWaveConstantInfo;
+
+layout (set = 0, binding = 0) uniform sampler2D sourceTexture;
+layout (set = 1, binding = 0) uniform sampler2D obstructionTexture;
+layout (set = 2, binding = 0, r32f) uniform image2D kernalImage;
+layout (set = 3, binding = 0, r32f) uniform image2D heightImage;
+layout (set = 4, binding = 0, r32f) uniform image2D previousHeightImage;
+layout (set = 5, binding = 0, r32f) uniform image2D verticalDerivativeImage;
+
+void main()
+{	
+	const ivec2 imagePosition = ivec2(gl_GlobalInvocationID.xy);
+
+	if(iWaveConstantInfo.imageSize.x <= imagePosition.x || iWaveConstantInfo.imageSize.y <= imagePosition.y) return;
+	
+	const vec2 imageUv = (imagePosition + vec2(0.5, 0.5)) / vec2(iWaveConstantInfo.imageSize);
+	const float source = texture(sourceTexture, imageUv).r * iWaveConstantInfo.sourceFactor;
+	const float obstruction = texture(obstructionTexture, imageUv).r * iWaveConstantInfo.obstructionFactor;
+
+	// Obstruction
+	{
+		float curHeight = imageLoad(heightImage, imagePosition).r;
+		curHeight *= obstruction;
+		imageStore(heightImage, imagePosition, vec4(curHeight));
+
+		// barrier();
+		memoryBarrier();
+	}
+
+	// Vertical Derivative
+	{
+		float vd = 0;
+		for (int iix = -iWaveConstantInfo.halfKernalSize; iix <= iWaveConstantInfo.halfKernalSize; iix++)
+		{
+			for (int iiy = -iWaveConstantInfo.halfKernalSize; iiy <= iWaveConstantInfo.halfKernalSize; iiy++)
+			{
+				ivec2 sampleImagePosition = imagePosition + ivec2(iix, iiy);
+				if(sampleImagePosition.x < 0)
+				{
+					sampleImagePosition.x = -sampleImagePosition.x;
+				}
+				if(sampleImagePosition.y < 0)
+				{
+					sampleImagePosition.y = -sampleImagePosition.y;
+				}
+				if(iWaveConstantInfo.imageSize.x <= sampleImagePosition.x)
+				{
+					sampleImagePosition.x = 2 * iWaveConstantInfo.imageSize.x -sampleImagePosition.x;
+				}
+				if(iWaveConstantInfo.imageSize.y <= sampleImagePosition.y)
+				{
+					sampleImagePosition.y = 2 * iWaveConstantInfo.imageSize.y -sampleImagePosition.y;
+				}
+
+				vd += imageLoad(kernalImage, ivec2(iix + iWaveConstantInfo.halfKernalSize, iiy + iWaveConstantInfo.halfKernalSize)).r * imageLoad(heightImage, sampleImagePosition).r;
+			}
+		}
+		imageStore(verticalDerivativeImage, imagePosition, vec4(vd));
+
+		// barrier();
+		memoryBarrier();
+	}
+
+	// Surface
+	float height = 0;
+	{
+		const float curHeight = imageLoad(heightImage, imagePosition).r;
+		const float preHeight = imageLoad(previousHeightImage, imagePosition).r;
+		const float verticalDerivative = imageLoad(verticalDerivativeImage, imagePosition).r;
+
+		const float adt = iWaveConstantInfo.alpha * iWaveConstantInfo.deltaTime;
+		const float adt2 = 1.0 / (1.0 + adt);
+		const float gravity = 9.8 * iWaveConstantInfo.deltaTime * iWaveConstantInfo.deltaTime;
+
+		float newHeight = curHeight * (2.0 - adt) - preHeight - gravity * verticalDerivative;
+		newHeight *= adt2;
+		newHeight += source;
+		newHeight *= obstruction;
+
+		imageStore(heightImage, imagePosition, vec4(newHeight));
+		imageStore(previousHeightImage, imagePosition, vec4(curHeight));
+		height = newHeight;
+		memoryBarrier();
+	}
+
+	#define TO_VALID(position, size) (min(vec2(size) - vec2(1), max(vec2(0), (position))))
+	vec3 normal = vec3(0);
+	// Normal
+	{
+        float hl = imageLoad(heightImage, ivec2(TO_VALID(imagePosition + vec2(-1, 0), iWaveConstantInfo.imageSize))).r;
+        // float hr = imageLoad(heightImage, TO_VALID(imagePosition + vec2(+1, 0), iWaveConstantInfo.imageSize)).r;
+        float hu = imageLoad(heightImage, ivec2(TO_VALID(imagePosition + vec2(0, -1), iWaveConstantInfo.imageSize))).r;
+        // float hd = imageLoad(heightImage, TO_VALID(imagePosition + vec2(0, +1), iWaveConstantInfo.imageSize)).r;
+        // vec3 leftDir = height - hl < hr - height ? height - hl : hr - height//求出最小的变换量
+        // vec3 upDir   = height - hd < hu - height ? height - hd : hu - height//求出最小的变换量
+        normal = normalize(cross(vec3(1, 0, height - hl), vec3(0, 1, hu - height)));
+    }
+}

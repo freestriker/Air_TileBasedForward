@@ -261,6 +261,11 @@ AirEngine::Core::Logic::Manager::ButtonStatusType AirEngine::Core::Logic::Manage
 	return _mouseStatusTable.count(mouse) > 0 ? _mouseStatusTable[mouse] : ButtonStatusType::Released;
 }
 
+void AirEngine::Core::Logic::Manager::InputManager::ClearMouseStatus()
+{
+	_mouseStatusTable.clear();
+}
+
 void AirEngine::Core::Logic::Manager::InputManager::InputWheel(float deltaDegree)
 {
 	std::lock_guard<std::mutex> locker(_wheelInputMutex);

@@ -42,6 +42,7 @@
 #include "Test/RendererDataController.h"
 #include "Test/TBF_Opaque_Pbr_RendererBehaviour.h"
 #include "Test/TBF_Opaque_Pbr_Mirror_RendererBehaviour.h"
+#include "Core/Graphic/Instance/ImageSampler.h"
 
 AirEngine::Core::Logic::CoreObject::Thread::LogicThread AirEngine::Core::Logic::CoreObject::Thread::_logicThread = AirEngine::Core::Logic::CoreObject::Thread::LogicThread();
 
@@ -481,6 +482,47 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 			}
 		}
 	}
+
+	//{
+	//	Logic::Object::GameObject* surfaceRendererGo = new Logic::Object::GameObject("SurfaceRenderer");
+	//	renderers->AddChild(surfaceRendererGo);
+
+	//	auto&& renderer = new Renderer::Renderer();
+
+	//	surfaceRendererGo->AddComponent(renderer);
+	//	surfaceRendererGo->transform.SetTranslation({ 0, -1, -1 });
+	//	surfaceRendererGo->transform.SetScale({ 10, 1, 10 });
+
+	//	renderer->mesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\Surface.ply");
+	//	surfaceRendererGo->AddComponent(renderer);
+
+	//	auto sampler = new Core::Graphic::Instance::ImageSampler(
+	//		VkFilter::VK_FILTER_LINEAR,
+	//		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_LINEAR,
+	//		VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT,
+	//		0.0f,
+	//		VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
+	//	);
+
+	//	{
+	//		std::string _textureBasePath = "..\\Asset\\Texture\\Bricks";
+	//		auto albedoTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(_textureBasePath + "_Albedo.json");
+	//		//auto normalTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(_textureBasePath + "_Normal.json");
+	//		//auto rmoTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(_textureBasePath + "_Rmo.json");
+	//		auto shader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\IWave_Surface_Shader.shader");
+	//		auto material = new Core::Graphic::Rendering::Material(shader);
+	//		material->SetSampledImage2D("albedoTexture", albedoTexture, sampler);
+	//		//material->SetSampledImage2D("normalTexture", normalTexture, sampler);
+	//		//material->SetSampledImage2D("rmoTexture", rmoTexture, sampler);
+	//		renderer->AddMaterial(material);
+	//	}
+	//	//{
+	//	//	auto geometryShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\Geometry_Shader.shader");
+	//	//	auto geometryMaterial = new Core::Graphic::Rendering::Material(geometryShader);
+	//	//	renderer->AddMaterial(geometryMaterial);
+	//	//}
+	//}
+
 
 	///OIT
 	Logic::Object::GameObject* oitRenderers = new Logic::Object::GameObject("OitRenderers");

@@ -1,6 +1,11 @@
 glslangValidator.exe -t -V TBF_Opaque_Pbr_Shader.vert -IUtils/ -o Spv/TBF_Opaque_Pbr_Shader.vert.spv
 glslangValidator.exe -t -V TBF_Opaque_Pbr_Shader.frag -IUtils/ -o Spv/TBF_Opaque_Pbr_Shader.frag.spv
 
+glslangValidator.exe -t -V IWave_Shader.comp -IUtils/ -o Spv/IWave_Shader.comp.spv
+
+glslangValidator.exe -t -V IWave_Surface_Shader.vert -IUtils/ -o Spv/IWave_Surface_Shader.vert.spv
+glslangValidator.exe -t -V IWave_Surface_Shader.frag -IUtils/ -o Spv/IWave_Surface_Shader.frag.spv
+
 glslangValidator.exe -t -V GenerateIrradianceMap_Shader.vert -IUtils/ -o Spv/GenerateIrradianceMap_Shader.vert.spv
 glslangValidator.exe -t -V GenerateIrradianceMap_Shader.frag -IUtils/ -o Spv/GenerateIrradianceMap_Shader.frag.spv
 

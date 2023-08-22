@@ -93,6 +93,7 @@ namespace AirEngine
 					bool MouseDown(InputMouseType mouse);
 					bool MouseAny(InputMouseType mouse);
 					ButtonStatusType MouseStatus(InputMouseType key);
+					void ClearMouseStatus();
 
 					///Wheel
 					void InputWheel(float deltaDegree);
