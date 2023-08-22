@@ -120,6 +120,7 @@
     <ClCompile Include="source\Rendering\RenderFeature\CSM_Visualization_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\ClearColorAttachment_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\CSM_ShadowCaster_RenderFeature.cpp" />
+    <ClCompile Include="source\Rendering\RenderFeature\FftOcean_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\Forward_Opaque_RenderFeature.cpp" />
     <ClCompile Include="source\Core\Graphic\Manager\RenderPipelineManager.cpp" />
     <ClCompile Include="source\Core\Graphic\Rendering\Material.cpp" />
@@ -287,6 +288,7 @@
     <ClInclude Include="header\Rendering\RenderFeature\CSM_Visualization_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\ClearColorAttachment_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\CSM_ShadowCaster_RenderFeature.h" />
+    <ClInclude Include="header\Rendering\RenderFeature\FftOcean_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\Forward_Opaque_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\Forward_Transparent_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\GenerateLutMap_RenderFeature.h" />
