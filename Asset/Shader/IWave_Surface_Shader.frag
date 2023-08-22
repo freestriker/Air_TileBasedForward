@@ -8,6 +8,7 @@
 // layout(set = START_SET_INDEX + 2, binding = 0) uniform sampler2D rmoTexture;
 
 layout(location = 0) in vec2 inTexCoords;
+layout(location = 1) in float inObstruction;
 // layout(location = 1) in vec3 inWorldPosition;
 // layout(location = 2) in vec3 inWorldNormal;
 // layout(location = 3) in vec3 inWorldTangent;
@@ -50,7 +51,7 @@ void main()
     // radiance += iblRadiance * occlusion * rmo.z;
 
     // ColorAttachment = vec4(radiance / (radiance + vec3(1)), 1);
-    ColorAttachment = vec4(inTexCoords, 0, 1);
+    ColorAttachment = vec4(inTexCoords * inObstruction, 0, 1);
     // ColorAttachment = vec4(normalize(inWorldNormal) * 0.5 + vec3(0.5), 1);
     // ColorAttachment = vec4(normalize(inWorldTangent) * 0.5 + vec3(0.5), 1);
     // ColorAttachment = vec4(normalize(inWorldBitangent) * 0.5 + vec3(0.5), 1);

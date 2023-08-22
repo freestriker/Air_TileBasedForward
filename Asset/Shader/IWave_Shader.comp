@@ -34,39 +34,44 @@ void main()
 	// Obstruction
 	{
 		float curHeight = imageLoad(heightImage, imagePosition).r;
-		// curHeight *= obstruction;
+		curHeight *= obstruction;
 		imageStore(heightImage, imagePosition, vec4(curHeight));
 
-		barrier();
+		// barrier();
 		memoryBarrier();
 	}
 
 	// Vertical Derivative
 	{
-		if(
-			iWaveConstantInfo.halfKernalSize <= imagePosition.x && 
-			imagePosition.x < iWaveConstantInfo.imageSize.x - iWaveConstantInfo.halfKernalSize &&
-			iWaveConstantInfo.halfKernalSize <= imagePosition.y && 
-			imagePosition.y < iWaveConstantInfo.imageSize.y - iWaveConstantInfo.halfKernalSize
-		)
+		float vd = 0;
+		for (int iix = -iWaveConstantInfo.halfKernalSize; iix <= iWaveConstantInfo.halfKernalSize; iix++)
 		{
-			float vd = 0;
-			for (int iix = -iWaveConstantInfo.halfKernalSize; iix <= iWaveConstantInfo.halfKernalSize; iix++)
+			for (int iiy = -iWaveConstantInfo.halfKernalSize; iiy <= iWaveConstantInfo.halfKernalSize; iiy++)
 			{
-				for (int iiy = -iWaveConstantInfo.halfKernalSize; iiy <= iWaveConstantInfo.halfKernalSize; iiy++)
+				ivec2 sampleImagePosition = imagePosition + ivec2(iix, iiy);
+				if(sampleImagePosition.x < 0)
 				{
-					const ivec2 sampleImagePosition = imagePosition + ivec2(iix, iiy);
-					vd += imageLoad(kernalImage, ivec2(iix + iWaveConstantInfo.halfKernalSize, iiy + iWaveConstantInfo.halfKernalSize)).r * imageLoad(heightImage, sampleImagePosition).r;
+					sampleImagePosition.x = -sampleImagePosition.x;
 				}
-			}
-			imageStore(verticalDerivativeImage, imagePosition, vec4(vd));
-		}
-		else
-		{
-			imageStore(verticalDerivativeImage, imagePosition, vec4(0.0));
-		}
+				if(sampleImagePosition.y < 0)
+				{
+					sampleImagePosition.y = -sampleImagePosition.y;
+				}
+				if(iWaveConstantInfo.imageSize.x <= sampleImagePosition.x)
+				{
+					sampleImagePosition.x = 2 * iWaveConstantInfo.imageSize.x -sampleImagePosition.x;
+				}
+				if(iWaveConstantInfo.imageSize.y <= sampleImagePosition.y)
+				{
+					sampleImagePosition.y = 2 * iWaveConstantInfo.imageSize.y -sampleImagePosition.y;
+				}
 
-		barrier();
+				vd += imageLoad(kernalImage, ivec2(iix + iWaveConstantInfo.halfKernalSize, iiy + iWaveConstantInfo.halfKernalSize)).r * imageLoad(heightImage, sampleImagePosition).r;
+			}
+		}
+		imageStore(verticalDerivativeImage, imagePosition, vec4(vd));
+
+		// barrier();
 		memoryBarrier();
 	}
 
@@ -83,7 +88,7 @@ void main()
 		float newHeight = curHeight * (2.0 - adt) - preHeight - gravity * verticalDerivative;
 		newHeight *= adt2;
 		newHeight += source;
-		// newHeight *= obstruction;
+		newHeight *= obstruction;
 
 		imageStore(heightImage, imagePosition, vec4(newHeight));
 		imageStore(previousHeightImage, imagePosition, vec4(curHeight));

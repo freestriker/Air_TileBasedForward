@@ -232,7 +232,7 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	featureData->frameBuffer = new Core::Graphic::Rendering::FrameBuffer(_renderPass, camera->attachments);
 	featureData->sourceTextureData = std::vector<float>(featureData->iWaveConstantInfo.imageSize.x * featureData->iWaveConstantInfo.imageSize.y, 0.0);
 	featureData->isSourceEmpty = true;
-	featureData->obstructionTextureData = std::vector<float>(featureData->iWaveConstantInfo.imageSize.x * featureData->iWaveConstantInfo.imageSize.y, 0.0);
+	featureData->obstructionTextureData = std::vector<float>(featureData->iWaveConstantInfo.imageSize.x * featureData->iWaveConstantInfo.imageSize.y, 1.0);
 	return featureData;
 }
 
@@ -280,7 +280,10 @@ void AirEngine::Rendering::RenderFeature::IWave_RenderFeature::OnExcute(Core::Gr
 			isSourceDirty = true;
 		}
 		if (Core::Logic::CoreObject::Instance::InputManager().MouseStatus(Core::Logic::Manager::InputMouseType::LeftButton) == Core::Logic::Manager::ButtonStatusType::Pressed)
+		//if (Core::Logic::CoreObject::Instance::InputManager().MouseDown(Core::Logic::Manager::InputMouseType::LeftButton))
 		{
+			Core::Logic::CoreObject::Instance::InputManager().ClearMouseStatus();
+			Utils::Log::Message("Paint sourc once.");
 			constexpr int SOURCE_BRUSH_HALF_SIZE = 6;
 			constexpr float SOURCE_RADIUS = SOURCE_BRUSH_HALF_SIZE * 1.415;
 			const auto&& cursorPosition = glm::vec2(Core::Logic::CoreObject::Instance::InputManager().Cursor());
@@ -297,7 +300,7 @@ void AirEngine::Rendering::RenderFeature::IWave_RenderFeature::OnExcute(Core::Gr
 					if (0 <= target.x && target.x < featureData->iWaveConstantInfo.imageSize.x && 0 <= target.y && target.y < featureData->iWaveConstantInfo.imageSize.y)
 					{
 						auto&& index = target.x + target.y * featureData->iWaveConstantInfo.imageSize.x;
-						featureData->sourceTextureData[index] = ((SOURCE_RADIUS - glm::length(glm::vec2(delta))) / SOURCE_RADIUS) * 0.05;
+						featureData->sourceTextureData[index] = ((SOURCE_RADIUS - glm::length(glm::vec2(delta))) / SOURCE_RADIUS) * 0.1;
 					}
 				}
 			}
@@ -373,7 +376,36 @@ void AirEngine::Rendering::RenderFeature::IWave_RenderFeature::OnExcute(Core::Gr
 		}
 		auto& obstructionTextureData = featureData->obstructionTextureData;
 		{
+			constexpr int ATTENUATION_SIZE = 4;
+			const int startI = featureData->iWaveConstantInfo.imageSize.y / 2;
+			const int EndI = featureData->iWaveConstantInfo.imageSize.y;
+			const int startJ = featureData->iWaveConstantInfo.imageSize.x / 2 - 26;
+			const int EndJ = featureData->iWaveConstantInfo.imageSize.x / 2 + 26;
 
+			for (int i = startI; i < EndI; i++)
+			{
+				for (int j = startJ; j < EndJ; j++)
+				{
+					auto&& index = i * featureData->iWaveConstantInfo.imageSize.x + j;
+
+					obstructionTextureData[index] = 0;
+				}
+			}
+			for (int attenuationIndex = ATTENUATION_SIZE; attenuationIndex >= 1; --attenuationIndex)
+			{
+				const float attenuation = attenuationIndex / float(ATTENUATION_SIZE + 1);
+				for (int i = startI - attenuationIndex; i < EndI + attenuationIndex; i++)
+				{
+					for (int j = startJ - attenuationIndex; j < EndJ + attenuationIndex; j++)
+					{
+						if (!(0 <= j && j < featureData->iWaveConstantInfo.imageSize.x && 0 <= i && i < featureData->iWaveConstantInfo.imageSize.y)) continue;
+						if ((startI <= i && i < EndI && startJ <= j && j < EndJ)) continue;
+
+						auto&& index = i * featureData->iWaveConstantInfo.imageSize.x + j;
+						obstructionTextureData[index] = attenuation;
+					}
+				}
+			}
 		}
 		std::vector<float> kernalImageData((featureData->iWaveConstantInfo.halfKernalSize * 2 + 1) * (featureData->iWaveConstantInfo.halfKernalSize * 2 + 1), 0.0);
 		{
@@ -568,6 +600,7 @@ void AirEngine::Rendering::RenderFeature::IWave_RenderFeature::OnExcute(Core::Gr
 			material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
 			material->SetUniformBuffer("meshObjectInfo", rendererComponent->ObjectInfoBuffer());
 			material->SetSampledImage2D("heightTexture", featureData->heightImage, _linearSampler);
+			material->SetSampledImage2D("obstructionTexture", featureData->obstructionTexture, _pointSampler);
 
 			commandBuffer->PushConstant(material, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT, featureData->iWaveSurfaceConstantInfo);
 			commandBuffer->DrawMesh(rendererComponent->mesh, material);
