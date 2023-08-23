@@ -196,9 +196,17 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
 		);
+		featureData->xySlopeFrequencyImage = Core::Graphic::Instance::Image::Create2DImage(
+			imageExtent,
+			VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT,
+			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
+		);
 		featureData->generateFrequencyMaterial->SetStorageImage2D("gaussianNoiseImage", featureData->gaussianNoiseImage);
 		featureData->generateFrequencyMaterial->SetStorageImage2D("heightFrequencyImage", featureData->heightFrequencyImage);
 		featureData->generateFrequencyMaterial->SetStorageImage2D("xyFrequencyImage", featureData->xyFrequencyImage);
+		featureData->generateFrequencyMaterial->SetStorageImage2D("xySlopeFrequencyImage", featureData->xySlopeFrequencyImage);
 	}
 
 	return featureData;
@@ -323,10 +331,18 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			VkAccessFlagBits::VK_ACCESS_NONE,
 			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
 		);
+		auto xySlopeFrequencyImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
+		(
+			featureData.xySlopeFrequencyImage,
+			VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+			VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+			VkAccessFlagBits::VK_ACCESS_NONE,
+			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
+		);
 		commandBuffer->AddPipelineImageBarrier(
 			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
 			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-			{ &heightFrequencyImageBarrier, &xyFrequencyImageBarrier }
+			{ &heightFrequencyImageBarrier, &xyFrequencyImageBarrier, &xySlopeFrequencyImageBarrier }
 		);
 	}
 
@@ -355,10 +371,18 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
 			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
 		);
+		auto xySlopeFrequencyImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
+		(
+			featureData.xySlopeFrequencyImage,
+			VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+			VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+			VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
+			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
+		);
 		commandBuffer->AddPipelineImageBarrier(
 			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
 			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-			{ &heightFrequencyImageBarrier, &xyFrequencyImageBarrier }
+			{ &heightFrequencyImageBarrier, &xyFrequencyImageBarrier, &xySlopeFrequencyImageBarrier }
 		);
 	}
 

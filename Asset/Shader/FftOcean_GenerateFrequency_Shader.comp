@@ -21,6 +21,7 @@ layout(push_constant) uniform GenerateFrequencyConstantInfo
 layout (set = 0, binding = 0, rgba32f) uniform readonly image2D gaussianNoiseImage;
 layout (set = 1, binding = 0, rg32f) uniform image2D heightFrequencyImage;
 layout (set = 2, binding = 0, rgba32f) uniform image2D xyFrequencyImage;
+layout (set = 3, binding = 0, rgba32f) uniform image2D xySlopeFrequencyImage;
 
 float Phillips(in vec2 k)
 {
@@ -70,10 +71,14 @@ void main()
     const vec2 heightFrequency = h1 + h2;
 	imageStore(heightFrequencyImage, pixelPosition, vec4(heightFrequency, 0, 0));
 
-	const float Ksqr = dot(k, k);
-    const vec2 Knorm = Ksqr > 1e-12f ? k / sqrt(Ksqr) : vec2(0);
+	const vec2 xSlopeFrequency = ComplexMultiply(vec2(0, 1), heightFrequency) * k.x;
+	const vec2 ySlopeFrequency = ComplexMultiply(vec2(0, 1), heightFrequency) * k.y;
+	imageStore(xySlopeFrequencyImage, pixelPosition, vec4(xSlopeFrequency, ySlopeFrequency));
 
-	const vec2 xFrequency = ComplexMultiply(vec2(0, 1), heightFrequency) * Knorm.x;
-	const vec2 yFrequency = ComplexMultiply(vec2(0, 1), heightFrequency) * Knorm.y;
+	const float Ksqr = dot(k, k);
+    const vec2 Knorm = Ksqr > 1e-12f ? vec2(1) / sqrt(Ksqr) : vec2(0);
+
+	const vec2 xFrequency = xSlopeFrequency * Knorm.x;
+	const vec2 yFrequency = ySlopeFrequency * Knorm.y;
 	imageStore(xyFrequencyImage, pixelPosition, vec4(xFrequency, yFrequency));
 }
