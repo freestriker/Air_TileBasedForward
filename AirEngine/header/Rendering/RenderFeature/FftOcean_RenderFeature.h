@@ -67,6 +67,7 @@ namespace AirEngine
 					Core::Graphic::Rendering::Shader* generateFrequencyShader;
 					Core::Graphic::Rendering::Material* generateFrequencyMaterial;
 					Core::Graphic::Instance::Image* heightFrequencyImage;
+					Core::Graphic::Instance::Image* xyFrequencyImage;
 				public:
 
 					CONSTRUCTOR(FftOcean_RenderFeatureData)
