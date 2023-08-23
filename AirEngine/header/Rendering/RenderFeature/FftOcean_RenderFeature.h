@@ -52,6 +52,7 @@ namespace AirEngine
 					float windSpeed;
 					float time;
 					float a;
+					float windDependency;
 				};
 				class FftOcean_RenderFeatureData final : public Core::Graphic::Rendering::RenderFeatureDataBase
 				{

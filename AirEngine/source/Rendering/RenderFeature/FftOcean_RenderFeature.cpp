@@ -180,6 +180,7 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 		featureData->generateFrequencyInfo.windSpeed = 31;
 		featureData->generateFrequencyInfo.time = 0;
 		featureData->generateFrequencyInfo.a = 3;
+		featureData->generateFrequencyInfo.windDependency = 0.1;
 		featureData->generateFrequencyShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\FftOcean_GenerateFrequency_Shader.shader");
 		featureData->generateFrequencyMaterial = new Core::Graphic::Rendering::Material(featureData->generateFrequencyShader);
 		featureData->heightFrequencyImage = Core::Graphic::Instance::Image::Create2DImage(

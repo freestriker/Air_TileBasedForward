@@ -16,6 +16,7 @@ layout(push_constant) uniform GenerateFrequencyConstantInfo
 	float windSpeed;
 	float time;
 	float a;
+	float windDependency;
 } constantInfo;
 
 layout (set = 0, binding = 0, rgba32f) uniform readonly image2D gaussianNoiseImage;
@@ -35,9 +36,10 @@ float Phillips(in vec2 k)
     const float l2 = L2 * 0.001 * 0.001;
 
 	const float windCosine = dot(normalize(k), normalize(constantInfo.windDirection));
+	const float windDependencyFactor = windCosine < 0 ? constantInfo.windDependency : 1;
 	const float windCosine2 = windCosine * windCosine;
 
-    return exp(-kLength2 * l2) * constantInfo.a * exp(-1.0 / (kLength2 * L2)) / kLength4 * windCosine2;
+    return windDependencyFactor * exp(-kLength2 * l2) * constantInfo.a * exp(-1.0 / (kLength2 * L2)) / kLength4 * windCosine2;
 }
 vec2 ComplexMultiply(in vec2 a, in vec2 b) 
 {
