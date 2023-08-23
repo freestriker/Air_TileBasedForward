@@ -210,17 +210,19 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			std::random_device rd{};
 			std::mt19937 gen{ rd() };
 
-			std::uniform_real_distribution<float> normalDistribution(0, 1);
+			std::normal_distribution<float> normalDistribution(0, 1);
 			std::vector<float> dataVector(featureData.imageSize.x * featureData.imageSize.y * 2, 0.0);
 			for (int index = 0; index < featureData.imageSize.x * featureData.imageSize.y; ++index)
 			{
 				constexpr double PI = 3.141592653589793;
 				auto&& x1 = normalDistribution(gen);
 				auto&& x2 = normalDistribution(gen);
-				float g1 = std::sqrt(-2.0f * std::log(x1)) * std::cos(2.0f * PI * x2);
-				float g2 = std::sqrt(-2.0f * std::log(x1)) * std::sin(2.0f * PI * x2);
-				dataVector[index * 2] = g1;
-				dataVector[index * 2 + 1] = g2;
+				//float g1 = std::sqrt(-2.0f * std::log(x1)) * std::cos(2.0f * PI * x2);
+				//float g2 = std::sqrt(-2.0f * std::log(x1)) * std::sin(2.0f * PI * x2);
+				//dataVector[index * 2] = g1;
+				//dataVector[index * 2 + 1] = g2;
+				dataVector[index * 2] = x1;
+				dataVector[index * 2 + 1] = x2;
 			}
 
 			featureData.gaussianNoiseTextureStagingBuffer->WriteData([&](void* dataPtr)->void {
