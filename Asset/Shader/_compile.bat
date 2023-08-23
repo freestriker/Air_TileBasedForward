@@ -3,6 +3,8 @@ glslangValidator.exe -t -V TBF_Opaque_Pbr_Shader.frag -IUtils/ -o Spv/TBF_Opaque
 
 glslangValidator.exe -t -V IWave_Shader.comp -IUtils/ -o Spv/IWave_Shader.comp.spv
 
+glslangValidator.exe -t -V FftOcean_GenerateFrequency_Shader.comp -IUtils/ -o Spv/FftOcean_GenerateFrequency_Shader.comp.spv
+
 glslangValidator.exe -t -V IWave_Surface_Shader.vert -IUtils/ -o Spv/IWave_Surface_Shader.vert.spv
 glslangValidator.exe -t -V IWave_Surface_Shader.frag -IUtils/ -o Spv/IWave_Surface_Shader.frag.spv
 

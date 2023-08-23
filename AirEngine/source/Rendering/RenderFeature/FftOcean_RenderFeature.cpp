@@ -106,8 +106,8 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOcean_Rende
 AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOcean_RenderFeatureData::FftOcean_RenderFeatureData()
 	: RenderFeatureDataBase()
 	, isInitialized(false)
-	, gaussianNoiseTextureStagingBuffer(nullptr)
-	, gaussianNoiseTexture(nullptr)
+	, gaussianNoiseImageStagingBuffer(nullptr)
+	, gaussianNoiseImage(nullptr)
 {
 
 }
@@ -155,19 +155,43 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 
 	featureData->isInitialized = false;
 	featureData->imageSize = { 512, 512 };
-	featureData->gaussianNoiseTextureStagingBuffer = new Core::Graphic::Instance::Buffer(
-		sizeof(float) * featureData->imageSize.x * featureData->imageSize.y * 2,
-		VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT,
-		VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-	);
 	const VkExtent2D imageExtent = VkExtent2D{ uint32_t(featureData->imageSize.x), uint32_t(featureData->imageSize.y) };
-	featureData->gaussianNoiseTexture = Core::Graphic::Instance::Image::Create2DImage(
-		imageExtent,
-		VkFormat::VK_FORMAT_R32G32_SFLOAT,
-		VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
-		VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-		VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
-	);
+
+	{
+		featureData->gaussianNoiseImageStagingBuffer = new Core::Graphic::Instance::Buffer(
+			sizeof(float) * featureData->imageSize.x * featureData->imageSize.y * 4,
+			VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT,
+			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+		);
+		featureData->gaussianNoiseImage = Core::Graphic::Instance::Image::Create2DImage(
+			imageExtent,
+			VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT,
+			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
+		);
+	}
+
+	{
+		featureData->generateFrequencyInfo.imageSize = featureData->imageSize;
+		featureData->generateFrequencyInfo.L = glm::vec2(1000, 1000);
+		featureData->generateFrequencyInfo.NM = featureData->imageSize;
+		featureData->generateFrequencyInfo.windDirection = glm::normalize(glm::vec2(1, 0.5));
+		featureData->generateFrequencyInfo.windSpeed = 31;
+		featureData->generateFrequencyInfo.time = 0;
+		featureData->generateFrequencyInfo.a = 3;
+		featureData->generateFrequencyShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\FftOcean_GenerateFrequency_Shader.shader");
+		featureData->generateFrequencyMaterial = new Core::Graphic::Rendering::Material(featureData->generateFrequencyShader);
+		featureData->heightFrequencyImage = Core::Graphic::Instance::Image::Create2DImage(
+			imageExtent,
+			VkFormat::VK_FORMAT_R32G32_SFLOAT,
+			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
+		);
+		featureData->generateFrequencyMaterial->SetStorageImage2D("gaussianNoiseImage", featureData->gaussianNoiseImage);
+		featureData->generateFrequencyMaterial->SetStorageImage2D("heightFrequencyImage", featureData->heightFrequencyImage);
+	}
 
 	return featureData;
 }
@@ -179,8 +203,13 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnResolveRende
 void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnDestroyRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)
 {
 	auto featureData = static_cast<FftOcean_RenderFeatureData*>(renderFeatureData);
-	delete featureData->gaussianNoiseTextureStagingBuffer;
-	delete featureData->gaussianNoiseTexture;
+
+	delete featureData->gaussianNoiseImageStagingBuffer;
+	delete featureData->gaussianNoiseImage;
+
+	delete featureData->generateFrequencyMaterial;
+	delete featureData->heightFrequencyImage;
+	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\FftOcean_GenerateFrequency_Shader.shader");
 
 	delete featureData;
 }
@@ -199,40 +228,44 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 
 	if (featureData.isInitialized)
 	{
-		delete featureData.gaussianNoiseTextureStagingBuffer;
-		featureData.gaussianNoiseTextureStagingBuffer = nullptr;
+		delete featureData.gaussianNoiseImageStagingBuffer;
+		featureData.gaussianNoiseImageStagingBuffer = nullptr;
 	}
 	else
 	{
-		//featureData.isInitialized = true;
+		featureData.isInitialized = true;
 
 		{
 			std::random_device rd{};
 			std::mt19937 gen{ rd() };
 
 			std::normal_distribution<float> normalDistribution(0, 1);
-			std::vector<float> dataVector(featureData.imageSize.x * featureData.imageSize.y * 2, 0.0);
+			std::vector<float> dataVector(featureData.imageSize.x * featureData.imageSize.y * 4, 0.0);
 			for (int index = 0; index < featureData.imageSize.x * featureData.imageSize.y; ++index)
 			{
 				constexpr double PI = 3.141592653589793;
 				auto&& x1 = normalDistribution(gen);
 				auto&& x2 = normalDistribution(gen);
+				auto&& x3 = normalDistribution(gen);
+				auto&& x4 = normalDistribution(gen);
 				//float g1 = std::sqrt(-2.0f * std::log(x1)) * std::cos(2.0f * PI * x2);
 				//float g2 = std::sqrt(-2.0f * std::log(x1)) * std::sin(2.0f * PI * x2);
 				//dataVector[index * 2] = g1;
 				//dataVector[index * 2 + 1] = g2;
-				dataVector[index * 2] = x1;
-				dataVector[index * 2 + 1] = x2;
+				dataVector[index * 4] = x1;
+				dataVector[index * 4 + 1] = x2;
+				dataVector[index * 4 + 2] = x3;
+				dataVector[index * 4 + 3] = x4;
 			}
 
-			featureData.gaussianNoiseTextureStagingBuffer->WriteData([&](void* dataPtr)->void {
+			featureData.gaussianNoiseImageStagingBuffer->WriteData([&](void* dataPtr)->void {
 				memcpy(dataPtr, dataVector.data(), dataVector.size() * sizeof(float));
 			});
 
 			{
-				auto sourceTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
+				auto gaussianNoiseImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
 				(
-					featureData.gaussianNoiseTexture,
+					featureData.gaussianNoiseImage,
 					VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
 					VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 					VkAccessFlagBits::VK_ACCESS_NONE,
@@ -241,28 +274,68 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 				commandBuffer->AddPipelineImageBarrier(
 					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
 					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-					{ &sourceTextureBarrier }
+					{ &gaussianNoiseImageBarrier }
 				);
 			}
 
-			commandBuffer->CopyBufferToImage(featureData.gaussianNoiseTextureStagingBuffer, featureData.gaussianNoiseTexture, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+			commandBuffer->CopyBufferToImage(featureData.gaussianNoiseImageStagingBuffer, featureData.gaussianNoiseImage, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
 			{
-				auto sourceTextureBarrier = Core::Graphic::Command::ImageMemoryBarrier
+				auto gaussianNoiseImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
 				(
-					featureData.gaussianNoiseTexture,
+					featureData.gaussianNoiseImage,
 					VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-					VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+					VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 					VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
-					VkAccessFlagBits::VK_ACCESS_NONE
+					VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
 				);
 				commandBuffer->AddPipelineImageBarrier(
 					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
-					{ &sourceTextureBarrier }
+					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+					{ &gaussianNoiseImageBarrier }
 				);
 			}
 		}
+	}
+
+	{
+		auto heightFrequencyImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
+		(
+			featureData.heightFrequencyImage,
+			VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+			VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+			VkAccessFlagBits::VK_ACCESS_NONE,
+			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
+		);
+		commandBuffer->AddPipelineImageBarrier(
+			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+			{ &heightFrequencyImageBarrier }
+		);
+	}
+
+	{
+		auto&& time = Core::Logic::CoreObject::Instance::time.LaunchDuration();
+		featureData.generateFrequencyInfo.time = time;
+		commandBuffer->PushConstant(featureData.generateFrequencyMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, featureData.generateFrequencyInfo);
+		constexpr int LOCAL_GROUP_WIDTH = 16;
+		commandBuffer->Dispatch(featureData.generateFrequencyMaterial, (featureData.imageSize.x + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, (featureData.imageSize.y + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, 1);
+	}
+
+	{
+		auto heightFrequencyImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
+		(
+			featureData.heightFrequencyImage,
+			VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+			VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+			VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
+			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
+		);
+		commandBuffer->AddPipelineImageBarrier(
+			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+			{ &heightFrequencyImageBarrier }
+		);
 	}
 
 	commandBuffer->EndRecord();

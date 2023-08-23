@@ -43,14 +43,30 @@ namespace AirEngine
 					CONSTRUCTOR(FftOcean_RenderPass)
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderPassBase)
 				};
+				struct GenerateFrequencyInfo
+				{
+					glm::ivec2 imageSize;
+					glm::vec2 L;
+					glm::ivec2 NM;
+					glm::vec2 windDirection;
+					float windSpeed;
+					float time;
+					float a;
+				};
 				class FftOcean_RenderFeatureData final : public Core::Graphic::Rendering::RenderFeatureDataBase
 				{
 					friend class FftOcean_RenderFeature;
 				private:
 					bool isInitialized;
 					glm::ivec2 imageSize;
-					Core::Graphic::Instance::Buffer* gaussianNoiseTextureStagingBuffer;
-					Core::Graphic::Instance::Image* gaussianNoiseTexture;
+
+					Core::Graphic::Instance::Buffer* gaussianNoiseImageStagingBuffer;
+					Core::Graphic::Instance::Image* gaussianNoiseImage;
+
+					GenerateFrequencyInfo generateFrequencyInfo;
+					Core::Graphic::Rendering::Shader* generateFrequencyShader;
+					Core::Graphic::Rendering::Material* generateFrequencyMaterial;
+					Core::Graphic::Instance::Image* heightFrequencyImage;
 				public:
 
 					CONSTRUCTOR(FftOcean_RenderFeatureData)
