@@ -249,6 +249,20 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 		featureData->ifftMaterial->SetStorageImage2D("tempImageArray", featureData->tempImageArray);
 	}
 
+	{
+		featureData->resolveShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\FftOcean_Resolve_Shader.shader");
+		featureData->resolveMaterial = new Core::Graphic::Rendering::Material(featureData->resolveShader);
+		featureData->displacementImage = Core::Graphic::Instance::Image::Create2DImage(
+			imageExtent,
+			VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT,
+			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT,
+			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
+		);
+		featureData->resolveMaterial->SetStorageImage2D("tempImageArray", featureData->tempImageArray);
+		featureData->resolveMaterial->SetStorageImage2D("displacementImage", featureData->displacementImage);
+	}
+
 	return featureData;
 }
 
@@ -467,6 +481,17 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 	//}
 
 	// height ifft
+	struct IfftConstantInfo
+	{
+		glm::ivec2 imageSize;
+		glm::ivec2 NM;
+		int isLast;
+		int isHorizen;
+		int blockSize;
+		int sourceIndex;
+		int targetIndex;
+	};
+	IfftConstantInfo ifftConstantInfo{};
 	{
 		{
 			auto heightFrequencyImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
@@ -511,17 +536,6 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			);
 		}
 
-		struct IfftConstantInfo
-		{
-			glm::ivec2 imageSize;
-			glm::ivec2 NM;
-			int isLast;
-			int isHorizen;
-			int blockSize;
-			int sourceIndex;
-			int targetIndex;
-		};
-		IfftConstantInfo ifftConstantInfo{};
 		ifftConstantInfo.imageSize = featureData.imageSize;
 		ifftConstantInfo.NM = featureData.generateFrequencyInfo.NM;
 		ifftConstantInfo.isLast = 0;
@@ -587,6 +601,39 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 				);
 			}
 		}
+	}
+
+	// resolve
+	struct ResolveConstantInfo
+	{
+		glm::ivec2 imageSize;
+		glm::ivec2 NM;
+		int heightImageIndex;
+	};
+	ResolveConstantInfo resolveConstantInfo{};
+	{
+		resolveConstantInfo.imageSize = featureData.imageSize;
+		resolveConstantInfo.NM = featureData.generateFrequencyInfo.NM;
+		resolveConstantInfo.heightImageIndex = ifftConstantInfo.targetIndex;
+
+		{
+			auto displacementImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
+			(
+				featureData.displacementImage,
+				VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+				VkAccessFlagBits::VK_ACCESS_NONE,
+				VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
+			);
+			commandBuffer->AddPipelineImageBarrier(
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+				{ &displacementImageBarrier }
+			);
+		}
+
+		commandBuffer->PushConstant(featureData.resolveMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, resolveConstantInfo);
+		commandBuffer->Dispatch(featureData.resolveMaterial, (featureData.imageSize.x + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, (featureData.imageSize.y + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, 1);
 	}
 
 	commandBuffer->EndRecord();

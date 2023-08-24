@@ -78,6 +78,10 @@ namespace AirEngine
 					Core::Graphic::Rendering::Shader* ifftShader;
 					Core::Graphic::Rendering::Material* ifftMaterial;
 					Core::Graphic::Instance::Image* tempImageArray;
+
+					Core::Graphic::Rendering::Shader* resolveShader;
+					Core::Graphic::Rendering::Material* resolveMaterial;
+					Core::Graphic::Instance::Image* displacementImage;
 				public:
 
 					CONSTRUCTOR(FftOcean_RenderFeatureData)

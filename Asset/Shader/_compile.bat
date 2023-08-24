@@ -6,6 +6,7 @@ glslangValidator.exe -t -V IWave_Shader.comp -IUtils/ -o Spv/IWave_Shader.comp.s
 glslangValidator.exe -t -V FftOcean_PhillipsSpectrum_Shader.comp -IUtils/ -o Spv/FftOcean_PhillipsSpectrum_Shader.comp.spv
 glslangValidator.exe -t -V FftOcean_GenerateFrequency_Shader.comp -IUtils/ -o Spv/FftOcean_GenerateFrequency_Shader.comp.spv
 glslangValidator.exe -t -V FftOcean_Ifft_Shader.comp -IUtils/ -o Spv/FftOcean_Ifft_Shader.comp.spv
+glslangValidator.exe -t -V FftOcean_Resolve_Shader.comp -IUtils/ -o Spv/FftOcean_Resolve_Shader.comp.spv
 
 glslangValidator.exe -t -V IWave_Surface_Shader.vert -IUtils/ -o Spv/IWave_Surface_Shader.vert.spv
 glslangValidator.exe -t -V IWave_Surface_Shader.frag -IUtils/ -o Spv/IWave_Surface_Shader.frag.spv

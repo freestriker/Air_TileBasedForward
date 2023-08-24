@@ -1,0 +1,33 @@
+#version 450
+#extension GL_GOOGLE_include_directive: enable
+
+#define LOCAL_GROUP_WIDTH 16
+layout (local_size_x = LOCAL_GROUP_WIDTH, local_size_y = LOCAL_GROUP_WIDTH) in;
+
+#define PI (3.141592653589793)
+#define G (9.81)
+
+layout(push_constant) uniform ResolveConstantInfo
+{
+    ivec2 imageSize;
+	ivec2 NM;
+	int heightImageIndex;
+} constantInfo;
+
+layout (set = 0, binding = 0, rg32f) uniform readonly image2DArray tempImageArray;
+layout (set = 1, binding = 0, rgba32f) uniform image2D displacementImage;
+
+void main()
+{	
+	// thread/saple Y = world Z
+	const ivec2 threadPosition = ivec2(gl_GlobalInvocationID.xy);
+
+	if(constantInfo.imageSize.x <= threadPosition.x || constantInfo.imageSize.y <= threadPosition.y) return;
+	
+	const ivec2 pixelPosition = threadPosition;
+	const int MN = constantInfo.NM.x * constantInfo.NM.y;
+
+	const float height = length(imageLoad(tempImageArray, ivec3(pixelPosition, constantInfo.heightImageIndex)).rg) / MN;
+
+	imageStore(displacementImage, pixelPosition, vec4(0, 0, height, 0));
+}
