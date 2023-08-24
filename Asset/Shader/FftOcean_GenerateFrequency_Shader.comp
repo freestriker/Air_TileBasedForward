@@ -9,20 +9,18 @@ layout (local_size_x = LOCAL_GROUP_WIDTH, local_size_y = LOCAL_GROUP_WIDTH) in;
 
 layout(push_constant) uniform GenerateFrequencyConstantInfo
 {
-    ivec2 imageSize;
-	vec2 L;
+	ivec2 imageSize;
 	ivec2 NM;
-	vec2 windDirection;
-	float windSpeed;
 	float time;
-	float a;
-	float windDependency;
+	int heightSpectrumImageIndex;
+	int xSpectrumImageIndex;
+	int ySpectrumImageIndex;
+	int xSlopeSpectrumImageIndex;
+	int ySlopeSpectrumImageIndex;
 } constantInfo;
 
 layout (set = 0, binding = 0, rgba32f) uniform readonly image2D phillipsSpectrumImage;
-layout (set = 1, binding = 0, rg32f) uniform image2D heightFrequencyImage;
-layout (set = 2, binding = 0, rgba32f) uniform image2D xyFrequencyImage;
-layout (set = 3, binding = 0, rgba32f) uniform image2D xySlopeFrequencyImage;
+layout (set = 1, binding = 0, rg32f) uniform image2DArray tempImageArray;
 
 vec2 ComplexMultiply(in vec2 a, in vec2 b) 
 {
@@ -54,16 +52,18 @@ void main()
     const vec2 h2 = ComplexMultiply(hTilde0Conj, vec2(c, -s));
 
     const vec2 heightFrequency = h1 + h2;
-	imageStore(heightFrequencyImage, pixelPosition, vec4(heightFrequency, 0, 0));
+	imageStore(tempImageArray, ivec3(pixelPosition, constantInfo.heightSpectrumImageIndex), vec4(heightFrequency, 0, 0));
 
 	const vec2 xSlopeFrequency = ComplexMultiply(vec2(0, 1), heightFrequency) * k.x;
 	const vec2 ySlopeFrequency = ComplexMultiply(vec2(0, 1), heightFrequency) * k.y;
-	imageStore(xySlopeFrequencyImage, pixelPosition, vec4(xSlopeFrequency, ySlopeFrequency));
+	imageStore(tempImageArray, ivec3(pixelPosition, constantInfo.xSlopeSpectrumImageIndex), vec4(xSlopeFrequency, 0, 0));
+	imageStore(tempImageArray, ivec3(pixelPosition, constantInfo.ySlopeSpectrumImageIndex), vec4(ySlopeFrequency, 0, 0));
 
 	const float Ksqr = dot(k, k);
     const vec2 Knorm = Ksqr > 1e-12f ? vec2(1) / sqrt(Ksqr) : vec2(0);
 
 	const vec2 xFrequency = xSlopeFrequency * Knorm.x;
 	const vec2 yFrequency = ySlopeFrequency * Knorm.y;
-	imageStore(xyFrequencyImage, pixelPosition, vec4(xFrequency, yFrequency));
+	imageStore(tempImageArray, ivec3(pixelPosition, constantInfo.xSpectrumImageIndex), vec4(xFrequency, 0, 0));
+	imageStore(tempImageArray, ivec3(pixelPosition, constantInfo.ySpectrumImageIndex), vec4(yFrequency, 0, 0));
 }

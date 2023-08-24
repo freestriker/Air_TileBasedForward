@@ -43,45 +43,37 @@ namespace AirEngine
 					CONSTRUCTOR(FftOcean_RenderPass)
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderPassBase)
 				};
-				struct GenerateFrequencyInfo
-				{
-					glm::ivec2 imageSize;
-					glm::vec2 L;
-					glm::ivec2 NM;
-					glm::vec2 windDirection;
-					float windSpeed;
-					float time;
-					float a;
-					float windDependency;
-				};
 				class FftOcean_RenderFeatureData final : public Core::Graphic::Rendering::RenderFeatureDataBase
 				{
 					friend class FftOcean_RenderFeature;
 				private:
 					bool isInitialized;
 					glm::ivec2 imageSize;
+					glm::vec2 L;
+					glm::ivec2 NM;
+					glm::vec2 windDirection;
+					float windSpeed;
+					float a;
+					float windDependency;
 
 					Core::Graphic::Instance::Buffer* gaussianNoiseImageStagingBuffer;
 					Core::Graphic::Instance::Image* gaussianNoiseImage;
 
-					GenerateFrequencyInfo generateFrequencyInfo;
+					Core::Graphic::Instance::Image* tempImageArray;
+
 					Core::Graphic::Instance::Image* phillipsSpectrumImage;
 					Core::Graphic::Rendering::Shader* phillipsSpectrumShader;
 					Core::Graphic::Rendering::Material* phillipsSpectrumMaterial;
 
 					Core::Graphic::Rendering::Shader* generateFrequencyShader;
 					Core::Graphic::Rendering::Material* generateFrequencyMaterial;
-					Core::Graphic::Instance::Image* heightFrequencyImage;
-					Core::Graphic::Instance::Image* xyFrequencyImage;
-					Core::Graphic::Instance::Image* xySlopeFrequencyImage;
 
 					Core::Graphic::Rendering::Shader* ifftShader;
 					Core::Graphic::Rendering::Material* ifftMaterial;
-					Core::Graphic::Instance::Image* tempImageArray;
 
+					Core::Graphic::Instance::Image* displacementImage;
 					Core::Graphic::Rendering::Shader* resolveShader;
 					Core::Graphic::Rendering::Material* resolveMaterial;
-					Core::Graphic::Instance::Image* displacementImage;
 				public:
 
 					CONSTRUCTOR(FftOcean_RenderFeatureData)
