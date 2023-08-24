@@ -24,9 +24,8 @@ layout (set = 1, binding = 0, rgba32f) uniform image2D phillipsSpectrumImage;
 
 float Phillips(in vec2 k)
 {
-    const float kLength = max(0.001, length(k));
-	// if(kLength == 0) return 0;
-    const float kLength2 = kLength * kLength;
+    const float kLength2 = dot(k, k);
+    if (kLength2 <= 0.0f) return 0;
     const float kLength4 = kLength2 * kLength2;
 
     const float L = constantInfo.windSpeed * constantInfo.windSpeed / G;
@@ -59,8 +58,8 @@ void main()
 
     const vec4 gaussianNoise = imageLoad(gaussianNoiseImage, pixelPosition).xyzw;
 
-    const vec2 hTilde0 = gaussianNoise.xy * sqrt(Phillips(k) / 2);
-    const vec2 hTilde0Conj = gaussianNoise.zw * sqrt(Phillips(-k) / 2) * vec2(1, -1);
+    const vec2 hTilde0 = gaussianNoise.xy * sqrt(abs(Phillips(k)) / 2);
+    const vec2 hTilde0Conj = gaussianNoise.zw * sqrt(abs(Phillips(-k)) / 2) * vec2(1, -1);
 
 	imageStore(phillipsSpectrumImage, pixelPosition, vec4(hTilde0, hTilde0Conj));
 }
