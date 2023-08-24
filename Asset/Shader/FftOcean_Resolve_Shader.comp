@@ -14,10 +14,13 @@ layout(push_constant) uniform ResolveConstantInfo
 	int heightImageIndex;
 	int xImageIndex;
 	int yImageIndex;
+	int xSlopeImageIndex;
+	int ySlopeImageIndex;
 } constantInfo;
 
 layout (set = 0, binding = 0, rg32f) uniform readonly image2DArray imageArray;
 layout (set = 1, binding = 0, rgba32f) uniform image2D displacementImage;
+layout (set = 2, binding = 0, rgba32f) uniform image2D normalImage;
 
 void main()
 {	
@@ -32,6 +35,9 @@ void main()
 	const float height = length(imageLoad(imageArray, ivec3(pixelPosition, constantInfo.heightImageIndex)).rg) / MN;
 	const float x = length(imageLoad(imageArray, ivec3(pixelPosition, constantInfo.xImageIndex)).rg) / MN;
 	const float y = length(imageLoad(imageArray, ivec3(pixelPosition, constantInfo.yImageIndex)).rg) / MN;
-
 	imageStore(displacementImage, pixelPosition, vec4(x, y, height, 0));
+
+	const float xSlope = length(imageLoad(imageArray, ivec3(pixelPosition, constantInfo.xSlopeImageIndex)).rg) / MN;
+	const float ySlope = length(imageLoad(imageArray, ivec3(pixelPosition, constantInfo.ySlopeImageIndex)).rg) / MN;
+	imageStore(normalImage, pixelPosition, vec4(xSlope, ySlope, 0, 0));
 }

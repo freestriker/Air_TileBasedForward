@@ -72,6 +72,7 @@ namespace AirEngine
 					Core::Graphic::Rendering::Material* ifftMaterial;
 
 					Core::Graphic::Instance::Image* displacementImage;
+					Core::Graphic::Instance::Image* normalImage;
 					Core::Graphic::Rendering::Shader* resolveShader;
 					Core::Graphic::Rendering::Material* resolveMaterial;
 				public:
