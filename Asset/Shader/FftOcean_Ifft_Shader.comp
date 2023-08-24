@@ -1,0 +1,73 @@
+#version 450
+#extension GL_GOOGLE_include_directive: enable
+
+#define LOCAL_GROUP_WIDTH 16
+layout (local_size_x = LOCAL_GROUP_WIDTH, local_size_y = LOCAL_GROUP_WIDTH) in;
+
+#define PI (3.141592653589793)
+#define G (9.81)
+
+layout(push_constant) uniform IfftConstantInfo
+{
+    ivec2 imageSize;
+	ivec2 NM;
+	int isLast;
+	int isHorizen;
+	int blockSize;
+	int sourceIndex;
+	int targetIndex;
+} constantInfo;
+
+layout (set = 0, binding = 0, rg32f) uniform image2DArray tempImageArray;
+
+vec2 ComplexMultiply(in vec2 a, in vec2 b) 
+{
+    const float real = a.x * b.x - a.y * b.y;
+    const float imag = a.x * b.y + a.y * b.x;
+    return vec2(real, imag);
+}
+void main()
+{	
+	// thread/saple Y = world Z
+	const ivec2 threadPosition = ivec2(gl_GlobalInvocationID.xy);
+
+	if(constantInfo.imageSize.x <= threadPosition.x || constantInfo.imageSize.y <= threadPosition.y) return;
+	
+	const ivec2 pixelPosition = threadPosition;
+
+	const int blockSize = constantInfo.blockSize;
+
+	if(constantInfo.isHorizen > 0)
+	{		
+		const int halfN = constantInfo.NM.x / 2;
+
+		const int index = (threadPosition.x / (blockSize * 2)) * blockSize + threadPosition.x % blockSize;
+
+		const vec2 x0 = imageLoad(tempImageArray, ivec3(index			, pixelPosition.y, constantInfo.sourceIndex)).rg;
+		const vec2 x1 = imageLoad(tempImageArray, ivec3(index + halfN	, pixelPosition.y, constantInfo.sourceIndex)).rg;
+
+		const float angle = 2.0 * PI * (threadPosition.x / (blockSize * 2.0));
+		const vec2 w = vec2(cos(angle),sin(angle)) * (constantInfo.isLast > 0 ? -1.0 : 1.0);
+
+		const vec2 target = (x0 + ComplexMultiply(w, x1)) * (constantInfo.isLast > 0 ? (threadPosition.x % 2 == 0 ? 1 : -1) : 1.0);
+
+		imageStore(tempImageArray, ivec3(pixelPosition, constantInfo.targetIndex), vec4(target, 0, 0));
+	}	
+	else
+	{		
+		const int halfM = constantInfo.NM.y / 2;
+
+		const int index = (threadPosition.y / (blockSize * 2)) * blockSize + threadPosition.y % blockSize;
+
+		const vec2 y0 = imageLoad(tempImageArray, ivec3(pixelPosition.x, index			, constantInfo.sourceIndex)).rg;
+		const vec2 y1 = imageLoad(tempImageArray, ivec3(pixelPosition.x, index + halfM	, constantInfo.sourceIndex)).rg;
+
+		const float angle = 2.0 * PI * (threadPosition.y / (blockSize * 2.0));
+		const vec2 w = vec2(cos(angle),sin(angle)) * (constantInfo.isLast > 0 ? -1.0 : 1.0);
+
+		const vec2 target = (y0 + ComplexMultiply(w, y1)) * (constantInfo.isLast > 0 ? (threadPosition.y % 2 == 0 ? 1 : -1) : 1.0);
+
+		// imageStore(tempImageArray, ivec3(pixelPosition, constantInfo.targetIndex), vec4(index, y1.x, 0, 0));
+		imageStore(tempImageArray, ivec3(pixelPosition, constantInfo.targetIndex), vec4(target, 0, 0));
+	}
+}

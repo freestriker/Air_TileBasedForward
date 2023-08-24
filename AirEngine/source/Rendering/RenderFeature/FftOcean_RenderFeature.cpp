@@ -186,21 +186,21 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 		featureData->heightFrequencyImage = Core::Graphic::Instance::Image::Create2DImage(
 			imageExtent,
 			VkFormat::VK_FORMAT_R32G32_SFLOAT,
-			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
 			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
 		);
 		featureData->xyFrequencyImage = Core::Graphic::Instance::Image::Create2DImage(
 			imageExtent,
 			VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT,
-			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
 			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
 		);
 		featureData->xySlopeFrequencyImage = Core::Graphic::Instance::Image::Create2DImage(
 			imageExtent,
 			VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT,
-			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
 			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
 		);
@@ -208,6 +208,32 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 		featureData->generateFrequencyMaterial->SetStorageImage2D("heightFrequencyImage", featureData->heightFrequencyImage);
 		featureData->generateFrequencyMaterial->SetStorageImage2D("xyFrequencyImage", featureData->xyFrequencyImage);
 		featureData->generateFrequencyMaterial->SetStorageImage2D("xySlopeFrequencyImage", featureData->xySlopeFrequencyImage);
+	}
+
+	{
+		featureData->ifftShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\FftOcean_Ifft_Shader.shader");
+		featureData->ifftMaterial = new Core::Graphic::Rendering::Material(featureData->ifftShader);
+		featureData->tempImageArray = Core::Graphic::Instance::Image::Create2DImageArray(
+			imageExtent,
+			VkFormat::VK_FORMAT_R32G32_SFLOAT,
+			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
+			2
+		);
+		featureData->tempImageArray->AddImageView(
+			"ImageView0",
+			VkImageViewType::VK_IMAGE_VIEW_TYPE_2D,
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
+			0, 1
+		);
+		featureData->tempImageArray->AddImageView(
+			"ImageView1",
+			VkImageViewType::VK_IMAGE_VIEW_TYPE_2D,
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
+			1, 1
+		);
+		featureData->ifftMaterial->SetStorageImage2D("tempImageArray", featureData->tempImageArray);
 	}
 
 	return featureData;
@@ -239,6 +265,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnPrepare(Core
 void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*> const* rendererComponents)
 {
 	auto& featureData = *static_cast<FftOcean_RenderFeatureData*>(renderFeatureData);
+	constexpr int LOCAL_GROUP_WIDTH = 16;
 
 	commandBuffer->Reset();
 	commandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
@@ -351,40 +378,162 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		auto&& time = Core::Logic::CoreObject::Instance::time.LaunchDuration();
 		featureData.generateFrequencyInfo.time = time;
 		commandBuffer->PushConstant(featureData.generateFrequencyMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, featureData.generateFrequencyInfo);
-		constexpr int LOCAL_GROUP_WIDTH = 16;
 		commandBuffer->Dispatch(featureData.generateFrequencyMaterial, (featureData.imageSize.x + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, (featureData.imageSize.y + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, 1);
 	}
 
+	//{
+	//	auto heightFrequencyImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
+	//	(
+	//		featureData.heightFrequencyImage,
+	//		VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+	//		VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+	//		VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
+	//		VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
+	//	);
+	//	auto xyFrequencyImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
+	//	(
+	//		featureData.xyFrequencyImage,
+	//		VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+	//		VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+	//		VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
+	//		VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
+	//	);
+	//	auto xySlopeFrequencyImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
+	//	(
+	//		featureData.xySlopeFrequencyImage,
+	//		VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+	//		VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+	//		VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
+	//		VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
+	//	);
+	//	commandBuffer->AddPipelineImageBarrier(
+	//		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+	//		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+	//		{ &heightFrequencyImageBarrier, &xyFrequencyImageBarrier, &xySlopeFrequencyImageBarrier, &tempImageBarrier }
+	//	);
+
+	//}
+
 	{
-		auto heightFrequencyImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
-		(
-			featureData.heightFrequencyImage,
-			VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-			VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-			VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
-			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
+		{
+			auto heightFrequencyImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
+			(
+				featureData.heightFrequencyImage,
+				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+				VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
+				VkAccessFlagBits::VK_ACCESS_TRANSFER_READ_BIT
+			);
+			auto tempImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
+			(
+				featureData.tempImageArray,
+				VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				VkAccessFlagBits::VK_ACCESS_NONE,
+				VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT
+			);
+			commandBuffer->AddPipelineImageBarrier(
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
+				{ &heightFrequencyImageBarrier, &tempImageBarrier }
+			);
+		}
+		commandBuffer->CopyImage(
+			featureData.heightFrequencyImage, "DefaultImageView", VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+			featureData.tempImageArray, "ImageView0", VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
 		);
-		auto xyFrequencyImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
-		(
-			featureData.xyFrequencyImage,
-			VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-			VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-			VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
-			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
-		);
-		auto xySlopeFrequencyImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
-		(
-			featureData.xySlopeFrequencyImage,
-			VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-			VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-			VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
-			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
-		);
-		commandBuffer->AddPipelineImageBarrier(
-			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-			{ &heightFrequencyImageBarrier, &xyFrequencyImageBarrier, &xySlopeFrequencyImageBarrier }
-		);
+		{
+			auto tempImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
+			(
+				featureData.tempImageArray,
+				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+				VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
+				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
+			);
+			commandBuffer->AddPipelineImageBarrier(
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+				{ &tempImageBarrier }
+			);
+		}
+
+		struct IfftConstantInfo
+		{
+			glm::ivec2 imageSize;
+			glm::ivec2 NM;
+			int isLast;
+			int isHorizen;
+			int blockSize;
+			int sourceIndex;
+			int targetIndex;
+		};
+		IfftConstantInfo ifftConstantInfo{};
+		ifftConstantInfo.imageSize = featureData.imageSize;
+		ifftConstantInfo.NM = featureData.generateFrequencyInfo.NM;
+		ifftConstantInfo.isLast = 0;
+		ifftConstantInfo.isHorizen = 0;
+		ifftConstantInfo.blockSize = 0;
+		ifftConstantInfo.sourceIndex = 0;
+		ifftConstantInfo.targetIndex = 0;
+
+		const int ifftXCount = std::log2(featureData.generateFrequencyInfo.NM.x);
+		for (int ifftIndex = 0, blockSize = 1; ifftIndex < ifftXCount; ++ifftIndex, blockSize *= 2)
+		{
+			ifftConstantInfo.isLast = (ifftIndex == ifftXCount - 1) ? 1 : 0;
+			ifftConstantInfo.isHorizen = 1;
+			ifftConstantInfo.blockSize = blockSize;
+			ifftConstantInfo.sourceIndex = (ifftConstantInfo.targetIndex) % 2;
+			ifftConstantInfo.targetIndex = (ifftConstantInfo.sourceIndex + 1) % 2;
+
+			commandBuffer->PushConstant(featureData.ifftMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, ifftConstantInfo);
+			commandBuffer->Dispatch(featureData.ifftMaterial, (featureData.imageSize.x + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, (featureData.imageSize.y + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, 1);
+			{
+				auto tempImageArrayBarrier = Core::Graphic::Command::ImageMemoryBarrier
+				(
+					featureData.tempImageArray,
+					"ImageView" + std::to_string(ifftConstantInfo.targetIndex),
+					VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+					VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+					VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
+					VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
+				);
+				commandBuffer->AddPipelineImageBarrier(
+					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+					{ &tempImageArrayBarrier }
+				);
+			}
+		}
+
+		const int ifftYCount = std::log2(featureData.generateFrequencyInfo.NM.y);
+		for (int ifftIndex = 0, blockSize = 1; ifftIndex < ifftYCount; ++ifftIndex, blockSize *= 2)
+		{
+			ifftConstantInfo.isLast = (ifftIndex == ifftYCount - 1) ? 1 : 0;
+			ifftConstantInfo.isHorizen = 0;
+			ifftConstantInfo.blockSize = blockSize;
+			ifftConstantInfo.sourceIndex = (ifftConstantInfo.targetIndex) % 2;
+			ifftConstantInfo.targetIndex = (ifftConstantInfo.sourceIndex + 1) % 2;
+
+			commandBuffer->PushConstant(featureData.ifftMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, ifftConstantInfo);
+			commandBuffer->Dispatch(featureData.ifftMaterial, (featureData.imageSize.x + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, (featureData.imageSize.y + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, 1);
+			{
+				auto tempImageArrayBarrier = Core::Graphic::Command::ImageMemoryBarrier
+				(
+					featureData.tempImageArray,
+					"ImageView" + std::to_string(ifftConstantInfo.targetIndex),
+					VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+					VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+					VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
+					VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
+				);
+				commandBuffer->AddPipelineImageBarrier(
+					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+					VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+					{ &tempImageArrayBarrier }
+				);
+			}
+		}
 	}
 
 	commandBuffer->EndRecord();

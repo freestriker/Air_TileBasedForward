@@ -27,6 +27,7 @@ layout (set = 3, binding = 0, rgba32f) uniform image2D xySlopeFrequencyImage;
 float Phillips(in vec2 k)
 {
     const float kLength = max(0.001, length(k));
+	if(kLength == 0) return 0;
     const float kLength2 = kLength * kLength;
     const float kLength4 = kLength2 * kLength2;
 
