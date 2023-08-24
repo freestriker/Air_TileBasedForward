@@ -12,6 +12,8 @@ layout(push_constant) uniform ResolveConstantInfo
     ivec2 imageSize;
 	ivec2 NM;
 	int heightImageIndex;
+	int xImageIndex;
+	int yImageIndex;
 } constantInfo;
 
 layout (set = 0, binding = 0, rg32f) uniform readonly image2DArray imageArray;
@@ -28,6 +30,8 @@ void main()
 	const int MN = constantInfo.NM.x * constantInfo.NM.y;
 
 	const float height = length(imageLoad(imageArray, ivec3(pixelPosition, constantInfo.heightImageIndex)).rg) / MN;
+	const float x = length(imageLoad(imageArray, ivec3(pixelPosition, constantInfo.xImageIndex)).rg) / MN;
+	const float y = length(imageLoad(imageArray, ivec3(pixelPosition, constantInfo.yImageIndex)).rg) / MN;
 
-	imageStore(displacementImage, pixelPosition, vec4(0, 0, height, 0));
+	imageStore(displacementImage, pixelPosition, vec4(x, y, height, 0));
 }
