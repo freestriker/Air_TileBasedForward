@@ -59,14 +59,14 @@ namespace AirEngine
 					Core::Graphic::Instance::Buffer* gaussianNoiseImageStagingBuffer;
 					Core::Graphic::Instance::Image* gaussianNoiseImage;
 
-					Core::Graphic::Instance::Image* tempImageArray;
+					Core::Graphic::Instance::Image* imageArray;
 
 					Core::Graphic::Instance::Image* phillipsSpectrumImage;
 					Core::Graphic::Rendering::Shader* phillipsSpectrumShader;
 					Core::Graphic::Rendering::Material* phillipsSpectrumMaterial;
 
-					Core::Graphic::Rendering::Shader* generateFrequencyShader;
-					Core::Graphic::Rendering::Material* generateFrequencyMaterial;
+					Core::Graphic::Rendering::Shader* spectrumShader;
+					Core::Graphic::Rendering::Material* spectrumMaterial;
 
 					Core::Graphic::Rendering::Shader* ifftShader;
 					Core::Graphic::Rendering::Material* ifftMaterial;

@@ -8,7 +8,7 @@
   "cullMode": 0,
   "dstAlphaBlendFactor": 0,
   "dstColorBlendFactor": 0,
-  "shaderPaths": ["..\\Asset\\Shader\\Spv\\FftOcean_GenerateFrequency_Shader.comp.spv"],
+  "shaderPaths": ["..\\Asset\\Shader\\Spv\\FftOcean_Spectrum_Shader.comp.spv"],
   "srcAlphaBlendFactor": 0,
   "srcColorBlendFactor": 0,
   "depthTestEnable": 0,

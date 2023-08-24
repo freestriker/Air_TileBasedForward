@@ -14,7 +14,7 @@ layout(push_constant) uniform ResolveConstantInfo
 	int heightImageIndex;
 } constantInfo;
 
-layout (set = 0, binding = 0, rg32f) uniform readonly image2DArray tempImageArray;
+layout (set = 0, binding = 0, rg32f) uniform readonly image2DArray imageArray;
 layout (set = 1, binding = 0, rgba32f) uniform image2D displacementImage;
 
 void main()
@@ -27,7 +27,7 @@ void main()
 	const ivec2 pixelPosition = threadPosition;
 	const int MN = constantInfo.NM.x * constantInfo.NM.y;
 
-	const float height = length(imageLoad(tempImageArray, ivec3(pixelPosition, constantInfo.heightImageIndex)).rg) / MN;
+	const float height = length(imageLoad(imageArray, ivec3(pixelPosition, constantInfo.heightImageIndex)).rg) / MN;
 
 	imageStore(displacementImage, pixelPosition, vec4(0, 0, height, 0));
 }
