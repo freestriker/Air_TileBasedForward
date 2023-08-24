@@ -65,6 +65,10 @@ namespace AirEngine
 					Core::Graphic::Instance::Image* gaussianNoiseImage;
 
 					GenerateFrequencyInfo generateFrequencyInfo;
+					Core::Graphic::Instance::Image* phillipsSpectrumImage;
+					Core::Graphic::Rendering::Shader* phillipsSpectrumShader;
+					Core::Graphic::Rendering::Material* phillipsSpectrumMaterial;
+
 					Core::Graphic::Rendering::Shader* generateFrequencyShader;
 					Core::Graphic::Rendering::Material* generateFrequencyMaterial;
 					Core::Graphic::Instance::Image* heightFrequencyImage;

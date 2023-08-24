@@ -1,0 +1,66 @@
+#version 450
+#extension GL_GOOGLE_include_directive: enable
+
+#define LOCAL_GROUP_WIDTH 16
+layout (local_size_x = LOCAL_GROUP_WIDTH, local_size_y = LOCAL_GROUP_WIDTH) in;
+
+#define PI (3.141592653589793)
+#define G (9.81)
+
+layout(push_constant) uniform GenerateFrequencyConstantInfo
+{
+    ivec2 imageSize;
+	vec2 L;
+	ivec2 NM;
+	vec2 windDirection;
+	float windSpeed;
+	float time;
+	float a;
+	float windDependency;
+} constantInfo;
+
+layout (set = 0, binding = 0, rgba32f) uniform readonly image2D gaussianNoiseImage;
+layout (set = 1, binding = 0, rgba32f) uniform image2D phillipsSpectrumImage;
+
+float Phillips(in vec2 k)
+{
+    const float kLength = max(0.001, length(k));
+	// if(kLength == 0) return 0;
+    const float kLength2 = kLength * kLength;
+    const float kLength4 = kLength2 * kLength2;
+
+    const float L = constantInfo.windSpeed * constantInfo.windSpeed / G;
+    const float L2 = L * L;
+
+    const float l2 = L2 * 0.001 * 0.001;
+
+	const float windCosine = dot(normalize(k), normalize(constantInfo.windDirection));
+	const float windDependencyFactor = windCosine < 0 ? constantInfo.windDependency : 1;
+	const float windCosine2 = windCosine * windCosine;
+
+    return windDependencyFactor * exp(-kLength2 * l2) * constantInfo.a * exp(-1.0 / (kLength2 * L2)) / kLength4 * windCosine2;
+}
+vec2 ComplexMultiply(in vec2 a, in vec2 b) 
+{
+    const float real = a.x * b.x - a.y * b.y;
+    const float imag = a.x * b.y + a.y * b.x;
+    return vec2(real, imag);
+}
+void main()
+{	
+	// thread/saple Y = world Z
+	const ivec2 threadPosition = ivec2(gl_GlobalInvocationID.xy);
+
+	if(constantInfo.imageSize.x <= threadPosition.x || constantInfo.imageSize.y <= threadPosition.y) return;
+	
+	const ivec2 pixelPosition = threadPosition;
+
+	const vec2 k = 2 * PI * vec2(threadPosition) / vec2(constantInfo.NM) - vec2(PI);
+
+    const vec4 gaussianNoise = imageLoad(gaussianNoiseImage, pixelPosition).xyzw;
+
+    const vec2 hTilde0 = gaussianNoise.xy * sqrt(Phillips(k) / 2);
+    const vec2 hTilde0Conj = gaussianNoise.zw * sqrt(Phillips(-k) / 2) * vec2(1, -1);
+
+	imageStore(phillipsSpectrumImage, pixelPosition, vec4(hTilde0, hTilde0Conj));
+}

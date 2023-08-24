@@ -181,6 +181,19 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 		featureData->generateFrequencyInfo.time = 0;
 		featureData->generateFrequencyInfo.a = 3;
 		featureData->generateFrequencyInfo.windDependency = 0.1;
+		
+		featureData->phillipsSpectrumShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\FftOcean_PhillipsSpectrum_Shader.shader");
+		featureData->phillipsSpectrumMaterial = new Core::Graphic::Rendering::Material(featureData->phillipsSpectrumShader);
+		featureData->phillipsSpectrumImage = Core::Graphic::Instance::Image::Create2DImage(
+			imageExtent,
+			VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT,
+			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
+		);
+		featureData->phillipsSpectrumMaterial->SetStorageImage2D("gaussianNoiseImage", featureData->gaussianNoiseImage);
+		featureData->phillipsSpectrumMaterial->SetStorageImage2D("phillipsSpectrumImage", featureData->phillipsSpectrumImage);
+
 		featureData->generateFrequencyShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\FftOcean_GenerateFrequency_Shader.shader");
 		featureData->generateFrequencyMaterial = new Core::Graphic::Rendering::Material(featureData->generateFrequencyShader);
 		featureData->heightFrequencyImage = Core::Graphic::Instance::Image::Create2DImage(
@@ -204,7 +217,7 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
 		);
-		featureData->generateFrequencyMaterial->SetStorageImage2D("gaussianNoiseImage", featureData->gaussianNoiseImage);
+		featureData->generateFrequencyMaterial->SetStorageImage2D("phillipsSpectrumImage", featureData->phillipsSpectrumImage);
 		featureData->generateFrequencyMaterial->SetStorageImage2D("heightFrequencyImage", featureData->heightFrequencyImage);
 		featureData->generateFrequencyMaterial->SetStorageImage2D("xyFrequencyImage", featureData->xyFrequencyImage);
 		featureData->generateFrequencyMaterial->SetStorageImage2D("xySlopeFrequencyImage", featureData->xySlopeFrequencyImage);
@@ -342,41 +355,81 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		}
 	}
 
+	const auto&& time = Core::Logic::CoreObject::Instance::time.LaunchDuration();
+	featureData.generateFrequencyInfo.time = time;
+
+	// phillipsSpectrum
 	{
-		auto heightFrequencyImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
-		(
-			featureData.heightFrequencyImage,
-			VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-			VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-			VkAccessFlagBits::VK_ACCESS_NONE,
-			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
-		);
-		auto xyFrequencyImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
-		(
-			featureData.xyFrequencyImage,
-			VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-			VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-			VkAccessFlagBits::VK_ACCESS_NONE,
-			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
-		);
-		auto xySlopeFrequencyImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
-		(
-			featureData.xySlopeFrequencyImage,
-			VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
-			VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-			VkAccessFlagBits::VK_ACCESS_NONE,
-			VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
-		);
-		commandBuffer->AddPipelineImageBarrier(
-			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
-			VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-			{ &heightFrequencyImageBarrier, &xyFrequencyImageBarrier, &xySlopeFrequencyImageBarrier }
-		);
+		{
+			auto phillipsSpectrumImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
+			(
+				featureData.phillipsSpectrumImage,
+				VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+				VkAccessFlagBits::VK_ACCESS_NONE,
+				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
+			);
+			commandBuffer->AddPipelineImageBarrier(
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+				{ &phillipsSpectrumImageBarrier }
+			);
+		}
+
+		commandBuffer->PushConstant(featureData.phillipsSpectrumMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, featureData.generateFrequencyInfo);
+		commandBuffer->Dispatch(featureData.phillipsSpectrumMaterial, (featureData.imageSize.x + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, (featureData.imageSize.y + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, 1);
+
+		{
+			auto phillipsSpectrumImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
+			(
+				featureData.phillipsSpectrumImage,
+				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+				VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
+				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+			);
+			commandBuffer->AddPipelineImageBarrier(
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+				{ &phillipsSpectrumImageBarrier }
+			);
+		}
 	}
 
+	// orthor
 	{
-		auto&& time = Core::Logic::CoreObject::Instance::time.LaunchDuration();
-		featureData.generateFrequencyInfo.time = time;
+		{
+			auto heightFrequencyImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
+			(
+				featureData.heightFrequencyImage,
+				VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+				VkAccessFlagBits::VK_ACCESS_NONE,
+				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
+			);
+			auto xyFrequencyImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
+			(
+				featureData.xyFrequencyImage,
+				VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+				VkAccessFlagBits::VK_ACCESS_NONE,
+				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
+			);
+			auto xySlopeFrequencyImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
+			(
+				featureData.xySlopeFrequencyImage,
+				VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
+				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+				VkAccessFlagBits::VK_ACCESS_NONE,
+				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
+			);
+			commandBuffer->AddPipelineImageBarrier(
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+				{ &heightFrequencyImageBarrier, &xyFrequencyImageBarrier, &xySlopeFrequencyImageBarrier }
+			);
+		}
+
 		commandBuffer->PushConstant(featureData.generateFrequencyMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, featureData.generateFrequencyInfo);
 		commandBuffer->Dispatch(featureData.generateFrequencyMaterial, (featureData.imageSize.x + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, (featureData.imageSize.y + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, 1);
 	}
@@ -411,9 +464,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 	//		VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
 	//		{ &heightFrequencyImageBarrier, &xyFrequencyImageBarrier, &xySlopeFrequencyImageBarrier, &tempImageBarrier }
 	//	);
-
 	//}
 
+	// height ifft
 	{
 		{
 			auto heightFrequencyImageBarrier = Core::Graphic::Command::ImageMemoryBarrier

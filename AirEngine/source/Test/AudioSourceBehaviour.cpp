@@ -31,7 +31,7 @@ void AirEngine::Test::AudioSourceBehaviour::OnStart()
 {
 	auto clip = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::AudioClip>("..\\Asset\\Audio\\IWouldGiveYouAnything.flac");
 	double time = Core::Logic::CoreObject::Instance::time.LaunchDuration();
-	double gain = std::abs(2.0 * std::fmod(time, 10.0f) / 10.f - 0.5f);
+	double gain = /*std::abs(2.0 * std::fmod(time, 10.0f) / 10.f - 0.5f)*/0;
 	GameObject()->GetComponent<Audio::AudioSource>()->SetGain(gain);
 	GameObject()->GetComponent<Audio::AudioSource>()->Play(clip);
 }
