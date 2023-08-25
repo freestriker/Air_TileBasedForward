@@ -28,7 +28,7 @@
 
 RTTR_REGISTRATION
 {
-	rttr::registration::class_<AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOcean_RenderPass>("AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOcean_RenderPass")
+	rttr::registration::class_<AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOcean_Surface_RenderPass>("AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOcean_Surface_RenderPass")
 		.constructor<>()
 		(
 			rttr::policy::ctor::as_raw_ptr
@@ -48,18 +48,18 @@ RTTR_REGISTRATION
 		;
 }
 
-AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOcean_RenderPass::FftOcean_RenderPass()
+AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOcean_Surface_RenderPass::FftOcean_Surface_RenderPass()
 	: RenderPassBase()
 {
 
 }
 
-AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOcean_RenderPass::~FftOcean_RenderPass()
+AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOcean_Surface_RenderPass::~FftOcean_Surface_RenderPass()
 {
 
 }
 
-void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOcean_RenderPass::OnPopulateRenderPassSettings(RenderPassSettings& settings)
+void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOcean_Surface_RenderPass::OnPopulateRenderPassSettings(RenderPassSettings& settings)
 {
 	settings.AddColorAttachment(
 		"ColorAttachment",
@@ -120,8 +120,8 @@ AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOcean_RenderFeat
 
 AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOcean_RenderFeature()
 	: RenderFeatureBase()
-	, _renderPass(Core::Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass<FftOcean_RenderPass>())
-	, _renderPassName(rttr::type::get<FftOcean_RenderPass>().get_name().to_string())
+	, _renderPass(Core::Graphic::CoreObject::Instance::RenderPassManager().LoadRenderPass<FftOcean_Surface_RenderPass>())
+	, _renderPassName(rttr::type::get<FftOcean_Surface_RenderPass>().get_name().to_string())
 	, _pointSampler(
 		new Core::Graphic::Instance::ImageSampler(
 			VkFilter::VK_FILTER_NEAREST,
@@ -146,7 +146,7 @@ AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOcean_RenderFeat
 
 AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::~FftOcean_RenderFeature()
 {
-	Core::Graphic::CoreObject::Instance::RenderPassManager().UnloadRenderPass<FftOcean_RenderPass>();
+	Core::Graphic::CoreObject::Instance::RenderPassManager().UnloadRenderPass<FftOcean_Surface_RenderPass>();
 }
 
 AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnCreateRenderFeatureData(Camera::CameraBase* camera)
@@ -155,14 +155,19 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 
 	featureData->isInitialized = false;
 	featureData->imageSize = { 512, 512 };
-	featureData->L = glm::vec2(1000, 1000);
+	featureData->L = glm::vec2(512, 512);
 	featureData->NM = featureData->imageSize;
 	featureData->windDirection = glm::normalize(glm::vec2(1, 0.5));
 	featureData->windSpeed = 31;
 	featureData->a = 3;
 	featureData->windDependency = 0.1;
+	featureData->displacementFactor = { 1, 1, 1 };
+	featureData->minVertexPosition = { -1, -1 };
+	featureData->maxVertexPosition = { 1, 1 };
 
 	const VkExtent2D imageExtent = VkExtent2D{ uint32_t(featureData->imageSize.x), uint32_t(featureData->imageSize.y) };
+
+	featureData->frameBuffer = new Core::Graphic::Rendering::FrameBuffer(_renderPass, camera->attachments);
 
 	{
 		featureData->gaussianNoiseImageStagingBuffer = new Core::Graphic::Instance::Buffer(
@@ -242,14 +247,14 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 		featureData->displacementImage = Core::Graphic::Instance::Image::Create2DImage(
 			imageExtent,
 			VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT,
-			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT,
+			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT,
 			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
 		);
 		featureData->normalImage = Core::Graphic::Instance::Image::Create2DImage(
 			imageExtent,
 			VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT,
-			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT,
+			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT,
 			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
 		);
@@ -953,7 +958,63 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 
 		commandBuffer->PushConstant(featureData.resolveMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, resolveConstantInfo);
 		commandBuffer->Dispatch(featureData.resolveMaterial, (featureData.imageSize.x + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, (featureData.imageSize.y + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, 1);
+		
+		{
+			auto displacementImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
+			(
+				featureData.displacementImage,
+				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+				VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
+				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+			);
+			auto normalImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
+			(
+				featureData.normalImage,
+				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+				VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
+				VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
+				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
+			);
+			commandBuffer->AddPipelineImageBarrier(
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_VERTEX_SHADER_BIT,
+				{ &displacementImageBarrier, &normalImageBarrier }
+			);
+		}
+}
+
+	///Render
+	{
+		commandBuffer->BeginRenderPass(_renderPass, featureData.frameBuffer);
+
+		struct SurfaceConstantInfo
+		{
+			glm::ivec2 minVertexPosition;
+			glm::ivec2 maxVertexPosition;
+			glm::vec3 displacementFactor;
+		};
+		SurfaceConstantInfo surfaceConstantInfo{};
+		surfaceConstantInfo.minVertexPosition = featureData.minVertexPosition;
+		surfaceConstantInfo.maxVertexPosition = featureData.maxVertexPosition;
+		surfaceConstantInfo.displacementFactor = featureData.displacementFactor;
+
+		for (const auto& rendererComponent : *rendererComponents)
+		{
+			auto material = rendererComponent->GetMaterial(_renderPassName);
+			if (material == nullptr) continue;
+
+			material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
+			material->SetUniformBuffer("meshObjectInfo", rendererComponent->ObjectInfoBuffer());
+			material->SetSampledImage2D("displacementTexture", featureData.displacementImage, _linearSampler);
+			//material->SetSampledImage2D("normalTexture", featureData.normalImage, _pointSampler);
+
+			commandBuffer->PushConstant(material, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT, surfaceConstantInfo);
+			commandBuffer->DrawMesh(rendererComponent->mesh, material);
+		}
+		commandBuffer->EndRenderPass();
 	}
+
 
 	commandBuffer->EndRecord();
 }

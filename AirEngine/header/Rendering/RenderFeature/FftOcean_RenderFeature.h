@@ -5,6 +5,7 @@
 #include "Core/Graphic/Instance/Image.h"
 #include "Core/Graphic/Instance/ImageSampler.h"
 #include <glm/vec2.hpp>
+#include <glm/vec3.hpp>
 #include <glm/ext/vector_int2.hpp>
 
 namespace AirEngine
@@ -35,12 +36,12 @@ namespace AirEngine
 			class FftOcean_RenderFeature final : public Core::Graphic::Rendering::RenderFeatureBase
 			{
 			public:
-				class FftOcean_RenderPass final : public Core::Graphic::Rendering::RenderPassBase
+				class FftOcean_Surface_RenderPass final : public Core::Graphic::Rendering::RenderPassBase
 				{
 				private:
 					void OnPopulateRenderPassSettings(RenderPassSettings& settings)override;
 				public:
-					CONSTRUCTOR(FftOcean_RenderPass)
+					CONSTRUCTOR(FftOcean_Surface_RenderPass)
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderPassBase)
 				};
 				class FftOcean_RenderFeatureData final : public Core::Graphic::Rendering::RenderFeatureDataBase
@@ -55,6 +56,11 @@ namespace AirEngine
 					float windSpeed;
 					float a;
 					float windDependency;
+					glm::ivec2 minVertexPosition;
+					glm::ivec2 maxVertexPosition;
+					glm::vec3 displacementFactor;
+
+					Core::Graphic::Rendering::FrameBuffer* frameBuffer;
 
 					Core::Graphic::Instance::Buffer* gaussianNoiseImageStagingBuffer;
 					Core::Graphic::Instance::Image* gaussianNoiseImage;
