@@ -53,12 +53,12 @@ AirEngine::Core::Graphic::Rendering::RenderPassBase::RenderPassSettings::RenderP
 
 void AirEngine::Core::Graphic::Rendering::RenderPassBase::RenderPassSettings::AddColorAttachment(std::string name, VkFormat format, VkSampleCountFlags sampleCount, VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp, VkImageLayout initialLayout, VkImageLayout finalLayout)
 {
-    attchmentDescriptors.insert({ name, AttachmentDescriptor(name, format, sampleCount, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, loadOp, storeOp, initialLayout, finalLayout, false, VK_ATTACHMENT_LOAD_OP_DONT_CARE, VK_ATTACHMENT_STORE_OP_NONE) });
+    attchmentDescriptors.insert({ name, AttachmentDescriptor(name, format, sampleCount, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, loadOp, storeOp, initialLayout, finalLayout, false, VK_ATTACHMENT_LOAD_OP_DONT_CARE, VK_ATTACHMENT_STORE_OP_DONT_CARE) });
 }
 
 void AirEngine::Core::Graphic::Rendering::RenderPassBase::RenderPassSettings::AddDepthAttachment(std::string name, VkFormat format, VkSampleCountFlags sampleCount, VkAttachmentLoadOp loadOp, VkAttachmentStoreOp storeOp, VkImageLayout initialLayout, VkImageLayout finalLayout)
 {
-    attchmentDescriptors.insert({ name, AttachmentDescriptor(name, format, sampleCount, VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, loadOp, storeOp, initialLayout, finalLayout, false, VK_ATTACHMENT_LOAD_OP_DONT_CARE, VK_ATTACHMENT_STORE_OP_NONE) });
+    attchmentDescriptors.insert({ name, AttachmentDescriptor(name, format, sampleCount, VkImageLayout::VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL, loadOp, storeOp, initialLayout, finalLayout, false, VK_ATTACHMENT_LOAD_OP_DONT_CARE, VK_ATTACHMENT_STORE_OP_DONT_CARE) });
 }
 
 void AirEngine::Core::Graphic::Rendering::RenderPassBase::RenderPassSettings::AddSubpass(std::string name, VkPipelineBindPoint pipelineBindPoint, std::vector<std::string> colorAttachmentNames)

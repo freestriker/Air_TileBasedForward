@@ -62,8 +62,8 @@ void main()
 	const float Ksqr = dot(k, k);
     const vec2 Knorm = Ksqr > 1e-12f ? vec2(1) / sqrt(Ksqr) : vec2(0);
 
-	const vec2 xSpectrum = xSlopeSpectrum * Knorm.x;
-	const vec2 ySpectrum = ySlopeSpectrum * Knorm.y;
+	const vec2 xSpectrum = ComplexMultiply(vec2(0, -1), heightSpectrum) * k.x * Knorm.x;
+	const vec2 ySpectrum = ComplexMultiply(vec2(0, -1), heightSpectrum) * k.y * Knorm.y;
 	imageStore(imageArray, ivec3(pixelPosition, constantInfo.xSpectrumImageIndex), vec4(xSpectrum, 0, 0));
 	imageStore(imageArray, ivec3(pixelPosition, constantInfo.ySpectrumImageIndex), vec4(ySpectrum, 0, 0));
 }
