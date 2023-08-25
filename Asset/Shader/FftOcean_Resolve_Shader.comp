@@ -39,6 +39,6 @@ void main()
 
 	const float xSlope = length(imageLoad(imageArray, ivec3(pixelPosition, constantInfo.xSlopeImageIndex)).rg) / MN;
 	const float ySlope = length(imageLoad(imageArray, ivec3(pixelPosition, constantInfo.ySlopeImageIndex)).rg) / MN;
-	const vec3 normal =normalize(vec3(-xSlope, 1.0 / MN, -ySlope));
+	const vec3 normal = normalize(vec3(-xSlope, 0.001, -ySlope));
 	imageStore(normalImage, pixelPosition, vec4(normal, 0));
 }

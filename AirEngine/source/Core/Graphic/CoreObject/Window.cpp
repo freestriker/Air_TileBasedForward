@@ -155,7 +155,7 @@ void AirEngine::Core::Graphic::CoreObject::Window::Start()
     //auto&& isl = _qVulkanInstance->supportedLayers();
     _qVulkanInstance->setLayers(QByteArrayList()
         << "VK_LAYER_KHRONOS_validation"
-        << "VK_LAYER_RENDERDOC_Capture"
+        //<< "VK_LAYER_RENDERDOC_Capture"
     );
     if (!_qVulkanInstance->create())
         qFatal("Failed to create Vulkan instance: %d", _qVulkanInstance->errorCode());

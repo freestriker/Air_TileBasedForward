@@ -47,12 +47,13 @@ namespace AirEngine
 				class FftOcean_RenderFeatureData final : public Core::Graphic::Rendering::RenderFeatureDataBase
 				{
 					friend class FftOcean_RenderFeature;
-				private:
+				public:
 					bool isInitialized;
 					glm::ivec2 imageSize;
 					glm::vec2 L;
 					glm::ivec2 NM;
 					glm::vec2 windDirection;
+					float windRotationAngle;
 					float windSpeed;
 					float a;
 					float windDependency;

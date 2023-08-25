@@ -43,6 +43,7 @@
 #include "Test/TBF_Opaque_Pbr_RendererBehaviour.h"
 #include "Test/TBF_Opaque_Pbr_Mirror_RendererBehaviour.h"
 #include "Core/Graphic/Instance/ImageSampler.h"
+#include "Test/IfftOcean_WindRotationBehaviour.h"
 
 AirEngine::Core::Logic::CoreObject::Thread::LogicThread AirEngine::Core::Logic::CoreObject::Thread::_logicThread = AirEngine::Core::Logic::CoreObject::Thread::LogicThread();
 
@@ -409,6 +410,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 			{"DepthAttachment", Graphic::Instance::Image::Create2DImage({1600, 900}, VK_FORMAT_D32_SFLOAT, VkImageUsageFlagBits::VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, VkImageAspectFlagBits::VK_IMAGE_ASPECT_DEPTH_BIT)}
 		}
 	);
+	camera->fovAngle = 60;
 	camera->mainCamera = camera;
 	cameraGo->AddComponent(camera);
 	cameraGo->AddComponent(new Test::CameraMoveBehaviour());
@@ -526,6 +528,10 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	{
 		Logic::Object::GameObject* surfaceRendererGo = new Logic::Object::GameObject("FftOceanRenderer");
 		renderers->AddChild(surfaceRendererGo);
+
+		auto&& windRotator = new Test::IfftOcean_WindRotationBehaviour();
+		windRotator->windRotationAngleSpeed = 35;
+		surfaceRendererGo->AddComponent(windRotator);
 
 		auto&& renderer = new Renderer::Renderer();
 

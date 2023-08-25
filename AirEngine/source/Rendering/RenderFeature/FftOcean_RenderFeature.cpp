@@ -157,7 +157,8 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	featureData->imageSize = { 512, 512 };
 	featureData->L = glm::vec2(512, 512);
 	featureData->NM = featureData->imageSize;
-	featureData->windDirection = glm::normalize(glm::vec2(1, 0.5));
+	featureData->windDirection = glm::normalize(glm::vec2(1, 0));
+	featureData->windRotationAngle = 0;
 	featureData->windSpeed = 31;
 	featureData->a = 3;
 	featureData->windDependency = 0.1;
@@ -288,7 +289,11 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnDestroyRende
 
 void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnPrepare(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)
 {
-
+	constexpr double PI = 3.141592653589793;
+	
+	auto& featureData = *static_cast<FftOcean_RenderFeatureData*>(renderFeatureData);
+	auto&& radian = featureData.windRotationAngle / 360 * 2 * PI;
+	featureData.windDirection = glm::normalize(glm::vec2(std::cos(radian), std::sin(radian)));
 }
 
 void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*> const* rendererComponents)
