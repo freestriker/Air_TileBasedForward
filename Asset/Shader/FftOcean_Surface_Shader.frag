@@ -55,9 +55,11 @@ void main()
     // radiance += iblRadiance * occlusion * rmo.z;
 
     // ColorAttachment = vec4(radiance / (radiance + vec3(1)), 1);
-    vec3 color = texture(albedoTexture, inTexCoords).rgb;
-    vec3 normal = texture(normalTexture, inTexCoords).rgb;
-    vec3 normalColor = ParseFromColor(normal);
+    const vec3 color = texture(albedoTexture, inTexCoords).rgb;
+    const vec4 normal_bubbles = texture(normalTexture, inTexCoords).rgba;
+    const vec3 normal = normal_bubbles.xyz;
+    const float bubbles = normal_bubbles.w;
+    const vec3 normalColor = max(vec3(bubbles), ParseFromColor(normal));
     ColorAttachment = vec4(normalColor, 1);
     // ColorAttachment = vec4(normalize(inWorldNormal) * 0.5 + vec3(0.5), 1);
     // ColorAttachment = vec4(normalize(inWorldTangent) * 0.5 + vec3(0.5), 1);

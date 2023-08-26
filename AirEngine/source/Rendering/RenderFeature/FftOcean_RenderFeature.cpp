@@ -165,6 +165,10 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	featureData->displacementFactor = { 1, 1, 1 };
 	featureData->minVertexPosition = { 0, 0 };
 	featureData->maxVertexPosition = { 1, 1 };
+	featureData->bubblesLambda = 1;
+	featureData->bubblesThreshold = 1;
+	featureData->bubblesScale = 85;
+
 
 	const VkExtent2D imageExtent = VkExtent2D{ uint32_t(featureData->imageSize.x), uint32_t(featureData->imageSize.y) };
 
@@ -928,6 +932,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			//int xSlopeImageIndex;
 			//int ySlopeImageIndex;
 			alignas(8) glm::vec2 L;
+			float bubblesLambda;
+			float bubblesThreshold;
+			float bubblesScale;
 		};
 		ResolveConstantInfo resolveConstantInfo{};
 		resolveConstantInfo.imageSize = featureData.imageSize;
@@ -938,6 +945,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		//resolveConstantInfo.xSlopeImageIndex = xSlopeImageIndex;
 		//resolveConstantInfo.ySlopeImageIndex = ySlopeImageIndex;
 		resolveConstantInfo.L = featureData.L;
+		resolveConstantInfo.bubblesLambda = featureData.bubblesLambda;
+		resolveConstantInfo.bubblesThreshold = featureData.bubblesThreshold;
+		resolveConstantInfo.bubblesScale = featureData.bubblesScale;
 
 		{
 			auto displacementImageBarrier = Core::Graphic::Command::ImageMemoryBarrier

@@ -537,7 +537,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 
 		surfaceRendererGo->AddComponent(renderer);
 		surfaceRendererGo->transform.SetTranslation({ 0, -1, -1 });
-		surfaceRendererGo->transform.SetScale({ 10, 10, 10 });
+		surfaceRendererGo->transform.SetScale({ 5, 5, 5 });
 
 		renderer->mesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\Surface.ply");
 		surfaceRendererGo->AddComponent(renderer);

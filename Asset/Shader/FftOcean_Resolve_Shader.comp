@@ -17,6 +17,9 @@ layout(push_constant) uniform ResolveConstantInfo
 	// int xSlopeImageIndex;
 	// int ySlopeImageIndex;
 	vec2 L;
+	float bubblesLambda;
+	float bubblesThreshold;
+	float bubblesScale;
 } constantInfo;
 
 layout (set = 0, binding = 0, rg32f) uniform readonly image2DArray imageArray;
@@ -70,5 +73,14 @@ void main()
 	// const float xSlope = length(imageLoad(imageArray, ivec3(pixelPosition, constantInfo.xSlopeImageIndex)).rg) / MN;
 	// const float ySlope = length(imageLoad(imageArray, ivec3(pixelPosition, constantInfo.ySlopeImageIndex)).rg) / MN;
 	// const vec3 normal = normalize(vec3(-xSlope, 0.001, -ySlope));
-	imageStore(normalImage, pixelPosition, vec4(normal, 0));
+
+	//计算泡沫
+    const vec3 ddx = x2D - x1D;
+    const vec3 ddz = z2D - z1D;
+    //雅可比行列式
+    float jacobian = (1.0f + constantInfo.bubblesLambda * ddx.x) * (1.0f + constantInfo.bubblesLambda * ddz.z) - constantInfo.bubblesLambda * ddx.z * constantInfo.bubblesLambda * ddz.x;
+
+    jacobian = clamp(max(0, constantInfo.bubblesThreshold - clamp(jacobian, 0, 1)) * constantInfo.bubblesScale, 0, 1);
+
+	imageStore(normalImage, pixelPosition, vec4(normal, jacobian));
 }
