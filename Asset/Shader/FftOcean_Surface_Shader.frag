@@ -1,6 +1,8 @@
 #version 450
 #extension GL_GOOGLE_include_directive: enable
 
+#include "Camera.glsl"
+#include "Object.glsl"
 // #include "TBForwardLighting.glsl"
 
 // layout(set = START_SET_INDEX + 0, binding = 0) uniform sampler2D albedoTexture;
@@ -15,7 +17,8 @@ layout(location = 0) in vec2 inTexCoords;
 
 layout(location = 0) out vec4 ColorAttachment;
 
-layout(set = 3, binding = 0) uniform sampler2D albedoTexture;
+layout(set = 3, binding = 0) uniform sampler2D normalTexture;
+layout(set = 4, binding = 0) uniform sampler2D albedoTexture;
 
 void main() 
 {
@@ -53,7 +56,9 @@ void main()
 
     // ColorAttachment = vec4(radiance / (radiance + vec3(1)), 1);
     vec3 color = texture(albedoTexture, inTexCoords).rgb;
-    ColorAttachment = vec4(color, 1);
+    vec3 normal = texture(normalTexture, inTexCoords).rgb;
+    vec3 normalColor = ParseFromColor(normal);
+    ColorAttachment = vec4(normalColor, 1);
     // ColorAttachment = vec4(normalize(inWorldNormal) * 0.5 + vec3(0.5), 1);
     // ColorAttachment = vec4(normalize(inWorldTangent) * 0.5 + vec3(0.5), 1);
     // ColorAttachment = vec4(normalize(inWorldBitangent) * 0.5 + vec3(0.5), 1);

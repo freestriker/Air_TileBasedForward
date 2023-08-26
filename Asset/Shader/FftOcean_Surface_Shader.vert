@@ -17,8 +17,8 @@ layout(location = 0) out vec2 outTexCoords;
 
 layout(push_constant) uniform SurfaceConstantInfo
 {
-    ivec2 minVertexPosition;
-    ivec2 maxVertexPosition;
+    // ivec2 minVertexPosition;
+    // ivec2 maxVertexPosition;
     vec3 displacementFactor;
 } constantInfo;
 
@@ -32,17 +32,20 @@ layout(set = 1, binding = 0) uniform MeshObjectInfo
     ObjectInfo info;
 } meshObjectInfo;
 layout(set = 2, binding = 0) uniform sampler2D displacementTexture;
+layout(set = 3, binding = 0) uniform sampler2D normalTexture;
 
 void main() 
 {
-    const vec2 aPosition = (vertexPosition.xz - vec2(constantInfo.minVertexPosition)) / vec2(constantInfo.maxVertexPosition - constantInfo.minVertexPosition);
-    const vec3 displacement = texture(displacementTexture, aPosition).rgb * constantInfo.displacementFactor;
+    const vec2 texCoords = vec2(1) - vertexTexCoords;
+    const vec3 displacement = texture(displacementTexture, texCoords).rgb * constantInfo.displacementFactor;
+    // const vec2 aPosition = (vertexPosition.xz - vec2(constantInfo.minVertexPosition)) / vec2(constantInfo.maxVertexPosition - constantInfo.minVertexPosition);
+    // const vec3 displacement = texture(displacementTexture, aPosition).rgb * constantInfo.displacementFactor;
     gl_Position = PositionO2P(vertexPosition + displacement, meshObjectInfo.info, cameraInfo.info);
     // vec3 worldNormal = DirectionO2W(vertexNormal, meshObjectInfo.info);
     // vec3 worldPosition = PositionO2W(vertexPosition, meshObjectInfo.info);
     // vec3 viewDirection = CameraWObserveDirection(worldPosition, cameraInfo.info);
 
-    outTexCoords = vertexTexCoords;
+    outTexCoords = texCoords;
     // outWorldPosition = worldPosition;
     // outWorldNormal = worldNormal;
     // outWorldTangent = DirectionO2W(vertexTangent, meshObjectInfo.info);

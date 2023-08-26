@@ -163,7 +163,7 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	featureData->a = 3;
 	featureData->windDependency = 0.1;
 	featureData->displacementFactor = { 1, 1, 1 };
-	featureData->minVertexPosition = { -1, -1 };
+	featureData->minVertexPosition = { 0, 0 };
 	featureData->maxVertexPosition = { 1, 1 };
 
 	const VkExtent2D imageExtent = VkExtent2D{ uint32_t(featureData->imageSize.x), uint32_t(featureData->imageSize.y) };
@@ -925,8 +925,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			int heightImageIndex;
 			int xImageIndex;
 			int yImageIndex;
-			int xSlopeImageIndex;
-			int ySlopeImageIndex;
+			//int xSlopeImageIndex;
+			//int ySlopeImageIndex;
+			alignas(8) glm::vec2 L;
 		};
 		ResolveConstantInfo resolveConstantInfo{};
 		resolveConstantInfo.imageSize = featureData.imageSize;
@@ -934,8 +935,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		resolveConstantInfo.heightImageIndex = heightImageIndex;
 		resolveConstantInfo.xImageIndex = xImageIndex;
 		resolveConstantInfo.yImageIndex = yImageIndex;
-		resolveConstantInfo.xSlopeImageIndex = xSlopeImageIndex;
-		resolveConstantInfo.ySlopeImageIndex = ySlopeImageIndex;
+		//resolveConstantInfo.xSlopeImageIndex = xSlopeImageIndex;
+		//resolveConstantInfo.ySlopeImageIndex = ySlopeImageIndex;
+		resolveConstantInfo.L = featureData.L;
 
 		{
 			auto displacementImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
@@ -995,13 +997,11 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 
 		struct SurfaceConstantInfo
 		{
-			glm::ivec2 minVertexPosition;
-			glm::ivec2 maxVertexPosition;
 			glm::vec3 displacementFactor;
 		};
 		SurfaceConstantInfo surfaceConstantInfo{};
-		surfaceConstantInfo.minVertexPosition = featureData.minVertexPosition;
-		surfaceConstantInfo.maxVertexPosition = featureData.maxVertexPosition;
+		//surfaceConstantInfo.minVertexPosition = featureData.minVertexPosition;
+		//surfaceConstantInfo.maxVertexPosition = featureData.maxVertexPosition;
 		surfaceConstantInfo.displacementFactor = featureData.displacementFactor;
 
 		for (const auto& rendererComponent : *rendererComponents)
@@ -1012,7 +1012,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
 			material->SetUniformBuffer("meshObjectInfo", rendererComponent->ObjectInfoBuffer());
 			material->SetSampledImage2D("displacementTexture", featureData.displacementImage, _linearSampler);
-			//material->SetSampledImage2D("normalTexture", featureData.normalImage, _pointSampler);
+			material->SetSampledImage2D("normalTexture", featureData.normalImage, _pointSampler);
 
 			commandBuffer->PushConstant(material, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT, surfaceConstantInfo);
 			commandBuffer->DrawMesh(rendererComponent->mesh, material);
