@@ -146,7 +146,12 @@
     <ClCompile Include="source\Core\Graphic\Manager\RenderPassManager.cpp" />
     <ClCompile Include="source\Core\Graphic\Command\ImageMemoryBarrier.cpp" />
     <ClCompile Include="source\Core\Graphic\Instance\Buffer.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="main.cpp">
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
+    </ClCompile>
     <ClCompile Include="source\Asset\Mesh.cpp" />
     <ClCompile Include="source\Core\Graphic\Command\CommandBuffer.cpp" />
     <ClCompile Include="source\Core\Graphic\Command\CommandPool.cpp" />

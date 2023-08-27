@@ -7,6 +7,11 @@
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
 #include <glm/ext/vector_int2.hpp>
+#include <qobject.h>
+#include <qwidget.h>
+#include <qapplication.h>
+#include <qpushbutton.h>
+#include "Utils/Log.h"
 
 namespace AirEngine
 {
@@ -44,15 +49,59 @@ namespace AirEngine
 					CONSTRUCTOR(FftOcean_Surface_RenderPass)
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderPassBase)
 				};
+				class FftOcean_RenderFeatureData;
+				class FftOceanDataWindow : public QWidget
+				{
+				private:
+					QPushButton button;
+					FftOcean_RenderFeatureData& _fftOceanData;
+				public:
+					FftOceanDataWindow(FftOcean_RenderFeatureData& fftOceanData)
+						: _fftOceanData(fftOceanData)
+						, button(this)
+					{
+						QObject::connect(&button, &QPushButton::clicked, this, [this]()->void {
+							AirEngine::Utils::Log::Message(std::to_string(_fftOceanData.L));
+						});
+					}
+					~FftOceanDataWindow() = default;
+
+				};
+				class FftOceanDataWindowLauncher : public QObject
+				{
+					FftOceanDataWindow* w;
+					FftOcean_RenderFeatureData& _fftOceanData;
+					virtual bool event(QEvent* ev)
+					{
+						if (ev->type() == QEvent::User)
+						{
+							w = new FftOceanDataWindow(_fftOceanData);
+							w->show();
+							return true;
+						}
+						return QObject::event(ev);
+					}
+				public:
+					FftOceanDataWindowLauncher(FftOcean_RenderFeatureData& fftOceanData)
+						: _fftOceanData(fftOceanData)
+						, w(nullptr)
+					{
+
+					}
+					~FftOceanDataWindowLauncher()
+					{
+						w->close();
+						delete w;
+					}
+				};
 				class FftOcean_RenderFeatureData final : public Core::Graphic::Rendering::RenderFeatureDataBase
 				{
 					friend class FftOcean_RenderFeature;
 				public:
 					bool isInitialized;
 					glm::ivec2 imageSize;
-					glm::vec2 L;
+					float L;
 					glm::ivec2 NM;
-					glm::vec2 windDirection;
 					float windRotationAngle;
 					float windSpeed;
 					float a;
@@ -63,6 +112,8 @@ namespace AirEngine
 					float bubblesLambda;
 					float bubblesThreshold;
 					float bubblesScale;
+
+					FftOceanDataWindowLauncher* launcher;
 
 					Core::Graphic::Rendering::FrameBuffer* frameBuffer;
 

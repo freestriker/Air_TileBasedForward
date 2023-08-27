@@ -47,7 +47,6 @@ RTTR_REGISTRATION
 		)
 		;
 }
-
 AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOcean_Surface_RenderPass::FftOcean_Surface_RenderPass()
 	: RenderPassBase()
 {
@@ -155,9 +154,8 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 
 	featureData->isInitialized = false;
 	featureData->imageSize = { 512, 512 };
-	featureData->L = glm::vec2(512, 512);
+	featureData->L = 512;
 	featureData->NM = featureData->imageSize;
-	featureData->windDirection = glm::normalize(glm::vec2(1, 0));
 	featureData->windRotationAngle = 0;
 	featureData->windSpeed = 31;
 	featureData->a = 3;
@@ -169,6 +167,9 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	featureData->bubblesThreshold = 1;
 	featureData->bubblesScale = 85;
 
+	featureData->launcher = new FftOceanDataWindowLauncher(*featureData);
+	featureData->launcher->moveToThread(QApplication::instance()->thread());
+	QApplication::postEvent(featureData->launcher, new QEvent(QEvent::User));
 
 	const VkExtent2D imageExtent = VkExtent2D{ uint32_t(featureData->imageSize.x), uint32_t(featureData->imageSize.y) };
 
@@ -282,22 +283,37 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnDestroyRende
 {
 	auto featureData = static_cast<FftOcean_RenderFeatureData*>(renderFeatureData);
 
-	delete featureData->gaussianNoiseImageStagingBuffer;
+	//featureData->launcher->deleteLater();
+	//QApplication::postEvent(featureData->launcher, new QEvent(QEvent::Destroy));
+	//delete featureData->launcher;
+
+	delete featureData->frameBuffer;
+
 	delete featureData->gaussianNoiseImage;
+	delete featureData->gaussianNoiseImageStagingBuffer;
+
+	delete featureData->imageArray;
+
+	delete featureData->phillipsSpectrumImage;
+	delete featureData->phillipsSpectrumMaterial;
+	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\FftOcean_PhillipsSpectrum_Shader.shader");
 
 	delete featureData->spectrumMaterial;
-	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\FftOcean_GenerateFrequency_Shader.shader");
+	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\FftOcean_Spectrum_Shader.shader");
+
+	delete featureData->ifftMaterial;
+	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\FftOcean_Ifft_Shader.shader");
+
+	delete featureData->displacementImage;
+	delete featureData->normalImage;
+	delete featureData->resolveMaterial;
+	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\FftOcean_Resolve_Shader.shader");
 
 	delete featureData;
 }
 
 void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnPrepare(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)
 {
-	constexpr double PI = 3.141592653589793;
-	
-	auto& featureData = *static_cast<FftOcean_RenderFeatureData*>(renderFeatureData);
-	auto&& radian = featureData.windRotationAngle / 360 * 2 * PI;
-	featureData.windDirection = glm::normalize(glm::vec2(std::cos(radian), std::sin(radian)));
 }
 
 void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*> const* rendererComponents)
@@ -412,7 +428,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		PhillipsSpectrumInfo phillipsSpectrumInfo{};
 		phillipsSpectrumInfo.imageSize = featureData.imageSize;
 		phillipsSpectrumInfo.NM = featureData.NM;
-		phillipsSpectrumInfo.windDirection = featureData.windDirection;
+		constexpr double PI = 3.141592653589793;
+		const auto&& radian = featureData.windRotationAngle / 360 * 2 * PI;
+		phillipsSpectrumInfo.windDirection = glm::normalize(glm::vec2(std::cos(radian), std::sin(radian)));
 		phillipsSpectrumInfo.windSpeed = featureData.windSpeed;
 		phillipsSpectrumInfo.time = time;
 		phillipsSpectrumInfo.a = featureData.a;
@@ -944,7 +962,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		resolveConstantInfo.yImageIndex = yImageIndex;
 		//resolveConstantInfo.xSlopeImageIndex = xSlopeImageIndex;
 		//resolveConstantInfo.ySlopeImageIndex = ySlopeImageIndex;
-		resolveConstantInfo.L = featureData.L;
+		resolveConstantInfo.L = { featureData.L, featureData.L };
 		resolveConstantInfo.bubblesLambda = featureData.bubblesLambda;
 		resolveConstantInfo.bubblesThreshold = featureData.bubblesThreshold;
 		resolveConstantInfo.bubblesScale = featureData.bubblesScale;
@@ -1043,3 +1061,5 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnFinish(Core:
 {
 	commandBuffer->WaitForFinish();
 }
+
+//#include "FftOcean_RenderFeature.moc"
