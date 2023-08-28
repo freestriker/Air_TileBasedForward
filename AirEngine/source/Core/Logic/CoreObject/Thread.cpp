@@ -529,9 +529,9 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 		Logic::Object::GameObject* surfaceRendererGo = new Logic::Object::GameObject("FftOceanRenderer");
 		renderers->AddChild(surfaceRendererGo);
 
-		auto&& windRotator = new Test::IfftOcean_WindRotationBehaviour();
-		windRotator->windRotationAngleSpeed = 35;
-		surfaceRendererGo->AddComponent(windRotator);
+		//auto&& windRotator = new Test::IfftOcean_WindRotationBehaviour();
+		//windRotator->windRotationAngleSpeed = 35;
+		//surfaceRendererGo->AddComponent(windRotator);
 
 		auto&& renderer = new Renderer::Renderer();
 

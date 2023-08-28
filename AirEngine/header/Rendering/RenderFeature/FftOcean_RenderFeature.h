@@ -12,6 +12,7 @@
 #include <qapplication.h>
 #include <qpushbutton.h>
 #include "Utils/Log.h"
+#include <QFormLayout>
 
 namespace AirEngine
 {
@@ -53,30 +54,32 @@ namespace AirEngine
 				class FftOceanDataWindow : public QWidget
 				{
 				private:
-					QPushButton button;
 					FftOcean_RenderFeatureData& _fftOceanData;
+					void BuildLayout();
 				public:
 					FftOceanDataWindow(FftOcean_RenderFeatureData& fftOceanData)
-						: _fftOceanData(fftOceanData)
-						, button(this)
+						: QWidget()
+						, _fftOceanData(fftOceanData)
 					{
-						QObject::connect(&button, &QPushButton::clicked, this, [this]()->void {
-							AirEngine::Utils::Log::Message(std::to_string(_fftOceanData.L));
-						});
+						setAttribute(Qt::WA_DeleteOnClose);
+						setWindowTitle(QStringLiteral("FftOceanDataWindow"));
+						BuildLayout();
 					}
 					~FftOceanDataWindow() = default;
 
 				};
 				class FftOceanDataWindowLauncher : public QObject
 				{
-					FftOceanDataWindow* w;
+				public:
+					FftOceanDataWindow* window;
+				private:
 					FftOcean_RenderFeatureData& _fftOceanData;
 					virtual bool event(QEvent* ev)
 					{
 						if (ev->type() == QEvent::User)
 						{
-							w = new FftOceanDataWindow(_fftOceanData);
-							w->show();
+							window = new FftOceanDataWindow(_fftOceanData);
+							window->show();
 							return true;
 						}
 						return QObject::event(ev);
@@ -84,14 +87,14 @@ namespace AirEngine
 				public:
 					FftOceanDataWindowLauncher(FftOcean_RenderFeatureData& fftOceanData)
 						: _fftOceanData(fftOceanData)
-						, w(nullptr)
+						, window(nullptr)
 					{
 
 					}
 					~FftOceanDataWindowLauncher()
 					{
-						w->close();
-						delete w;
+						window->close();
+						//delete window;
 					}
 				};
 				class FftOcean_RenderFeatureData final : public Core::Graphic::Rendering::RenderFeatureDataBase
