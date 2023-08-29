@@ -426,6 +426,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			glm::ivec2 imageSize;
 			glm::ivec2 NM;
 			glm::vec2 windDirection;
+			float L;
 			float windSpeed;
 			float time;
 			float a;
@@ -437,6 +438,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		constexpr double PI = 3.141592653589793;
 		const auto&& radian = featureData.windRotationAngle / 360 * 2 * PI;
 		phillipsSpectrumInfo.windDirection = glm::normalize(glm::vec2(std::cos(radian), std::sin(radian)));
+		phillipsSpectrumInfo.L = featureData.L;
 		phillipsSpectrumInfo.windSpeed = featureData.windSpeed;
 		phillipsSpectrumInfo.time = time;
 		phillipsSpectrumInfo.a = featureData.a;
@@ -505,6 +507,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		{
 			glm::ivec2 imageSize;
 			glm::ivec2 NM;
+			float L;
 			float time;
 			int heightSpectrumImageIndex;
 			int xSpectrumImageIndex;
@@ -515,6 +518,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		SpectrumInfo spectrumInfo{};
 		spectrumInfo.imageSize = featureData.imageSize;
 		spectrumInfo.NM = featureData.NM;
+		spectrumInfo.L = featureData.L;
 		spectrumInfo.time = time;
 		spectrumInfo.heightSpectrumImageIndex = heightSpectrumImageIndex;
 		spectrumInfo.xSpectrumImageIndex = xSpectrumImageIndex;
@@ -956,7 +960,8 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			//int xSlopeImageIndex;
 			//int ySlopeImageIndex;
 			alignas(8) glm::vec3 displacementFactor;
-			alignas(8) glm::vec2 L;
+			//alignas(8) glm::vec2 L;
+			alignas(8) glm::ivec2 meshEdgeVertexCount;
 			float bubblesLambda;
 			float bubblesThreshold;
 			float bubblesScale;
@@ -970,7 +975,8 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		resolveConstantInfo.displacementFactor = featureData.displacementFactor;
 		//resolveConstantInfo.xSlopeImageIndex = xSlopeImageIndex;
 		//resolveConstantInfo.ySlopeImageIndex = ySlopeImageIndex;
-		resolveConstantInfo.L = { featureData.L, featureData.L };
+		resolveConstantInfo.meshEdgeVertexCount = { 257, 257 };
+		//resolveConstantInfo.L = { featureData.L, featureData.L };
 		resolveConstantInfo.bubblesLambda = featureData.bubblesLambda;
 		resolveConstantInfo.bubblesThreshold = featureData.bubblesThreshold;
 		resolveConstantInfo.bubblesScale = featureData.bubblesScale;

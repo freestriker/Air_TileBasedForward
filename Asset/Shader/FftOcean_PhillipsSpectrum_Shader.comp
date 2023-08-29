@@ -12,6 +12,7 @@ layout(push_constant) uniform GenerateFrequencyConstantInfo
     ivec2 imageSize;
 	ivec2 NM;
 	vec2 windDirection;
+	float L;
 	float windSpeed;
 	float time;
 	float a;
@@ -53,12 +54,12 @@ void main()
 	
 	const ivec2 pixelPosition = threadPosition;
 
-	const vec2 k = 2 * PI * vec2(threadPosition) / vec2(constantInfo.NM) - vec2(PI);
+	const vec2 k = 2 * PI * vec2(vec2(threadPosition) - 0.5 * vec2(constantInfo.NM)) / constantInfo.L;
 
     const vec4 gaussianNoise = imageLoad(gaussianNoiseImage, pixelPosition).xyzw;
 
     const vec2 hTilde0 = gaussianNoise.xy * sqrt(abs(Phillips(k)) / 2);
-    const vec2 hTilde0Conj = gaussianNoise.zw * sqrt(abs(Phillips(-k)) / 2) * vec2(1, -1);
+    const vec2 hTilde0Conj = gaussianNoise.zw * sqrt(abs(Phillips(-k)) / 2)/* * vec2(1, -1)*/;
 
 	imageStore(phillipsSpectrumImage, pixelPosition, vec4(hTilde0, hTilde0Conj));
 }

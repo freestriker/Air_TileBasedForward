@@ -11,6 +11,7 @@ layout(push_constant) uniform SpectrumConstantInfo
 {
 	ivec2 imageSize;
 	ivec2 NM;
+	float L;
 	float time;
 	int heightSpectrumImageIndex;
 	int xSpectrumImageIndex;
@@ -37,7 +38,7 @@ void main()
 	
 	const ivec2 pixelPosition = threadPosition;
 
-	const vec2 k = 2 * PI * vec2(threadPosition) / vec2(constantInfo.NM) - vec2(PI);
+	const vec2 k = 2 * PI * vec2(vec2(threadPosition) - 0.5 * vec2(constantInfo.NM)) / constantInfo.L;
 
     const vec4 phillipsSpectrum = imageLoad(phillipsSpectrumImage, pixelPosition).xyzw;
 
