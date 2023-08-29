@@ -112,6 +112,7 @@ namespace AirEngine
 					glm::ivec2 minVertexPosition;
 					glm::ivec2 maxVertexPosition;
 					glm::vec3 displacementFactor;
+					float normalScale;
 					float bubblesLambda;
 					float bubblesThreshold;
 					float bubblesScale;
