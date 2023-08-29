@@ -14,6 +14,7 @@ layout(push_constant) uniform ResolveConstantInfo
 	int heightImageIndex;
 	int xImageIndex;
 	int yImageIndex;
+	vec3 displacementFactor;
 	// int xSlopeImageIndex;
 	// int ySlopeImageIndex;
 	vec2 L;
@@ -39,12 +40,15 @@ void main()
 	const float height = length(imageLoad(imageArray, ivec3(pixelPosition, constantInfo.heightImageIndex)).rg) / MN;
 	const float x = length(imageLoad(imageArray, ivec3(pixelPosition, constantInfo.xImageIndex)).rg) / MN;
 	const float y = length(imageLoad(imageArray, ivec3(pixelPosition, constantInfo.yImageIndex)).rg) / MN;
-	imageStore(displacementImage, pixelPosition, vec4(x, height, y, 0));
+	// const float height = imageLoad(imageArray, ivec3(pixelPosition, constantInfo.heightImageIndex)).r / MN;
+	// const float x = imageLoad(imageArray, ivec3(pixelPosition, constantInfo.xImageIndex)).r / MN;
+	// const float y = imageLoad(imageArray, ivec3(pixelPosition, constantInfo.yImageIndex)).r / MN;
+	imageStore(displacementImage, pixelPosition, vec4(x, height, y, 0) * vec4(constantInfo.displacementFactor, 0));
 
 	memoryBarrierImage();
 
-	// const vec2 uintLength = constantInfo.L / (constantInfo.NM - vec2(1));//两点间单位长度
-	const vec2 uintLength = vec2(0);//两点间单位长度
+	const vec2 uintLength = constantInfo.L / (constantInfo.NM - vec2(1));//两点间单位长度
+	// const vec2 uintLength = vec2(0);//两点间单位长度
     //获取当前点，周围4个点的uv坐标
     const ivec2 uvX1 = ivec2((pixelPosition.x - 1 + constantInfo.NM.x) % constantInfo.NM.x, pixelPosition.y);
     const ivec2 uvX2 = ivec2((pixelPosition.x + 1 + constantInfo.NM.x) % constantInfo.NM.x, pixelPosition.y);

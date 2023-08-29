@@ -166,6 +166,7 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	featureData->displacementFactor = { 1, 1, 1 };
 	featureData->minVertexPosition = { 0, 0 };
 	featureData->maxVertexPosition = { 1, 1 };
+	featureData->displacementFactor = { 1, 1, 1 };
 	featureData->bubblesLambda = 1;
 	featureData->bubblesThreshold = 1;
 	featureData->bubblesScale = 85;
@@ -954,6 +955,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			int yImageIndex;
 			//int xSlopeImageIndex;
 			//int ySlopeImageIndex;
+			alignas(8) glm::vec3 displacementFactor;
 			alignas(8) glm::vec2 L;
 			float bubblesLambda;
 			float bubblesThreshold;
@@ -965,6 +967,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		resolveConstantInfo.heightImageIndex = heightImageIndex;
 		resolveConstantInfo.xImageIndex = xImageIndex;
 		resolveConstantInfo.yImageIndex = yImageIndex;
+		resolveConstantInfo.displacementFactor = featureData.displacementFactor;
 		//resolveConstantInfo.xSlopeImageIndex = xSlopeImageIndex;
 		//resolveConstantInfo.ySlopeImageIndex = ySlopeImageIndex;
 		resolveConstantInfo.L = { featureData.L, featureData.L };
@@ -1028,14 +1031,14 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 	{
 		commandBuffer->BeginRenderPass(_renderPass, featureData.frameBuffer);
 
-		struct SurfaceConstantInfo
-		{
-			glm::vec3 displacementFactor;
-		};
-		SurfaceConstantInfo surfaceConstantInfo{};
-		//surfaceConstantInfo.minVertexPosition = featureData.minVertexPosition;
-		//surfaceConstantInfo.maxVertexPosition = featureData.maxVertexPosition;
-		surfaceConstantInfo.displacementFactor = featureData.displacementFactor;
+		//struct SurfaceConstantInfo
+		//{
+		//	glm::vec3 displacementFactor;
+		//};
+		//SurfaceConstantInfo surfaceConstantInfo{};
+		////surfaceConstantInfo.minVertexPosition = featureData.minVertexPosition;
+		////surfaceConstantInfo.maxVertexPosition = featureData.maxVertexPosition;
+		//surfaceConstantInfo.displacementFactor = featureData.displacementFactor;
 
 		for (const auto& rendererComponent : *rendererComponents)
 		{
@@ -1047,7 +1050,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			material->SetSampledImage2D("displacementTexture", featureData.displacementImage, _linearSampler);
 			material->SetSampledImage2D("normalTexture", featureData.normalImage, _pointSampler);
 
-			commandBuffer->PushConstant(material, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT, surfaceConstantInfo);
+			//commandBuffer->PushConstant(material, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT, surfaceConstantInfo);
 			commandBuffer->DrawMesh(rendererComponent->mesh, material);
 		}
 		commandBuffer->EndRenderPass();
@@ -1081,6 +1084,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 	QDoubleValidator* doubleValidator = new QDoubleValidator;
 	doubleValidator->setRange(0, 10000000, 5);
 
+	// L
 	{
 		QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->L)), this);
 		lineEdit->setValidator(doubleValidator);
@@ -1089,17 +1093,6 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 			Utils::Log::Message("L: " + std::to_string(fftOceanDataPtr->L));
 		});
 		pLayout->addRow(QStringLiteral("L: "), lineEdit);
-	}
-
-	// L
-	{
-		QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->windRotationAngle)), this);
-		lineEdit->setValidator(doubleValidator);
-		lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
-			fftOceanDataPtr->windRotationAngle = string.toFloat();
-			Utils::Log::Message("windRotationAngle: " + std::to_string(fftOceanDataPtr->windRotationAngle));
-		});
-		pLayout->addRow(QStringLiteral("windRotationAngle: "), lineEdit);
 	}
 
 	// windRotationAngle
@@ -1144,6 +1137,39 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 			Utils::Log::Message("windDependency: " + std::to_string(fftOceanDataPtr->windDependency));
 		});
 		pLayout->addRow(QStringLiteral("windDependency: "), lineEdit);
+	}
+
+	// displacement.height
+	{
+		QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->displacementFactor.y)), this);
+		lineEdit->setValidator(doubleValidator);
+		lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+			fftOceanDataPtr->displacementFactor.y = string.toFloat();
+			Utils::Log::Message("displacement.height: " + std::to_string(fftOceanDataPtr->displacementFactor.y));
+		});
+		pLayout->addRow(QStringLiteral("displacement.height: "), lineEdit);
+	}
+
+	// displacementFactor.x
+	{
+		QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->displacementFactor.x)), this);
+		lineEdit->setValidator(doubleValidator);
+		lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+			fftOceanDataPtr->displacementFactor.x = string.toFloat();
+			Utils::Log::Message("displacementFactor.x: " + std::to_string(fftOceanDataPtr->displacementFactor.x));
+		});
+		pLayout->addRow(QStringLiteral("displacementFactor.x: "), lineEdit);
+	}
+
+	// displacementFactor.z
+	{
+		QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->displacementFactor.z)), this);
+		lineEdit->setValidator(doubleValidator);
+		lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+			fftOceanDataPtr->displacementFactor.z = string.toFloat();
+			Utils::Log::Message("displacementFactor.z: " + std::to_string(fftOceanDataPtr->displacementFactor.z));
+		});
+		pLayout->addRow(QStringLiteral("displacementFactor.z: "), lineEdit);
 	}
 
 	// bubblesLambda

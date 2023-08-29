@@ -15,13 +15,6 @@ layout(location = 0) out vec2 outTexCoords;
 // layout(location = 3) out vec3 outWorldTangent;
 // layout(location = 4) out vec3 outWorldBitangent;
 
-layout(push_constant) uniform SurfaceConstantInfo
-{
-    // ivec2 minVertexPosition;
-    // ivec2 maxVertexPosition;
-    vec3 displacementFactor;
-} constantInfo;
-
 layout(set = 0, binding = 0) uniform _CameraInfo
 {
     CameraInfo info;
@@ -37,7 +30,7 @@ layout(set = 3, binding = 0) uniform sampler2D normalTexture;
 void main() 
 {
     const vec2 texCoords = vec2(1) - vertexTexCoords;
-    const vec3 displacement = texture(displacementTexture, texCoords).rgb * constantInfo.displacementFactor;
+    const vec3 displacement = texture(displacementTexture, texCoords).xyz;
     // const vec2 aPosition = (vertexPosition.xz - vec2(constantInfo.minVertexPosition)) / vec2(constantInfo.maxVertexPosition - constantInfo.minVertexPosition);
     // const vec3 displacement = texture(displacementTexture, aPosition).rgb * constantInfo.displacementFactor;
     gl_Position = PositionO2P(vertexPosition + displacement, meshObjectInfo.info, cameraInfo.info);
