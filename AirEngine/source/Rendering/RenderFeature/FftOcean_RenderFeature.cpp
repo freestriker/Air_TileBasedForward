@@ -109,7 +109,6 @@ AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOcean_RenderFeat
 	: RenderFeatureDataBase()
 	, isInitialized(false)
 	, gaussianNoiseImageStagingBuffer(nullptr)
-	, gaussianNoiseImage(nullptr)
 {
 
 }
@@ -187,12 +186,43 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 			VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT,
 			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 		);
-		featureData->gaussianNoiseImage = Core::Graphic::Instance::Image::Create2DImage(
+	}
+
+	{
+		featureData->imageArray = Core::Graphic::Instance::Image::Create2DImageArray(
 			imageExtent,
-			VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT,
-			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
+			VkFormat::VK_FORMAT_R32G32_SFLOAT,
+			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
 			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
+			9
+		);
+		for (int layerIndex = 0; layerIndex < featureData->imageArray->LayerCount(); ++layerIndex)
+		{
+			featureData->imageArray->AddImageView(
+				"ImageView" + std::to_string(layerIndex),
+				VkImageViewType::VK_IMAGE_VIEW_TYPE_2D,
+				VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
+				layerIndex, 1
+			);
+		}
+		featureData->imageArray->AddImageView(
+			"GaussianNoiseImageGroup",
+			VkImageViewType::VK_IMAGE_VIEW_TYPE_2D_ARRAY,
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
+			0, 2
+		);
+		featureData->imageArray->AddImageView(
+			"SpectrumImageGroup",
+			VkImageViewType::VK_IMAGE_VIEW_TYPE_2D_ARRAY,
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
+			2, 3
+		);
+		featureData->imageArray->AddImageView(
+			"ImageGroup",
+			VkImageViewType::VK_IMAGE_VIEW_TYPE_2D_ARRAY,
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
+			6, 3
 		);
 	}
 
@@ -206,41 +236,10 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
 		);
-		featureData->phillipsSpectrumMaterial->SetStorageImage2D("gaussianNoiseImage", featureData->gaussianNoiseImage);
+		featureData->phillipsSpectrumMaterial->SetStorageImage2D("imageArray", featureData->imageArray, "GaussianNoiseImageGroup");
 		featureData->phillipsSpectrumMaterial->SetStorageImage2D("phillipsSpectrumImage", featureData->phillipsSpectrumImage);
 	}
 
-	{
-		featureData->imageArray = Core::Graphic::Instance::Image::Create2DImageArray(
-			imageExtent,
-			VkFormat::VK_FORMAT_R32G32_SFLOAT,
-			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
-			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
-			7
-		);
-		for (int layerIndex = 0; layerIndex < featureData->imageArray->LayerCount(); ++layerIndex)
-		{
-			featureData->imageArray->AddImageView(
-				"ImageView" + std::to_string(layerIndex),
-				VkImageViewType::VK_IMAGE_VIEW_TYPE_2D,
-				VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
-				layerIndex, 1
-			);
-		}
-		featureData->imageArray->AddImageView(
-			"SpectrumImageGroup",
-			VkImageViewType::VK_IMAGE_VIEW_TYPE_2D_ARRAY,
-			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
-			0, 3
-		);
-		featureData->imageArray->AddImageView(
-			"ImageGroup",
-			VkImageViewType::VK_IMAGE_VIEW_TYPE_2D_ARRAY,
-			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
-			4, 3
-		);
-	}
 
 	{
 		featureData->spectrumShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\FftOcean_Spectrum_Shader.shader");
@@ -297,7 +296,6 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnDestroyRende
 
 	delete featureData->frameBuffer;
 
-	delete featureData->gaussianNoiseImage;
 	delete featureData->gaussianNoiseImageStagingBuffer;
 
 	delete featureData->imageArray;
@@ -354,10 +352,6 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 				auto&& x2 = normalDistribution(gen);
 				auto&& x3 = normalDistribution(gen);
 				auto&& x4 = normalDistribution(gen);
-				//float g1 = std::sqrt(-2.0f * std::log(x1)) * std::cos(2.0f * PI * x2);
-				//float g2 = std::sqrt(-2.0f * std::log(x1)) * std::sin(2.0f * PI * x2);
-				//dataVector[index * 2] = g1;
-				//dataVector[index * 2 + 1] = g2;
 				dataVector[index * 4] = x1;
 				dataVector[index * 4 + 1] = x2;
 				dataVector[index * 4 + 2] = x3;
@@ -371,7 +365,8 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			{
 				auto gaussianNoiseImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
 				(
-					featureData.gaussianNoiseImage,
+					featureData.imageArray,
+					"GaussianNoiseImageGroup",
 					VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
 					VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 					VkAccessFlagBits::VK_ACCESS_NONE,
@@ -384,12 +379,13 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 				);
 			}
 
-			commandBuffer->CopyBufferToImage(featureData.gaussianNoiseImageStagingBuffer, featureData.gaussianNoiseImage, VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
+			commandBuffer->CopyBufferToImage(featureData.gaussianNoiseImageStagingBuffer, featureData.imageArray, "GaussianNoiseImageGroup", VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
 
 			{
 				auto gaussianNoiseImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
 				(
-					featureData.gaussianNoiseImage,
+					featureData.imageArray,
+					"GaussianNoiseImageGroup",
 					VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 					VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 					VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
@@ -466,13 +462,13 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		}
 	}
 
-	int heightSpectrumImageIndex = 0;
-	int xSpectrumImageIndex = 1;
-	int ySpectrumImageIndex = 2;
-	int tempImageIndex = 3;
-	int heightImageIndex = 4;
-	int xImageIndex = 5;
-	int yImageIndex = 6;
+	int heightSpectrumImageIndex = 2;
+	int xSpectrumImageIndex = 3;
+	int ySpectrumImageIndex = 4;
+	int tempImageIndex = 5;
+	int heightImageIndex = 6;
+	int xImageIndex = 7;
+	int yImageIndex = 8;
 
 	// spectrum
 	{
@@ -510,9 +506,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		spectrumInfo.NM = featureData.NM;
 		spectrumInfo.L = featureData.L;
 		spectrumInfo.time = time;
-		spectrumInfo.heightSpectrumImageIndex = heightSpectrumImageIndex;
-		spectrumInfo.xSpectrumImageIndex = xSpectrumImageIndex;
-		spectrumInfo.ySpectrumImageIndex = ySpectrumImageIndex;
+		spectrumInfo.heightSpectrumImageIndex = 0;
+		spectrumInfo.xSpectrumImageIndex = 1;
+		spectrumInfo.ySpectrumImageIndex = 2;
 
 		commandBuffer->PushConstant(featureData.spectrumMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, spectrumInfo);
 		commandBuffer->Dispatch(featureData.spectrumMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);

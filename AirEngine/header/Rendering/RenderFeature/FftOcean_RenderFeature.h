@@ -123,7 +123,6 @@ namespace AirEngine
 					Core::Graphic::Rendering::FrameBuffer* frameBuffer;
 
 					Core::Graphic::Instance::Buffer* gaussianNoiseImageStagingBuffer;
-					Core::Graphic::Instance::Image* gaussianNoiseImage;
 
 					Core::Graphic::Instance::Image* imageArray;
 
