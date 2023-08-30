@@ -195,7 +195,7 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
 			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
-			9
+			11
 		);
 		for (int layerIndex = 0; layerIndex < featureData->imageArray->LayerCount(); ++layerIndex)
 		{
@@ -213,39 +213,37 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 			0, 2
 		);
 		featureData->imageArray->AddImageView(
+			"PhillipsSpectrumImageGroup",
+			VkImageViewType::VK_IMAGE_VIEW_TYPE_2D_ARRAY,
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
+			2, 2
+		);
+		featureData->imageArray->AddImageView(
 			"SpectrumImageGroup",
 			VkImageViewType::VK_IMAGE_VIEW_TYPE_2D_ARRAY,
 			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
-			2, 3
+			4, 3
 		);
 		featureData->imageArray->AddImageView(
 			"ImageGroup",
 			VkImageViewType::VK_IMAGE_VIEW_TYPE_2D_ARRAY,
 			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
-			6, 3
+			8, 3
 		);
 	}
 
 	{
 		featureData->phillipsSpectrumShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\FftOcean_PhillipsSpectrum_Shader.shader");
 		featureData->phillipsSpectrumMaterial = new Core::Graphic::Rendering::Material(featureData->phillipsSpectrumShader);
-		featureData->phillipsSpectrumImage = Core::Graphic::Instance::Image::Create2DImage(
-			imageExtent,
-			VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT,
-			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
-			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
-			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
-		);
-		featureData->phillipsSpectrumMaterial->SetStorageImage2D("imageArray", featureData->imageArray, "GaussianNoiseImageGroup");
-		featureData->phillipsSpectrumMaterial->SetStorageImage2D("phillipsSpectrumImage", featureData->phillipsSpectrumImage);
+		featureData->phillipsSpectrumMaterial->SetStorageImage2D("gaussianNoiseImageArray", featureData->imageArray, "GaussianNoiseImageGroup");
+		featureData->phillipsSpectrumMaterial->SetStorageImage2D("phillipsSpectrumImageArray", featureData->imageArray, "PhillipsSpectrumImageGroup");
 	}
-
 
 	{
 		featureData->spectrumShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\FftOcean_Spectrum_Shader.shader");
 		featureData->spectrumMaterial = new Core::Graphic::Rendering::Material(featureData->spectrumShader);
-		featureData->spectrumMaterial->SetStorageImage2D("phillipsSpectrumImage", featureData->phillipsSpectrumImage);
-		featureData->spectrumMaterial->SetStorageImage2D("imageArray", featureData->imageArray, "SpectrumImageGroup");
+		featureData->spectrumMaterial->SetStorageImage2D("phillipsSpectrumImageArray", featureData->imageArray, "PhillipsSpectrumImageGroup");
+		featureData->spectrumMaterial->SetStorageImage2D("spectrumImageArray", featureData->imageArray, "SpectrumImageGroup");
 	}
 
 	{
@@ -300,7 +298,6 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnDestroyRende
 
 	delete featureData->imageArray;
 
-	delete featureData->phillipsSpectrumImage;
 	delete featureData->phillipsSpectrumMaterial;
 	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\FftOcean_PhillipsSpectrum_Shader.shader");
 
@@ -410,7 +407,8 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		{
 			auto phillipsSpectrumImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
 			(
-				featureData.phillipsSpectrumImage,
+				featureData.imageArray,
+				"PhillipsSpectrumImageGroup",
 				VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
 				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 				VkAccessFlagBits::VK_ACCESS_NONE,
@@ -448,7 +446,8 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		{
 			auto phillipsSpectrumImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
 			(
-				featureData.phillipsSpectrumImage,
+				featureData.imageArray,
+				"PhillipsSpectrumImageGroup",
 				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 				VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
@@ -462,13 +461,13 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		}
 	}
 
-	int heightSpectrumImageIndex = 2;
-	int xSpectrumImageIndex = 3;
-	int ySpectrumImageIndex = 4;
-	int tempImageIndex = 5;
-	int heightImageIndex = 6;
-	int xImageIndex = 7;
-	int yImageIndex = 8;
+	int heightSpectrumImageIndex = 4;
+	int xSpectrumImageIndex = 5;
+	int ySpectrumImageIndex = 6;
+	int tempImageIndex = 7;
+	int heightImageIndex = 8;
+	int xImageIndex = 9;
+	int yImageIndex = 10;
 
 	// spectrum
 	{
@@ -495,20 +494,20 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			glm::ivec2 NM;
 			float L;
 			float time;
-			int heightSpectrumImageIndex;
-			int xSpectrumImageIndex;
-			int ySpectrumImageIndex;
-			int xSlopeSpectrumImageIndex;
-			int ySlopeSpectrumImageIndex;
+			//int heightSpectrumImageIndex;
+			//int xSpectrumImageIndex;
+			//int ySpectrumImageIndex;
+			//int xSlopeSpectrumImageIndex;
+			//int ySlopeSpectrumImageIndex;
 		};
 		SpectrumInfo spectrumInfo{};
 		spectrumInfo.imageSize = featureData.imageSize;
 		spectrumInfo.NM = featureData.NM;
 		spectrumInfo.L = featureData.L;
 		spectrumInfo.time = time;
-		spectrumInfo.heightSpectrumImageIndex = 0;
-		spectrumInfo.xSpectrumImageIndex = 1;
-		spectrumInfo.ySpectrumImageIndex = 2;
+		//spectrumInfo.heightSpectrumImageIndex = 0;
+		//spectrumInfo.xSpectrumImageIndex = 1;
+		//spectrumInfo.ySpectrumImageIndex = 2;
 
 		commandBuffer->PushConstant(featureData.spectrumMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, spectrumInfo);
 		commandBuffer->Dispatch(featureData.spectrumMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);

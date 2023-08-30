@@ -17,8 +17,8 @@ layout(push_constant) uniform GenerateFrequencyConstantInfo
 	float windDependency;
 } constantInfo;
 
-layout (set = 0, binding = 0, rgba32f) uniform image2DArray imageArray;
-layout (set = 1, binding = 0, rgba32f) uniform image2D phillipsSpectrumImage;
+layout (set = 0, binding = 0, rg32f) uniform readonly image2DArray gaussianNoiseImageArray;
+layout (set = 1, binding = 0, rg32f) uniform image2DArray phillipsSpectrumImageArray;
 
 float Phillips(in vec2 k)
 {
@@ -54,8 +54,9 @@ void main()
 
 	const vec2 k = 2 * PI * vec2(vec2(threadPosition) - 0.5 * vec2(constantInfo.imageSize)) / constantInfo.L;
 
-    const vec2 hTilde0 = imageLoad(imageArray, ivec3(pixelPosition, 0)).xy * sqrt(abs(Phillips(k)) / 2);
-    const vec2 hTilde0Conj = imageLoad(imageArray, ivec3(pixelPosition, 1)).xy * sqrt(abs(Phillips(-k)) / 2)/* * vec2(1, -1)*/;
+    const vec2 hTilde0 = imageLoad(gaussianNoiseImageArray, ivec3(pixelPosition, 0)).xy * sqrt(abs(Phillips(k)) / 2);
+    const vec2 hTilde0Conj = imageLoad(gaussianNoiseImageArray, ivec3(pixelPosition, 1)).xy * sqrt(abs(Phillips(-k)) / 2)/* * vec2(1, -1)*/;
 
-	imageStore(phillipsSpectrumImage, pixelPosition, vec4(hTilde0, hTilde0Conj));
+	imageStore(phillipsSpectrumImageArray, ivec3(pixelPosition, 0), vec4(hTilde0, 0, 0));
+	imageStore(phillipsSpectrumImageArray, ivec3(pixelPosition, 1), vec4(hTilde0Conj, 0, 0));
 }

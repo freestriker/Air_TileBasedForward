@@ -13,15 +13,15 @@ layout(push_constant) uniform SpectrumConstantInfo
 	ivec2 NM;
 	float L;
 	float time;
-	int heightSpectrumImageIndex;
-	int xSpectrumImageIndex;
-	int ySpectrumImageIndex;
+	// int heightSpectrumImageIndex;
+	// int xSpectrumImageIndex;
+	// int ySpectrumImageIndex;
 	// int xSlopeSpectrumImageIndex;
 	// int ySlopeSpectrumImageIndex;
 } constantInfo;
 
-layout (set = 0, binding = 0, rgba32f) uniform readonly image2D phillipsSpectrumImage;
-layout (set = 1, binding = 0, rg32f) uniform image2DArray imageArray;
+layout (set = 0, binding = 0, rg32f) uniform readonly image2DArray phillipsSpectrumImageArray;
+layout (set = 1, binding = 0, rg32f) uniform image2DArray spectrumImageArray;
 
 vec2 ComplexMultiply(in vec2 a, in vec2 b) 
 {
@@ -40,10 +40,8 @@ void main()
 
 	const vec2 k = 2 * PI * vec2(vec2(threadPosition) - 0.5 * vec2(constantInfo.NM)) / constantInfo.L;
 
-    const vec4 phillipsSpectrum = imageLoad(phillipsSpectrumImage, pixelPosition).xyzw;
-
-    const vec2 hTilde0 = phillipsSpectrum.xy;
-    const vec2 hTilde0Conj = phillipsSpectrum.zw;
+    const vec2 hTilde0 = imageLoad(phillipsSpectrumImageArray, ivec3(pixelPosition, 0)).xy;
+    const vec2 hTilde0Conj = imageLoad(phillipsSpectrumImageArray, ivec3(pixelPosition, 1)).xy;
 
     const float omegat = sqrt(G * length(k)) * constantInfo.time;
     const float c = cos(omegat);
@@ -53,7 +51,7 @@ void main()
     const vec2 h2 = ComplexMultiply(hTilde0Conj, vec2(c, -s));
 
     const vec2 heightSpectrum = h1 + h2;
-	imageStore(imageArray, ivec3(pixelPosition, constantInfo.heightSpectrumImageIndex), vec4(heightSpectrum, 0, 0));
+	imageStore(spectrumImageArray, ivec3(pixelPosition, 0), vec4(heightSpectrum, 0, 0));
 
 	// const vec2 xSlopeSpectrum = ComplexMultiply(vec2(0, 1), heightSpectrum) * k.x;
 	// const vec2 ySlopeSpectrum = ComplexMultiply(vec2(0, 1), heightSpectrum) * k.y;
@@ -65,6 +63,6 @@ void main()
 
 	const vec2 xSpectrum = ComplexMultiply(vec2(0, -1), heightSpectrum) * k.x * Knorm.x;
 	const vec2 ySpectrum = ComplexMultiply(vec2(0, -1), heightSpectrum) * k.y * Knorm.y;
-	imageStore(imageArray, ivec3(pixelPosition, constantInfo.xSpectrumImageIndex), vec4(xSpectrum, 0, 0));
-	imageStore(imageArray, ivec3(pixelPosition, constantInfo.ySpectrumImageIndex), vec4(ySpectrum, 0, 0));
+	imageStore(spectrumImageArray, ivec3(pixelPosition, 1), vec4(xSpectrum, 0, 0));
+	imageStore(spectrumImageArray, ivec3(pixelPosition, 2), vec4(ySpectrum, 0, 0));
 }

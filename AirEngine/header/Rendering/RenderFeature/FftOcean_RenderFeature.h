@@ -126,7 +126,6 @@ namespace AirEngine
 
 					Core::Graphic::Instance::Image* imageArray;
 
-					Core::Graphic::Instance::Image* phillipsSpectrumImage;
 					Core::Graphic::Rendering::Shader* phillipsSpectrumShader;
 					Core::Graphic::Rendering::Material* phillipsSpectrumMaterial;
 
