@@ -11,9 +11,9 @@ layout(push_constant) uniform ResolveConstantInfo
 {
     ivec2 imageSize;
 	ivec2 NM;
-	int heightImageIndex;
-	int xImageIndex;
-	int yImageIndex;
+	// int heightImageIndex;
+	// int xImageIndex;
+	// int yImageIndex;
 	vec3 displacementFactor;
 	// int xSlopeImageIndex;
 	// int ySlopeImageIndex;
@@ -39,9 +39,9 @@ void main()
 	const ivec2 pixelPosition = threadPosition;
 	const int MN = constantInfo.NM.x * constantInfo.NM.y;
 
-	const float height = length(imageLoad(imageArray, ivec3(pixelPosition, constantInfo.heightImageIndex)).rg) / MN;
-	const float x = length(imageLoad(imageArray, ivec3(pixelPosition, constantInfo.xImageIndex)).rg) / MN;
-	const float y = length(imageLoad(imageArray, ivec3(pixelPosition, constantInfo.yImageIndex)).rg) / MN;
+	const float height = length(imageLoad(imageArray, ivec3(pixelPosition, 0)).rg) / MN;
+	const float x = length(imageLoad(imageArray, ivec3(pixelPosition, 1)).rg) / MN;
+	const float y = length(imageLoad(imageArray, ivec3(pixelPosition, 2)).rg) / MN;
 	// const float height = imageLoad(imageArray, ivec3(pixelPosition, constantInfo.heightImageIndex)).r / MN;
 	// const float x = imageLoad(imageArray, ivec3(pixelPosition, constantInfo.xImageIndex)).r / MN;
 	// const float y = imageLoad(imageArray, ivec3(pixelPosition, constantInfo.yImageIndex)).r / MN;

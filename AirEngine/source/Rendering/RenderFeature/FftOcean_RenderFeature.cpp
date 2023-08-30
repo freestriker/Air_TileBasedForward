@@ -270,7 +270,7 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 		
 		featureData->resolveShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\FftOcean_Resolve_Shader.shader");
 		featureData->resolveMaterial = new Core::Graphic::Rendering::Material(featureData->resolveShader);
-		featureData->resolveMaterial->SetStorageImage2D("imageArray", featureData->imageArray);
+		featureData->resolveMaterial->SetStorageImage2D("imageArray", featureData->imageArray, "ImageGroup");
 		featureData->resolveMaterial->SetStorageImage2D("displacementImage", featureData->displacementImage);
 		featureData->resolveMaterial->SetStorageImage2D("normalImage", featureData->normalImage);
 	}
@@ -806,9 +806,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		{
 			glm::ivec2 imageSize;
 			glm::ivec2 NM;
-			int heightImageIndex;
-			int xImageIndex;
-			int yImageIndex;
+			//int heightImageIndex;
+			//int xImageIndex;
+			//int yImageIndex;
 			//int xSlopeImageIndex;
 			//int ySlopeImageIndex;
 			alignas(8) glm::vec3 displacementFactor;
@@ -822,9 +822,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		ResolveConstantInfo resolveConstantInfo{};
 		resolveConstantInfo.imageSize = featureData.imageSize;
 		resolveConstantInfo.NM = featureData.NM;
-		resolveConstantInfo.heightImageIndex = heightImageIndex;
-		resolveConstantInfo.xImageIndex = xImageIndex;
-		resolveConstantInfo.yImageIndex = yImageIndex;
+		//resolveConstantInfo.heightImageIndex = heightImageIndex;
+		//resolveConstantInfo.xImageIndex = xImageIndex;
+		//resolveConstantInfo.yImageIndex = yImageIndex;
 		resolveConstantInfo.displacementFactor = featureData.displacementFactor;
 		//resolveConstantInfo.xSlopeImageIndex = xSlopeImageIndex;
 		//resolveConstantInfo.ySlopeImageIndex = ySlopeImageIndex;
