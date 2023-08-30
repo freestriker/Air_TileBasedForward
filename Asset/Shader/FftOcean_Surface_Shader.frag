@@ -3,6 +3,7 @@
 
 #include "Camera.glsl"
 #include "Object.glsl"
+#include "Light.glsl"
 // #include "TBForwardLighting.glsl"
 
 // layout(set = START_SET_INDEX + 0, binding = 0) uniform sampler2D albedoTexture;
@@ -10,15 +11,31 @@
 // layout(set = START_SET_INDEX + 2, binding = 0) uniform sampler2D rmoTexture;
 
 layout(location = 0) in vec2 inTexCoords;
-// layout(location = 1) in vec3 inWorldPosition;
+layout(location = 1) in vec3 inWorldPosition;
 // layout(location = 2) in vec3 inWorldNormal;
 // layout(location = 3) in vec3 inWorldTangent;
 // layout(location = 4) in vec3 inWorldBitangent;
 
 layout(location = 0) out vec4 ColorAttachment;
 
-layout(set = 3, binding = 0) uniform sampler2D normalTexture;
-layout(set = 4, binding = 0) uniform sampler2D albedoTexture;
+layout(set = 0, binding = 0) uniform _CameraInfo
+{
+    CameraInfo info;
+} cameraInfo;
+layout(set = 1, binding = 0) uniform MeshObjectInfo
+{
+    ObjectInfo info;
+} meshObjectInfo;
+#define MAX_ORTHER_LIGHT_COUNT 256
+layout(set = 2, binding = 0) uniform LightInfos
+{
+    LightInfo ambientLightInfo;
+    LightInfo mainLightInfo;
+    int ortherLightCount;
+    LightInfo[MAX_ORTHER_LIGHT_COUNT] ortherLightInfos;
+} lightInfos;
+layout(set = 3, binding = 0) uniform sampler2D displacementTexture;
+layout(set = 4, binding = 0) uniform sampler2D normalTexture;
 
 void main() 
 {
@@ -26,7 +43,6 @@ void main()
     // vec3 t = cross(normalize(inWorldNormal), normalize(inWorldBitangent));
     // vec3 wNormal = normalize(TBNMatrix(t, b, inWorldNormal) * NormalC2T(texture(normalTexture, inTexCoords)));
     // // vec3 wNormal = normalize(normalize(inWorldNormal) + wDisturbance);
-    // // vec3 wNormal = normalize(inWorldNormal);
     // vec3 wView = CameraWObserveDirection(inWorldPosition, cameraInfo.info);
     // vec3 albedo = texture(albedoTexture, inTexCoords).rgb;
     // vec3 rmo = texture(rmoTexture, inTexCoords).rgb;
@@ -55,12 +71,44 @@ void main()
     // radiance += iblRadiance * occlusion * rmo.z;
 
     // ColorAttachment = vec4(radiance / (radiance + vec3(1)), 1);
-    const vec3 color = texture(albedoTexture, inTexCoords).rgb;
     const vec4 normal_bubbles = texture(normalTexture, inTexCoords).rgba;
-    const vec3 normal = normal_bubbles.xyz;
+    const vec3 normal = normalize(normal_bubbles.xyz);
     const float bubbles = normal_bubbles.w;
-    const vec3 normalColor = max(vec3(bubbles), ParseFromColor(normal));
-    ColorAttachment = vec4(normalColor, 1);
+
+    vec3 Ci;
+    {
+        vec3 upwelling = vec3(0, 0.2, 0.3);
+        vec3 sky = vec3(0.69,0.84,1);
+        vec3 air = vec3(0.1,0.1,0.1);
+        float nSnell = 1.34;
+        float Kdiffuse = 0.91;
+   
+        vec3 nI = normalize(-lightInfos.mainLightInfo.direction);
+        vec3 nN = normalize(normal);
+        float costhetai = abs(dot(nI, nN));
+        float thetai = acos(costhetai);
+        float sinthetat = sin(thetai) / nSnell;
+        float thetat = asin(sinthetat);
+        float reflectivity;
+        if(thetai == 0.0)
+        {
+            reflectivity = (nSnell - 1) / (nSnell + 1);
+            reflectivity = reflectivity * reflectivity;
+        }
+        else
+        {
+            float fs = sin(thetat - thetai) / sin(thetat + thetai);
+            float ts = tan(thetat - thetai) / tan(thetat + thetai);
+            reflectivity = 0.5 * (fs * fs + ts * ts);
+        }
+        float dist = exp(-length(inWorldPosition - cameraInfo.info.position) * Kdiffuse);
+        Ci = /*dist * */(reflectivity * sky + (1 - reflectivity) * upwelling) + (1 - dist) * air;
+    }
+
+    ColorAttachment = vec4(Ci + vec3(bubbles), 1);
+
+    // const vec3 normalColor = max(vec3(bubbles), ParseToColor(normal));
+    // ColorAttachment = vec4(normalColor, 1);
     // ColorAttachment = vec4(normalize(inWorldNormal) * 0.5 + vec3(0.5), 1);
     // ColorAttachment = vec4(normalize(inWorldTangent) * 0.5 + vec3(0.5), 1);
     // ColorAttachment = vec4(normalize(inWorldBitangent) * 0.5 + vec3(0.5), 1);

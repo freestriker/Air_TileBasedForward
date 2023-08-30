@@ -167,6 +167,7 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	featureData->minVertexPosition = { 0, 0 };
 	featureData->maxVertexPosition = { 1, 1 };
 	featureData->displacementFactor = { 1, 1, 1 };
+	featureData->normalScale = 1;
 	featureData->bubblesLambda = 1;
 	featureData->bubblesThreshold = 1;
 	featureData->bubblesScale = 85;
@@ -426,6 +427,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			glm::ivec2 imageSize;
 			glm::ivec2 NM;
 			glm::vec2 windDirection;
+			float L;
 			float windSpeed;
 			float time;
 			float a;
@@ -437,6 +439,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		constexpr double PI = 3.141592653589793;
 		const auto&& radian = featureData.windRotationAngle / 360 * 2 * PI;
 		phillipsSpectrumInfo.windDirection = glm::normalize(glm::vec2(std::cos(radian), std::sin(radian)));
+		phillipsSpectrumInfo.L = featureData.L;
 		phillipsSpectrumInfo.windSpeed = featureData.windSpeed;
 		phillipsSpectrumInfo.time = time;
 		phillipsSpectrumInfo.a = featureData.a;
@@ -505,6 +508,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		{
 			glm::ivec2 imageSize;
 			glm::ivec2 NM;
+			float L;
 			float time;
 			int heightSpectrumImageIndex;
 			int xSpectrumImageIndex;
@@ -515,6 +519,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		SpectrumInfo spectrumInfo{};
 		spectrumInfo.imageSize = featureData.imageSize;
 		spectrumInfo.NM = featureData.NM;
+		spectrumInfo.L = featureData.L;
 		spectrumInfo.time = time;
 		spectrumInfo.heightSpectrumImageIndex = heightSpectrumImageIndex;
 		spectrumInfo.xSpectrumImageIndex = xSpectrumImageIndex;
@@ -956,7 +961,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			//int xSlopeImageIndex;
 			//int ySlopeImageIndex;
 			alignas(8) glm::vec3 displacementFactor;
-			alignas(8) glm::vec2 L;
+			//alignas(8) glm::vec2 L;
+			alignas(8) glm::ivec2 meshEdgeVertexCount;
+			float normalScale;
 			float bubblesLambda;
 			float bubblesThreshold;
 			float bubblesScale;
@@ -970,7 +977,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		resolveConstantInfo.displacementFactor = featureData.displacementFactor;
 		//resolveConstantInfo.xSlopeImageIndex = xSlopeImageIndex;
 		//resolveConstantInfo.ySlopeImageIndex = ySlopeImageIndex;
-		resolveConstantInfo.L = { featureData.L, featureData.L };
+		resolveConstantInfo.meshEdgeVertexCount = { 257, 257 };
+		//resolveConstantInfo.L = { featureData.L, featureData.L };
+		resolveConstantInfo.normalScale = featureData.normalScale;
 		resolveConstantInfo.bubblesLambda = featureData.bubblesLambda;
 		resolveConstantInfo.bubblesThreshold = featureData.bubblesThreshold;
 		resolveConstantInfo.bubblesScale = featureData.bubblesScale;
@@ -1049,6 +1058,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			material->SetUniformBuffer("meshObjectInfo", rendererComponent->ObjectInfoBuffer());
 			material->SetSampledImage2D("displacementTexture", featureData.displacementImage, _linearSampler);
 			material->SetSampledImage2D("normalTexture", featureData.normalImage, _pointSampler);
+			material->SetUniformBuffer("lightInfos", Core::Graphic::CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
 
 			//commandBuffer->PushConstant(material, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT, surfaceConstantInfo);
 			commandBuffer->DrawMesh(rendererComponent->mesh, material);
@@ -1170,6 +1180,17 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 			Utils::Log::Message("displacementFactor.z: " + std::to_string(fftOceanDataPtr->displacementFactor.z));
 		});
 		pLayout->addRow(QStringLiteral("displacementFactor.z: "), lineEdit);
+	}
+
+	// normalScale
+	{
+		QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->normalScale)), this);
+		lineEdit->setValidator(doubleValidator);
+		lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+			fftOceanDataPtr->normalScale = string.toFloat();
+			Utils::Log::Message("normalScale: " + std::to_string(fftOceanDataPtr->normalScale));
+		});
+		pLayout->addRow(QStringLiteral("normalScale: "), lineEdit);
 	}
 
 	// bubblesLambda
