@@ -446,7 +446,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		phillipsSpectrumInfo.windDependency = featureData.windDependency;
 
 		commandBuffer->PushConstant(featureData.phillipsSpectrumMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, phillipsSpectrumInfo);
-		commandBuffer->Dispatch(featureData.phillipsSpectrumMaterial, (featureData.imageSize.x + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, (featureData.imageSize.y + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, 1);
+		commandBuffer->Dispatch(featureData.phillipsSpectrumMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);
 
 		{
 			auto phillipsSpectrumImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
@@ -528,7 +528,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		spectrumInfo.ySlopeSpectrumImageIndex = ySlopeSpectrumImageIndex;
 
 		commandBuffer->PushConstant(featureData.spectrumMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, spectrumInfo);
-		commandBuffer->Dispatch(featureData.spectrumMaterial, (featureData.imageSize.x + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, (featureData.imageSize.y + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, 1);
+		commandBuffer->Dispatch(featureData.spectrumMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);
 	}
 
 	// copy
@@ -633,7 +633,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 				ifftConstantInfo.targetIndex = targetImageIndex;
 
 				commandBuffer->PushConstant(featureData.ifftMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, ifftConstantInfo);
-				commandBuffer->Dispatch(featureData.ifftMaterial, (featureData.imageSize.x + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, (featureData.imageSize.y + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, 1);
+				commandBuffer->Dispatch(featureData.ifftMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);
 				{
 					auto imageArrayBarrier = Core::Graphic::Command::ImageMemoryBarrier
 					(
@@ -663,7 +663,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 				ifftConstantInfo.targetIndex = targetImageIndex;
 
 				commandBuffer->PushConstant(featureData.ifftMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, ifftConstantInfo);
-				commandBuffer->Dispatch(featureData.ifftMaterial, (featureData.imageSize.x + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, (featureData.imageSize.y + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, 1);
+				commandBuffer->Dispatch(featureData.ifftMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);
 				{
 					auto imageArrayBarrier = Core::Graphic::Command::ImageMemoryBarrier
 					(
@@ -699,7 +699,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 				ifftConstantInfo.targetIndex = targetImageIndex;
 
 				commandBuffer->PushConstant(featureData.ifftMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, ifftConstantInfo);
-				commandBuffer->Dispatch(featureData.ifftMaterial, (featureData.imageSize.x + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, (featureData.imageSize.y + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, 1);
+				commandBuffer->Dispatch(featureData.ifftMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);
 				{
 					auto imageArrayBarrier = Core::Graphic::Command::ImageMemoryBarrier
 					(
@@ -729,7 +729,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 				ifftConstantInfo.targetIndex = targetImageIndex;
 
 				commandBuffer->PushConstant(featureData.ifftMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, ifftConstantInfo);
-				commandBuffer->Dispatch(featureData.ifftMaterial, (featureData.imageSize.x + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, (featureData.imageSize.y + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, 1);
+				commandBuffer->Dispatch(featureData.ifftMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);
 				{
 					auto imageArrayBarrier = Core::Graphic::Command::ImageMemoryBarrier
 					(
@@ -765,7 +765,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 				ifftConstantInfo.targetIndex = targetImageIndex;
 
 				commandBuffer->PushConstant(featureData.ifftMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, ifftConstantInfo);
-				commandBuffer->Dispatch(featureData.ifftMaterial, (featureData.imageSize.x + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, (featureData.imageSize.y + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, 1);
+				commandBuffer->Dispatch(featureData.ifftMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);
 				{
 					auto imageArrayBarrier = Core::Graphic::Command::ImageMemoryBarrier
 					(
@@ -795,7 +795,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 				ifftConstantInfo.targetIndex = targetImageIndex;
 
 				commandBuffer->PushConstant(featureData.ifftMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, ifftConstantInfo);
-				commandBuffer->Dispatch(featureData.ifftMaterial, (featureData.imageSize.x + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, (featureData.imageSize.y + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, 1);
+				commandBuffer->Dispatch(featureData.ifftMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);
 				{
 					auto imageArrayBarrier = Core::Graphic::Command::ImageMemoryBarrier
 					(
@@ -830,7 +830,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 				ifftConstantInfo.targetIndex = targetImageIndex;
 
 				commandBuffer->PushConstant(featureData.ifftMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, ifftConstantInfo);
-				commandBuffer->Dispatch(featureData.ifftMaterial, (featureData.imageSize.x + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, (featureData.imageSize.y + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, 1);
+				commandBuffer->Dispatch(featureData.ifftMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);
 				{
 					auto imageArrayBarrier = Core::Graphic::Command::ImageMemoryBarrier
 					(
@@ -860,7 +860,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 				ifftConstantInfo.targetIndex = targetImageIndex;
 
 				commandBuffer->PushConstant(featureData.ifftMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, ifftConstantInfo);
-				commandBuffer->Dispatch(featureData.ifftMaterial, (featureData.imageSize.x + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, (featureData.imageSize.y + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, 1);
+				commandBuffer->Dispatch(featureData.ifftMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);
 				{
 					auto imageArrayBarrier = Core::Graphic::Command::ImageMemoryBarrier
 					(
@@ -896,7 +896,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 				ifftConstantInfo.targetIndex = targetImageIndex;
 
 				commandBuffer->PushConstant(featureData.ifftMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, ifftConstantInfo);
-				commandBuffer->Dispatch(featureData.ifftMaterial, (featureData.imageSize.x + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, (featureData.imageSize.y + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, 1);
+				commandBuffer->Dispatch(featureData.ifftMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);
 				{
 					auto imageArrayBarrier = Core::Graphic::Command::ImageMemoryBarrier
 					(
@@ -926,7 +926,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 				ifftConstantInfo.targetIndex = targetImageIndex;
 
 				commandBuffer->PushConstant(featureData.ifftMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, ifftConstantInfo);
-				commandBuffer->Dispatch(featureData.ifftMaterial, (featureData.imageSize.x + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, (featureData.imageSize.y + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, 1);
+				commandBuffer->Dispatch(featureData.ifftMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);
 				{
 					auto imageArrayBarrier = Core::Graphic::Command::ImageMemoryBarrier
 					(
@@ -1009,7 +1009,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		}
 
 		commandBuffer->PushConstant(featureData.resolveMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, resolveConstantInfo);
-		commandBuffer->Dispatch(featureData.resolveMaterial, (featureData.imageSize.x + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, (featureData.imageSize.y + LOCAL_GROUP_WIDTH - 1) / LOCAL_GROUP_WIDTH, 1);
+		commandBuffer->Dispatch(featureData.resolveMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);
 		
 		{
 			auto displacementImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
