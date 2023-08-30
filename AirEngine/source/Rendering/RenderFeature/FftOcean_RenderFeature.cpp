@@ -1058,6 +1058,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			material->SetUniformBuffer("meshObjectInfo", rendererComponent->ObjectInfoBuffer());
 			material->SetSampledImage2D("displacementTexture", featureData.displacementImage, _linearSampler);
 			material->SetSampledImage2D("normalTexture", featureData.normalImage, _pointSampler);
+			material->SetUniformBuffer("lightInfos", Core::Graphic::CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
 
 			//commandBuffer->PushConstant(material, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT, surfaceConstantInfo);
 			commandBuffer->DrawMesh(rendererComponent->mesh, material);
