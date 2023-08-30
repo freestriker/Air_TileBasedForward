@@ -102,6 +102,7 @@ namespace AirEngine
 					friend class FftOcean_RenderFeature;
 				public:
 					bool isInitialized;
+					bool isDirty;
 					glm::ivec2 imageSize;
 					float L;
 					glm::ivec2 NM;

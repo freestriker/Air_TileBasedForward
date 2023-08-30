@@ -156,6 +156,7 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	auto featureData = new FftOcean_RenderFeatureData();
 
 	featureData->isInitialized = false;
+	featureData->isDirty = true;
 	featureData->imageSize = { 512, 512 };
 	featureData->L = 512;
 	featureData->NM = featureData->imageSize;
@@ -406,7 +407,10 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 	const auto&& time = Core::Logic::CoreObject::Instance::time.LaunchDuration();
 
 	// phillips spectrum
+	if(featureData.isDirty)
 	{
+		featureData.isDirty = false;
+
 		{
 			auto phillipsSpectrumImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
 			(
@@ -422,26 +426,23 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 				{ &phillipsSpectrumImageBarrier }
 			);
 		}
+
 		struct PhillipsSpectrumInfo
 		{
 			glm::ivec2 imageSize;
-			glm::ivec2 NM;
 			glm::vec2 windDirection;
 			float L;
 			float windSpeed;
-			float time;
 			float a;
 			float windDependency;
 		};
 		PhillipsSpectrumInfo phillipsSpectrumInfo{};
 		phillipsSpectrumInfo.imageSize = featureData.imageSize;
-		phillipsSpectrumInfo.NM = featureData.NM;
 		constexpr double PI = 3.141592653589793;
 		const auto&& radian = featureData.windRotationAngle / 360 * 2 * PI;
 		phillipsSpectrumInfo.windDirection = glm::normalize(glm::vec2(std::cos(radian), std::sin(radian)));
 		phillipsSpectrumInfo.L = featureData.L;
 		phillipsSpectrumInfo.windSpeed = featureData.windSpeed;
-		phillipsSpectrumInfo.time = time;
 		phillipsSpectrumInfo.a = featureData.a;
 		phillipsSpectrumInfo.windDependency = featureData.windDependency;
 
@@ -476,14 +477,6 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 	// spectrum
 	{
 		{
-			auto phillipsSpectrumImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
-			(
-				featureData.phillipsSpectrumImage,
-				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-				VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
-				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-			);
 			auto tempImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
 			(
 				featureData.imageArray,
@@ -496,7 +489,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			commandBuffer->AddPipelineImageBarrier(
 				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
 				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-				{ &phillipsSpectrumImageBarrier, &tempImageBarrier }
+				{ &tempImageBarrier }
 			);
 		}
 
@@ -963,6 +956,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 		lineEdit->setValidator(doubleValidator);
 		lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
 			fftOceanDataPtr->L = string.toFloat();
+			fftOceanDataPtr->isDirty = true;
 			Utils::Log::Message("L: " + std::to_string(fftOceanDataPtr->L));
 		});
 		pLayout->addRow(QStringLiteral("L: "), lineEdit);
@@ -974,6 +968,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 		lineEdit->setValidator(doubleValidator);
 		lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
 			fftOceanDataPtr->windRotationAngle = string.toFloat();
+			fftOceanDataPtr->isDirty = true;
 			Utils::Log::Message("windRotationAngle: " + std::to_string(fftOceanDataPtr->windRotationAngle));
 		});
 		pLayout->addRow(QStringLiteral("windRotationAngle: "), lineEdit);
@@ -985,6 +980,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 		lineEdit->setValidator(doubleValidator);
 		lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
 			fftOceanDataPtr->windSpeed = string.toFloat();
+			fftOceanDataPtr->isDirty = true;
 			Utils::Log::Message("windSpeed: " + std::to_string(fftOceanDataPtr->windSpeed));
 		});
 		pLayout->addRow(QStringLiteral("windSpeed: "), lineEdit);
@@ -996,6 +992,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 		lineEdit->setValidator(doubleValidator);
 		lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
 			fftOceanDataPtr->a = string.toFloat();
+			fftOceanDataPtr->isDirty = true;
 			Utils::Log::Message("a: " + std::to_string(fftOceanDataPtr->a));
 		});
 		pLayout->addRow(QStringLiteral("a: "), lineEdit);
@@ -1007,6 +1004,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 		lineEdit->setValidator(doubleValidator);
 		lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
 			fftOceanDataPtr->windDependency = string.toFloat();
+			fftOceanDataPtr->isDirty = true;
 			Utils::Log::Message("windDependency: " + std::to_string(fftOceanDataPtr->windDependency));
 		});
 		pLayout->addRow(QStringLiteral("windDependency: "), lineEdit);

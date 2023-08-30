@@ -10,11 +10,9 @@ layout (local_size_x = LOCAL_GROUP_WIDTH, local_size_y = LOCAL_GROUP_WIDTH) in;
 layout(push_constant) uniform GenerateFrequencyConstantInfo
 {
     ivec2 imageSize;
-	ivec2 NM;
 	vec2 windDirection;
 	float L;
 	float windSpeed;
-	float time;
 	float a;
 	float windDependency;
 } constantInfo;
@@ -54,7 +52,7 @@ void main()
 	
 	const ivec2 pixelPosition = threadPosition;
 
-	const vec2 k = 2 * PI * vec2(vec2(threadPosition) - 0.5 * vec2(constantInfo.NM)) / constantInfo.L;
+	const vec2 k = 2 * PI * vec2(vec2(threadPosition) - 0.5 * vec2(constantInfo.imageSize)) / constantInfo.L;
 
     const vec4 gaussianNoise = imageLoad(gaussianNoiseImage, pixelPosition).xyzw;
 
