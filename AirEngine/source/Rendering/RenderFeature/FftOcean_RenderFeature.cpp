@@ -216,7 +216,7 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_TRANSFER_DST_BIT,
 			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
-			11
+			7
 		);
 		for (int layerIndex = 0; layerIndex < featureData->imageArray->LayerCount(); ++layerIndex)
 		{
@@ -231,13 +231,13 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 			"SpectrumImageGroup",
 			VkImageViewType::VK_IMAGE_VIEW_TYPE_2D_ARRAY,
 			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
-			0, 5
+			0, 3
 		);
 		featureData->imageArray->AddImageView(
 			"ImageGroup",
 			VkImageViewType::VK_IMAGE_VIEW_TYPE_2D_ARRAY,
 			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
-			6, 5
+			4, 3
 		);
 	}
 
@@ -468,14 +468,10 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 	int heightSpectrumImageIndex = 0;
 	int xSpectrumImageIndex = 1;
 	int ySpectrumImageIndex = 2;
-	int xSlopeSpectrumImageIndex = 3;
-	int ySlopeSpectrumImageIndex = 4;
-	int tempImageIndex = 5;
-	int heightImageIndex = 6;
-	int xImageIndex = 7;
-	int yImageIndex = 8;
-	int xSlopeImageIndex = 9;
-	int ySlopeImageIndex = 10;
+	int tempImageIndex = 3;
+	int heightImageIndex = 4;
+	int xImageIndex = 5;
+	int yImageIndex = 6;
 
 	// spectrum
 	{
@@ -524,8 +520,6 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		spectrumInfo.heightSpectrumImageIndex = heightSpectrumImageIndex;
 		spectrumInfo.xSpectrumImageIndex = xSpectrumImageIndex;
 		spectrumInfo.ySpectrumImageIndex = ySpectrumImageIndex;
-		spectrumInfo.xSlopeSpectrumImageIndex = xSlopeSpectrumImageIndex;
-		spectrumInfo.ySlopeSpectrumImageIndex = ySlopeSpectrumImageIndex;
 
 		commandBuffer->PushConstant(featureData.spectrumMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, spectrumInfo);
 		commandBuffer->Dispatch(featureData.spectrumMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);
@@ -754,137 +748,6 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		// y
 		{
 			auto& sourceImageIndex = yImageIndex;
-			auto& targetImageIndex = tempImageIndex;
-
-			ifftConstantInfo.isHorizen = 1;
-			for (int ifftIndex = 0, blockSize = 1; ifftIndex < ifftXCount; ++ifftIndex, blockSize *= 2)
-			{
-				ifftConstantInfo.isLast = (ifftIndex == ifftXCount - 1) ? 1 : 0;
-				ifftConstantInfo.blockSize = blockSize;
-				ifftConstantInfo.sourceIndex = sourceImageIndex;
-				ifftConstantInfo.targetIndex = targetImageIndex;
-
-				commandBuffer->PushConstant(featureData.ifftMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, ifftConstantInfo);
-				commandBuffer->Dispatch(featureData.ifftMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);
-				{
-					auto imageArrayBarrier = Core::Graphic::Command::ImageMemoryBarrier
-					(
-						featureData.imageArray,
-						"ImageView" + std::to_string(ifftConstantInfo.targetIndex),
-						VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-						VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-						VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
-						VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-					);
-					commandBuffer->AddPipelineImageBarrier(
-						VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-						VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-						{ &imageArrayBarrier }
-					);
-				}
-
-				std::swap(sourceImageIndex, targetImageIndex);
-			}
-
-			ifftConstantInfo.isHorizen = 0;
-			for (int ifftIndex = 0, blockSize = 1; ifftIndex < ifftYCount; ++ifftIndex, blockSize *= 2)
-			{
-				ifftConstantInfo.isLast = (ifftIndex == ifftYCount - 1) ? 1 : 0;
-				ifftConstantInfo.blockSize = blockSize;
-				ifftConstantInfo.sourceIndex = sourceImageIndex;
-				ifftConstantInfo.targetIndex = targetImageIndex;
-
-				commandBuffer->PushConstant(featureData.ifftMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, ifftConstantInfo);
-				commandBuffer->Dispatch(featureData.ifftMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);
-				{
-					auto imageArrayBarrier = Core::Graphic::Command::ImageMemoryBarrier
-					(
-						featureData.imageArray,
-						"ImageView" + std::to_string(ifftConstantInfo.targetIndex),
-						VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-						VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-						VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
-						VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-					);
-					commandBuffer->AddPipelineImageBarrier(
-						VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-						VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-						{ &imageArrayBarrier }
-					);
-				}
-
-				std::swap(sourceImageIndex, targetImageIndex);
-			}
-		}
-		// xSlope
-		{
-			auto& sourceImageIndex = xSlopeImageIndex;
-			auto& targetImageIndex = tempImageIndex;
-
-			ifftConstantInfo.isHorizen = 1;
-			for (int ifftIndex = 0, blockSize = 1; ifftIndex < ifftXCount; ++ifftIndex, blockSize *= 2)
-			{
-				ifftConstantInfo.isLast = (ifftIndex == ifftXCount - 1) ? 1 : 0;
-				ifftConstantInfo.blockSize = blockSize;
-				ifftConstantInfo.sourceIndex = sourceImageIndex;
-				ifftConstantInfo.targetIndex = targetImageIndex;
-
-				commandBuffer->PushConstant(featureData.ifftMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, ifftConstantInfo);
-				commandBuffer->Dispatch(featureData.ifftMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);
-				{
-					auto imageArrayBarrier = Core::Graphic::Command::ImageMemoryBarrier
-					(
-						featureData.imageArray,
-						"ImageView" + std::to_string(ifftConstantInfo.targetIndex),
-						VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-						VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-						VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
-						VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-					);
-					commandBuffer->AddPipelineImageBarrier(
-						VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-						VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-						{ &imageArrayBarrier }
-					);
-				}
-
-				std::swap(sourceImageIndex, targetImageIndex);
-			}
-
-			ifftConstantInfo.isHorizen = 0;
-			for (int ifftIndex = 0, blockSize = 1; ifftIndex < ifftYCount; ++ifftIndex, blockSize *= 2)
-			{
-				ifftConstantInfo.isLast = (ifftIndex == ifftYCount - 1) ? 1 : 0;
-				ifftConstantInfo.blockSize = blockSize;
-				ifftConstantInfo.sourceIndex = sourceImageIndex;
-				ifftConstantInfo.targetIndex = targetImageIndex;
-
-				commandBuffer->PushConstant(featureData.ifftMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, ifftConstantInfo);
-				commandBuffer->Dispatch(featureData.ifftMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);
-				{
-					auto imageArrayBarrier = Core::Graphic::Command::ImageMemoryBarrier
-					(
-						featureData.imageArray,
-						"ImageView" + std::to_string(ifftConstantInfo.targetIndex),
-						VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-						VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
-						VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
-						VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
-					);
-					commandBuffer->AddPipelineImageBarrier(
-						VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-						VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
-						{ &imageArrayBarrier }
-					);
-				}
-
-				std::swap(sourceImageIndex, targetImageIndex);
-			}
-		}
-
-		// ySlope
-		{
-			auto& sourceImageIndex = ySlopeImageIndex;
 			auto& targetImageIndex = tempImageIndex;
 
 			ifftConstantInfo.isHorizen = 1;
