@@ -230,7 +230,7 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 			7, 4
 		);
 		featureData->imageArray->AddImageView(
-			"originalDisplacementImageGroup",
+			"OriginalDisplacementImageGroup",
 			VkImageViewType::VK_IMAGE_VIEW_TYPE_2D_ARRAY,
 			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
 			8, 3
@@ -275,7 +275,7 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 		
 		featureData->resolveShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\FftOcean_Resolve_Shader.shader");
 		featureData->resolveMaterial = new Core::Graphic::Rendering::Material(featureData->resolveShader);
-		featureData->resolveMaterial->SetStorageImage2D("originalDisplacementImageArray", featureData->imageArray, "originalDisplacementImageGroup");
+		featureData->resolveMaterial->SetStorageImage2D("originalDisplacementImageArray", featureData->imageArray, "OriginalDisplacementImageGroup");
 		featureData->resolveMaterial->SetStorageImage2D("displacementImage", featureData->displacementImage);
 		featureData->resolveMaterial->SetStorageImage2D("normalImage", featureData->normalImage);
 	}
@@ -520,7 +520,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			auto imageGroupBarrier = Core::Graphic::Command::ImageMemoryBarrier
 			(
 				featureData.imageArray,
-				"originalDisplacementImageGroup",
+				"OriginalDisplacementImageGroup",
 				VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
 				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 				VkAccessFlagBits::VK_ACCESS_NONE,
@@ -535,7 +535,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 
 		commandBuffer->CopyImage(
 			featureData.imageArray, "SpectrumImageGroup", VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-			featureData.imageArray, "originalDisplacementImageGroup", VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+			featureData.imageArray, "OriginalDisplacementImageGroup", VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
 		);
 	}
 
@@ -563,7 +563,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			auto imageGroupBarrier = Core::Graphic::Command::ImageMemoryBarrier
 			(
 				featureData.imageArray,
-				"originalDisplacementImageGroup",
+				"OriginalDisplacementImageGroup",
 				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 				VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,

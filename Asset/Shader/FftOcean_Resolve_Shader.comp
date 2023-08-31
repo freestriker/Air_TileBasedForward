@@ -32,12 +32,12 @@ void main()
 	const ivec2 pixelPosition = threadPosition;
 	const int MN = constantInfo.imageSize.x * constantInfo.imageSize.y;
 
-	const float height = length(imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, 0)).rg) / MN;
-	const float x = length(imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, 1)).rg) / MN;
-	const float y = length(imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, 2)).rg) / MN;
-	// const float height = imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, constantInfo.heightImageIndex)).r / MN;
-	// const float x = imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, constantInfo.xImageIndex)).r / MN;
-	// const float y = imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, constantInfo.yImageIndex)).r / MN;
+	// const float height = -length(imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, 0)).rg) / MN;
+	// const float x = length(imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, 1)).rg) / MN;
+	// const float y = length(imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, 2)).rg) / MN;
+	const float height = -imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, 0)).r / MN;
+	const float x = imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, 1)).r / MN;
+	const float y = imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, 2)).r / MN;
 	imageStore(displacementImage, pixelPosition, vec4(x, height, y, 0) * vec4(constantInfo.displacementFactor, 0));
 
 	memoryBarrierImage();
