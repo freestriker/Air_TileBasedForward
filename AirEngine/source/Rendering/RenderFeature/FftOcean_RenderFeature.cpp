@@ -554,7 +554,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			auto tempImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
 			(
 				featureData.imageArray,
-				"ImageView" + std::to_string(tempImageIndex),
+				"ImageView" + std::to_string(tempImageIndex + IFFT_IMAGE_GROUP_OFFSET),
 				VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
 				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 				VkAccessFlagBits::VK_ACCESS_NONE,
@@ -875,10 +875,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
 			material->SetUniformBuffer("meshObjectInfo", rendererComponent->ObjectInfoBuffer());
 			material->SetSampledImage2D("displacementTexture", featureData.displacementImage, _linearSampler);
-			material->SetSampledImage2D("normalTexture", featureData.normalImage, _pointSampler);
+			material->SetSampledImage2D("normalTexture", featureData.normalImage, _linearSampler);
 			material->SetUniformBuffer("lightInfos", Core::Graphic::CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
 
-			//commandBuffer->PushConstant(material, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT, surfaceConstantInfo);
 			commandBuffer->DrawMesh(rendererComponent->mesh, material);
 		}
 		commandBuffer->EndRenderPass();
