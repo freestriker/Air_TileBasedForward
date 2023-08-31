@@ -105,7 +105,6 @@ namespace AirEngine
 					bool isDirty;
 					glm::ivec2 imageSize;
 					float L;
-					glm::ivec2 NM;
 					float windRotationAngle;
 					float windSpeed;
 					float a;

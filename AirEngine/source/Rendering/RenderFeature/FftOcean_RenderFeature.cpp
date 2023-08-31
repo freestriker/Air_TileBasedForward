@@ -158,7 +158,6 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	featureData->isDirty = true;
 	featureData->imageSize = { 512, 512 };
 	featureData->L = 512;
-	featureData->NM = featureData->imageSize;
 	featureData->windRotationAngle = 0;
 	featureData->windSpeed = 31;
 	featureData->a = 3;
@@ -225,7 +224,13 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 			4, 3
 		);
 		featureData->imageArray->AddImageView(
-			"ImageGroup",
+			"IfftImageGroup",
+			VkImageViewType::VK_IMAGE_VIEW_TYPE_2D_ARRAY,
+			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
+			7, 4
+		);
+		featureData->imageArray->AddImageView(
+			"originalDisplacementImageGroup",
 			VkImageViewType::VK_IMAGE_VIEW_TYPE_2D_ARRAY,
 			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT,
 			8, 3
@@ -249,7 +254,7 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	{
 		featureData->ifftShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\FftOcean_Ifft_Shader.shader");
 		featureData->ifftMaterial = new Core::Graphic::Rendering::Material(featureData->ifftShader);
-		featureData->ifftMaterial->SetStorageImage2D("imageArray", featureData->imageArray);
+		featureData->ifftMaterial->SetStorageImage2D("ifftImageArray", featureData->imageArray, "IfftImageGroup");
 	}
 
 	{
@@ -270,7 +275,7 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 		
 		featureData->resolveShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\FftOcean_Resolve_Shader.shader");
 		featureData->resolveMaterial = new Core::Graphic::Rendering::Material(featureData->resolveShader);
-		featureData->resolveMaterial->SetStorageImage2D("imageArray", featureData->imageArray, "ImageGroup");
+		featureData->resolveMaterial->SetStorageImage2D("originalDisplacementImageArray", featureData->imageArray, "originalDisplacementImageGroup");
 		featureData->resolveMaterial->SetStorageImage2D("displacementImage", featureData->displacementImage);
 		featureData->resolveMaterial->SetStorageImage2D("normalImage", featureData->normalImage);
 	}
@@ -412,7 +417,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 				VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
 				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 				VkAccessFlagBits::VK_ACCESS_NONE,
-				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT | VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
+				VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
 			);
 			commandBuffer->AddPipelineImageBarrier(
 				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
@@ -460,14 +465,11 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			);
 		}
 	}
-
-	int heightSpectrumImageIndex = 4;
-	int xSpectrumImageIndex = 5;
-	int ySpectrumImageIndex = 6;
-	int tempImageIndex = 7;
-	int heightImageIndex = 8;
-	int xImageIndex = 9;
-	int yImageIndex = 10;
+	constexpr int IFFT_IMAGE_GROUP_OFFSET = 7;
+	int tempImageIndex = 0;
+	int heightImageIndex = 1;
+	int xImageIndex = 2;
+	int yImageIndex = 3;
 
 	// spectrum
 	{
@@ -491,23 +493,13 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		struct SpectrumInfo
 		{
 			glm::ivec2 imageSize;
-			glm::ivec2 NM;
 			float L;
 			float time;
-			//int heightSpectrumImageIndex;
-			//int xSpectrumImageIndex;
-			//int ySpectrumImageIndex;
-			//int xSlopeSpectrumImageIndex;
-			//int ySlopeSpectrumImageIndex;
 		};
 		SpectrumInfo spectrumInfo{};
 		spectrumInfo.imageSize = featureData.imageSize;
-		spectrumInfo.NM = featureData.NM;
 		spectrumInfo.L = featureData.L;
 		spectrumInfo.time = time;
-		//spectrumInfo.heightSpectrumImageIndex = 0;
-		//spectrumInfo.xSpectrumImageIndex = 1;
-		//spectrumInfo.ySpectrumImageIndex = 2;
 
 		commandBuffer->PushConstant(featureData.spectrumMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, spectrumInfo);
 		commandBuffer->Dispatch(featureData.spectrumMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);
@@ -528,7 +520,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			auto imageGroupBarrier = Core::Graphic::Command::ImageMemoryBarrier
 			(
 				featureData.imageArray,
-				"ImageGroup",
+				"originalDisplacementImageGroup",
 				VkImageLayout::VK_IMAGE_LAYOUT_UNDEFINED,
 				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 				VkAccessFlagBits::VK_ACCESS_NONE,
@@ -543,7 +535,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 
 		commandBuffer->CopyImage(
 			featureData.imageArray, "SpectrumImageGroup", VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-			featureData.imageArray, "ImageGroup", VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
+			featureData.imageArray, "originalDisplacementImageGroup", VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL
 		);
 	}
 
@@ -571,7 +563,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			auto imageGroupBarrier = Core::Graphic::Command::ImageMemoryBarrier
 			(
 				featureData.imageArray,
-				"ImageGroup",
+				"originalDisplacementImageGroup",
 				VkImageLayout::VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 				VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT,
@@ -587,19 +579,17 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		struct IfftConstantInfo
 		{
 			glm::ivec2 imageSize;
-			glm::ivec2 NM;
 			int isLast;
 			int isHorizen;
 			int blockSize;
 			int sourceIndex;
 			int targetIndex;
 		};
-		const int ifftXCount = std::log2(featureData.NM.x);
-		const int ifftYCount = std::log2(featureData.NM.y);
+		const int ifftXCount = std::log2(featureData.imageSize.x);
+		const int ifftYCount = std::log2(featureData.imageSize.y);
 
 		IfftConstantInfo ifftConstantInfo{};
 		ifftConstantInfo.imageSize = featureData.imageSize;
-		ifftConstantInfo.NM = featureData.NM;
 
 		// height
 		{
@@ -620,7 +610,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 					auto imageArrayBarrier = Core::Graphic::Command::ImageMemoryBarrier
 					(
 						featureData.imageArray,
-						"ImageView" + std::to_string(ifftConstantInfo.targetIndex),
+						"ImageView" + std::to_string(ifftConstantInfo.targetIndex + IFFT_IMAGE_GROUP_OFFSET),
 						VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 						VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 						VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
@@ -650,7 +640,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 					auto imageArrayBarrier = Core::Graphic::Command::ImageMemoryBarrier
 					(
 						featureData.imageArray,
-						"ImageView" + std::to_string(ifftConstantInfo.targetIndex),
+						"ImageView" + std::to_string(ifftConstantInfo.targetIndex + IFFT_IMAGE_GROUP_OFFSET),
 						VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 						VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 						VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
@@ -686,7 +676,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 					auto imageArrayBarrier = Core::Graphic::Command::ImageMemoryBarrier
 					(
 						featureData.imageArray,
-						"ImageView" + std::to_string(ifftConstantInfo.targetIndex),
+						"ImageView" + std::to_string(ifftConstantInfo.targetIndex + IFFT_IMAGE_GROUP_OFFSET),
 						VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 						VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 						VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
@@ -716,7 +706,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 					auto imageArrayBarrier = Core::Graphic::Command::ImageMemoryBarrier
 					(
 						featureData.imageArray,
-						"ImageView" + std::to_string(ifftConstantInfo.targetIndex),
+						"ImageView" + std::to_string(ifftConstantInfo.targetIndex + IFFT_IMAGE_GROUP_OFFSET),
 						VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 						VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 						VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
@@ -752,7 +742,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 					auto imageArrayBarrier = Core::Graphic::Command::ImageMemoryBarrier
 					(
 						featureData.imageArray,
-						"ImageView" + std::to_string(ifftConstantInfo.targetIndex),
+						"ImageView" + std::to_string(ifftConstantInfo.targetIndex + IFFT_IMAGE_GROUP_OFFSET),
 						VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 						VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 						VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
@@ -782,7 +772,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 					auto imageArrayBarrier = Core::Graphic::Command::ImageMemoryBarrier
 					(
 						featureData.imageArray,
-						"ImageView" + std::to_string(ifftConstantInfo.targetIndex),
+						"ImageView" + std::to_string(ifftConstantInfo.targetIndex + IFFT_IMAGE_GROUP_OFFSET),
 						VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 						VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 						VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
@@ -805,15 +795,8 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		struct ResolveConstantInfo
 		{
 			glm::ivec2 imageSize;
-			glm::ivec2 NM;
-			//int heightImageIndex;
-			//int xImageIndex;
-			//int yImageIndex;
-			//int xSlopeImageIndex;
-			//int ySlopeImageIndex;
-			alignas(8) glm::vec3 displacementFactor;
-			//alignas(8) glm::vec2 L;
 			alignas(8) glm::ivec2 meshEdgeVertexCount;
+			alignas(8) glm::vec3 displacementFactor;
 			float normalScale;
 			float bubblesLambda;
 			float bubblesThreshold;
@@ -821,15 +804,8 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		};
 		ResolveConstantInfo resolveConstantInfo{};
 		resolveConstantInfo.imageSize = featureData.imageSize;
-		resolveConstantInfo.NM = featureData.NM;
-		//resolveConstantInfo.heightImageIndex = heightImageIndex;
-		//resolveConstantInfo.xImageIndex = xImageIndex;
-		//resolveConstantInfo.yImageIndex = yImageIndex;
 		resolveConstantInfo.displacementFactor = featureData.displacementFactor;
-		//resolveConstantInfo.xSlopeImageIndex = xSlopeImageIndex;
-		//resolveConstantInfo.ySlopeImageIndex = ySlopeImageIndex;
 		resolveConstantInfo.meshEdgeVertexCount = { 257, 257 };
-		//resolveConstantInfo.L = { featureData.L, featureData.L };
 		resolveConstantInfo.normalScale = featureData.normalScale;
 		resolveConstantInfo.bubblesLambda = featureData.bubblesLambda;
 		resolveConstantInfo.bubblesThreshold = featureData.bubblesThreshold;
@@ -891,15 +867,6 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 	{
 		commandBuffer->BeginRenderPass(_renderPass, featureData.frameBuffer);
 
-		//struct SurfaceConstantInfo
-		//{
-		//	glm::vec3 displacementFactor;
-		//};
-		//SurfaceConstantInfo surfaceConstantInfo{};
-		////surfaceConstantInfo.minVertexPosition = featureData.minVertexPosition;
-		////surfaceConstantInfo.maxVertexPosition = featureData.maxVertexPosition;
-		//surfaceConstantInfo.displacementFactor = featureData.displacementFactor;
-
 		for (const auto& rendererComponent : *rendererComponents)
 		{
 			auto material = rendererComponent->GetMaterial(_renderPassName);
@@ -916,7 +883,6 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		}
 		commandBuffer->EndRenderPass();
 	}
-
 
 	commandBuffer->EndRecord();
 }

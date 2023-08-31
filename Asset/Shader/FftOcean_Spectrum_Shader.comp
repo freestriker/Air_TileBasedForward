@@ -10,14 +10,8 @@ layout (local_size_x = LOCAL_GROUP_WIDTH, local_size_y = LOCAL_GROUP_WIDTH) in;
 layout(push_constant) uniform SpectrumConstantInfo
 {
 	ivec2 imageSize;
-	ivec2 NM;
 	float L;
 	float time;
-	// int heightSpectrumImageIndex;
-	// int xSpectrumImageIndex;
-	// int ySpectrumImageIndex;
-	// int xSlopeSpectrumImageIndex;
-	// int ySlopeSpectrumImageIndex;
 } constantInfo;
 
 layout (set = 0, binding = 0, rg32f) uniform readonly image2DArray phillipsSpectrumImageArray;
@@ -38,7 +32,7 @@ void main()
 	
 	const ivec2 pixelPosition = threadPosition;
 
-	const vec2 k = 2 * PI * vec2(vec2(threadPosition) - 0.5 * vec2(constantInfo.NM)) / constantInfo.L;
+	const vec2 k = 2 * PI * vec2(vec2(threadPosition) - 0.5 * vec2(constantInfo.imageSize)) / constantInfo.L;
 
     const vec2 hTilde0 = imageLoad(phillipsSpectrumImageArray, ivec3(pixelPosition, 0)).xy;
     const vec2 hTilde0Conj = imageLoad(phillipsSpectrumImageArray, ivec3(pixelPosition, 1)).xy;
