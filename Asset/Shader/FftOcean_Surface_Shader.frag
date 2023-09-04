@@ -10,25 +10,6 @@ layout(location = 1) in vec3 inWorldPosition;
 
 layout(location = 0) out vec4 ColorAttachment;
 
-// layout(set = 0, binding = 0) uniform _CameraInfo
-// {
-//     CameraInfo info;
-// } cameraInfo;
-// layout(set = 1, binding = 0) uniform MeshObjectInfo
-// {
-//     ObjectInfo info;
-// } meshObjectInfo;
-// #define MAX_ORTHER_LIGHT_COUNT 256
-// layout(set = 2, binding = 0) uniform LightInfos
-// {
-//     LightInfo ambientLightInfo;
-//     LightInfo mainLightInfo;
-//     int ortherLightCount;
-//     LightInfo[MAX_ORTHER_LIGHT_COUNT] ortherLightInfos;
-// } lightInfos;
-// layout(set = 3, binding = 0) uniform sampler2D displacementTexture;
-// layout(set = 4, binding = 0) uniform sampler2D normalTexture;
-
 layout(set = 0, binding = 0) uniform _CameraInfo
 {
     CameraInfo info;
@@ -55,6 +36,16 @@ layout(push_constant) uniform ProjectedGridConstantInfo
 
 void main() 
 {
+    // vec2 texCoords;
+    // {
+    //     const vec2 offset = mod(inWorldPosition.xz, constantInfo.scale.xz);
+    //     texCoords = offset / constantInfo.scale.xz;
+    //     texCoords.x = 1 - texCoords.x;
+    // }
+    // const vec2 inTexCoords = texCoords;
+    // ivec2 ij = ivec2(inWorldPosition.xz / constantInfo.scale.xz);
+    // if(!(ij.x == 0 && ij.y == 0)) discard;
+
     const vec4 normal_bubbles = texture(normalTexture, inTexCoords).rgba;
     const vec3 normal = normalize(normal_bubbles.xyz);
     const float bubbles = normal_bubbles.w;
@@ -90,4 +81,6 @@ void main()
     }
 
     ColorAttachment = vec4(Ci + vec3(bubbles), 1);
+    // ColorAttachment = vec4(inTexCoords, 1, 1);
+    // ColorAttachment = vec4(mod(inWorldPosition.xz, constantInfo.scale.xz) / constantInfo.scale.xz, 0, 1);
 }
