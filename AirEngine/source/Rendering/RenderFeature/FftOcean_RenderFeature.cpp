@@ -928,34 +928,34 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		const glm::dmat4&& cameraViewMatrix = glm::lookAt(eye, center, up);
 
 		const glm::dmat4&& cameraViewProjectionMatrix = cameraProjectionMatrix * cameraViewMatrix;
-		const glm::dmat4&& cameraViewInvProjectionMatrix = glm::inverse(cameraViewProjectionMatrix);
+		const glm::dmat4&& cameraInvViewProjectionMatrix = glm::inverse(cameraViewProjectionMatrix);
 
 		std::array<glm::dvec3, 8> cameraCornerPositions{};
 		{
 			glm::dvec4 temp{};
 
-			temp = cameraViewInvProjectionMatrix * glm::dvec4(-1, -1, 0, 1);
+			temp = cameraInvViewProjectionMatrix * glm::dvec4(-1, -1, 0, 1);
 			cameraCornerPositions.at(0) = temp / temp.w;
 
-			temp = cameraViewInvProjectionMatrix * glm::dvec4(+1, -1, 0, 1);
+			temp = cameraInvViewProjectionMatrix * glm::dvec4(+1, -1, 0, 1);
 			cameraCornerPositions.at(1) = temp / temp.w;
 
-			temp = cameraViewInvProjectionMatrix * glm::dvec4(-1, +1, 0, 1);
+			temp = cameraInvViewProjectionMatrix * glm::dvec4(-1, +1, 0, 1);
 			cameraCornerPositions.at(2) = temp / temp.w;
 
-			temp = cameraViewInvProjectionMatrix * glm::dvec4(+1, +1, 0, 1);
+			temp = cameraInvViewProjectionMatrix * glm::dvec4(+1, +1, 0, 1);
 			cameraCornerPositions.at(3) = temp / temp.w;
 
-			temp = cameraViewInvProjectionMatrix * glm::dvec4(-1, -1, +1, 1);
+			temp = cameraInvViewProjectionMatrix * glm::dvec4(-1, -1, +1, 1);
 			cameraCornerPositions.at(4) = temp / temp.w;
 
-			temp = cameraViewInvProjectionMatrix * glm::dvec4(+1, -1, +1, 1);
+			temp = cameraInvViewProjectionMatrix * glm::dvec4(+1, -1, +1, 1);
 			cameraCornerPositions.at(5) = temp / temp.w;
 
-			temp = cameraViewInvProjectionMatrix * glm::dvec4(-1, +1, +1, 1);
+			temp = cameraInvViewProjectionMatrix * glm::dvec4(-1, +1, +1, 1);
 			cameraCornerPositions.at(6) = temp / temp.w;
 
-			temp = cameraViewInvProjectionMatrix * glm::dvec4(+1, +1, +1, 1);
+			temp = cameraInvViewProjectionMatrix * glm::dvec4(+1, +1, +1, 1);
 			cameraCornerPositions.at(7) = temp / temp.w;
 		}
 
@@ -1044,7 +1044,76 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			needRenderWater = false;
 		}
 
+		const glm::dmat4&& rangeInvViewProjectionMatrix = cameraInvViewProjectionMatrix * rangeMatrix;
 
+		std::array<glm::dvec4, 4> uvDoubleCorners{};
+		{
+			{
+				double u = 0;
+				double v = 0;
+				auto& uvCorner = uvDoubleCorners.at(0);
+
+				glm::dvec4 origin(u, v, 0, 1);
+				glm::dvec4 direction(u, v, 1, 1);
+
+				origin = rangeInvViewProjectionMatrix * origin;
+				direction = rangeInvViewProjectionMatrix * direction;
+				direction = direction - origin;
+
+				double l = -origin.y / direction.y;
+
+				uvCorner = origin + direction * l;
+			}
+			{
+				double u = 1;
+				double v = 0;
+				auto& uvCorner = uvDoubleCorners.at(1);
+
+				glm::dvec4 origin(u, v, 0, 1);
+				glm::dvec4 direction(u, v, 1, 1);
+
+				origin = rangeInvViewProjectionMatrix * origin;
+				direction = rangeInvViewProjectionMatrix * direction;
+				direction = direction - origin;
+
+				double l = -origin.y / direction.y;
+
+				uvCorner = origin + direction * l;
+			}
+			{
+				double u = 0;
+				double v = 1;
+				auto& uvCorner = uvDoubleCorners.at(2);
+
+				glm::dvec4 origin(u, v, 0, 1);
+				glm::dvec4 direction(u, v, 1, 1);
+
+				origin = rangeInvViewProjectionMatrix * origin;
+				direction = rangeInvViewProjectionMatrix * direction;
+				direction = direction - origin;
+
+				double l = -origin.y / direction.y;
+
+				uvCorner = origin + direction * l;
+			}
+			{
+				double u = 1;
+				double v = 1;
+				auto& uvCorner = uvDoubleCorners.at(3);
+
+				glm::dvec4 origin(u, v, 0, 1);
+				glm::dvec4 direction(u, v, 1, 1);
+
+				origin = rangeInvViewProjectionMatrix * origin;
+				direction = rangeInvViewProjectionMatrix * direction;
+				direction = direction - origin;
+
+				double l = -origin.y / direction.y;
+
+				uvCorner = origin + direction * l;
+			}
+
+		}
 		int mmm = 0;
 	}
 
