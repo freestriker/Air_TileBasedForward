@@ -142,6 +142,10 @@ namespace AirEngine
 					Core::Graphic::Rendering::Material* resolveDisplacementMaterial;
 					Core::Graphic::Rendering::Shader* resolveNormalShader;
 					Core::Graphic::Rendering::Material* resolveNormalMaterial;
+
+					Asset::Mesh* surfaceMesh;
+					Core::Graphic::Rendering::Shader* surfaceShader;
+					Core::Graphic::Rendering::Material* surfaceMaterial;
 				public:
 
 					CONSTRUCTOR(FftOcean_RenderFeatureData)

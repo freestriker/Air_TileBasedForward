@@ -416,7 +416,7 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	cameraGo->AddComponent(new Test::CameraMoveBehaviour());
 	cameraGo->AddComponent(new Audio::AudioListener());
 	cameraGo->AddComponent(new Test::RendererDataController());
-	cameraGo->transform.SetTranslation({ 0, 0, 5 });
+	cameraGo->transform.SetTranslation({ 0, 0.5, 5 });
 
 	///AudioSource
 	Logic::Object::GameObject* audioSources = new Logic::Object::GameObject("AudioSources");
@@ -525,49 +525,49 @@ void AirEngine::Core::Logic::CoreObject::Thread::LogicThread::OnRun()
 	//	//}
 	//}
 
-	{
-		Logic::Object::GameObject* surfaceRendererGo = new Logic::Object::GameObject("FftOceanRenderer");
-		renderers->AddChild(surfaceRendererGo);
+	//{
+	//	Logic::Object::GameObject* surfaceRendererGo = new Logic::Object::GameObject("FftOceanRenderer");
+	//	renderers->AddChild(surfaceRendererGo);
 
-		//auto&& windRotator = new Test::IfftOcean_WindRotationBehaviour();
-		//windRotator->windRotationAngleSpeed = 35;
-		//surfaceRendererGo->AddComponent(windRotator);
+	//	//auto&& windRotator = new Test::IfftOcean_WindRotationBehaviour();
+	//	//windRotator->windRotationAngleSpeed = 35;
+	//	//surfaceRendererGo->AddComponent(windRotator);
 
-		auto&& renderer = new Renderer::Renderer();
+	//	auto&& renderer = new Renderer::Renderer();
 
-		surfaceRendererGo->AddComponent(renderer);
-		surfaceRendererGo->transform.SetTranslation({ 0, -1, -1 });
-		surfaceRendererGo->transform.SetScale({ 5, 5, 5 });
+	//	surfaceRendererGo->AddComponent(renderer);
+	//	surfaceRendererGo->transform.SetTranslation({ 0, -1, -1 });
+	//	surfaceRendererGo->transform.SetScale({ 5, 5, 5 });
 
-		renderer->mesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\Surface.ply");
-		surfaceRendererGo->AddComponent(renderer);
+	//	renderer->mesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\Surface.ply");
+	//	surfaceRendererGo->AddComponent(renderer);
 
-		auto sampler = new Core::Graphic::Instance::ImageSampler(
-			VkFilter::VK_FILTER_LINEAR,
-			VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_LINEAR,
-			VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT,
-			0.0f,
-			VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
-		);
+	//	auto sampler = new Core::Graphic::Instance::ImageSampler(
+	//		VkFilter::VK_FILTER_LINEAR,
+	//		VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_LINEAR,
+	//		VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_MIRRORED_REPEAT,
+	//		0.0f,
+	//		VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
+	//	);
 
-		{
-			//std::string _textureBasePath = "..\\Asset\\Texture\\Bricks";
-			//auto albedoTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(_textureBasePath + "_Albedo.json");
-			//auto normalTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(_textureBasePath + "_Normal.json");
-			//auto rmoTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(_textureBasePath + "_Rmo.json");
-			auto shader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\FftOcean_Surface_Shader.shader");
-			auto material = new Core::Graphic::Rendering::Material(shader);
-			//material->SetSampledImage2D("albedoTexture", albedoTexture, sampler);
-			//material->SetSampledImage2D("normalTexture", normalTexture, sampler);
-			//material->SetSampledImage2D("rmoTexture", rmoTexture, sampler);
-			renderer->AddMaterial(material);
-		}
-		//{
-		//	auto geometryShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\Geometry_Shader.shader");
-		//	auto geometryMaterial = new Core::Graphic::Rendering::Material(geometryShader);
-		//	renderer->AddMaterial(geometryMaterial);
-		//}
-	}
+	//	{
+	//		//std::string _textureBasePath = "..\\Asset\\Texture\\Bricks";
+	//		//auto albedoTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(_textureBasePath + "_Albedo.json");
+	//		//auto normalTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(_textureBasePath + "_Normal.json");
+	//		//auto rmoTexture = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Instance::Image>(_textureBasePath + "_Rmo.json");
+	//		auto shader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\FftOcean_Surface_Shader.shader");
+	//		auto material = new Core::Graphic::Rendering::Material(shader);
+	//		//material->SetSampledImage2D("albedoTexture", albedoTexture, sampler);
+	//		//material->SetSampledImage2D("normalTexture", normalTexture, sampler);
+	//		//material->SetSampledImage2D("rmoTexture", rmoTexture, sampler);
+	//		renderer->AddMaterial(material);
+	//	}
+	//	//{
+	//	//	auto geometryShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\Geometry_Shader.shader");
+	//	//	auto geometryMaterial = new Core::Graphic::Rendering::Material(geometryShader);
+	//	//	renderer->AddMaterial(geometryMaterial);
+	//	//}
+	//}
 
 	/////OIT
 	//Logic::Object::GameObject* oitRenderers = new Logic::Object::GameObject("OitRenderers");

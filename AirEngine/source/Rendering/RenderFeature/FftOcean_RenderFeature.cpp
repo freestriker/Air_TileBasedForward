@@ -173,7 +173,7 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	featureData->bubblesLambda = 1;
 	featureData->bubblesThreshold = 1;
 	featureData->bubblesScale = 85;
-	featureData->oceanScale = 10;
+	featureData->oceanScale = 5;
 	featureData->absDisplacement = glm::vec3(0.1, 0.12, 0.1);
 
 	featureData->launcher = new FftOceanDataWindowLauncher(*featureData);
@@ -287,6 +287,13 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 		featureData->resolveNormalMaterial = new Core::Graphic::Rendering::Material(featureData->resolveNormalShader);
 		featureData->resolveNormalMaterial->SetStorageImage2D("displacementImage", featureData->displacementImage);
 		featureData->resolveNormalMaterial->SetStorageImage2D("normalImage", featureData->normalImage);
+
+		featureData->surfaceMesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\Surface.ply");
+		featureData->surfaceShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\FftOcean_Surface_Shader.shader");
+		featureData->surfaceMaterial = new Core::Graphic::Rendering::Material(featureData->surfaceShader);
+		featureData->surfaceMaterial->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
+		featureData->surfaceMaterial->SetSampledImage2D("displacementTexture", featureData->displacementImage, _linearSampler);
+		featureData->surfaceMaterial->SetSampledImage2D("normalTexture", featureData->normalImage, _linearSampler);
 	}
 
 	return featureData;
@@ -897,6 +904,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 	}
 
 	// projected grid
+	std::array<glm::vec4, 4> uvCorners{};
 	{
 		if (dynamic_cast<Camera::PerspectiveCamera*>(camera) == nullptr)
 		{
@@ -1046,12 +1054,11 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 
 		const glm::dmat4&& rangeInvViewProjectionMatrix = cameraInvViewProjectionMatrix * rangeMatrix;
 
-		std::array<glm::dvec4, 4> uvDoubleCorners{};
 		{
 			{
 				double u = 0;
 				double v = 0;
-				auto& uvCorner = uvDoubleCorners.at(0);
+				auto& uvCorner = uvCorners.at(0);
 
 				glm::dvec4 origin(u, v, 0, 1);
 				glm::dvec4 direction(u, v, 1, 1);
@@ -1067,7 +1074,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			{
 				double u = 1;
 				double v = 0;
-				auto& uvCorner = uvDoubleCorners.at(1);
+				auto& uvCorner = uvCorners.at(1);
 
 				glm::dvec4 origin(u, v, 0, 1);
 				glm::dvec4 direction(u, v, 1, 1);
@@ -1083,7 +1090,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			{
 				double u = 0;
 				double v = 1;
-				auto& uvCorner = uvDoubleCorners.at(2);
+				auto& uvCorner = uvCorners.at(2);
 
 				glm::dvec4 origin(u, v, 0, 1);
 				glm::dvec4 direction(u, v, 1, 1);
@@ -1099,7 +1106,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			{
 				double u = 1;
 				double v = 1;
-				auto& uvCorner = uvDoubleCorners.at(3);
+				auto& uvCorner = uvCorners.at(3);
 
 				glm::dvec4 origin(u, v, 0, 1);
 				glm::dvec4 direction(u, v, 1, 1);
@@ -1112,28 +1119,34 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 
 				uvCorner = origin + direction * l;
 			}
-
 		}
-		int mmm = 0;
 	}
 
 	///Render
 	{
+		struct ProjectedGridInfo
+		{
+			glm::vec4 corner00;
+			glm::vec4 corner10;
+			glm::vec4 corner01;
+			glm::vec4 corner11;
+			glm::vec3 scale;
+		};
+		ProjectedGridInfo projectedGridInfo{};
+		projectedGridInfo.corner00 = uvCorners.at(0);
+		projectedGridInfo.corner10 = uvCorners.at(1);
+		projectedGridInfo.corner01 = uvCorners.at(2);
+		projectedGridInfo.corner11 = uvCorners.at(3);
+		projectedGridInfo.scale = { featureData.oceanScale, featureData.oceanScale, featureData.oceanScale };
+
 		commandBuffer->BeginRenderPass(_renderPass, featureData.frameBuffer);
 
-		for (const auto& rendererComponent : *rendererComponents)
-		{
-			auto material = rendererComponent->GetMaterial(_renderPassName);
-			if (material == nullptr) continue;
+		//featureData.surfaceMaterial->SetUniformBuffer("meshObjectInfo", rendererComponent->ObjectInfoBuffer());
+		featureData.surfaceMaterial->SetUniformBuffer("lightInfos", Core::Graphic::CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
 
-			material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
-			material->SetUniformBuffer("meshObjectInfo", rendererComponent->ObjectInfoBuffer());
-			material->SetSampledImage2D("displacementTexture", featureData.displacementImage, _linearSampler);
-			material->SetSampledImage2D("normalTexture", featureData.normalImage, _linearSampler);
-			material->SetUniformBuffer("lightInfos", Core::Graphic::CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
+		commandBuffer->PushConstant(featureData.surfaceMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT, projectedGridInfo);
+		commandBuffer->DrawMesh(featureData.surfaceMesh, featureData.surfaceMaterial);
 
-			commandBuffer->DrawMesh(rendererComponent->mesh, material);
-		}
 		commandBuffer->EndRenderPass();
 	}
 
