@@ -11,16 +11,14 @@ layout(push_constant) uniform ResolveConstantInfo
 {
     ivec2 imageSize;
 	ivec2 meshEdgeVertexCount;
-	vec3 displacementFactor;
 	float normalScale;
 	float bubblesLambda;
 	float bubblesThreshold;
 	float bubblesScale;
 } constantInfo;
 
-layout (set = 0, binding = 0, rg32f) uniform readonly image2DArray originalDisplacementImageArray;
-layout (set = 1, binding = 0, rgba32f) uniform image2D displacementImage;
-layout (set = 2, binding = 0, rgba32f) uniform image2D normalImage;
+layout (set = 0, binding = 0, rgba32f) uniform readonly image2D displacementImage;
+layout (set = 1, binding = 0, rgba32f) uniform writeonly image2D normalImage;
 
 void main()
 {	
@@ -30,20 +28,8 @@ void main()
 	if(constantInfo.imageSize.x <= threadPosition.x || constantInfo.imageSize.y <= threadPosition.y) return;
 	
 	const ivec2 pixelPosition = threadPosition;
-	const int MN = constantInfo.imageSize.x * constantInfo.imageSize.y;
-
-	// const float height = -length(imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, 0)).rg) / MN;
-	// const float x = length(imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, 1)).rg) / MN;
-	// const float y = length(imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, 2)).rg) / MN;
-	const float height = -imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, 0)).r / MN;
-	const float x = imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, 1)).r / MN;
-	const float y = imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, 2)).r / MN;
-	imageStore(displacementImage, pixelPosition, vec4(x, height, y, 0) * vec4(constantInfo.displacementFactor, 0));
-
-	memoryBarrierImage();
 
 	const vec2 uintLength = vec2(1) / (vec2(constantInfo.meshEdgeVertexCount) - vec2(1));
-	// const vec2 uintLength = vec2(0);
 
     const ivec2 uvX1 = ivec2((pixelPosition.x - 1 + constantInfo.imageSize.x) % constantInfo.imageSize.x, pixelPosition.y);
     const ivec2 uvX2 = ivec2((pixelPosition.x + 1 + constantInfo.imageSize.x) % constantInfo.imageSize.x, pixelPosition.y);
@@ -65,10 +51,6 @@ void main()
     const vec3 tangentZ = z2 - z1;
 
     const vec3 normal = normalize(cross(tangentZ, tangentX));
-
-	// const float xSlope = length(imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, constantInfo.xSlopeImageIndex)).rg) / MN;
-	// const float ySlope = length(imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, constantInfo.ySlopeImageIndex)).rg) / MN;
-	// const vec3 normal = normalize(vec3(-xSlope, 0.001, -ySlope));
 
     const vec3 ddx = x2D - x1D;
     const vec3 ddz = z2D - z1D;

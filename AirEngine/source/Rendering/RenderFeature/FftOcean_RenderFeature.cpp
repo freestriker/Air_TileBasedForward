@@ -273,11 +273,15 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
 		);
 		
-		featureData->resolveShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\FftOcean_Resolve_Shader.shader");
-		featureData->resolveMaterial = new Core::Graphic::Rendering::Material(featureData->resolveShader);
-		featureData->resolveMaterial->SetStorageImage2D("originalDisplacementImageArray", featureData->imageArray, "OriginalDisplacementImageGroup");
-		featureData->resolveMaterial->SetStorageImage2D("displacementImage", featureData->displacementImage);
-		featureData->resolveMaterial->SetStorageImage2D("normalImage", featureData->normalImage);
+		featureData->resolveDisplacementShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\FftOcean_ResolveDisplacement_Shader.shader");
+		featureData->resolveDisplacementMaterial = new Core::Graphic::Rendering::Material(featureData->resolveDisplacementShader);
+		featureData->resolveDisplacementMaterial->SetStorageImage2D("originalDisplacementImageArray", featureData->imageArray, "OriginalDisplacementImageGroup");
+		featureData->resolveDisplacementMaterial->SetStorageImage2D("displacementImage", featureData->displacementImage);
+		
+		featureData->resolveNormalShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\FftOcean_ResolveNormal_Shader.shader");
+		featureData->resolveNormalMaterial = new Core::Graphic::Rendering::Material(featureData->resolveNormalShader);
+		featureData->resolveNormalMaterial->SetStorageImage2D("displacementImage", featureData->displacementImage);
+		featureData->resolveNormalMaterial->SetStorageImage2D("normalImage", featureData->normalImage);
 	}
 
 	return featureData;
@@ -291,11 +295,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnDestroyRende
 {
 	auto featureData = static_cast<FftOcean_RenderFeatureData*>(renderFeatureData);
 
-	//QApplication::postEvent(featureData->launcher->window, new QEvent(QEvent::Close));
-	//QApplication::postEvent(featureData->launcher->window, new QEvent(QEvent::Destroy));
 	featureData->launcher->deleteLater();
-	//QApplication::postEvent(featureData->launcher, new QEvent(QEvent::Destroy));
-	//delete featureData->launcher;
 
 	delete featureData->frameBuffer;
 
@@ -314,8 +314,10 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnDestroyRende
 
 	delete featureData->displacementImage;
 	delete featureData->normalImage;
-	delete featureData->resolveMaterial;
-	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\FftOcean_Resolve_Shader.shader");
+	delete featureData->resolveDisplacementMaterial;
+	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\FftOcean_ResolveDisplacement_Shader.shader");
+	delete featureData->resolveNormalMaterial;
+	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\FftOcean_ResolveNormal_Shader.shader");
 
 	delete featureData;
 }
@@ -792,25 +794,6 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 
 	// resolve
 	{
-		struct ResolveConstantInfo
-		{
-			glm::ivec2 imageSize;
-			alignas(8) glm::ivec2 meshEdgeVertexCount;
-			alignas(8) glm::vec3 displacementFactor;
-			float normalScale;
-			float bubblesLambda;
-			float bubblesThreshold;
-			float bubblesScale;
-		};
-		ResolveConstantInfo resolveConstantInfo{};
-		resolveConstantInfo.imageSize = featureData.imageSize;
-		resolveConstantInfo.displacementFactor = featureData.displacementFactor;
-		resolveConstantInfo.meshEdgeVertexCount = { 257, 257 };
-		resolveConstantInfo.normalScale = featureData.normalScale;
-		resolveConstantInfo.bubblesLambda = featureData.bubblesLambda;
-		resolveConstantInfo.bubblesThreshold = featureData.bubblesThreshold;
-		resolveConstantInfo.bubblesScale = featureData.bubblesScale;
-
 		{
 			auto displacementImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
 			(
@@ -819,6 +802,34 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 				VkAccessFlagBits::VK_ACCESS_NONE,
 				VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
+			);
+			commandBuffer->AddPipelineImageBarrier(
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
+				{ &displacementImageBarrier }
+			);
+		}
+
+		struct ResolveDisplacementConstantInfo
+		{
+			glm::vec3 displacementFactor;
+			alignas(8) glm::ivec2 imageSize;
+		};
+		ResolveDisplacementConstantInfo resolveDisplacementConstantInfo{};
+		resolveDisplacementConstantInfo.imageSize = featureData.imageSize;
+		resolveDisplacementConstantInfo.displacementFactor = featureData.displacementFactor;
+
+		commandBuffer->PushConstant(featureData.resolveDisplacementMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, resolveDisplacementConstantInfo);
+		commandBuffer->Dispatch(featureData.resolveDisplacementMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);
+
+		{
+			auto displacementImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
+			(
+				featureData.displacementImage,
+				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
+				VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
+				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
 			);
 			auto normalImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
 			(
@@ -829,14 +840,31 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 				VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT
 			);
 			commandBuffer->AddPipelineImageBarrier(
-				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT,
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
 				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT,
 				{ &displacementImageBarrier, &normalImageBarrier }
 			);
 		}
 
-		commandBuffer->PushConstant(featureData.resolveMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, resolveConstantInfo);
-		commandBuffer->Dispatch(featureData.resolveMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);
+		struct ResolveNormalConstantInfo
+		{
+			glm::ivec2 imageSize;
+			glm::ivec2 meshEdgeVertexCount;
+			float normalScale;
+			float bubblesLambda;
+			float bubblesThreshold;
+			float bubblesScale;
+		};
+		ResolveNormalConstantInfo resolveNormalConstantInfo{};
+		resolveNormalConstantInfo.imageSize = featureData.imageSize;
+		resolveNormalConstantInfo.meshEdgeVertexCount = { 257, 257 };
+		resolveNormalConstantInfo.normalScale = featureData.normalScale;
+		resolveNormalConstantInfo.bubblesLambda = featureData.bubblesLambda;
+		resolveNormalConstantInfo.bubblesThreshold = featureData.bubblesThreshold;
+		resolveNormalConstantInfo.bubblesScale = featureData.bubblesScale;
+
+		commandBuffer->PushConstant(featureData.resolveNormalMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, resolveNormalConstantInfo);
+		commandBuffer->Dispatch(featureData.resolveNormalMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);
 		
 		{
 			auto displacementImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
@@ -844,7 +872,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 				featureData.displacementImage,
 				VkImageLayout::VK_IMAGE_LAYOUT_GENERAL,
 				VkImageLayout::VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
-				VkAccessFlagBits::VK_ACCESS_SHADER_WRITE_BIT,
+				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT,
 				VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT
 			);
 			auto normalImageBarrier = Core::Graphic::Command::ImageMemoryBarrier
@@ -861,7 +889,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 				{ &displacementImageBarrier, &normalImageBarrier }
 			);
 		}
-}
+	}
 
 	///Render
 	{
