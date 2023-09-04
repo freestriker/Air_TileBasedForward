@@ -59,6 +59,7 @@ void main()
 
     const vec3 displacement = texture(displacementTexture, worldTexCoords).xyz * constantInfo.scale;
     worldPosition.y = displacement.y;
+    worldPosition.xz = worldPosition.xz + displacement.xz;
 
     gl_Position = cameraInfo.info.projection * cameraInfo.info.view * worldPosition;
 

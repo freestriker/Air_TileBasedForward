@@ -1016,6 +1016,40 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			for (auto& cameraProjectedPosition : cameraProjectedPositions)
 			{
 				cameraProjectedPosition = cameraProjectedPosition - planeNormal * glm::dot(planeNormal, cameraProjectedPosition);
+			}
+
+			auto&& minMaxXIterPair = std::minmax_element(
+				cameraProjectedPositions.begin(), 
+				cameraProjectedPositions.end(),
+				[](const glm::dvec3& a, const glm::dvec3& b)->bool
+				{
+					return a.x < b.x;
+				}
+			);
+			auto&& minMaxZIterPair = std::minmax_element(
+				cameraProjectedPositions.begin(), 
+				cameraProjectedPositions.end(),
+				[](const glm::dvec3& a, const glm::dvec3& b)->bool
+				{
+					return a.z < b.z;
+				}
+			);
+			const double minX = minMaxXIterPair.first->x;
+			const double maxX = minMaxXIterPair.second->x;
+			const double minZ = minMaxZIterPair.first->z;
+			const double maxZ = minMaxZIterPair.second->z;
+
+			//const double minX = minMaxXIterPair.first->x - featureData.absDisplacement.x * featureData.oceanScale;
+			//const double maxX = minMaxXIterPair.second->x + featureData.absDisplacement.x * featureData.oceanScale;
+			//const double minZ = minMaxZIterPair.first->z - featureData.absDisplacement.z * featureData.oceanScale;
+			//const double maxZ = minMaxZIterPair.second->z + featureData.absDisplacement.z * featureData.oceanScale;
+			//cameraProjectedPositions.clear();
+			//cameraProjectedPositions.emplace_back(minX, 0, minZ);
+			//cameraProjectedPositions.emplace_back(minX, 0, maxZ);
+			//cameraProjectedPositions.emplace_back(maxX, 0, minZ);
+			//cameraProjectedPositions.emplace_back(maxX, 0, maxZ);
+			for (auto& cameraProjectedPosition : cameraProjectedPositions)
+			{
 				glm::dvec4 temp = cameraViewProjectionMatrix * glm::dvec4(cameraProjectedPosition, 1);
 				cameraProjectedPosition = temp / temp.w;
 			}
@@ -1141,7 +1175,6 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 
 		commandBuffer->BeginRenderPass(_renderPass, featureData.frameBuffer);
 
-		//featureData.surfaceMaterial->SetUniformBuffer("meshObjectInfo", rendererComponent->ObjectInfoBuffer());
 		featureData.surfaceMaterial->SetUniformBuffer("lightInfos", Core::Graphic::CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
 
 		commandBuffer->PushConstant(featureData.surfaceMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT, projectedGridInfo);
