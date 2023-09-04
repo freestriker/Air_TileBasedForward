@@ -149,10 +149,13 @@ void AirEngine::Core::Graphic::CoreObject::Window::Start()
     //QLoggingCategory::setFilterRules(QStringLiteral("qt.vulkan=true"));
 
     _qVulkanInstance = new QVulkanInstance();
-    auto supportVersion = _qVulkanInstance->supportedApiVersion();
-    _qVulkanInstance->setApiVersion(supportVersion);
+    //auto supportVersion = _qVulkanInstance->supportedApiVersion();
+    _qVulkanInstance->setApiVersion({1, 0, 0});
+    //auto&&ise = _qVulkanInstance->supportedExtensions();
+    //auto&& isl = _qVulkanInstance->supportedLayers();
     _qVulkanInstance->setLayers(QByteArrayList()
         << "VK_LAYER_KHRONOS_validation"
+        //<< "VK_LAYER_RENDERDOC_Capture"
     );
     if (!_qVulkanInstance->create())
         qFatal("Failed to create Vulkan instance: %d", _qVulkanInstance->errorCode());
@@ -176,13 +179,13 @@ void AirEngine::Core::Graphic::CoreObject::Window::Start()
     }
     _window->setPhysicalDeviceIndex(prefferedPhysicalDeviceIndex);
     //auto sde = _window->supportedDeviceExtensions();
-    ////_window->setEnabledFeaturesModifier([](VkPhysicalDeviceFeatures& feature)->void {
-    ////    
-    ////});
-    //_window->setDeviceExtensions(QByteArrayList()
-    //    << "VK_EXT_shader_atomic_float"
-    //    << VK_KHR_MAINTENANCE1_EXTENSION_NAME
-    //); 
+    //_window->setEnabledFeaturesModifier([](VkPhysicalDeviceFeatures& feature)->void {
+    //    
+    //});
+    _window->setDeviceExtensions(QByteArrayList()
+        //<< "VK_EXT_shader_atomic_float"
+        << VK_KHR_MAINTENANCE1_EXTENSION_NAME
+    ); 
     //auto queuePrioritieMapPtr = new std::map<uint32_t, std::vector<float>>();
     _window->setQueueCreateInfoModifier([](const VkQueueFamilyProperties* properties, uint32_t queueFamilyCount, QList<VkDeviceQueueCreateInfo>& infos)->void
     {

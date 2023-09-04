@@ -120,6 +120,7 @@
     <ClCompile Include="source\Rendering\RenderFeature\CSM_Visualization_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\ClearColorAttachment_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\CSM_ShadowCaster_RenderFeature.cpp" />
+    <ClCompile Include="source\Rendering\RenderFeature\FftOcean_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\Forward_Opaque_RenderFeature.cpp" />
     <ClCompile Include="source\Core\Graphic\Manager\RenderPipelineManager.cpp" />
     <ClCompile Include="source\Core\Graphic\Rendering\Material.cpp" />
@@ -145,7 +146,12 @@
     <ClCompile Include="source\Core\Graphic\Manager\RenderPassManager.cpp" />
     <ClCompile Include="source\Core\Graphic\Command\ImageMemoryBarrier.cpp" />
     <ClCompile Include="source\Core\Graphic\Instance\Buffer.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="main.cpp">
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(Filename).moc</QtMocFileName>
+      <DynamicSource Condition="'$(Configuration)|$(Platform)'=='Release|x64'">input</DynamicSource>
+      <QtMocFileName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(Filename).moc</QtMocFileName>
+    </ClCompile>
     <ClCompile Include="source\Asset\Mesh.cpp" />
     <ClCompile Include="source\Core\Graphic\Command\CommandBuffer.cpp" />
     <ClCompile Include="source\Core\Graphic\Command\CommandPool.cpp" />
@@ -200,6 +206,7 @@
     <ClCompile Include="source\Test\F_OpaqueRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\F_BrokenGlassRendererBehaviour.cpp" />
     <ClCompile Include="source\Test\F_WallRendererBehaviour.cpp" />
+    <ClCompile Include="source\Test\IfftOcean_WindRotationBehaviour.cpp" />
     <ClCompile Include="source\Test\QuadMoveBehaviour.cpp" />
     <ClCompile Include="source\Test\RendererDataController.cpp" />
     <ClCompile Include="source\Test\SelfRotateBehaviour.cpp" />
@@ -287,6 +294,7 @@
     <ClInclude Include="header\Rendering\RenderFeature\CSM_Visualization_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\ClearColorAttachment_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\CSM_ShadowCaster_RenderFeature.h" />
+    <ClInclude Include="header\Rendering\RenderFeature\FftOcean_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\Forward_Opaque_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\Forward_Transparent_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\GenerateLutMap_RenderFeature.h" />
@@ -311,6 +319,7 @@
     <ClInclude Include="header\Test\F_MirrorRendererBehaviour.h" />
     <ClInclude Include="header\Test\F_OpaqueRendererBehaviour.h" />
     <ClInclude Include="header\Test\F_WallRendererBehaviour.h" />
+    <ClInclude Include="header\Test\IfftOcean_WindRotationBehaviour.h" />
     <ClInclude Include="header\Test\QuadMoveBehaviour.h" />
     <ClInclude Include="header\Test\RendererDataController.h" />
     <ClInclude Include="header\Test\SelfRotateBehaviour.h" />

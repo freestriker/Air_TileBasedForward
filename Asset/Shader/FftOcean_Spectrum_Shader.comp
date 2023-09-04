@@ -1,0 +1,62 @@
+#version 450
+#extension GL_GOOGLE_include_directive: enable
+
+#define LOCAL_GROUP_WIDTH 16
+layout (local_size_x = LOCAL_GROUP_WIDTH, local_size_y = LOCAL_GROUP_WIDTH) in;
+
+#define PI (3.141592653589793)
+#define G (9.81)
+
+layout(push_constant) uniform SpectrumConstantInfo
+{
+	ivec2 imageSize;
+	float L;
+	float time;
+} constantInfo;
+
+layout (set = 0, binding = 0, rg32f) uniform readonly image2DArray phillipsSpectrumImageArray;
+layout (set = 1, binding = 0, rg32f) uniform image2DArray spectrumImageArray;
+
+vec2 ComplexMultiply(in vec2 a, in vec2 b) 
+{
+    const float real = a.x * b.x - a.y * b.y;
+    const float imag = a.x * b.y + a.y * b.x;
+    return vec2(real, imag);
+}
+void main()
+{	
+	// thread/saple Y = world Z
+	const ivec2 threadPosition = ivec2(gl_GlobalInvocationID.xy);
+
+	if(constantInfo.imageSize.x <= threadPosition.x || constantInfo.imageSize.y <= threadPosition.y) return;
+	
+	const ivec2 pixelPosition = threadPosition;
+
+	const vec2 k = 2 * PI * vec2(vec2(threadPosition) - 0.5 * vec2(constantInfo.imageSize)) / constantInfo.L;
+
+    const vec2 hTilde0 = imageLoad(phillipsSpectrumImageArray, ivec3(pixelPosition, 0)).xy;
+    const vec2 hTilde0Conj = imageLoad(phillipsSpectrumImageArray, ivec3(pixelPosition, 1)).xy;
+
+    const float omegat = sqrt(G * length(k)) * constantInfo.time;
+    const float c = cos(omegat);
+    const float s = sin(omegat);
+    
+    const vec2 h1 = ComplexMultiply(hTilde0, vec2(c, s));
+    const vec2 h2 = ComplexMultiply(hTilde0Conj, vec2(c, -s));
+
+    const vec2 heightSpectrum = h1 + h2;
+	imageStore(spectrumImageArray, ivec3(pixelPosition, 0), vec4(heightSpectrum, 0, 0));
+
+	// const vec2 xSlopeSpectrum = ComplexMultiply(vec2(0, 1), heightSpectrum) * k.x;
+	// const vec2 ySlopeSpectrum = ComplexMultiply(vec2(0, 1), heightSpectrum) * k.y;
+	// imageStore(imageArray, ivec3(pixelPosition, constantInfo.xSlopeSpectrumImageIndex), vec4(xSlopeSpectrum, 0, 0));
+	// imageStore(imageArray, ivec3(pixelPosition, constantInfo.ySlopeSpectrumImageIndex), vec4(ySlopeSpectrum, 0, 0));
+
+	const float Ksqr = dot(k, k);
+    const vec2 Knorm = Ksqr > 1e-12f ? vec2(1) / sqrt(Ksqr) : vec2(0);
+
+	const vec2 xSpectrum = ComplexMultiply(vec2(0, -1), heightSpectrum) * k.x * Knorm.x;
+	const vec2 ySpectrum = ComplexMultiply(vec2(0, -1), heightSpectrum) * k.y * Knorm.y;
+	imageStore(spectrumImageArray, ivec3(pixelPosition, 1), vec4(xSpectrum, 0, 0));
+	imageStore(spectrumImageArray, ivec3(pixelPosition, 2), vec4(ySpectrum, 0, 0));
+}
