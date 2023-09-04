@@ -55,18 +55,11 @@ void main()
             );
     worldPosition.xzw /= worldPosition.w;
 
-    vec2 worldTexCoords;
-    {
-        const vec2 offset = mod(worldPosition.xz, constantInfo.scale.xz);
-        worldTexCoords = offset / constantInfo.scale.xz;
-    }
+    const vec2 worldTexCoords = worldPosition.xz / constantInfo.scale.xz;
 
     const vec3 displacement = texture(displacementTexture, worldTexCoords).xyz * constantInfo.scale;
     worldPosition.y = displacement.y;
-    //worldPosition.xz = worldPosition.xz + displacement.xz;
 
-    // const vec3 newVertexPosition = vertexPosition + displacement;
-    // const vec3 worldPosition = constantInfo.scale * newVertexPosition;
     gl_Position = cameraInfo.info.projection * cameraInfo.info.view * worldPosition;
 
     outTexCoords = worldTexCoords;

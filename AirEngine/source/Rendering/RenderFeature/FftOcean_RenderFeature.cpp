@@ -130,7 +130,7 @@ AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOcean_RenderFeat
 		new Core::Graphic::Instance::ImageSampler(
 			VkFilter::VK_FILTER_NEAREST,
 			VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
-			VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+			VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
 			0.0f,
 			VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
 		)
@@ -139,7 +139,7 @@ AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOcean_RenderFeat
 		new Core::Graphic::Instance::ImageSampler(
 			VkFilter::VK_FILTER_LINEAR,
 			VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
-			VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+			VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
 			0.0f,
 			VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
 		)
