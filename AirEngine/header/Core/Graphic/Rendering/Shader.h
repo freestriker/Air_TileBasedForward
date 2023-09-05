@@ -51,6 +51,7 @@ namespace AirEngine
 						std::string renderPass{};
 						std::string subpass{};
 						std::vector<std::string> shaderPaths{};
+						VkPolygonMode polygonMode;
 						VkCullModeFlags cullMode{};
 						VkBool32 blendEnable{};
 						VkBlendFactor srcColorBlendFactor{};
@@ -68,6 +69,7 @@ namespace AirEngine
 						(
 							ShaderSettings,
 							shaderPaths,
+							polygonMode,
 							cullMode,
 							blendEnable,
 							srcColorBlendFactor,

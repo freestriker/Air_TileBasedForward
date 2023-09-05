@@ -1,6 +1,7 @@
 {
   "renderPass": "AirEngine::Rendering::RenderFeature::GTAO_Occlusion_RenderFeature::GTAO_Occlusion_RenderPass",
   "subpass": "DrawSubpass",
+  "polygonMode": 0,
   "alphaBlendOp": 0,
   "blendEnable": 0,
   "colorBlendOp": 0,

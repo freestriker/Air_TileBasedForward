@@ -1,6 +1,7 @@
 {
   "renderPass": "AirEngine::Rendering::RenderFeature::Background_RenderFeature::Background_RenderPass",
   "subpass": "DrawSubpass",
+  "polygonMode": 0,
   "alphaBlendOp": 0,
   "blendEnable": 0,
   "colorBlendOp": 0,

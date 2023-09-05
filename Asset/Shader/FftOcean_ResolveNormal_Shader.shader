@@ -1,6 +1,7 @@
 {
   "renderPass": "",
   "subpass": "",
+  "polygonMode": 0,
   "alphaBlendOp": 0,
   "blendEnable": 0,
   "colorBlendOp": 0,

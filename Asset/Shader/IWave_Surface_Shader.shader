@@ -1,6 +1,7 @@
 {
   "renderPass": "AirEngine::Rendering::RenderFeature::IWave_RenderFeature::IWave_RenderPass",
   "subpass": "DrawSubpass",
+  "polygonMode": 0,
   "alphaBlendOp": 0,
   "blendEnable": 0,
   "colorBlendOp": 0,

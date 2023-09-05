@@ -118,6 +118,7 @@ namespace AirEngine
 					float bubblesScale;
 					float oceanScale;
 					glm::vec3 absDisplacement;
+					bool showLines;
 
 					FftOceanDataWindowLauncher* launcher;
 

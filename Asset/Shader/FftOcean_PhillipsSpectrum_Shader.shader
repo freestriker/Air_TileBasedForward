@@ -2,6 +2,7 @@
   "renderPass": "",
   "subpass": "",
   "alphaBlendOp": 0,
+  "polygonMode": 0,
   "blendEnable": 0,
   "colorBlendOp": 0,
   "colorWriteMask": 0,

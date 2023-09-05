@@ -1,6 +1,7 @@
 {
   "renderPass": "AirEngine::Rendering::RenderFeature::TBForward_Opaque_RenderFeature::TBForward_Opaque_RenderPass",
   "subpass": "DrawSubpass",
+  "polygonMode": 0,
   "alphaBlendOp": 0,
   "blendEnable": 0,
   "colorBlendOp": 0,

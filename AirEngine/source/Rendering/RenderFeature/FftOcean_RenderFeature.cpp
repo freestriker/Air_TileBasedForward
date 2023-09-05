@@ -175,6 +175,7 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	featureData->bubblesScale = 85;
 	featureData->oceanScale = 5;
 	featureData->absDisplacement = glm::vec3(0.12, 0.12, 0.12);
+	featureData->showLines = true;
 
 	featureData->launcher = new FftOceanDataWindowLauncher(*featureData);
 	featureData->launcher->moveToThread(QApplication::instance()->thread());

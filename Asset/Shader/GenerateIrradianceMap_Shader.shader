@@ -1,6 +1,7 @@
 {
   "renderPass": "AirEngine::Rendering::RenderFeature::GenerateIrradianceMap_RenderFeature::GenerateIrradianceMap_RenderPass",
   "subpass": "DrawSubpass",
+  "polygonMode": 0,
   "shaderPaths": ["..\\Asset\\Shader\\Spv\\GenerateIrradianceMap_Shader.vert.spv", "..\\Asset\\Shader\\Spv\\GenerateIrradianceMap_Shader.frag.spv"],
   "blendEnable": 1,
   "srcAlphaBlendFactor": 0,

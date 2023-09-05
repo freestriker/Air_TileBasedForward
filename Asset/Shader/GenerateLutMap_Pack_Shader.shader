@@ -1,6 +1,7 @@
 {
   "renderPass": "AirEngine::Rendering::RenderFeature::GenerateLutMap_RenderFeature::GenerateLutMap_Pack_RenderPass",
   "subpass": "DrawSubpass",
+  "polygonMode": 0,
   "shaderPaths": ["..\\Asset\\Shader\\Spv\\GenerateLutMap_Pack_Shader.vert.spv", "..\\Asset\\Shader\\Spv\\GenerateLutMap_Pack_Shader.frag.spv"],
   "cullMode": 0,
   "colorWriteMask": 15,
