@@ -1018,36 +1018,18 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 				cameraProjectedPosition = cameraProjectedPosition - planeNormal * glm::dot(planeNormal, cameraProjectedPosition);
 			}
 
-			auto&& minMaxXIterPair = std::minmax_element(
-				cameraProjectedPositions.begin(), 
-				cameraProjectedPositions.end(),
-				[](const glm::dvec3& a, const glm::dvec3& b)->bool
-				{
-					return a.x < b.x;
-				}
-			);
-			auto&& minMaxZIterPair = std::minmax_element(
-				cameraProjectedPositions.begin(), 
-				cameraProjectedPositions.end(),
-				[](const glm::dvec3& a, const glm::dvec3& b)->bool
-				{
-					return a.z < b.z;
-				}
-			);
-			const double minX = minMaxXIterPair.first->x;
-			const double maxX = minMaxXIterPair.second->x;
-			const double minZ = minMaxZIterPair.first->z;
-			const double maxZ = minMaxZIterPair.second->z;
+			cameraProjectedPositions.reserve(cameraProjectedPositions.size() * 5);
+			const glm::dvec3 xDisplacement(featureData.oceanScale * featureData.absDisplacement.x, 0, 0);
+			const glm::dvec3 zDisplacement(0, 0, featureData.oceanScale * featureData.absDisplacement.z);
+			for (int i = 0, len = cameraProjectedPositions.size(); i < len; ++i)
+			{
+				const auto& cameraProjectedPosition = cameraProjectedPositions.at(i);
+				cameraProjectedPositions.emplace_back(cameraProjectedPosition + xDisplacement);
+				cameraProjectedPositions.emplace_back(cameraProjectedPosition - xDisplacement);
+				cameraProjectedPositions.emplace_back(cameraProjectedPosition + zDisplacement);
+				cameraProjectedPositions.emplace_back(cameraProjectedPosition - zDisplacement);
+			}
 
-			//const double minX = minMaxXIterPair.first->x - featureData.absDisplacement.x * featureData.oceanScale;
-			//const double maxX = minMaxXIterPair.second->x + featureData.absDisplacement.x * featureData.oceanScale;
-			//const double minZ = minMaxZIterPair.first->z - featureData.absDisplacement.z * featureData.oceanScale;
-			//const double maxZ = minMaxZIterPair.second->z + featureData.absDisplacement.z * featureData.oceanScale;
-			//cameraProjectedPositions.clear();
-			//cameraProjectedPositions.emplace_back(minX, 0, minZ);
-			//cameraProjectedPositions.emplace_back(minX, 0, maxZ);
-			//cameraProjectedPositions.emplace_back(maxX, 0, minZ);
-			//cameraProjectedPositions.emplace_back(maxX, 0, maxZ);
 			for (auto& cameraProjectedPosition : cameraProjectedPositions)
 			{
 				glm::dvec4 temp = cameraViewProjectionMatrix * glm::dvec4(cameraProjectedPosition, 1);

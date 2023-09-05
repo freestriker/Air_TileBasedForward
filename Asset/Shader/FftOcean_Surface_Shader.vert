@@ -41,7 +41,7 @@ void main()
 {
     const vec2 texCoords = vec2(1) - vertexTexCoords;
 
-    vec4 worldPosition;
+    vec4 worldPosition = vec4(0);
     worldPosition.xzw = 
         (1.0 - texCoords.y) * 
             (
@@ -58,8 +58,7 @@ void main()
     const vec2 worldTexCoords = worldPosition.xz / constantInfo.scale.xz;
 
     const vec3 displacement = texture(displacementTexture, worldTexCoords).xyz * constantInfo.scale;
-    worldPosition.y = displacement.y;
-    worldPosition.xz = worldPosition.xz + displacement.xz;
+    worldPosition.xyz = worldPosition.xyz + displacement.xyz;
 
     gl_Position = cameraInfo.info.projection * cameraInfo.info.view * worldPosition;
 
