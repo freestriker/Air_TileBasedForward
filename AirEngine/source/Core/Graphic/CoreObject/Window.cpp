@@ -149,8 +149,8 @@ void AirEngine::Core::Graphic::CoreObject::Window::Start()
     //QLoggingCategory::setFilterRules(QStringLiteral("qt.vulkan=true"));
 
     _qVulkanInstance = new QVulkanInstance();
-    //auto supportVersion = _qVulkanInstance->supportedApiVersion();
-    _qVulkanInstance->setApiVersion({1, 0, 0});
+    auto&& supportVersion = _qVulkanInstance->supportedApiVersion();
+    _qVulkanInstance->setApiVersion(supportVersion);
     //auto&&ise = _qVulkanInstance->supportedExtensions();
     //auto&& isl = _qVulkanInstance->supportedLayers();
     _qVulkanInstance->setLayers(QByteArrayList()

@@ -1,7 +1,7 @@
 {
   "renderPass": "AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOcean_Surface_RenderPass",
   "subpass": "DrawSubpass",
-  "polygonMode": 0,
+  "polygonMode": 1,
   "alphaBlendOp": 0,
   "blendEnable": 0,
   "colorBlendOp": 0,

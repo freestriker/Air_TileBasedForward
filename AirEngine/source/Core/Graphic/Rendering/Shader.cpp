@@ -207,7 +207,7 @@ void AirEngine::Core::Graphic::Rendering::Shader::_CheckAttachmentOutputState(_P
 void AirEngine::Core::Graphic::Rendering::Shader::_PopulateGraphicPipelineSettings(_PipelineData& pipelineData)
 {
 	pipelineData.inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-	pipelineData.inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+	pipelineData.inputAssembly.topology = VkPrimitiveTopology::VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 	pipelineData.inputAssembly.primitiveRestartEnable = VK_FALSE;
 
 	pipelineData.viewport.x = 0.0f;
@@ -229,7 +229,7 @@ void AirEngine::Core::Graphic::Rendering::Shader::_PopulateGraphicPipelineSettin
 	pipelineData.rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
 	pipelineData.rasterizer.depthClampEnable = VK_FALSE;
 	pipelineData.rasterizer.rasterizerDiscardEnable = VK_FALSE;
-	pipelineData.rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+	pipelineData.rasterizer.polygonMode = _shaderSettings.polygonMode;
 	pipelineData.rasterizer.lineWidth = 1.0f;
 	pipelineData.rasterizer.cullMode = _shaderSettings.cullMode;
 	pipelineData.rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;

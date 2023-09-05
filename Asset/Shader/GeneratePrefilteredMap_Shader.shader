@@ -1,6 +1,7 @@
 {
   "renderPass": "AirEngine::Rendering::RenderFeature::GeneratePrefilteredMap_RenderFeature::GeneratePrefilteredMap_RenderPass",
   "subpass": "DrawSubpass",
+  "polygonMode": 0,
   "shaderPaths": ["..\\Asset\\Shader\\Spv\\GeneratePrefilteredMap_Shader.vert.spv", "..\\Asset\\Shader\\Spv\\GeneratePrefilteredMap_Shader.frag.spv"],
   "cullMode": 0,
   "colorWriteMask": 15,

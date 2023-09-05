@@ -3,6 +3,7 @@
   "subpass": "DrawSubpass",
   "shaderPaths": ["..\\Asset\\Shader\\Spv\\AO_Cover_Shader.vert.spv", "..\\Asset\\Shader\\Spv\\AO_Cover_Shader.frag.spv"],
   "colorWriteMask": 7,
+  "polygonMode": 0,
   "cullMode": 0,
   "depthTestEnable": 0,
   "depthCompareOp": 0,

@@ -1,6 +1,7 @@
 {
   "renderPass": "AirEngine::Rendering::RenderFeature::TBForward_OIT_DepthPeeling_RenderFeature::TBForward_OIT_DepthPeeling_RenderPass",
   "subpass": "DrawSubpass",
+  "polygonMode": 0,
   "shaderPaths": ["..\\Asset\\Shader\\Spv\\TBF_OIT_DepthPeeling_Shader.vert.spv", "..\\Asset\\Shader\\Spv\\TBF_OIT_DepthPeeling_Shader.frag.spv"],
   "cullMode": 0,
   "depthTestEnable": 1,

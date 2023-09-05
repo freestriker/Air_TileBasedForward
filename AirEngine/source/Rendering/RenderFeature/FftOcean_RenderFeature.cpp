@@ -28,6 +28,10 @@
 #include <qlineedit.h>
 #include <QIntValidator>
 #include <QDoubleValidator>
+#include <glm/gtx/intersect.hpp>
+#include <glm/ext/matrix_double4x4.hpp>
+#include <Camera/PerspectiveCamera.h>
+#include <QCheckBox>
 
 RTTR_REGISTRATION
 {
@@ -127,7 +131,7 @@ AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOcean_RenderFeat
 		new Core::Graphic::Instance::ImageSampler(
 			VkFilter::VK_FILTER_NEAREST,
 			VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
-			VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+			VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
 			0.0f,
 			VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
 		)
@@ -136,7 +140,7 @@ AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOcean_RenderFeat
 		new Core::Graphic::Instance::ImageSampler(
 			VkFilter::VK_FILTER_LINEAR,
 			VkSamplerMipmapMode::VK_SAMPLER_MIPMAP_MODE_NEAREST,
-			VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE,
+			VkSamplerAddressMode::VK_SAMPLER_ADDRESS_MODE_REPEAT,
 			0.0f,
 			VkBorderColor::VK_BORDER_COLOR_INT_OPAQUE_BLACK
 		)
@@ -170,6 +174,9 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	featureData->bubblesLambda = 1;
 	featureData->bubblesThreshold = 1;
 	featureData->bubblesScale = 85;
+	featureData->oceanScale = 5;
+	featureData->absDisplacement = glm::vec3(0.12, 0.12, 0.12);
+	featureData->showWireFrame = false;
 
 	featureData->launcher = new FftOceanDataWindowLauncher(*featureData);
 	featureData->launcher->moveToThread(QApplication::instance()->thread());
@@ -260,14 +267,14 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	{
 		featureData->displacementImage = Core::Graphic::Instance::Image::Create2DImage(
 			imageExtent,
-			VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT,
+			VkFormat::VK_FORMAT_R16G16B16A16_SFLOAT,
 			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT,
 			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
 		);
 		featureData->normalImage = Core::Graphic::Instance::Image::Create2DImage(
 			imageExtent,
-			VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT,
+			VkFormat::VK_FORMAT_R16G16B16A16_SFLOAT,
 			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT,
 			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
@@ -282,6 +289,19 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 		featureData->resolveNormalMaterial = new Core::Graphic::Rendering::Material(featureData->resolveNormalShader);
 		featureData->resolveNormalMaterial->SetStorageImage2D("displacementImage", featureData->displacementImage);
 		featureData->resolveNormalMaterial->SetStorageImage2D("normalImage", featureData->normalImage);
+
+		featureData->surfaceMesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\Surface.ply");
+		featureData->surfaceShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\FftOcean_Surface_Shader.shader");
+		featureData->surfaceMaterial = new Core::Graphic::Rendering::Material(featureData->surfaceShader);
+		featureData->surfaceMaterial->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
+		featureData->surfaceMaterial->SetSampledImage2D("displacementTexture", featureData->displacementImage, _linearSampler);
+		featureData->surfaceMaterial->SetSampledImage2D("normalTexture", featureData->normalImage, _linearSampler);
+		
+		featureData->surfaceWireFrameShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\FftOcean_SurfaceWireFrame_Shader.shader");
+		featureData->surfaceWireFrameMaterial = new Core::Graphic::Rendering::Material(featureData->surfaceWireFrameShader);
+		featureData->surfaceWireFrameMaterial->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
+		featureData->surfaceWireFrameMaterial->SetSampledImage2D("displacementTexture", featureData->displacementImage, _linearSampler);
+		featureData->surfaceWireFrameMaterial->SetSampledImage2D("normalTexture", featureData->normalImage, _linearSampler);
 	}
 
 	return featureData;
@@ -318,6 +338,11 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnDestroyRende
 	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\FftOcean_ResolveDisplacement_Shader.shader");
 	delete featureData->resolveNormalMaterial;
 	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\FftOcean_ResolveNormal_Shader.shader");
+
+	delete featureData->surfaceMaterial;
+	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\FftOcean_Surface_Shader.shader");
+	delete featureData->surfaceWireFrameMaterial;
+	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\FftOcean_SurfaceWireFrame_Shader.shader");
 
 	delete featureData;
 }
@@ -891,23 +916,267 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		}
 	}
 
+	// projected grid
+	std::array<glm::vec4, 4> uvCorners{};
+	{
+		if (dynamic_cast<Camera::PerspectiveCamera*>(camera) == nullptr)
+		{
+			Utils::Log::Message("FFT ocean can only use perspective camera.");
+		}
+		auto& renderCamera = *dynamic_cast<Camera::PerspectiveCamera*>(camera);
+
+		auto& cameraTransform = renderCamera.GameObject()->transform;
+		const glm::dmat4&& cameraModelMatrix = cameraTransform.ModelMatrix();
+		const glm::dvec3&& cameraPosition = cameraModelMatrix * glm::dvec4(0, 0, 0, 1);
+		const glm::dvec3&& cameraInfoForward = glm::normalize(glm::dvec3(cameraModelMatrix * glm::dvec4(0, 0, -1, 0)));
+
+		const double pi = std::acos(-1.0);
+		const double halfFov = renderCamera.fovAngle * pi / 360.0;
+		double cot = 1.0 / std::tan(halfFov);
+		float flatDistence = renderCamera.farFlat - renderCamera.nearFlat;
+
+		const glm::dmat4&& cameraProjectionMatrix = glm::dmat4(
+			cot / renderCamera.aspectRatio, 0, 0, 0,
+			0, cot, 0, 0,
+			0, 0, -renderCamera.farFlat / flatDistence, -1,
+			0, 0, -renderCamera.nearFlat * renderCamera.farFlat / flatDistence, 0
+		);
+
+		const glm::dvec3&& eye = cameraModelMatrix * glm::dvec4(0, 0, 0, 1);
+		const glm::dvec3&& center = cameraModelMatrix * glm::dvec4(0, 0, -1, 1);
+		const glm::dvec3&& up = cameraModelMatrix * glm::dvec4(0, 1, 0, 0);
+
+		const glm::dmat4&& cameraViewMatrix = glm::lookAt(eye, center, up);
+
+		const glm::dmat4&& cameraViewProjectionMatrix = cameraProjectionMatrix * cameraViewMatrix;
+		const glm::dmat4&& cameraInvViewProjectionMatrix = glm::inverse(cameraViewProjectionMatrix);
+
+		std::array<glm::dvec3, 8> cameraCornerPositions{};
+		{
+			glm::dvec4 temp{};
+
+			temp = cameraInvViewProjectionMatrix * glm::dvec4(-1, -1, 0, 1);
+			cameraCornerPositions.at(0) = temp / temp.w;
+
+			temp = cameraInvViewProjectionMatrix * glm::dvec4(+1, -1, 0, 1);
+			cameraCornerPositions.at(1) = temp / temp.w;
+
+			temp = cameraInvViewProjectionMatrix * glm::dvec4(-1, +1, 0, 1);
+			cameraCornerPositions.at(2) = temp / temp.w;
+
+			temp = cameraInvViewProjectionMatrix * glm::dvec4(+1, +1, 0, 1);
+			cameraCornerPositions.at(3) = temp / temp.w;
+
+			temp = cameraInvViewProjectionMatrix * glm::dvec4(-1, -1, +1, 1);
+			cameraCornerPositions.at(4) = temp / temp.w;
+
+			temp = cameraInvViewProjectionMatrix * glm::dvec4(+1, -1, +1, 1);
+			cameraCornerPositions.at(5) = temp / temp.w;
+
+			temp = cameraInvViewProjectionMatrix * glm::dvec4(-1, +1, +1, 1);
+			cameraCornerPositions.at(6) = temp / temp.w;
+
+			temp = cameraInvViewProjectionMatrix * glm::dvec4(+1, +1, +1, 1);
+			cameraCornerPositions.at(7) = temp / temp.w;
+		}
+
+		std::array<int, 24> ndcVertexIndexs = {
+			0,1,	0,2,	2,3,	1,3,
+			0,4,	2,6,	3,7,	1,5,
+			4,6,	4,5,	5,7,	6,7
+		};
+
+		const glm::dvec3&& planeNormal{0, 1, 0};
+		const glm::dvec4&& upperPlane{0, 1, 0, -featureData.absDisplacement.y * featureData.oceanScale};
+		const glm::dvec4&& lowerPlane{0, 1, 0, +featureData.absDisplacement.y * featureData.oceanScale};
+
+		std::vector<glm::dvec3> cameraProjectedPositions{};
+		cameraProjectedPositions.reserve(24);
+		{
+			for (int i = 0; i < 12; i++)
+			{
+				const int src = ndcVertexIndexs.at(i * 2), dst = ndcVertexIndexs.at(i * 2 + 1);
+				const glm::dvec4&& srcCornerPosition = glm::dvec4(cameraCornerPositions.at(src), 1);
+				const glm::dvec4&& dstCornerPosition = glm::dvec4(cameraCornerPositions.at(dst), 1);
+				const glm::dvec3&& srcToDstDirection = glm::normalize(glm::dvec3(dstCornerPosition - srcCornerPosition));
+
+				if (glm::dot(upperPlane, srcCornerPosition) * glm::dot(upperPlane, dstCornerPosition) < 0) 
+				{
+					double distance = 0;
+					glm::intersectRayPlane(glm::dvec3(srcCornerPosition), srcToDstDirection, glm::dvec3(0, -upperPlane.w, 0), planeNormal, distance);
+					const auto&& intersectedPosition = glm::dvec3(srcCornerPosition) + srcToDstDirection * distance;
+					cameraProjectedPositions.emplace_back(intersectedPosition);
+				}
+
+				if (glm::dot(lowerPlane, srcCornerPosition) * glm::dot(lowerPlane, dstCornerPosition) < 0)
+				{
+					double distance = 0;
+					glm::intersectRayPlane(glm::dvec3(srcCornerPosition), srcToDstDirection, glm::dvec3(0, -lowerPlane.w, 0), planeNormal, distance);
+					const auto&& intersectedPosition = glm::dvec3(srcCornerPosition) + srcToDstDirection * distance;
+					cameraProjectedPositions.emplace_back(intersectedPosition);
+				}
+			}
+
+			for (int i = 0; i < 8; i++)
+			{
+				const glm::dvec4&& cornerPosition = glm::dvec4(cameraCornerPositions.at(i), 1);
+				if (glm::dot(upperPlane, cornerPosition) * glm::dot(lowerPlane, cornerPosition) < 0)
+				{
+					cameraProjectedPositions.emplace_back(glm::dvec3(cornerPosition));
+				}
+			}
+
+			for (auto& cameraProjectedPosition : cameraProjectedPositions)
+			{
+				cameraProjectedPosition = cameraProjectedPosition - planeNormal * glm::dot(planeNormal, cameraProjectedPosition);
+			}
+
+			cameraProjectedPositions.reserve(cameraProjectedPositions.size() * 5);
+			const glm::dvec3 xDisplacement(featureData.oceanScale * featureData.absDisplacement.x, 0, 0);
+			const glm::dvec3 zDisplacement(0, 0, featureData.oceanScale * featureData.absDisplacement.z);
+			for (int i = 0, len = cameraProjectedPositions.size(); i < len; ++i)
+			{
+				const auto& cameraProjectedPosition = cameraProjectedPositions.at(i);
+				cameraProjectedPositions.emplace_back(cameraProjectedPosition + xDisplacement);
+				cameraProjectedPositions.emplace_back(cameraProjectedPosition - xDisplacement);
+				cameraProjectedPositions.emplace_back(cameraProjectedPosition + zDisplacement);
+				cameraProjectedPositions.emplace_back(cameraProjectedPosition - zDisplacement);
+			}
+
+			for (auto& cameraProjectedPosition : cameraProjectedPositions)
+			{
+				glm::dvec4 temp = cameraViewProjectionMatrix * glm::dvec4(cameraProjectedPosition, 1);
+				cameraProjectedPosition = temp / temp.w;
+			}
+		}
+
+		glm::dmat4 rangeMatrix{};
+		bool needRenderWater;
+		if (cameraProjectedPositions.size() > 0)
+		{
+			needRenderWater = true;
+
+			double x_min = cameraProjectedPositions.at(0).x;
+			double x_max = cameraProjectedPositions.at(0).x;
+			double y_min = cameraProjectedPositions.at(0).y;
+			double y_max = cameraProjectedPositions.at(0).y;
+			for (int i = 1; i < cameraProjectedPositions.size(); i++) 
+			{
+				const auto& cameraProjectedPosition = cameraProjectedPositions.at(i);
+				x_min = std::min(x_min, cameraProjectedPosition.x);
+				x_max = std::max(x_max, cameraProjectedPosition.x);
+				y_min = std::min(y_min, cameraProjectedPosition.y);
+				y_max = std::max(y_max, cameraProjectedPosition.y);
+			}
+
+			rangeMatrix = {
+				x_max - x_min, 0, 0, 0,
+				0, y_max - y_min, 0, 0,
+				0, 0, 1, 0,
+				x_min, y_min, 0, 1
+			};
+		}
+		else
+		{
+			needRenderWater = false;
+		}
+
+		const glm::dmat4&& rangeInvViewProjectionMatrix = cameraInvViewProjectionMatrix * rangeMatrix;
+
+		{
+			{
+				double u = 0;
+				double v = 0;
+				auto& uvCorner = uvCorners.at(0);
+
+				glm::dvec4 origin(u, v, 0, 1);
+				glm::dvec4 direction(u, v, 1, 1);
+
+				origin = rangeInvViewProjectionMatrix * origin;
+				direction = rangeInvViewProjectionMatrix * direction;
+				direction = direction - origin;
+
+				double l = -origin.y / direction.y;
+
+				uvCorner = origin + direction * l;
+			}
+			{
+				double u = 1;
+				double v = 0;
+				auto& uvCorner = uvCorners.at(1);
+
+				glm::dvec4 origin(u, v, 0, 1);
+				glm::dvec4 direction(u, v, 1, 1);
+
+				origin = rangeInvViewProjectionMatrix * origin;
+				direction = rangeInvViewProjectionMatrix * direction;
+				direction = direction - origin;
+
+				double l = -origin.y / direction.y;
+
+				uvCorner = origin + direction * l;
+			}
+			{
+				double u = 0;
+				double v = 1;
+				auto& uvCorner = uvCorners.at(2);
+
+				glm::dvec4 origin(u, v, 0, 1);
+				glm::dvec4 direction(u, v, 1, 1);
+
+				origin = rangeInvViewProjectionMatrix * origin;
+				direction = rangeInvViewProjectionMatrix * direction;
+				direction = direction - origin;
+
+				double l = -origin.y / direction.y;
+
+				uvCorner = origin + direction * l;
+			}
+			{
+				double u = 1;
+				double v = 1;
+				auto& uvCorner = uvCorners.at(3);
+
+				glm::dvec4 origin(u, v, 0, 1);
+				glm::dvec4 direction(u, v, 1, 1);
+
+				origin = rangeInvViewProjectionMatrix * origin;
+				direction = rangeInvViewProjectionMatrix * direction;
+				direction = direction - origin;
+
+				double l = -origin.y / direction.y;
+
+				uvCorner = origin + direction * l;
+			}
+		}
+	}
+
 	///Render
 	{
+		struct ProjectedGridInfo
+		{
+			glm::vec4 corner00;
+			glm::vec4 corner10;
+			glm::vec4 corner01;
+			glm::vec4 corner11;
+			glm::vec3 scale;
+		};
+		ProjectedGridInfo projectedGridInfo{};
+		projectedGridInfo.corner00 = uvCorners.at(0);
+		projectedGridInfo.corner10 = uvCorners.at(1);
+		projectedGridInfo.corner01 = uvCorners.at(2);
+		projectedGridInfo.corner11 = uvCorners.at(3);
+		projectedGridInfo.scale = { featureData.oceanScale, featureData.oceanScale, featureData.oceanScale };
+
 		commandBuffer->BeginRenderPass(_renderPass, featureData.frameBuffer);
 
-		for (const auto& rendererComponent : *rendererComponents)
 		{
-			auto material = rendererComponent->GetMaterial(_renderPassName);
-			if (material == nullptr) continue;
-
-			material->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
-			material->SetUniformBuffer("meshObjectInfo", rendererComponent->ObjectInfoBuffer());
-			material->SetSampledImage2D("displacementTexture", featureData.displacementImage, _linearSampler);
-			material->SetSampledImage2D("normalTexture", featureData.normalImage, _linearSampler);
+			auto material = featureData.showWireFrame ? featureData.surfaceWireFrameMaterial : featureData.surfaceMaterial;
 			material->SetUniformBuffer("lightInfos", Core::Graphic::CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
-
-			commandBuffer->DrawMesh(rendererComponent->mesh, material);
+			commandBuffer->PushConstant(material, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT, projectedGridInfo);
+			commandBuffer->DrawMesh(featureData.surfaceMesh, material);
 		}
+
 		commandBuffer->EndRenderPass();
 	}
 
@@ -1074,5 +1343,17 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 		});
 		pLayout->addRow(QStringLiteral("bubblesScale: "), lineEdit);
 	}
+
+	// showWireFrame
+	{
+		QCheckBox* checkBox = new QCheckBox(this);
+		checkBox->setCheckState(fftOceanDataPtr->showWireFrame ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+		checkBox->connect(checkBox, &QCheckBox::stateChanged, this, [fftOceanDataPtr](int state)->void {
+			fftOceanDataPtr->showWireFrame = (state != Qt::CheckState::Unchecked);
+			Utils::Log::Message(fftOceanDataPtr->showWireFrame ? "showWireFrame: true" : "showWireFrame: false");
+		});
+		pLayout->addRow(QStringLiteral("showWireFrame: "), checkBox);
+	}
+
 	setLayout(pLayout);
 }

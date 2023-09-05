@@ -14,7 +14,7 @@ layout(push_constant) uniform ResolveConstantInfo
 } constantInfo;
 
 layout (set = 0, binding = 0, rg32f) uniform readonly image2DArray originalDisplacementImageArray;
-layout (set = 1, binding = 0, rgba32f) uniform writeonly image2D displacementImage;
+layout (set = 1, binding = 0, rgba16f) uniform writeonly image2D displacementImage;
 
 void main()
 {	

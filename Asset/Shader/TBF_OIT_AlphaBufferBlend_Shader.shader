@@ -1,6 +1,7 @@
 {
   "renderPass": "AirEngine::Rendering::RenderFeature::TBForward_OIT_AlphaBuffer_RenderFeature::TBForward_OIT_AlphaBufferBlend_RenderPass",
   "subpass": "DrawSubpass",
+  "polygonMode": 0,
   "shaderPaths": ["..\\Asset\\Shader\\Spv\\TBF_OIT_AlphaBufferBlend_Shader.vert.spv", "..\\Asset\\Shader\\Spv\\TBF_OIT_AlphaBufferBlend_Shader.frag.spv"],
   "cullMode": 0,
   "depthTestEnable": 0,
