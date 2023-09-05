@@ -267,14 +267,14 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	{
 		featureData->displacementImage = Core::Graphic::Instance::Image::Create2DImage(
 			imageExtent,
-			VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT,
+			VkFormat::VK_FORMAT_R16G16B16A16_SFLOAT,
 			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT,
 			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
 		);
 		featureData->normalImage = Core::Graphic::Instance::Image::Create2DImage(
 			imageExtent,
-			VkFormat::VK_FORMAT_R32G32B32A32_SFLOAT,
+			VkFormat::VK_FORMAT_R16G16B16A16_SFLOAT,
 			VkImageUsageFlagBits::VK_IMAGE_USAGE_STORAGE_BIT | VkImageUsageFlagBits::VK_IMAGE_USAGE_SAMPLED_BIT,
 			VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
 			VkImageAspectFlagBits::VK_IMAGE_ASPECT_COLOR_BIT
