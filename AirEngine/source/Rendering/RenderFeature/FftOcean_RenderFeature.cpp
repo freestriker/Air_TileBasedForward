@@ -31,6 +31,7 @@
 #include <glm/gtx/intersect.hpp>
 #include <glm/ext/matrix_double4x4.hpp>
 #include <Camera/PerspectiveCamera.h>
+#include <QCheckBox>
 
 RTTR_REGISTRATION
 {
@@ -175,7 +176,7 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	featureData->bubblesScale = 85;
 	featureData->oceanScale = 5;
 	featureData->absDisplacement = glm::vec3(0.12, 0.12, 0.12);
-	featureData->showLines = true;
+	featureData->showWireFrame = false;
 
 	featureData->launcher = new FftOceanDataWindowLauncher(*featureData);
 	featureData->launcher->moveToThread(QApplication::instance()->thread());
@@ -295,6 +296,12 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 		featureData->surfaceMaterial->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
 		featureData->surfaceMaterial->SetSampledImage2D("displacementTexture", featureData->displacementImage, _linearSampler);
 		featureData->surfaceMaterial->SetSampledImage2D("normalTexture", featureData->normalImage, _linearSampler);
+		
+		featureData->surfaceWireFrameShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\FftOcean_SurfaceWireFrame_Shader.shader");
+		featureData->surfaceWireFrameMaterial = new Core::Graphic::Rendering::Material(featureData->surfaceWireFrameShader);
+		featureData->surfaceWireFrameMaterial->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
+		featureData->surfaceWireFrameMaterial->SetSampledImage2D("displacementTexture", featureData->displacementImage, _linearSampler);
+		featureData->surfaceWireFrameMaterial->SetSampledImage2D("normalTexture", featureData->normalImage, _linearSampler);
 	}
 
 	return featureData;
@@ -331,6 +338,11 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnDestroyRende
 	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\FftOcean_ResolveDisplacement_Shader.shader");
 	delete featureData->resolveNormalMaterial;
 	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\FftOcean_ResolveNormal_Shader.shader");
+
+	delete featureData->surfaceMaterial;
+	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\FftOcean_Surface_Shader.shader");
+	delete featureData->surfaceWireFrameMaterial;
+	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\FftOcean_SurfaceWireFrame_Shader.shader");
 
 	delete featureData;
 }
@@ -1158,10 +1170,12 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 
 		commandBuffer->BeginRenderPass(_renderPass, featureData.frameBuffer);
 
-		featureData.surfaceMaterial->SetUniformBuffer("lightInfos", Core::Graphic::CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
-
-		commandBuffer->PushConstant(featureData.surfaceMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT, projectedGridInfo);
-		commandBuffer->DrawMesh(featureData.surfaceMesh, featureData.surfaceMaterial);
+		{
+			auto material = featureData.showWireFrame ? featureData.surfaceWireFrameMaterial : featureData.surfaceMaterial;
+			material->SetUniformBuffer("lightInfos", Core::Graphic::CoreObject::Instance::LightManager().TileBasedForwardLightInfosBuffer());
+			commandBuffer->PushConstant(material, VkShaderStageFlagBits::VK_SHADER_STAGE_VERTEX_BIT | VkShaderStageFlagBits::VK_SHADER_STAGE_FRAGMENT_BIT, projectedGridInfo);
+			commandBuffer->DrawMesh(featureData.surfaceMesh, material);
+		}
 
 		commandBuffer->EndRenderPass();
 	}
@@ -1329,5 +1343,17 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 		});
 		pLayout->addRow(QStringLiteral("bubblesScale: "), lineEdit);
 	}
+
+	// showWireFrame
+	{
+		QCheckBox* checkBox = new QCheckBox(this);
+		checkBox->setCheckState(fftOceanDataPtr->showWireFrame ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+		checkBox->connect(checkBox, &QCheckBox::stateChanged, this, [fftOceanDataPtr](int state)->void {
+			fftOceanDataPtr->showWireFrame = (state != Qt::CheckState::Unchecked);
+			Utils::Log::Message(fftOceanDataPtr->showWireFrame ? "showWireFrame: true" : "showWireFrame: false");
+		});
+		pLayout->addRow(QStringLiteral("showWireFrame: "), checkBox);
+	}
+
 	setLayout(pLayout);
 }

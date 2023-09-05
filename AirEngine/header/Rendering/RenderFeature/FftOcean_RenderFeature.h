@@ -118,7 +118,7 @@ namespace AirEngine
 					float bubblesScale;
 					float oceanScale;
 					glm::vec3 absDisplacement;
-					bool showLines;
+					bool showWireFrame;
 
 					FftOceanDataWindowLauncher* launcher;
 
@@ -147,6 +147,8 @@ namespace AirEngine
 					Asset::Mesh* surfaceMesh;
 					Core::Graphic::Rendering::Shader* surfaceShader;
 					Core::Graphic::Rendering::Material* surfaceMaterial;
+					Core::Graphic::Rendering::Shader* surfaceWireFrameShader;
+					Core::Graphic::Rendering::Material* surfaceWireFrameMaterial;
 				public:
 
 					CONSTRUCTOR(FftOcean_RenderFeatureData)
