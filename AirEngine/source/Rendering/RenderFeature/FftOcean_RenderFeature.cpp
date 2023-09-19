@@ -918,6 +918,220 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 
 	// projected grid
 	std::array<glm::vec4, 4> uvCorners{};
+	//{
+	//	if (dynamic_cast<Camera::PerspectiveCamera*>(camera) == nullptr)
+	//	{
+	//		Utils::Log::Message("FFT ocean can only use perspective camera.");
+	//	}
+	//	auto& renderCamera = *dynamic_cast<Camera::PerspectiveCamera*>(camera);
+
+	//	auto& cameraTransform = renderCamera.GameObject()->transform;
+	//	const glm::dmat4&& cameraModelMatrix = cameraTransform.ModelMatrix();
+	//	const glm::dvec3&& cameraPosition = cameraModelMatrix * glm::dvec4(0, 0, 0, 1);
+	//	const glm::dvec3&& cameraInfoForward = glm::normalize(glm::dvec3(cameraModelMatrix * glm::dvec4(0, 0, -1, 0)));
+
+	//	const double pi = std::acos(-1.0);
+	//	const double halfFov = renderCamera.fovAngle * pi / 360.0;
+	//	double cot = 1.0 / std::tan(halfFov);
+	//	float flatDistence = renderCamera.farFlat - renderCamera.nearFlat;
+
+	//	const glm::dmat4&& cameraProjectionMatrix = glm::dmat4(
+	//		cot / renderCamera.aspectRatio, 0, 0, 0,
+	//		0, cot, 0, 0,
+	//		0, 0, -renderCamera.farFlat / flatDistence, -1,
+	//		0, 0, -renderCamera.nearFlat * renderCamera.farFlat / flatDistence, 0
+	//	);
+	//	const glm::dmat4&& cameraInvProjectionMatrix = glm::inverse(cameraProjectionMatrix);
+
+	//	const glm::dvec3&& eye = cameraModelMatrix * glm::dvec4(0, 0, 0, 1);
+	//	const glm::dvec3&& center = cameraModelMatrix * glm::dvec4(0, 0, -1, 1);
+	//	const glm::dvec3&& up = cameraModelMatrix * glm::dvec4(0, 1, 0, 0);
+
+	//	const glm::dmat4&& cameraViewMatrix = glm::lookAt(eye, center, up);
+
+	//	const glm::dmat4&& cameraViewProjectionMatrix = cameraProjectionMatrix * cameraViewMatrix;
+	//	const glm::dmat4&& cameraInvViewProjectionMatrix = glm::inverse(cameraViewProjectionMatrix);
+
+	//	std::array<glm::dvec3, 8> cameraCornerPositions{};
+	//	{
+	//		glm::dvec4 temp{};
+
+	//		temp = cameraInvViewProjectionMatrix * glm::dvec4(-1, -1, 0, 1);
+	//		cameraCornerPositions.at(0) = temp / temp.w;
+
+	//		temp = cameraInvViewProjectionMatrix * glm::dvec4(+1, -1, 0, 1);
+	//		cameraCornerPositions.at(1) = temp / temp.w;
+
+	//		temp = cameraInvViewProjectionMatrix * glm::dvec4(-1, +1, 0, 1);
+	//		cameraCornerPositions.at(2) = temp / temp.w;
+
+	//		temp = cameraInvViewProjectionMatrix * glm::dvec4(+1, +1, 0, 1);
+	//		cameraCornerPositions.at(3) = temp / temp.w;
+
+	//		temp = cameraInvViewProjectionMatrix * glm::dvec4(-1, -1, +1, 1);
+	//		cameraCornerPositions.at(4) = temp / temp.w;
+
+	//		temp = cameraInvViewProjectionMatrix * glm::dvec4(+1, -1, +1, 1);
+	//		cameraCornerPositions.at(5) = temp / temp.w;
+
+	//		temp = cameraInvViewProjectionMatrix * glm::dvec4(-1, +1, +1, 1);
+	//		cameraCornerPositions.at(6) = temp / temp.w;
+
+	//		temp = cameraInvViewProjectionMatrix * glm::dvec4(+1, +1, +1, 1);
+	//		cameraCornerPositions.at(7) = temp / temp.w;
+	//	}
+
+	//	std::array<int, 24> ndcVertexIndexs = {
+	//		0,1,	0,2,	2,3,	1,3,
+	//		0,4,	2,6,	3,7,	1,5,
+	//		4,6,	4,5,	5,7,	6,7
+	//	};
+
+	//	const glm::dvec3&& planeNormal{0, 1, 0};
+	//	const glm::dvec4&& upperPlane{0, 1, 0, -featureData.absDisplacement.y * featureData.oceanScale};
+	//	const glm::dvec4&& lowerPlane{0, 1, 0, +featureData.absDisplacement.y * featureData.oceanScale};
+
+	//	std::vector<glm::dvec3> cameraProjectedPositions{};
+	//	cameraProjectedPositions.reserve(24);
+	//	{
+	//		for (int i = 0; i < 12; i++)
+	//		{
+	//			const int src = ndcVertexIndexs.at(i * 2), dst = ndcVertexIndexs.at(i * 2 + 1);
+	//			const glm::dvec4&& srcCornerPosition = glm::dvec4(cameraCornerPositions.at(src), 1);
+	//			const glm::dvec4&& dstCornerPosition = glm::dvec4(cameraCornerPositions.at(dst), 1);
+	//			const glm::dvec3&& srcToDstDirection = glm::normalize(glm::dvec3(dstCornerPosition - srcCornerPosition));
+
+	//			if (glm::dot(upperPlane, srcCornerPosition) * glm::dot(upperPlane, dstCornerPosition) < 0) 
+	//			{
+	//				double distance = 0;
+	//				glm::intersectRayPlane(glm::dvec3(srcCornerPosition), srcToDstDirection, glm::dvec3(0, -upperPlane.w, 0), planeNormal, distance);
+	//				const auto&& intersectedPosition = glm::dvec3(srcCornerPosition) + srcToDstDirection * distance;
+	//				cameraProjectedPositions.emplace_back(intersectedPosition);
+	//			}
+
+	//			if (glm::dot(lowerPlane, srcCornerPosition) * glm::dot(lowerPlane, dstCornerPosition) < 0)
+	//			{
+	//				double distance = 0;
+	//				glm::intersectRayPlane(glm::dvec3(srcCornerPosition), srcToDstDirection, glm::dvec3(0, -lowerPlane.w, 0), planeNormal, distance);
+	//				const auto&& intersectedPosition = glm::dvec3(srcCornerPosition) + srcToDstDirection * distance;
+	//				cameraProjectedPositions.emplace_back(intersectedPosition);
+	//			}
+	//		}
+
+	//		for (int i = 0; i < 8; i++)
+	//		{
+	//			const glm::dvec4&& cornerPosition = glm::dvec4(cameraCornerPositions.at(i), 1);
+	//			if (glm::dot(upperPlane, cornerPosition) * glm::dot(lowerPlane, cornerPosition) < 0)
+	//			{
+	//				cameraProjectedPositions.emplace_back(glm::dvec3(cornerPosition));
+	//			}
+	//		}
+
+	//		for (auto& cameraProjectedPosition : cameraProjectedPositions)
+	//		{
+	//			cameraProjectedPosition = cameraProjectedPosition - planeNormal * glm::dot(planeNormal, cameraProjectedPosition);
+	//			const glm::dvec4 temp = cameraViewProjectionMatrix * glm::dvec4(cameraProjectedPosition, 1);
+	//			cameraProjectedPosition = temp / temp.w;
+	//		}
+	//	}
+
+	//	glm::dmat4 rangeMatrix{};
+	//	bool needRenderWater;
+	//	if (cameraProjectedPositions.size() > 0)
+	//	{
+	//		needRenderWater = true;
+
+	//		double x_min = cameraProjectedPositions.at(0).x;
+	//		double x_max = cameraProjectedPositions.at(0).x;
+	//		double y_min = cameraProjectedPositions.at(0).y;
+	//		double y_max = cameraProjectedPositions.at(0).y;
+	//		for (int i = 1; i < cameraProjectedPositions.size(); i++) 
+	//		{
+	//			const auto& cameraProjectedPosition = cameraProjectedPositions.at(i);
+	//			x_min = std::min(x_min, cameraProjectedPosition.x);
+	//			x_max = std::max(x_max, cameraProjectedPosition.x);
+	//			y_min = std::min(y_min, cameraProjectedPosition.y);
+	//			y_max = std::max(y_max, cameraProjectedPosition.y);
+	//		}
+
+	//		rangeMatrix = {
+	//			x_max - x_min, 0, 0, 0,
+	//			0, y_max - y_min, 0, 0,
+	//			0, 0, 1, 0,
+	//			x_min, y_min, 0, 1
+	//		};
+	//	}
+	//	else
+	//	{
+	//		needRenderWater = false;
+	//	}
+
+	//	if (needRenderWater)
+	//	{
+	//		const auto&& RangeInvViewProjectionMatrix = rangeMatrix * cameraInvViewProjectionMatrix;
+	//		const auto&& RangeInvProjectionMatrix = rangeMatrix * cameraInvProjectionMatrix;
+
+	//		const std::array<glm::dvec2, 4> UvCorners
+	//		{
+	//			glm::dvec2{0, 0},
+	//			glm::dvec2{1, 0},
+	//			glm::dvec2{0, 1},
+	//			glm::dvec2{1, 1}
+	//		};
+
+	//		std::array<glm::dvec3, 4> WorldSpaceOriginalRangePositions{};
+	//		std::array<glm::dvec4, 4> WorldSpaceOriginalRangeHomoPositions{};
+	//		for (uint32_t i = 0; i < 4; ++i)
+	//		{
+	//			const auto& NdcNearPlaneCornerPosition = UvCorners.at(i);
+	//			auto& WorldSpaceOriginalRangePosition = WorldSpaceOriginalRangePositions.at(i);
+	//			auto& WorldSpaceOriginalRangeHomoPosition = WorldSpaceOriginalRangeHomoPositions.at(i);
+
+	//			auto&& SrcPosition = RangeInvViewProjectionMatrix * glm::dvec4{ NdcNearPlaneCornerPosition.x, NdcNearPlaneCornerPosition.y, 0, 1 };
+	//			auto&& DstPosition = RangeInvViewProjectionMatrix * glm::dvec4{ NdcNearPlaneCornerPosition.x, NdcNearPlaneCornerPosition.y, 1, 1 };
+	//			auto&& Direction = DstPosition - SrcPosition;
+
+	//			auto&& Ratio = -SrcPosition.y / Direction.y;
+
+	//			WorldSpaceOriginalRangeHomoPosition = SrcPosition + Direction * Ratio;
+
+	//			WorldSpaceOriginalRangePosition = WorldSpaceOriginalRangeHomoPosition / WorldSpaceOriginalRangeHomoPosition.w;
+	//		}
+
+	//		const glm::dvec3&& RightDirection = glm::normalize(WorldSpaceOriginalRangePositions.at(1) - WorldSpaceOriginalRangePositions.at(0));
+	//		const glm::dvec3&& ForwardDirection = glm::normalize(glm::cross({ 0, 1, 0 }, RightDirection));
+
+	//		const double DisplacementX = featureData.oceanScale * featureData.absDisplacement.x * featureData.displacementFactor.x;
+	//		const double DisplacementZ = featureData.oceanScale * featureData.absDisplacement.z * featureData.displacementFactor.z;
+
+	//		const double Displacement = std::max(DisplacementX, DisplacementZ);
+
+	//		std::array<glm::dvec3, 4> WorldSpaceDisplacedRangePositions{};
+	//		WorldSpaceDisplacedRangePositions.at(0) = WorldSpaceOriginalRangePositions.at(0) - Displacement * RightDirection - Displacement * ForwardDirection;
+	//		WorldSpaceDisplacedRangePositions.at(1) = WorldSpaceOriginalRangePositions.at(1) + Displacement * RightDirection - Displacement * ForwardDirection;
+	//		WorldSpaceDisplacedRangePositions.at(2) = WorldSpaceOriginalRangePositions.at(2) - Displacement * RightDirection + Displacement * ForwardDirection;
+	//		WorldSpaceDisplacedRangePositions.at(3) = WorldSpaceOriginalRangePositions.at(3) + Displacement * RightDirection + Displacement * ForwardDirection;
+
+	//		std::array<glm::dvec4, 4> WorldSpaceDisplacedRangeHomoPositions{};
+	//		for (uint32_t i = 0; i < 4; ++i)
+	//		{
+	//			auto& TargetRangePosition = WorldSpaceDisplacedRangeHomoPositions.at(i);
+	//			const auto& WorldSpaceDisplacedRangePosition = WorldSpaceDisplacedRangePositions.at(i);
+
+	//			TargetRangePosition = cameraViewProjectionMatrix * glm::dvec4(WorldSpaceDisplacedRangePosition, 1);
+	//			TargetRangePosition = TargetRangePosition / TargetRangePosition.w;
+	//			TargetRangePosition = cameraInvViewProjectionMatrix * TargetRangePosition;
+	//		}
+
+	//		for (uint32_t i = 0; i < 4; ++i)
+	//		{
+	//			auto& TargetRangePosition = WorldSpaceDisplacedRangeHomoPositions.at(i);
+	//			auto& uvCorner = uvCorners.at(i);
+
+	//			uvCorner = TargetRangePosition;
+	//		}
+	//	}
+	//}
 	{
 		if (dynamic_cast<Camera::PerspectiveCamera*>(camera) == nullptr)
 		{
