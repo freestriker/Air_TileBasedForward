@@ -6,6 +6,7 @@
 #include "Core/Graphic/Instance/ImageSampler.h"
 #include <glm/vec2.hpp>
 #include <glm/vec3.hpp>
+#include <glm/vec4.hpp>
 #include <glm/ext/vector_int2.hpp>
 #include <qobject.h>
 #include <qwidget.h>
@@ -171,6 +172,9 @@ namespace AirEngine
 				void OnExcute(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*>const* rendererComponents)override;
 				void OnSubmit(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer)override;
 				void OnFinish(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer)override;
+
+				bool PopulateUvCornerPositions(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera, std::array<glm::vec4, 4>& targets);
+				bool PopulateUvCornerPositions2(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera, std::array<glm::vec4, 4>& targets);
 
 				RTTR_ENABLE(Core::Graphic::Rendering::RenderFeatureBase)
 			};
