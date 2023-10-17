@@ -1423,13 +1423,13 @@ bool AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::PopulateUvCorn
 	glm::dvec3 projectorLookAtPosition{};
 	{
 		const double aimPointDistanceFactor = double(std::abs(featureData.aimPointDistanceFactor));
-		const double aimPointHeightCompensation = double(std::abs(featureData.aimPointHeightCompensation));
+		const double aimPointHeightCompensation = double(std::abs(featureData.aimPointHeightCompensation)) + double(std::abs(featureData.oceanScale.y * featureData.absDisplacement.y));
 
 		const glm::dvec3&& aimPointPosition = cameraPosition + aimPointDistanceFactor * std::abs(double(renderCamera.farFlat)) * cameraForward;
 	
 		const double cameraHeight = cameraPosition.y;
 		projectorPosition = cameraPosition;
-		if (cameraHeight < double(featureData.aimPointHeightCompensation))
+		if (cameraHeight < aimPointHeightCompensation)
 		{
 			if (cameraHeight < 0)
 			{
