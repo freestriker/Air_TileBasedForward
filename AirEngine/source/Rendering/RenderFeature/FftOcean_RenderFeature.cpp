@@ -173,7 +173,7 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	featureData->bubblesLambda = 1;
 	featureData->bubblesThreshold = 1;
 	featureData->bubblesScale = 85;
-	featureData->oceanScale = 5;
+	featureData->oceanScale = { 5, 5, 5 };
 	featureData->absDisplacement = glm::vec3(0.12, 0.12, 0.12);
 	featureData->aimPointDistanceFactor = 10;
 	featureData->aimPointHeightCompensation = 5;
@@ -934,7 +934,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		projectedGridInfo.corner10 = uvCorners.at(1);
 		projectedGridInfo.corner01 = uvCorners.at(2);
 		projectedGridInfo.corner11 = uvCorners.at(3);
-		projectedGridInfo.scale = { featureData.oceanScale, featureData.oceanScale, featureData.oceanScale };
+		projectedGridInfo.scale = featureData.oceanScale;
 
 		commandBuffer->BeginRenderPass(_renderPass, featureData.frameBuffer);
 
@@ -1029,8 +1029,8 @@ bool AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::PopulateUvCorn
 	};
 
 	const glm::dvec3&& planeNormal{ 0, 1, 0 };
-	const glm::dvec4&& upperPlane{ 0, 1, 0, -featureData.absDisplacement.y * featureData.oceanScale };
-	const glm::dvec4&& lowerPlane{ 0, 1, 0, +featureData.absDisplacement.y * featureData.oceanScale };
+	const glm::dvec4&& upperPlane{ 0, 1, 0, -featureData.absDisplacement.y * featureData.oceanScale.y };
+	const glm::dvec4&& lowerPlane{ 0, 1, 0, +featureData.absDisplacement.y * featureData.oceanScale.y };
 
 	std::vector<glm::dvec3> cameraProjectedPositions{};
 	cameraProjectedPositions.reserve(24);
@@ -1074,8 +1074,8 @@ bool AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::PopulateUvCorn
 		}
 
 		cameraProjectedPositions.reserve(cameraProjectedPositions.size() * 5);
-		const glm::dvec3 xDisplacement(featureData.oceanScale * featureData.absDisplacement.x, 0, 0);
-		const glm::dvec3 zDisplacement(0, 0, featureData.oceanScale * featureData.absDisplacement.z);
+		const glm::dvec3 xDisplacement(featureData.oceanScale.x * featureData.absDisplacement.x, 0, 0);
+		const glm::dvec3 zDisplacement(0, 0, featureData.oceanScale.z * featureData.absDisplacement.z);
 		for (int i = 0, len = cameraProjectedPositions.size(); i < len; ++i)
 		{
 			const auto& cameraProjectedPosition = cameraProjectedPositions.at(i);
@@ -1258,8 +1258,8 @@ bool AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::PopulateUvCorn
 	};
 
 	const glm::dvec3&& planeNormal{ 0, 1, 0 };
-	const glm::dvec4&& upperPlane{ 0, 1, 0, -featureData.absDisplacement.y * featureData.oceanScale };
-	const glm::dvec4&& lowerPlane{ 0, 1, 0, +featureData.absDisplacement.y * featureData.oceanScale };
+	const glm::dvec4&& upperPlane{ 0, 1, 0, -featureData.absDisplacement.y * featureData.oceanScale.y };
+	const glm::dvec4&& lowerPlane{ 0, 1, 0, +featureData.absDisplacement.y * featureData.oceanScale.y };
 
 	std::vector<glm::dvec3> cameraProjectedPositions{};
 	cameraProjectedPositions.reserve(32);
@@ -1369,8 +1369,8 @@ bool AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::PopulateUvCorn
 		const glm::dvec3&& RightDirection = glm::normalize(worldSpaceOriginalRangePositions.at(1) - worldSpaceOriginalRangePositions.at(0));
 		glm::dvec3 ForwardDirection = glm::normalize(glm::cross({ 0, 1, 0 }, RightDirection));
 
-		const double DisplacementX = featureData.oceanScale * featureData.absDisplacement.x * featureData.displacementFactor.x;
-		const double DisplacementZ = featureData.oceanScale * featureData.absDisplacement.z * featureData.displacementFactor.z;
+		const double DisplacementX = featureData.oceanScale.x * featureData.absDisplacement.x * featureData.displacementFactor.x;
+		const double DisplacementZ = featureData.oceanScale.z * featureData.absDisplacement.z * featureData.displacementFactor.z;
 		const double Displacement = std::max(DisplacementX, DisplacementZ);
 
 		std::array<glm::dvec3, 4> worldSpaceDisplacedRangePositions{};
@@ -1493,8 +1493,8 @@ bool AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::PopulateUvCorn
 	};
 
 	const glm::dvec3&& planeNormal{ 0, 1, 0 };
-	const glm::dvec4&& upperPlane{ 0, 1, 0, -featureData.absDisplacement.y * featureData.oceanScale };
-	const glm::dvec4&& lowerPlane{ 0, 1, 0, +featureData.absDisplacement.y * featureData.oceanScale };
+	const glm::dvec4&& upperPlane{ 0, 1, 0, -featureData.absDisplacement.y * featureData.oceanScale.y };
+	const glm::dvec4&& lowerPlane{ 0, 1, 0, +featureData.absDisplacement.y * featureData.oceanScale.y };
 
 	std::vector<glm::dvec3> cameraProjectedPositions{};
 	cameraProjectedPositions.reserve(32);
@@ -1604,8 +1604,8 @@ bool AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::PopulateUvCorn
 		const glm::dvec3&& RightDirection = glm::normalize(worldSpaceOriginalRangePositions.at(1) - worldSpaceOriginalRangePositions.at(0));
 		glm::dvec3 ForwardDirection = glm::normalize(glm::cross({ 0, 1, 0 }, RightDirection));
 
-		const double DisplacementX = featureData.oceanScale * featureData.absDisplacement.x * featureData.displacementFactor.x;
-		const double DisplacementZ = featureData.oceanScale * featureData.absDisplacement.z * featureData.displacementFactor.z;
+		const double DisplacementX = featureData.oceanScale.x * featureData.absDisplacement.x * featureData.displacementFactor.x;
+		const double DisplacementZ = featureData.oceanScale.z * featureData.absDisplacement.z * featureData.displacementFactor.z;
 		const double Displacement = std::max(DisplacementX, DisplacementZ);
 
 		std::array<glm::dvec3, 4> worldSpaceDisplacedRangePositions{};
@@ -1776,6 +1776,39 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 			Utils::Log::Message("absDisplacement.z: " + std::to_string(fftOceanDataPtr->absDisplacement.z));
 		});
 		pLayout->addRow(QStringLiteral("absDisplacement.z: "), lineEdit);
+	}
+
+	// oceanScale.height
+	{
+		QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->oceanScale.y)), this);
+		lineEdit->setValidator(doubleValidator);
+		lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+			fftOceanDataPtr->oceanScale.y = string.toFloat();
+			Utils::Log::Message("oceanScale.height: " + std::to_string(fftOceanDataPtr->oceanScale.y));
+			});
+		pLayout->addRow(QStringLiteral("oceanScale.height: "), lineEdit);
+	}
+
+	// oceanScale.x
+	{
+		QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->oceanScale.x)), this);
+		lineEdit->setValidator(doubleValidator);
+		lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+			fftOceanDataPtr->oceanScale.x = string.toFloat();
+			Utils::Log::Message("oceanScale.x: " + std::to_string(fftOceanDataPtr->oceanScale.x));
+			});
+		pLayout->addRow(QStringLiteral("oceanScale.x: "), lineEdit);
+	}
+
+	// oceanScale.z
+	{
+		QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->oceanScale.z)), this);
+		lineEdit->setValidator(doubleValidator);
+		lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+			fftOceanDataPtr->oceanScale.z = string.toFloat();
+			Utils::Log::Message("oceanScale.z: " + std::to_string(fftOceanDataPtr->oceanScale.z));
+			});
+		pLayout->addRow(QStringLiteral("oceanScale.z: "), lineEdit);
 	}
 
 	// normalScale

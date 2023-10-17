@@ -117,7 +117,7 @@ namespace AirEngine
 					float bubblesLambda;
 					float bubblesThreshold;
 					float bubblesScale;
-					float oceanScale;
+					glm::vec3 oceanScale;
 					glm::vec3 absDisplacement;
 					float aimPointDistanceFactor;
 					float aimPointHeightCompensation;
