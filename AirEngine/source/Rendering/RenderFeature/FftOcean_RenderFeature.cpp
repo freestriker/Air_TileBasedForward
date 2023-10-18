@@ -355,6 +355,14 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnPrepare(Core
 void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*> const* rendererComponents)
 {
 	auto& featureData = *static_cast<FftOcean_RenderFeatureData*>(renderFeatureData);
+	
+	// projected grid
+	std::array<glm::vec4, 4> uvCorners{};
+	if (!PopulateUvCornerPositions3(renderFeatureData, camera, uvCorners))
+	{
+		return;
+	}
+
 	constexpr int LOCAL_GROUP_WIDTH = 16;
 
 	commandBuffer->Reset();
@@ -917,9 +925,7 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		}
 	}
 
-	// projected grid
-	std::array<glm::vec4, 4> uvCorners{};
-	if (PopulateUvCornerPositions3(renderFeatureData, camera, uvCorners))
+	// render
 	{
 		struct ProjectedGridInfo
 		{
