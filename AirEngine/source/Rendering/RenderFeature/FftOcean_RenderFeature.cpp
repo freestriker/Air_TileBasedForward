@@ -1415,12 +1415,13 @@ bool AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::PopulateUvCorn
 	auto& cameraTransform = renderCamera.GameObject()->transform;
 	const glm::dmat4&& cameraModelMatrix = cameraTransform.ModelMatrix();
 	const glm::dvec3&& cameraPosition = cameraModelMatrix * glm::dvec4(0, 0, 0, 1);
-	const glm::dvec3&& cameraLookAtPosition = cameraModelMatrix * glm::dvec4(0, 0, -1, 1);
-	const glm::dvec3&& cameraForward = glm::normalize(cameraLookAtPosition - cameraPosition);
-	const glm::dvec3&& cameraUp = cameraModelMatrix * glm::dvec4(0, 1, 0, 0);
+	const glm::dvec3&& cameraForwardPosition = cameraModelMatrix * glm::dvec4(0, 0, -1, 1);
+	const glm::dvec3&& cameraForward = glm::normalize(cameraForwardPosition - cameraPosition);
+	const glm::dvec3&& cameraUpPosition = cameraModelMatrix * glm::dvec4(0, 1, 0, 1);
+	const glm::dvec3&& cameraUp = glm::normalize(cameraUpPosition - cameraPosition);
 
 	glm::dvec3 projectorPosition{};
-	glm::dvec3 projectorLookAtPosition{};
+	glm::dvec3 projectorForwardPosition{};
 	{
 		const double aimPointDistanceFactor = double(std::abs(featureData.aimPointDistanceFactor));
 		const double aimPointHeightCompensation = double(std::abs(featureData.aimPointHeightCompensation)) + double(std::abs(featureData.oceanScale.y * featureData.absDisplacement.y));
@@ -1441,7 +1442,7 @@ bool AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::PopulateUvCorn
 			}
 		}
 
-		projectorLookAtPosition = glm::dvec3(aimPointPosition.x, 0, aimPointPosition.z);
+		projectorForwardPosition = glm::dvec3(aimPointPosition.x, 0, aimPointPosition.z);
 	}
 
 	const double PI = std::acos(-1.0);
@@ -1456,7 +1457,13 @@ bool AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::PopulateUvCorn
 		0								, 0		, -renderCamera.nearFlat * renderCamera.farFlat / flatDistence	, 0
 	);
 
-	const glm::dmat4&& projectorViewMatrix = glm::lookAt(projectorPosition, projectorLookAtPosition, cameraUp);
+	const glm::dmat4&& cameraViewMatrix = glm::lookAt(cameraPosition, cameraForwardPosition, cameraUp);
+	const glm::dmat4&& cameraInvViewMatrix = glm::inverse(cameraViewMatrix);
+
+	const glm::dmat4&& cameraViewProjectionMatrix = cameraProjectionMatrix * cameraViewMatrix;
+	const glm::dmat4&& cameraInvViewProjectionMatrix = glm::inverse(cameraViewProjectionMatrix);
+
+	const glm::dmat4&& projectorViewMatrix = glm::lookAt(projectorPosition, projectorForwardPosition, cameraUp);
 	const glm::dmat4&& projectorInvViewMatrix = glm::inverse(projectorViewMatrix);
 
 	const glm::dmat4&& projectorViewProjectionMatrix = cameraProjectionMatrix * projectorViewMatrix;
@@ -1481,7 +1488,7 @@ bool AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::PopulateUvCorn
 			const auto& ndcCornerPosition = ndcCornerPositions.at(i);
 			auto& worldSpaceCornerPosition = worldSpaceCornerPositions.at(i);
 
-			worldSpaceCornerPosition = projectorInvViewProjectionMatrix * ndcCornerPosition;
+			worldSpaceCornerPosition = cameraInvViewProjectionMatrix * ndcCornerPosition;
 			worldSpaceCornerPosition = worldSpaceCornerPosition / worldSpaceCornerPosition.w;
 		}
 	}
@@ -1496,8 +1503,8 @@ bool AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::PopulateUvCorn
 	const glm::dvec4&& upperPlane{ 0, 1, 0, -featureData.absDisplacement.y * featureData.oceanScale.y };
 	const glm::dvec4&& lowerPlane{ 0, 1, 0, +featureData.absDisplacement.y * featureData.oceanScale.y };
 
-	std::vector<glm::dvec3> cameraProjectedPositions{};
-	cameraProjectedPositions.reserve(32);
+	std::vector<glm::dvec3> projectorProjectedPositions{};
+	projectorProjectedPositions.reserve(32);
 	{
 		for (uint32_t i = 0; i < 12; i++)
 		{
@@ -1512,7 +1519,7 @@ bool AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::PopulateUvCorn
 				if (glm::intersectRayPlane(glm::dvec3(srcCornerPosition), srcToDstDirection, glm::dvec3(0, -upperPlane.w, 0), planeNormal, distance))
 				{
 					const auto&& intersectedPosition = glm::dvec3(srcCornerPosition) + srcToDstDirection * distance;
-					cameraProjectedPositions.emplace_back(intersectedPosition);
+					projectorProjectedPositions.emplace_back(intersectedPosition);
 				}
 			}
 
@@ -1521,7 +1528,7 @@ bool AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::PopulateUvCorn
 				if (glm::intersectRayPlane(glm::dvec3(srcCornerPosition), srcToDstDirection, glm::dvec3(0, -lowerPlane.w, 0), planeNormal, distance))
 				{
 					const auto&& intersectedPosition = glm::dvec3(srcCornerPosition) + srcToDstDirection * distance;
-					cameraProjectedPositions.emplace_back(intersectedPosition);
+					projectorProjectedPositions.emplace_back(intersectedPosition);
 				}
 			}
 		}
@@ -1531,11 +1538,11 @@ bool AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::PopulateUvCorn
 			const glm::dvec4& cornerPosition = worldSpaceCornerPositions.at(i);
 			if (glm::dot(upperPlane, cornerPosition) * glm::dot(lowerPlane, cornerPosition) < 0)
 			{
-				cameraProjectedPositions.emplace_back(glm::dvec3(cornerPosition));
+				projectorProjectedPositions.emplace_back(glm::dvec3(cornerPosition));
 			}
 		}
 
-		for (auto& cameraProjectedPosition : cameraProjectedPositions)
+		for (auto& cameraProjectedPosition : projectorProjectedPositions)
 		{
 			cameraProjectedPosition = cameraProjectedPosition - planeNormal * glm::dot(planeNormal, cameraProjectedPosition);
 			glm::dvec4 temp = projectorViewProjectionMatrix * glm::dvec4(cameraProjectedPosition, 1);
@@ -1544,23 +1551,23 @@ bool AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::PopulateUvCorn
 	}
 
 	glm::dmat4 rangeMatrix{};
-	if (cameraProjectedPositions.size() == 0)
+	if (projectorProjectedPositions.size() == 0)
 	{
 		return false;
 	}
 	else
 	{
-		double x_min = cameraProjectedPositions.at(0).x;
-		double x_max = cameraProjectedPositions.at(0).x;
-		double y_min = cameraProjectedPositions.at(0).y;
-		double y_max = cameraProjectedPositions.at(0).y;
-		for (int i = 1; i < cameraProjectedPositions.size(); i++)
+		double x_min = projectorProjectedPositions.at(0).x;
+		double x_max = projectorProjectedPositions.at(0).x;
+		double y_min = projectorProjectedPositions.at(0).y;
+		double y_max = projectorProjectedPositions.at(0).y;
+		for (int i = 1; i < projectorProjectedPositions.size(); i++)
 		{
-			const auto& cameraProjectedPosition = cameraProjectedPositions.at(i);
-			x_min = std::min(x_min, cameraProjectedPosition.x);
-			x_max = std::max(x_max, cameraProjectedPosition.x);
-			y_min = std::min(y_min, cameraProjectedPosition.y);
-			y_max = std::max(y_max, cameraProjectedPosition.y);
+			const auto& projectorProjectedPosition = projectorProjectedPositions.at(i);
+			x_min = std::min(x_min, projectorProjectedPosition.x);
+			x_max = std::max(x_max, projectorProjectedPosition.x);
+			y_min = std::min(y_min, projectorProjectedPosition.y);
+			y_max = std::max(y_max, projectorProjectedPosition.y);
 		}
 
 		rangeMatrix = {
@@ -1609,14 +1616,15 @@ bool AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::PopulateUvCorn
 		const double Displacement = std::max(DisplacementX, DisplacementZ);
 
 		std::array<glm::dvec3, 4> worldSpaceDisplacedRangePositions{};
-		worldSpaceDisplacedRangePositions.at(0) = worldSpaceOriginalRangePositions.at(0) - Displacement * RightDirection - Displacement * ForwardDirection;
-		worldSpaceDisplacedRangePositions.at(1) = worldSpaceOriginalRangePositions.at(1) + Displacement * RightDirection - Displacement * ForwardDirection;
-		worldSpaceDisplacedRangePositions.at(2) = worldSpaceOriginalRangePositions.at(2) - Displacement * RightDirection + Displacement * ForwardDirection;
-		worldSpaceDisplacedRangePositions.at(3) = worldSpaceOriginalRangePositions.at(3) + Displacement * RightDirection + Displacement * ForwardDirection;
-		//worldSpaceDisplacedRangePositions.at(0) = worldSpaceOriginalRangePositions.at(0);
-		//worldSpaceDisplacedRangePositions.at(1) = worldSpaceOriginalRangePositions.at(1);
-		//worldSpaceDisplacedRangePositions.at(2) = worldSpaceOriginalRangePositions.at(2);
-		//worldSpaceDisplacedRangePositions.at(3) = worldSpaceOriginalRangePositions.at(3);
+		//worldSpaceDisplacedRangePositions.at(0) = worldSpaceOriginalRangePositions.at(0) - Displacement * RightDirection - Displacement * ForwardDirection;
+		//worldSpaceDisplacedRangePositions.at(1) = worldSpaceOriginalRangePositions.at(1) + Displacement * RightDirection - Displacement * ForwardDirection;
+		//worldSpaceDisplacedRangePositions.at(2) = worldSpaceOriginalRangePositions.at(2) - Displacement * RightDirection + Displacement * ForwardDirection;
+		//worldSpaceDisplacedRangePositions.at(3) = worldSpaceOriginalRangePositions.at(3) + Displacement * RightDirection + Displacement * ForwardDirection;
+		worldSpaceDisplacedRangePositions.at(0) = worldSpaceOriginalRangePositions.at(0) - DisplacementX * RightDirection - DisplacementZ * ForwardDirection;
+		worldSpaceDisplacedRangePositions.at(1) = worldSpaceOriginalRangePositions.at(1) + DisplacementX * RightDirection - DisplacementZ * ForwardDirection;
+		worldSpaceDisplacedRangePositions.at(2) = worldSpaceOriginalRangePositions.at(2) - DisplacementX * RightDirection + DisplacementZ * ForwardDirection;
+		worldSpaceDisplacedRangePositions.at(3) = worldSpaceOriginalRangePositions.at(3) + DisplacementX * RightDirection + DisplacementZ * ForwardDirection;
+
 
 		std::array<glm::dvec4, 4> worldSpaceDisplacedRangeHomoPositions{};
 		for (uint32_t i = 0; i < 4; ++i)
