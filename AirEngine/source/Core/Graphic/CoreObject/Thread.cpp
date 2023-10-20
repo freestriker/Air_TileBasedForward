@@ -238,7 +238,7 @@ void AirEngine::Core::Graphic::CoreObject::Thread::GraphicThread::OnRun()
 				auto curSwapchaineImageIndex = CoreObject::Window::VulkanWindow_()->currentSwapChainImageIndex();
 				auto curSwapchaineImage = CoreObject::Window::VulkanWindow_()->swapChainImage(curSwapchaineImageIndex);
 				auto curSwapchaineImageView = CoreObject::Window::VulkanWindow_()->swapChainImageView(curSwapchaineImageIndex);
-				auto windowExtent = CoreObject::Window::Extent();
+				auto windowExtent = CoreObject::Window::PixelExtent();
 
 				auto ai = Graphic::Instance::Image::CreateNative2DImage(
 					curSwapchaineImage, 

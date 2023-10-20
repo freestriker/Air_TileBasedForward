@@ -45,6 +45,7 @@ namespace AirEngine
 					static VulkanWindow* VulkanWindow_();
 					static VulkanWindowRenderer* VulkanWindowRenderer_();
 					static VkExtent2D Extent();
+					static VkExtent2D PixelExtent();
 					static void Init();
 					static void Start();
 					static void End();

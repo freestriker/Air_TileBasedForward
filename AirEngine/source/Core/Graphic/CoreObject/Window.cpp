@@ -138,7 +138,11 @@ AirEngine::Core::Graphic::CoreObject::Window::VulkanWindowRenderer* AirEngine::C
 }
 VkExtent2D AirEngine::Core::Graphic::CoreObject::Window::Extent()
 {
-    return { static_cast<uint32_t>(_window->size().width()), static_cast<uint32_t>(_window->size().height()) };
+    return { static_cast<uint32_t>(_window->width()), static_cast<uint32_t>(_window->height()) };
+}
+VkExtent2D AirEngine::Core::Graphic::CoreObject::Window::PixelExtent()
+{
+    return { static_cast<uint32_t>(_window->width() * _window->devicePixelRatio()), static_cast<uint32_t>(_window->height() * _window->devicePixelRatio()) };
 }
 void AirEngine::Core::Graphic::CoreObject::Window::Init()
 {
