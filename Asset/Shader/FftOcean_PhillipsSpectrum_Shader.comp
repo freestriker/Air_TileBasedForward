@@ -37,12 +37,7 @@ float Phillips(in vec2 k)
 
     return windDependencyFactor * exp(-kLength2 * l2) * constantInfo.a * exp(-1.0 / (kLength2 * L2)) / kLength4 * windCosine2;
 }
-vec2 ComplexMultiply(in vec2 a, in vec2 b) 
-{
-    const float real = a.x * b.x - a.y * b.y;
-    const float imag = a.x * b.y + a.y * b.x;
-    return vec2(real, imag);
-}
+
 void main()
 {	
 	// thread/saple Y = world Z

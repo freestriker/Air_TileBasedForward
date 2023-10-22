@@ -27,7 +27,7 @@ vec2 ComplexMultiply(in vec2 a, in vec2 b)
 }
 void main()
 {	
-	// thread/saple Y = world Z
+	// thread/sample Y = world Z
 	const ivec2 threadPosition = ivec2(gl_GlobalInvocationID.xy);
 
 	if(constantInfo.imageSize.x <= threadPosition.x || constantInfo.imageSize.y <= threadPosition.y) return;

@@ -18,16 +18,16 @@ layout (set = 1, binding = 0, rgba16f) uniform writeonly image2D displacementIma
 
 void main()
 {	
-	// thread/saple Y = world Z
+	// thread/sample Y = world Z
 	const ivec2 threadPosition = ivec2(gl_GlobalInvocationID.xy);
 
 	if(constantInfo.imageSize.x <= threadPosition.x || constantInfo.imageSize.y <= threadPosition.y) return;
 	
 	const ivec2 pixelPosition = threadPosition;
-	const int MN = constantInfo.imageSize.x * constantInfo.imageSize.y;
+	const int pixelCount = constantInfo.imageSize.x * constantInfo.imageSize.y;
 
-	const float height = -imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, 0)).r / MN;
-	const float x = imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, 1)).r / MN;
-	const float y = imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, 2)).r / MN;
+	const float height = -imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, 0)).r / pixelCount;
+	const float x = imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, 1)).r / pixelCount;
+	const float y = imageLoad(originalDisplacementImageArray, ivec3(pixelPosition, 2)).r / pixelCount;
 	imageStore(displacementImage, pixelPosition, vec4(x, height, y, 0) * vec4(constantInfo.displacementFactor, 0));
 }

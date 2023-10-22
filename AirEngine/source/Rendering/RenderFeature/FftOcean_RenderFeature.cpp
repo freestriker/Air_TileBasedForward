@@ -161,18 +161,18 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	featureData->isInitialized = false;
 	featureData->isDirty = true;
 	featureData->imageSize = { 512, 512 };
-	featureData->L = 512;
+	featureData->waveLength = 512;
 	featureData->windRotationAngle = 0;
 	featureData->windSpeed = 31;
-	featureData->a = 3;
+	featureData->amplitude = 3;
 	featureData->windDependency = 0.1;
 	featureData->minVertexPosition = { 0, 0 };
 	featureData->maxVertexPosition = { 1, 1 };
 	featureData->displacementFactor = { 1, 1, 1 };
-	featureData->normalScale = 1;
+	featureData->normalFactor = 1;
 	featureData->bubblesLambda = 1;
 	featureData->bubblesThreshold = 1;
-	featureData->bubblesScale = 85;
+	featureData->bubblesFactor = 85;
 	featureData->oceanScale = { 5, 5, 5 };
 	featureData->absDisplacement = glm::vec3(0.12, 0.12, 0.12);
 	featureData->aimPointDistanceFactor = 10;
@@ -383,17 +383,12 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 
 			std::normal_distribution<float> normalDistribution(0, 1);
 			std::vector<float> dataVector(featureData.imageSize.x * featureData.imageSize.y * 4, 0.0);
-			for (int index = 0; index < featureData.imageSize.x * featureData.imageSize.y; ++index)
+			for (uint32_t index = 0; index < featureData.imageSize.x * featureData.imageSize.y; ++index)
 			{
-				constexpr double PI = 3.141592653589793;
-				auto&& x1 = normalDistribution(gen);
-				auto&& x2 = normalDistribution(gen);
-				auto&& x3 = normalDistribution(gen);
-				auto&& x4 = normalDistribution(gen);
-				dataVector[index * 4] = x1;
-				dataVector[index * 4 + 1] = x2;
-				dataVector[index * 4 + 2] = x3;
-				dataVector[index * 4 + 3] = x4;
+				dataVector[index * 4 + 0] = normalDistribution(gen);
+				dataVector[index * 4 + 1] = normalDistribution(gen);
+				dataVector[index * 4 + 2] = normalDistribution(gen);
+				dataVector[index * 4 + 3] = normalDistribution(gen);
 			}
 
 			featureData.gaussianNoiseImageStagingBuffer->WriteData([&](void* dataPtr)->void {
@@ -438,8 +433,6 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		}
 	}
 
-	const auto&& time = Core::Logic::CoreObject::Instance::time.LaunchDuration();
-
 	// phillips spectrum
 	if(featureData.isDirty)
 	{
@@ -466,9 +459,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		{
 			glm::ivec2 imageSize;
 			glm::vec2 windDirection;
-			float L;
+			float waveLength;
 			float windSpeed;
-			float a;
+			float amplitude;
 			float windDependency;
 		};
 		PhillipsSpectrumInfo phillipsSpectrumInfo{};
@@ -476,9 +469,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		constexpr double PI = 3.141592653589793;
 		const auto&& radian = featureData.windRotationAngle / 360 * 2 * PI;
 		phillipsSpectrumInfo.windDirection = glm::normalize(glm::vec2(std::cos(radian), std::sin(radian)));
-		phillipsSpectrumInfo.L = featureData.L;
+		phillipsSpectrumInfo.waveLength = featureData.waveLength;
 		phillipsSpectrumInfo.windSpeed = featureData.windSpeed;
-		phillipsSpectrumInfo.a = featureData.a;
+		phillipsSpectrumInfo.amplitude = featureData.amplitude;
 		phillipsSpectrumInfo.windDependency = featureData.windDependency;
 
 		commandBuffer->PushConstant(featureData.phillipsSpectrumMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, phillipsSpectrumInfo);
@@ -501,6 +494,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			);
 		}
 	}
+
+	const auto&& time = Core::Logic::CoreObject::Instance::time.LaunchDuration();
+
 	constexpr int IFFT_IMAGE_GROUP_OFFSET = 7;
 	int tempImageIndex = 0;
 	int heightImageIndex = 1;
@@ -529,12 +525,12 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		struct SpectrumInfo
 		{
 			glm::ivec2 imageSize;
-			float L;
+			float waveLength;
 			float time;
 		};
 		SpectrumInfo spectrumInfo{};
 		spectrumInfo.imageSize = featureData.imageSize;
-		spectrumInfo.L = featureData.L;
+		spectrumInfo.waveLength = featureData.waveLength;
 		spectrumInfo.time = time;
 
 		commandBuffer->PushConstant(featureData.spectrumMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, spectrumInfo);
@@ -884,18 +880,18 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		{
 			glm::ivec2 imageSize;
 			glm::ivec2 meshEdgeVertexCount;
-			float normalScale;
+			float normalFactor;
 			float bubblesLambda;
 			float bubblesThreshold;
-			float bubblesScale;
+			float bubblesFactor;
 		};
 		ResolveNormalConstantInfo resolveNormalConstantInfo{};
 		resolveNormalConstantInfo.imageSize = featureData.imageSize;
 		resolveNormalConstantInfo.meshEdgeVertexCount = { 257, 257 };
-		resolveNormalConstantInfo.normalScale = featureData.normalScale;
+		resolveNormalConstantInfo.normalFactor = featureData.normalFactor;
 		resolveNormalConstantInfo.bubblesLambda = featureData.bubblesLambda;
 		resolveNormalConstantInfo.bubblesThreshold = featureData.bubblesThreshold;
-		resolveNormalConstantInfo.bubblesScale = featureData.bubblesScale;
+		resolveNormalConstantInfo.bubblesFactor = featureData.bubblesFactor;
 
 		commandBuffer->PushConstant(featureData.resolveNormalMaterial, VkShaderStageFlagBits::VK_SHADER_STAGE_COMPUTE_BIT, resolveNormalConstantInfo);
 		commandBuffer->Dispatch(featureData.resolveNormalMaterial, featureData.imageSize.x / LOCAL_GROUP_WIDTH, featureData.imageSize.y / LOCAL_GROUP_WIDTH, 1);
@@ -933,14 +929,14 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 			glm::vec4 corner10;
 			glm::vec4 corner01;
 			glm::vec4 corner11;
-			glm::vec3 scale;
+			glm::vec3 oceanScale;
 		};
 		ProjectedGridInfo projectedGridInfo{};
 		projectedGridInfo.corner00 = uvCorners.at(0);
 		projectedGridInfo.corner10 = uvCorners.at(1);
 		projectedGridInfo.corner01 = uvCorners.at(2);
 		projectedGridInfo.corner11 = uvCorners.at(3);
-		projectedGridInfo.scale = featureData.oceanScale;
+		projectedGridInfo.oceanScale = featureData.oceanScale;
 
 		commandBuffer->BeginRenderPass(_renderPass, featureData.frameBuffer);
 
@@ -1666,16 +1662,16 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 	QDoubleValidator* doubleValidator = new QDoubleValidator;
 	doubleValidator->setRange(0, 10000000, 5);
 
-	// L
+	// waveLength
 	{
-		QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->L)), this);
+		QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->waveLength)), this);
 		lineEdit->setValidator(doubleValidator);
 		lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
-			fftOceanDataPtr->L = string.toFloat();
+			fftOceanDataPtr->waveLength = string.toFloat();
 			fftOceanDataPtr->isDirty = true;
-			Utils::Log::Message("L: " + std::to_string(fftOceanDataPtr->L));
+			Utils::Log::Message("waveLength: " + std::to_string(fftOceanDataPtr->waveLength));
 		});
-		pLayout->addRow(QStringLiteral("L: "), lineEdit);
+		pLayout->addRow(QStringLiteral("waveLength: "), lineEdit);
 	}
 
 	// windRotationAngle
@@ -1702,16 +1698,16 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 		pLayout->addRow(QStringLiteral("windSpeed: "), lineEdit);
 	}
 
-	// a
+	// amplitude
 	{
-		QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->a)), this);
+		QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->amplitude)), this);
 		lineEdit->setValidator(doubleValidator);
 		lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
-			fftOceanDataPtr->a = string.toFloat();
+			fftOceanDataPtr->amplitude = string.toFloat();
 			fftOceanDataPtr->isDirty = true;
-			Utils::Log::Message("a: " + std::to_string(fftOceanDataPtr->a));
+			Utils::Log::Message("amplitude: " + std::to_string(fftOceanDataPtr->amplitude));
 		});
-		pLayout->addRow(QStringLiteral("a: "), lineEdit);
+		pLayout->addRow(QStringLiteral("amplitude: "), lineEdit);
 	}
 
 	// windDependency
@@ -1825,15 +1821,15 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 		pLayout->addRow(QStringLiteral("oceanScale.z: "), lineEdit);
 	}
 
-	// normalScale
+	// normalFactor
 	{
-		QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->normalScale)), this);
+		QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->normalFactor)), this);
 		lineEdit->setValidator(doubleValidator);
 		lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
-			fftOceanDataPtr->normalScale = string.toFloat();
-			Utils::Log::Message("normalScale: " + std::to_string(fftOceanDataPtr->normalScale));
+			fftOceanDataPtr->normalFactor = string.toFloat();
+			Utils::Log::Message("normalFactor: " + std::to_string(fftOceanDataPtr->normalFactor));
 		});
-		pLayout->addRow(QStringLiteral("normalScale: "), lineEdit);
+		pLayout->addRow(QStringLiteral("normalFactor: "), lineEdit);
 	}
 
 	// bubblesLambda
@@ -1858,15 +1854,15 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 		pLayout->addRow(QStringLiteral("bubblesThreshold: "), lineEdit);
 	}
 
-	// bubblesScale
+	// bubblesFactor
 	{
-		QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->bubblesScale)), this);
+		QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->bubblesFactor)), this);
 		lineEdit->setValidator(doubleValidator);
 		lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
-			fftOceanDataPtr->bubblesScale = string.toFloat();
-			Utils::Log::Message("bubblesScale: " + std::to_string(fftOceanDataPtr->bubblesScale));
+			fftOceanDataPtr->bubblesFactor = string.toFloat();
+			Utils::Log::Message("bubblesFactor: " + std::to_string(fftOceanDataPtr->bubblesFactor));
 		});
-		pLayout->addRow(QStringLiteral("bubblesScale: "), lineEdit);
+		pLayout->addRow(QStringLiteral("bubblesFactor: "), lineEdit);
 	}
 
 	// aimPointDistanceFactor

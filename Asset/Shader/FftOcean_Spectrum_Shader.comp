@@ -47,11 +47,6 @@ void main()
     const vec2 heightSpectrum = h1 + h2;
 	imageStore(spectrumImageArray, ivec3(pixelPosition, 0), vec4(heightSpectrum, 0, 0));
 
-	// const vec2 xSlopeSpectrum = ComplexMultiply(vec2(0, 1), heightSpectrum) * k.x;
-	// const vec2 ySlopeSpectrum = ComplexMultiply(vec2(0, 1), heightSpectrum) * k.y;
-	// imageStore(imageArray, ivec3(pixelPosition, constantInfo.xSlopeSpectrumImageIndex), vec4(xSlopeSpectrum, 0, 0));
-	// imageStore(imageArray, ivec3(pixelPosition, constantInfo.ySlopeSpectrumImageIndex), vec4(ySlopeSpectrum, 0, 0));
-
 	const float Ksqr = dot(k, k);
     const vec2 Knorm = Ksqr > 1e-12f ? vec2(1) / sqrt(Ksqr) : vec2(0);
 
