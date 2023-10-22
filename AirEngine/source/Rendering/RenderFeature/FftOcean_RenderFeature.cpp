@@ -1421,33 +1421,37 @@ bool AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::PopulateUvCorn
 	const glm::dvec3&& cameraForward = glm::normalize(cameraForwardPosition - cameraPosition);
 	const glm::dvec3&& cameraUpPosition = cameraModelMatrix * glm::dvec4(0, 1, 0, 1);
 	const glm::dvec3&& cameraUp = glm::normalize(cameraUpPosition - cameraPosition);
+	const glm::dvec3&& cameraRight = glm::normalize(glm::cross(cameraForward, cameraUp));
+
+	const glm::dvec3&& absExtent = glm::abs(featureData.oceanScale *featureData.absDisplacement);
 
 	glm::dvec3 projectorPosition{};
 	glm::dvec3 projectorForwardPosition{};
 	{
 		const double aimPointDistanceFactor = double(std::abs(featureData.aimPointDistanceFactor));
-		const double aimPointHeightCompensation = double(std::abs(featureData.aimPointHeightCompensation)) + double(std::abs(featureData.oceanScale.y * featureData.absDisplacement.y));
+		const double aimPointHeightCompensation = double(std::abs(featureData.aimPointHeightCompensation));
 
 		const glm::dvec3&& aimPointPosition = cameraPosition + aimPointDistanceFactor * std::abs(double(renderCamera.farFlat)) * cameraForward;
 	
 		const double cameraHeight = cameraPosition.y;
 		projectorPosition = cameraPosition;
-		if (cameraHeight < aimPointHeightCompensation)
+		if (cameraHeight < absExtent.y)
 		{
 			if (cameraHeight < 0)
 			{
-				projectorPosition.y += aimPointHeightCompensation - 2 * cameraHeight;
+				projectorPosition.y += absExtent.y - 2 * cameraHeight;
 			}
 			else
 			{
-				projectorPosition.y += aimPointHeightCompensation - cameraHeight;
+				projectorPosition.y += absExtent.y - cameraHeight;
 			}
 		}
+		projectorPosition.y += aimPointHeightCompensation;
 
 		projectorForwardPosition = glm::dvec3(aimPointPosition.x, 0, aimPointPosition.z);
 	}
 
-	const double PI = std::acos(-1.0);
+	constexpr double PI = 3.141592653589793;
 	const double&& halfFov = renderCamera.fovAngle * PI / 360.0;
 	const double&& cot = 1.0 / std::tan(halfFov);
 	const double&& flatDistence = renderCamera.farFlat - renderCamera.nearFlat;
@@ -1502,8 +1506,8 @@ bool AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::PopulateUvCorn
 	};
 
 	const glm::dvec3&& planeNormal{ 0, 1, 0 };
-	const glm::dvec4&& upperPlane{ 0, 1, 0, -featureData.absDisplacement.y * featureData.oceanScale.y };
-	const glm::dvec4&& lowerPlane{ 0, 1, 0, +featureData.absDisplacement.y * featureData.oceanScale.y };
+	const glm::dvec4&& upperPlane{ 0, 1, 0, -absExtent.y };
+	const glm::dvec4&& lowerPlane{ 0, 1, 0, +absExtent.y };
 
 	std::vector<glm::dvec3> projectorProjectedPositions{};
 	projectorProjectedPositions.reserve(32);
@@ -1610,22 +1614,14 @@ bool AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::PopulateUvCorn
 			worldSpaceOriginalRangePosition = worldSpaceOriginalRangeHomoPosition / worldSpaceOriginalRangeHomoPosition.w;
 		}
 
-		const glm::dvec3&& RightDirection = glm::normalize(worldSpaceOriginalRangePositions.at(1) - worldSpaceOriginalRangePositions.at(0));
-		glm::dvec3 ForwardDirection = glm::normalize(glm::cross({ 0, 1, 0 }, RightDirection));
-
 		const double DisplacementX = featureData.oceanScale.x * featureData.absDisplacement.x * featureData.displacementFactor.x;
 		const double DisplacementZ = featureData.oceanScale.z * featureData.absDisplacement.z * featureData.displacementFactor.z;
-		const double Displacement = std::max(DisplacementX, DisplacementZ);
 
 		std::array<glm::dvec3, 4> worldSpaceDisplacedRangePositions{};
-		//worldSpaceDisplacedRangePositions.at(0) = worldSpaceOriginalRangePositions.at(0) - Displacement * RightDirection - Displacement * ForwardDirection;
-		//worldSpaceDisplacedRangePositions.at(1) = worldSpaceOriginalRangePositions.at(1) + Displacement * RightDirection - Displacement * ForwardDirection;
-		//worldSpaceDisplacedRangePositions.at(2) = worldSpaceOriginalRangePositions.at(2) - Displacement * RightDirection + Displacement * ForwardDirection;
-		//worldSpaceDisplacedRangePositions.at(3) = worldSpaceOriginalRangePositions.at(3) + Displacement * RightDirection + Displacement * ForwardDirection;
-		worldSpaceDisplacedRangePositions.at(0) = worldSpaceOriginalRangePositions.at(0) - DisplacementX * RightDirection - DisplacementZ * ForwardDirection;
-		worldSpaceDisplacedRangePositions.at(1) = worldSpaceOriginalRangePositions.at(1) + DisplacementX * RightDirection - DisplacementZ * ForwardDirection;
-		worldSpaceDisplacedRangePositions.at(2) = worldSpaceOriginalRangePositions.at(2) - DisplacementX * RightDirection + DisplacementZ * ForwardDirection;
-		worldSpaceDisplacedRangePositions.at(3) = worldSpaceOriginalRangePositions.at(3) + DisplacementX * RightDirection + DisplacementZ * ForwardDirection;
+		worldSpaceDisplacedRangePositions.at(0) = worldSpaceOriginalRangePositions.at(0) - DisplacementX * cameraRight - DisplacementZ * cameraForward;
+		worldSpaceDisplacedRangePositions.at(1) = worldSpaceOriginalRangePositions.at(1) + DisplacementX * cameraRight - DisplacementZ * cameraForward;
+		worldSpaceDisplacedRangePositions.at(2) = worldSpaceOriginalRangePositions.at(2) - DisplacementX * cameraRight + DisplacementZ * cameraForward;
+		worldSpaceDisplacedRangePositions.at(3) = worldSpaceOriginalRangePositions.at(3) + DisplacementX * cameraRight + DisplacementZ * cameraForward;
 
 
 		std::array<glm::dvec4, 4> worldSpaceDisplacedRangeHomoPositions{};
