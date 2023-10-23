@@ -11,10 +11,10 @@ layout(push_constant) uniform ResolveConstantInfo
 {
     ivec2 imageSize;
 	ivec2 meshEdgeVertexCount;
-	float normalScale;
+	float normalFactor;
 	float bubblesLambda;
 	float bubblesThreshold;
-	float bubblesScale;
+	float bubblesFactor;
 } constantInfo;
 
 layout (set = 0, binding = 0, rgba16f) uniform readonly image2D displacementImage;
@@ -41,7 +41,7 @@ void main()
     const vec3 z1D = imageLoad(displacementImage, uvZ1).xyz;
     const vec3 z2D = imageLoad(displacementImage, uvZ2).xyz;
 
-	const vec3 normalScaleFactor = vec3(1, constantInfo.normalScale, 1);
+	const vec3 normalScaleFactor = vec3(1, constantInfo.normalFactor, 1);
     const vec3 x1 = vec3(x1D.x - uintLength.x, x1D.yz) * normalScaleFactor;
     const vec3 x2 = vec3(x2D.x + uintLength.x, x2D.yz) * normalScaleFactor;
     const vec3 z1 = vec3(z1D.xy, z1D.z - uintLength.y) * normalScaleFactor;
@@ -57,7 +57,7 @@ void main()
 
     float jacobian = (1.0f + constantInfo.bubblesLambda * ddx.x) * (1.0f + constantInfo.bubblesLambda * ddz.z) - constantInfo.bubblesLambda * ddx.z * constantInfo.bubblesLambda * ddz.x;
 
-    jacobian = clamp(max(0, constantInfo.bubblesThreshold - clamp(jacobian, 0, 1)) * constantInfo.bubblesScale, 0, 1);
+    jacobian = clamp(max(0, constantInfo.bubblesThreshold - clamp(jacobian, 0, 1)) * constantInfo.bubblesFactor, 0, 1);
 
 	imageStore(normalImage, pixelPosition, vec4(normal, jacobian));
 }
