@@ -58,7 +58,7 @@ AirEngine::Core::Graphic::Rendering::RendererDataBase* AirEngine::Rendering::Ren
 
 void AirEngine::Rendering::Renderer::FftOceanRenderer::OnResolveRendererData(Core::Graphic::Rendering::RendererDataBase* rendererData, Camera::CameraBase* camera)
 {
-
+	rendererData->RenderFeatureData<RenderFeature::Background_RenderFeature::Background_RenderFeatureData>("Background_RenderFeature")->needClearColorAttachment = true;
 }
 
 void AirEngine::Rendering::Renderer::FftOceanRenderer::OnDestroyRendererData(Core::Graphic::Rendering::RendererDataBase* rendererData)

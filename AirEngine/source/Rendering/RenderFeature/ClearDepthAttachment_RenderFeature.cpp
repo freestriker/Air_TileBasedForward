@@ -33,7 +33,7 @@ RTTR_REGISTRATION
 
 AirEngine::Rendering::RenderFeature::ClearDepthAttachment_RenderFeature::ClearDepthAttachment_RenderFeatureData::ClearDepthAttachment_RenderFeatureData()
 	: RenderFeatureDataBase()
-	, clearValue(0)
+	, clearValue(1)
 {
 
 }

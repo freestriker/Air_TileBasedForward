@@ -52,15 +52,19 @@ namespace AirEngine
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderPassBase)
 				};
 				class FftOcean_RenderFeatureData;
+				class FftOceanDataWindowLauncher;
 				class FftOceanDataWindow : public QWidget
 				{
 				private:
 					FftOcean_RenderFeatureData& _fftOceanData;
+					FftOceanDataWindowLauncher& _launcher;
 					void BuildLayout();
+					void closeEvent(QCloseEvent* event);
 				public:
-					FftOceanDataWindow(FftOcean_RenderFeatureData& fftOceanData)
+					FftOceanDataWindow(FftOcean_RenderFeatureData& fftOceanData, FftOceanDataWindowLauncher& launcher)
 						: QWidget()
 						, _fftOceanData(fftOceanData)
+						, _launcher(launcher)
 					{
 						setAttribute(Qt::WA_DeleteOnClose);
 						setWindowTitle(QStringLiteral("FftOceanDataWindow"));
@@ -75,27 +79,35 @@ namespace AirEngine
 					FftOceanDataWindow* window;
 				private:
 					FftOcean_RenderFeatureData& _fftOceanData;
+					bool _isClosed;
 					virtual bool event(QEvent* ev)
 					{
 						if (ev->type() == QEvent::User)
 						{
-							window = new FftOceanDataWindow(_fftOceanData);
+							window = new FftOceanDataWindow(_fftOceanData, *this);
 							window->show();
 							return true;
 						}
 						return QObject::event(ev);
 					}
 				public:
+					void SetClosed()
+					{
+						_isClosed = true;
+					}
 					FftOceanDataWindowLauncher(FftOcean_RenderFeatureData& fftOceanData)
 						: _fftOceanData(fftOceanData)
 						, window(nullptr)
+						, _isClosed(false)
 					{
 
 					}
 					~FftOceanDataWindowLauncher()
 					{
-						window->close();
-						//delete window;
+						if(!_isClosed)
+						{
+							window->close();
+						}
 					}
 				};
 				class FftOcean_RenderFeatureData final : public Core::Graphic::Rendering::RenderFeatureDataBase

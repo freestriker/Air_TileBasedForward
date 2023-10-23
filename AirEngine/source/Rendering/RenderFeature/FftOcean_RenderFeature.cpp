@@ -1916,3 +1916,8 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 
 	setLayout(pLayout);
 }
+
+void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWindow::closeEvent(QCloseEvent* event)
+{
+	_launcher.SetClosed();
+}
