@@ -15,7 +15,7 @@
 #include "Rendering/RenderFeature/CSM_ShadowCaster_RenderFeature.h"
 #include "Rendering/RenderFeature/TBForward_Transparent_RenderFeature.h"
 //#include "Rendering/RenderFeature/IWave_RenderFeature.h"
-#include "Rendering/RenderFeature/FftOcean_RenderFeature.h"
+//#include "Rendering/RenderFeature/FftOcean_RenderFeature.h"
 
 RTTR_REGISTRATION
 {
@@ -54,7 +54,7 @@ AirEngine::Rendering::Renderer::TBForwardRenderer::TBForwardRenderer()
 	UseRenderFeature("TBForward_Transparent_RenderFeature", new RenderFeature::TBForward_Transparent_RenderFeature());
 
 	//UseRenderFeature("IWave_RenderFeature", new RenderFeature::IWave_RenderFeature());
-	UseRenderFeature("FftOcean_RenderFeature", new RenderFeature::FftOcean_RenderFeature());
+	//UseRenderFeature("FftOcean_RenderFeature", new RenderFeature::FftOcean_RenderFeature());
 }
 
 AirEngine::Rendering::Renderer::TBForwardRenderer::~TBForwardRenderer()
@@ -154,7 +154,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::PrepareRenderer(Core::Gr
 	}
 
 	//PrepareRenderFeature("IWave_RenderFeature", rendererData);
-	PrepareRenderFeature("FftOcean_RenderFeature", rendererData);
+	//PrepareRenderFeature("FftOcean_RenderFeature", rendererData);
 }
 
 void AirEngine::Rendering::Renderer::TBForwardRenderer::ExcuteRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*> const* rendererComponents)
@@ -184,7 +184,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::ExcuteRenderer(Core::Gra
 	}
 
 	//ExcuteRenderFeature("IWave_RenderFeature", rendererData, camera, rendererComponents);
-	ExcuteRenderFeature("FftOcean_RenderFeature", rendererData, camera, rendererComponents);
+	//ExcuteRenderFeature("FftOcean_RenderFeature", rendererData, camera, rendererComponents);
 }
 
 void AirEngine::Rendering::Renderer::TBForwardRenderer::SubmitRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -214,7 +214,7 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::SubmitRenderer(Core::Gra
 	}
 
 	//SubmitRenderFeature("IWave_RenderFeature", rendererData);
-	SubmitRenderFeature("FftOcean_RenderFeature", rendererData);
+	//SubmitRenderFeature("FftOcean_RenderFeature", rendererData);
 }
 
 void AirEngine::Rendering::Renderer::TBForwardRenderer::FinishRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -244,5 +244,5 @@ void AirEngine::Rendering::Renderer::TBForwardRenderer::FinishRenderer(Core::Gra
 	}
 
 	//FinishRenderFeature("IWave_RenderFeature", rendererData);
-	FinishRenderFeature("FftOcean_RenderFeature", rendererData);
+	//FinishRenderFeature("FftOcean_RenderFeature", rendererData);
 }

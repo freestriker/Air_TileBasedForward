@@ -110,6 +110,7 @@
     <ClCompile Include="source\Core\Graphic\Instance\Image.cpp" />
     <ClCompile Include="source\Rendering\Renderer\AmbientOcclusionRenderer.cpp" />
     <ClCompile Include="source\Rendering\Renderer\BuildIblRenderer.cpp" />
+    <ClCompile Include="source\Rendering\Renderer\FftOceanRenderer.cpp" />
     <ClCompile Include="source\Rendering\Renderer\ScreenSpaceShadowVisualizationRenderer.cpp" />
     <ClCompile Include="source\Rendering\Renderer\TBForwardRenderer.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\AO_Blur_RenderFeature.cpp" />
@@ -117,6 +118,7 @@
     <ClCompile Include="source\Rendering\RenderFeature\Background_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\CascadeEVSM_ShadowCaster_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\CascadeEVSM_Visualization_RenderFeature.cpp" />
+    <ClCompile Include="source\Rendering\RenderFeature\ClearDepthAttachment_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\CSM_Visualization_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\ClearColorAttachment_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\CSM_ShadowCaster_RenderFeature.cpp" />
@@ -283,6 +285,7 @@
     <ClInclude Include="header\Rendering\PresentRenderPass.h" />
     <ClInclude Include="header\Rendering\Renderer\AmbientOcclusionRenderer.h" />
     <ClInclude Include="header\Rendering\Renderer\BuildIblRenderer.h" />
+    <ClInclude Include="header\Rendering\Renderer\FftOceanRenderer.h" />
     <ClInclude Include="header\Rendering\Renderer\ForwardRenderer.h" />
     <ClInclude Include="header\Rendering\Renderer\ScreenSpaceShadowVisualizationRenderer.h" />
     <ClInclude Include="header\Rendering\Renderer\TBForwardRenderer.h" />
@@ -291,6 +294,7 @@
     <ClInclude Include="header\Rendering\RenderFeature\Background_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\CascadeEVSM_ShadowCaster_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\CascadeEVSM_Visualization_RenderFeature.h" />
+    <ClInclude Include="header\Rendering\RenderFeature\ClearDepthAttachment_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\CSM_Visualization_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\ClearColorAttachment_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\CSM_ShadowCaster_RenderFeature.h" />

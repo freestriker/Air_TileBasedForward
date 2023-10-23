@@ -162,6 +162,13 @@ void AirEngine::Test::RendererDataController::OnUpdate()
 		}
 		else if (camera->RendererName() == "ScreenSpaceShadowVisualizationRenderer")
 		{
+			camera->SetRendererName("FftOceanRenderer");
+			Utils::Log::Message("---------------------------------------------------------------");
+			OutputRendererDescriptions();
+			Utils::Log::Message("---------------------------------------------------------------");
+		}
+		else if (camera->RendererName() == "FftOceanRenderer")
+		{
 			camera->SetRendererName("BuildIblRenderer");
 			Utils::Log::Message("---------------------------------------------------------------");
 			OutputRendererDescriptions();

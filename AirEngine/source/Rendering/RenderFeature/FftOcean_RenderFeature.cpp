@@ -146,7 +146,7 @@ AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOcean_RenderFeat
 		)
 	)
 {
-	_description = "Use forward+ to render opaque objects, mixing shadows with ambient occlusion.";
+	_description = "Use FFT and Projected-Grid to render ocean.";
 }
 
 AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::~FftOcean_RenderFeature()
