@@ -163,20 +163,18 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	featureData->imageSize = { 512, 512 };
 	featureData->waveLength = 512;
 	featureData->windRotationAngle = 0;
-	featureData->windSpeed = 31;
+	featureData->windSpeed = 25;
 	featureData->amplitude = 3;
 	featureData->windDependency = 0.1;
-	featureData->minVertexPosition = { 0, 0 };
-	featureData->maxVertexPosition = { 1, 1 };
 	featureData->displacementFactor = { 1, 1, 1 };
-	featureData->normalFactor = 1;
+	featureData->normalFactor = 0.6;
 	featureData->bubblesLambda = 1;
 	featureData->bubblesThreshold = 1;
-	featureData->bubblesFactor = 85;
-	featureData->oceanScale = { 5, 5, 5 };
+	featureData->bubblesFactor = 30;
+	featureData->oceanScale = { 100, 100, 100 };
 	featureData->absDisplacement = glm::vec3(0.12, 0.12, 0.12);
 	featureData->aimPointDistanceFactor = 10;
-	featureData->aimPointHeightCompensation = 5;
+	featureData->aimPointHeightCompensation = 20;
 	featureData->showWireFrame = false;
 
 	featureData->launcher = new FftOceanDataWindowLauncher(*featureData);
@@ -879,7 +877,6 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		struct ResolveNormalConstantInfo
 		{
 			glm::ivec2 imageSize;
-			glm::ivec2 meshEdgeVertexCount;
 			float normalFactor;
 			float bubblesLambda;
 			float bubblesThreshold;
@@ -887,7 +884,6 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnExcute(Core:
 		};
 		ResolveNormalConstantInfo resolveNormalConstantInfo{};
 		resolveNormalConstantInfo.imageSize = featureData.imageSize;
-		resolveNormalConstantInfo.meshEdgeVertexCount = { 257, 257 };
 		resolveNormalConstantInfo.normalFactor = featureData.normalFactor;
 		resolveNormalConstantInfo.bubblesLambda = featureData.bubblesLambda;
 		resolveNormalConstantInfo.bubblesThreshold = featureData.bubblesThreshold;

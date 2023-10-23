@@ -110,8 +110,6 @@ namespace AirEngine
 					float windSpeed;
 					float amplitude;
 					float windDependency;
-					glm::ivec2 minVertexPosition;
-					glm::ivec2 maxVertexPosition;
 					glm::vec3 displacementFactor;
 					float normalFactor;
 					float bubblesLambda;
