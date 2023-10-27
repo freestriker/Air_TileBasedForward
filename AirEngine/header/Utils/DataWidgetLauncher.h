@@ -35,7 +35,7 @@ namespace AirEngine
 
 			}
 		private:
-			virtual bool event(QEvent* ev)
+			inline bool event(QEvent* ev)
 			{
 				if (ev->type() == QEvent::User)
 				{
@@ -61,20 +61,20 @@ namespace AirEngine
 					_widget->close();
 				}
 			}
-			void Launch()
+			inline void Launch()
 			{
 				moveToThread(QApplication::instance()->thread());
 				QApplication::postEvent(this, new QEvent(QEvent::User));
 			}
-			void Terminate()
+			inline void Terminate()
 			{
 				deleteLater();
 			}
-			TData& Data()
+			inline TData& Data()
 			{
 				return _data;
 			}
-			DataWidget* Widget()
+			inline DataWidget* Widget()
 			{
 				return _widget;
 			}

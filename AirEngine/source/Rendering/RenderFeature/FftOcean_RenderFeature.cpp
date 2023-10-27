@@ -178,10 +178,6 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	featureData->aimPointHeightCompensation = 20;
 	featureData->showWireFrame = false;
 
-	featureData->launcher = new FftOceanDataWindowLauncher(*featureData);
-	featureData->launcher->moveToThread(QApplication::instance()->thread());
-	QApplication::postEvent(featureData->launcher, new QEvent(QEvent::User));
-
 	featureData->widgetLauncher = new FftOceanDataWidgetLauncher(*featureData);
 	featureData->widgetLauncher->Launch();
 
@@ -319,8 +315,6 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnDestroyRende
 	auto featureData = static_cast<FftOcean_RenderFeatureData*>(renderFeatureData);
 
 	featureData->widgetLauncher->Terminate();
-
-	featureData->launcher->deleteLater();
 
 	delete featureData->frameBuffer;
 
@@ -1415,11 +1409,13 @@ bool AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::PopulateUvCorn
 
 //#include "FftOcean_RenderFeature.moc"
 
-void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWindow::BuildLayout()
+void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWidgetLauncher::OnSetUp()
 {
-	auto&& fftOceanDataPtr = &_fftOceanData;
+	Widget()->setWindowTitle(QStringLiteral("FftOceanDataWidget"));
 
-	QFormLayout* pLayout = new QFormLayout(this);
+	auto&& fftOceanDataPtr = &Data();
+
+	QFormLayout* pLayout = new QFormLayout(Widget());
 
 	QIntValidator* intValidator = new QIntValidator;
 	intValidator->setRange(0, 10000000);
@@ -1433,9 +1429,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 
 		// waveLength
 		{
-			QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->waveLength)), this);
+			QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->waveLength)), Widget());
 			lineEdit->setValidator(doubleValidator);
-			lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+			lineEdit->connect(lineEdit, &QLineEdit::textChanged, Widget(), [fftOceanDataPtr](const QString& string)->void {
 				fftOceanDataPtr->waveLength = string.toFloat();
 				fftOceanDataPtr->isDirty = true;
 				Utils::Log::Message("waveLength: " + std::to_string(fftOceanDataPtr->waveLength));
@@ -1445,9 +1441,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 
 		// windRotationAngle
 		{
-			QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->windRotationAngle)), this);
+			QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->windRotationAngle)), Widget());
 			lineEdit->setValidator(doubleValidator);
-			lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+			lineEdit->connect(lineEdit, &QLineEdit::textChanged, Widget(), [fftOceanDataPtr](const QString& string)->void {
 				fftOceanDataPtr->windRotationAngle = string.toFloat();
 				fftOceanDataPtr->isDirty = true;
 				Utils::Log::Message("windRotationAngle: " + std::to_string(fftOceanDataPtr->windRotationAngle));
@@ -1457,9 +1453,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 
 		// windSpeed
 		{
-			QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->windSpeed)), this);
+			QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->windSpeed)), Widget());
 			lineEdit->setValidator(doubleValidator);
-			lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+			lineEdit->connect(lineEdit, &QLineEdit::textChanged, Widget(), [fftOceanDataPtr](const QString& string)->void {
 				fftOceanDataPtr->windSpeed = string.toFloat();
 				fftOceanDataPtr->isDirty = true;
 				Utils::Log::Message("windSpeed: " + std::to_string(fftOceanDataPtr->windSpeed));
@@ -1469,9 +1465,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 
 		// amplitude
 		{
-			QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->amplitude)), this);
+			QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->amplitude)), Widget());
 			lineEdit->setValidator(doubleValidator);
-			lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+			lineEdit->connect(lineEdit, &QLineEdit::textChanged, Widget(), [fftOceanDataPtr](const QString& string)->void {
 				fftOceanDataPtr->amplitude = string.toFloat();
 				fftOceanDataPtr->isDirty = true;
 				Utils::Log::Message("amplitude: " + std::to_string(fftOceanDataPtr->amplitude));
@@ -1481,9 +1477,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 
 		// windDependency
 		{
-			QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->windDependency)), this);
+			QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->windDependency)), Widget());
 			lineEdit->setValidator(doubleValidator);
-			lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+			lineEdit->connect(lineEdit, &QLineEdit::textChanged, Widget(), [fftOceanDataPtr](const QString& string)->void {
 				fftOceanDataPtr->windDependency = string.toFloat();
 				fftOceanDataPtr->isDirty = true;
 				Utils::Log::Message("windDependency: " + std::to_string(fftOceanDataPtr->windDependency));
@@ -1500,27 +1496,27 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 		{
 			QGridLayout* gridLayout = new QGridLayout();
 			{
-				QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->displacementFactor.x)), this);
+				QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->displacementFactor.x)), Widget());
 				lineEdit->setValidator(doubleValidator);
-				lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+				lineEdit->connect(lineEdit, &QLineEdit::textChanged, Widget(), [fftOceanDataPtr](const QString& string)->void {
 					fftOceanDataPtr->displacementFactor.x = string.toFloat();
 					Utils::Log::Message("displacementFactor.x: " + std::to_string(fftOceanDataPtr->displacementFactor.x));
 					});
 				gridLayout->addWidget(lineEdit, 0, 0);
 			}
 			{
-				QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->displacementFactor.y)), this);
+				QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->displacementFactor.y)), Widget());
 				lineEdit->setValidator(doubleValidator);
-				lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+				lineEdit->connect(lineEdit, &QLineEdit::textChanged, Widget(), [fftOceanDataPtr](const QString& string)->void {
 					fftOceanDataPtr->displacementFactor.y = string.toFloat();
 					Utils::Log::Message("displacementFactor.y: " + std::to_string(fftOceanDataPtr->displacementFactor.y));
 					});
 				gridLayout->addWidget(lineEdit, 0, 1);
 			}
 			{
-				QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->displacementFactor.z)), this);
+				QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->displacementFactor.z)), Widget());
 				lineEdit->setValidator(doubleValidator);
-				lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+				lineEdit->connect(lineEdit, &QLineEdit::textChanged, Widget(), [fftOceanDataPtr](const QString& string)->void {
 					fftOceanDataPtr->displacementFactor.z = string.toFloat();
 					Utils::Log::Message("displacementFactor.z: " + std::to_string(fftOceanDataPtr->displacementFactor.z));
 					});
@@ -1533,27 +1529,27 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 		{
 			QGridLayout* gridLayout = new QGridLayout();
 			{
-				QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->absDisplacement.x)), this);
+				QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->absDisplacement.x)), Widget());
 				lineEdit->setValidator(doubleValidator);
-				lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+				lineEdit->connect(lineEdit, &QLineEdit::textChanged, Widget(), [fftOceanDataPtr](const QString& string)->void {
 					fftOceanDataPtr->absDisplacement.x = string.toFloat();
 					Utils::Log::Message("absDisplacement.x: " + std::to_string(fftOceanDataPtr->absDisplacement.x));
 					});
 				gridLayout->addWidget(lineEdit, 0, 0);
 			}
 			{
-				QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->absDisplacement.y)), this);
+				QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->absDisplacement.y)), Widget());
 				lineEdit->setValidator(doubleValidator);
-				lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+				lineEdit->connect(lineEdit, &QLineEdit::textChanged, Widget(), [fftOceanDataPtr](const QString& string)->void {
 					fftOceanDataPtr->absDisplacement.y = string.toFloat();
 					Utils::Log::Message("absDisplacement.y: " + std::to_string(fftOceanDataPtr->absDisplacement.y));
 					});
 				gridLayout->addWidget(lineEdit, 0, 1);
 			}
 			{
-				QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->absDisplacement.z)), this);
+				QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->absDisplacement.z)), Widget());
 				lineEdit->setValidator(doubleValidator);
-				lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+				lineEdit->connect(lineEdit, &QLineEdit::textChanged, Widget(), [fftOceanDataPtr](const QString& string)->void {
 					fftOceanDataPtr->absDisplacement.z = string.toFloat();
 					Utils::Log::Message("absDisplacement.z: " + std::to_string(fftOceanDataPtr->absDisplacement.z));
 					});
@@ -1566,27 +1562,27 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 		{
 			QGridLayout* gridLayout = new QGridLayout();
 			{
-				QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->oceanScale.x)), this);
+				QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->oceanScale.x)), Widget());
 				lineEdit->setValidator(doubleValidator);
-				lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+				lineEdit->connect(lineEdit, &QLineEdit::textChanged, Widget(), [fftOceanDataPtr](const QString& string)->void {
 					fftOceanDataPtr->oceanScale.x = string.toFloat();
 					Utils::Log::Message("oceanScale.x: " + std::to_string(fftOceanDataPtr->oceanScale.x));
 					});
 				gridLayout->addWidget(lineEdit, 0, 0);
 			}
 			{
-				QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->oceanScale.y)), this);
+				QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->oceanScale.y)), Widget());
 				lineEdit->setValidator(doubleValidator);
-				lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+				lineEdit->connect(lineEdit, &QLineEdit::textChanged, Widget(), [fftOceanDataPtr](const QString& string)->void {
 					fftOceanDataPtr->oceanScale.y = string.toFloat();
 					Utils::Log::Message("oceanScale.y: " + std::to_string(fftOceanDataPtr->oceanScale.y));
 					});
 				gridLayout->addWidget(lineEdit, 0, 1);
 			}
 			{
-				QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->oceanScale.z)), this);
+				QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->oceanScale.z)), Widget());
 				lineEdit->setValidator(doubleValidator);
-				lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+				lineEdit->connect(lineEdit, &QLineEdit::textChanged, Widget(), [fftOceanDataPtr](const QString& string)->void {
 					fftOceanDataPtr->oceanScale.z = string.toFloat();
 					Utils::Log::Message("oceanScale.z: " + std::to_string(fftOceanDataPtr->oceanScale.z));
 					});
@@ -1597,9 +1593,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 
 		// normalFactor
 		{
-			QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->normalFactor)), this);
+			QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->normalFactor)), Widget());
 			lineEdit->setValidator(doubleValidator);
-			lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+			lineEdit->connect(lineEdit, &QLineEdit::textChanged, Widget(), [fftOceanDataPtr](const QString& string)->void {
 				fftOceanDataPtr->normalFactor = string.toFloat();
 				Utils::Log::Message("normalFactor: " + std::to_string(fftOceanDataPtr->normalFactor));
 				});
@@ -1608,14 +1604,14 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 	}
 
 	// Bubbles
-	{		
+	{
 		pLayout->addRow(QStringLiteral("-----Bubbles :-----"), new QWidget());
 
 		// bubblesLambda
 		{
-			QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->bubblesLambda)), this);
+			QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->bubblesLambda)), Widget());
 			lineEdit->setValidator(doubleValidator);
-			lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+			lineEdit->connect(lineEdit, &QLineEdit::textChanged, Widget(), [fftOceanDataPtr](const QString& string)->void {
 				fftOceanDataPtr->bubblesLambda = string.toFloat();
 				Utils::Log::Message("bubblesLambda: " + std::to_string(fftOceanDataPtr->bubblesLambda));
 				});
@@ -1624,9 +1620,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 
 		// bubblesThreshold
 		{
-			QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->bubblesThreshold)), this);
+			QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->bubblesThreshold)), Widget());
 			lineEdit->setValidator(doubleValidator);
-			lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+			lineEdit->connect(lineEdit, &QLineEdit::textChanged, Widget(), [fftOceanDataPtr](const QString& string)->void {
 				fftOceanDataPtr->bubblesThreshold = string.toFloat();
 				Utils::Log::Message("bubblesThreshold: " + std::to_string(fftOceanDataPtr->bubblesThreshold));
 				});
@@ -1635,9 +1631,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 
 		// bubblesFactor
 		{
-			QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->bubblesFactor)), this);
+			QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->bubblesFactor)), Widget());
 			lineEdit->setValidator(doubleValidator);
-			lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+			lineEdit->connect(lineEdit, &QLineEdit::textChanged, Widget(), [fftOceanDataPtr](const QString& string)->void {
 				fftOceanDataPtr->bubblesFactor = string.toFloat();
 				Utils::Log::Message("bubblesFactor: " + std::to_string(fftOceanDataPtr->bubblesFactor));
 				});
@@ -1651,9 +1647,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 
 		// aimPointDistanceFactor
 		{
-			QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->aimPointDistanceFactor)), this);
+			QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->aimPointDistanceFactor)), Widget());
 			lineEdit->setValidator(doubleValidator);
-			lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+			lineEdit->connect(lineEdit, &QLineEdit::textChanged, Widget(), [fftOceanDataPtr](const QString& string)->void {
 				fftOceanDataPtr->aimPointDistanceFactor = string.toFloat();
 				Utils::Log::Message("aimPointDistanceFactor: " + std::to_string(fftOceanDataPtr->aimPointDistanceFactor));
 				});
@@ -1661,9 +1657,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 		}
 		// aimPointHeightCompensation
 		{
-			QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->aimPointHeightCompensation)), this);
+			QLineEdit* lineEdit = new QLineEdit(QString::fromStdString(std::to_string(fftOceanDataPtr->aimPointHeightCompensation)), Widget());
 			lineEdit->setValidator(doubleValidator);
-			lineEdit->connect(lineEdit, &QLineEdit::textChanged, this, [fftOceanDataPtr](const QString& string)->void {
+			lineEdit->connect(lineEdit, &QLineEdit::textChanged, Widget(), [fftOceanDataPtr](const QString& string)->void {
 				fftOceanDataPtr->aimPointHeightCompensation = string.toFloat();
 				Utils::Log::Message("aimPointHeightCompensation: " + std::to_string(fftOceanDataPtr->aimPointHeightCompensation));
 				});
@@ -1677,9 +1673,9 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 
 		// showWireFrame
 		{
-			QCheckBox* checkBox = new QCheckBox(this);
+			QCheckBox* checkBox = new QCheckBox(Widget());
 			checkBox->setCheckState(fftOceanDataPtr->showWireFrame ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
-			checkBox->connect(checkBox, &QCheckBox::stateChanged, this, [fftOceanDataPtr](int state)->void {
+			checkBox->connect(checkBox, &QCheckBox::stateChanged, Widget(), [fftOceanDataPtr](int state)->void {
 				fftOceanDataPtr->showWireFrame = (state != Qt::CheckState::Unchecked);
 				Utils::Log::Message(fftOceanDataPtr->showWireFrame ? "showWireFrame: true" : "showWireFrame: false");
 				});
@@ -1687,10 +1683,5 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWi
 		}
 	}
 
-	setLayout(pLayout);
-}
-
-void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOceanDataWindow::closeEvent(QCloseEvent* event)
-{
-	_launcher.SetClosed();
+	Widget()->setLayout(pLayout);
 }
