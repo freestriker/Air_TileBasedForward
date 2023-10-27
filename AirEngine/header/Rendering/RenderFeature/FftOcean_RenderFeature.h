@@ -187,7 +187,6 @@ namespace AirEngine
 
 				bool PopulateUvCornerPositions(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera, std::array<glm::vec4, 4>& targets);
 				bool PopulateUvCornerPositions2(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera, std::array<glm::vec4, 4>& targets);
-				bool PopulateUvCornerPositions3(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Camera::CameraBase* camera, std::array<glm::vec4, 4>& targets);
 
 				RTTR_ENABLE(Core::Graphic::Rendering::RenderFeatureBase)
 			};
