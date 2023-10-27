@@ -182,6 +182,9 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 	featureData->launcher->moveToThread(QApplication::instance()->thread());
 	QApplication::postEvent(featureData->launcher, new QEvent(QEvent::User));
 
+	featureData->widgetLauncher = new FftOceanDataWidgetLauncher(*featureData);
+	featureData->widgetLauncher->Launch();
+
 	const VkExtent2D imageExtent = VkExtent2D{ uint32_t(featureData->imageSize.x), uint32_t(featureData->imageSize.y) };
 
 	featureData->frameBuffer = new Core::Graphic::Rendering::FrameBuffer(_renderPass, camera->attachments);
@@ -314,6 +317,8 @@ void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnResolveRende
 void AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::OnDestroyRenderFeatureData(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData)
 {
 	auto featureData = static_cast<FftOcean_RenderFeatureData*>(renderFeatureData);
+
+	featureData->widgetLauncher->Terminate();
 
 	featureData->launcher->deleteLater();
 

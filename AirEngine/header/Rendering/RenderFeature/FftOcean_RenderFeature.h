@@ -14,6 +14,7 @@
 #include <qpushbutton.h>
 #include "Utils/Log.h"
 #include <QFormLayout>
+#include "Utils/DataWidgetLauncher.h"
 
 namespace AirEngine
 {
@@ -110,6 +111,7 @@ namespace AirEngine
 						}
 					}
 				};
+				class FftOceanDataWidgetLauncher;
 				class FftOcean_RenderFeatureData final : public Core::Graphic::Rendering::RenderFeatureDataBase
 				{
 					friend class FftOcean_RenderFeature;
@@ -134,6 +136,7 @@ namespace AirEngine
 					bool showWireFrame;
 
 					FftOceanDataWindowLauncher* launcher;
+					FftOceanDataWidgetLauncher* widgetLauncher;
 
 					Core::Graphic::Rendering::FrameBuffer* frameBuffer;
 
@@ -166,6 +169,20 @@ namespace AirEngine
 
 					CONSTRUCTOR(FftOcean_RenderFeatureData)
 					RTTR_ENABLE(Core::Graphic::Rendering::RenderFeatureDataBase)
+				};
+				class FftOceanDataWidgetLauncher final: public AirEngine::Utils::DataWidgetLauncher< FftOcean_RenderFeatureData>
+				{
+				private:
+					void OnSetUp() override
+					{
+						Widget()->setWindowTitle(QStringLiteral("FftOceanDataWidget"));
+					}
+				public:
+					FftOceanDataWidgetLauncher(FftOcean_RenderFeatureData& data)
+						: AirEngine::Utils::DataWidgetLauncher< FftOcean_RenderFeatureData>(data)
+					{
+
+					}
 				};
 
 				CONSTRUCTOR(FftOcean_RenderFeature)
