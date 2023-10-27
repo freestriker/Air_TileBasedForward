@@ -11,17 +11,17 @@ namespace AirEngine
 	{
 		namespace Renderer
 		{
-			class FftOceanRenderer final : public Core::Graphic::Rendering::RendererBase
+			class OceanRenderer final : public Core::Graphic::Rendering::RendererBase
 			{
 			public:
-				class FftOceanRendererData final : public Core::Graphic::Rendering::RendererDataBase
+				class OceanRendererData final : public Core::Graphic::Rendering::RendererDataBase
 				{
 				public:
-					CONSTRUCTOR(FftOceanRendererData)
+					CONSTRUCTOR(OceanRendererData)
 					RTTR_ENABLE(Core::Graphic::Rendering::RendererDataBase)
 				};
 
-				CONSTRUCTOR(FftOceanRenderer)
+				CONSTRUCTOR(OceanRenderer)
 
 			private:
 				Core::Graphic::Rendering::RendererDataBase* OnCreateRendererData(Camera::CameraBase* camera)override;

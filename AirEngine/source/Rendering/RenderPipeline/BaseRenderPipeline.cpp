@@ -4,7 +4,7 @@
 #include "Rendering/Renderer/AmbientOcclusionRenderer.h"
 #include "Rendering/Renderer/ScreenSpaceShadowVisualizationRenderer.h"
 #include "Rendering/Renderer/BuildIblRenderer.h"
-#include "Rendering/Renderer/FftOceanRenderer.h"
+#include "Rendering/Renderer/OceanRenderer.h"
 
 RTTR_REGISTRATION
 {
@@ -25,7 +25,7 @@ AirEngine::Rendering::RenderPipeline::BaseRenderPipeline::BaseRenderPipeline()
 	UseRenderer("TBForwardRenderer", new Renderer::TBForwardRenderer());
 	UseRenderer("AmbientOcclusionRenderer", new Renderer::AmbientOcclusionRenderer());
 	UseRenderer("ScreenSpaceShadowVisualizationRenderer", new Renderer::ScreenSpaceShadowVisualizationRenderer());
-	UseRenderer("FftOceanRenderer", new Renderer::FftOceanRenderer());
+	UseRenderer("OceanRenderer", new Renderer::OceanRenderer());
 	UseRenderer("BuildIblRenderer", new Renderer::BuildIblRenderer());
 }
 
@@ -35,6 +35,6 @@ AirEngine::Rendering::RenderPipeline::BaseRenderPipeline::~BaseRenderPipeline()
 	delete static_cast<Renderer::TBForwardRenderer*>(Renderer("TBForwardRenderer"));
 	delete static_cast<Renderer::AmbientOcclusionRenderer*>(Renderer("AmbientOcclusionRenderer"));
 	delete static_cast<Renderer::ScreenSpaceShadowVisualizationRenderer*>(Renderer("ScreenSpaceShadowVisualizationRenderer"));
-	delete static_cast<Renderer::FftOceanRenderer*>(Renderer("FftOceanRenderer"));
+	delete static_cast<Renderer::OceanRenderer*>(Renderer("OceanRenderer"));
 	delete static_cast<Renderer::BuildIblRenderer*>(Renderer("BuildIblRenderer"));
 }

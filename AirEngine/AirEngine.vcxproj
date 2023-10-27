@@ -110,7 +110,7 @@
     <ClCompile Include="source\Core\Graphic\Instance\Image.cpp" />
     <ClCompile Include="source\Rendering\Renderer\AmbientOcclusionRenderer.cpp" />
     <ClCompile Include="source\Rendering\Renderer\BuildIblRenderer.cpp" />
-    <ClCompile Include="source\Rendering\Renderer\FftOceanRenderer.cpp" />
+    <ClCompile Include="source\Rendering\Renderer\OceanRenderer.cpp" />
     <ClCompile Include="source\Rendering\Renderer\ScreenSpaceShadowVisualizationRenderer.cpp" />
     <ClCompile Include="source\Rendering\Renderer\TBForwardRenderer.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\AO_Blur_RenderFeature.cpp" />
@@ -286,7 +286,7 @@
     <ClInclude Include="header\Rendering\PresentRenderPass.h" />
     <ClInclude Include="header\Rendering\Renderer\AmbientOcclusionRenderer.h" />
     <ClInclude Include="header\Rendering\Renderer\BuildIblRenderer.h" />
-    <ClInclude Include="header\Rendering\Renderer\FftOceanRenderer.h" />
+    <ClInclude Include="header\Rendering\Renderer\OceanRenderer.h" />
     <ClInclude Include="header\Rendering\Renderer\ForwardRenderer.h" />
     <ClInclude Include="header\Rendering\Renderer\ScreenSpaceShadowVisualizationRenderer.h" />
     <ClInclude Include="header\Rendering\Renderer\TBForwardRenderer.h" />
