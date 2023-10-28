@@ -189,6 +189,7 @@
     <ClCompile Include="source\Rendering\RenderFeature\GenerateLutMap_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\GeneratePrefilteredMap_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\Geometry_RenderFeature.cpp" />
+    <ClCompile Include="source\Rendering\RenderFeature\GerstnerOcean_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\GTAO_Occlusion_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\HBAO_Occlusion_RenderFeature.cpp" />
     <ClCompile Include="source\Rendering\RenderFeature\SplitHdrToCubeMap_RenderFeature.cpp" />
@@ -305,6 +306,7 @@
     <ClInclude Include="header\Rendering\RenderFeature\GenerateLutMap_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\GeneratePrefilteredMap_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\Geometry_RenderFeature.h" />
+    <ClInclude Include="header\Rendering\RenderFeature\GerstnerOcean_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\GTAO_Occlusion_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\HBAO_Occlusion_RenderFeature.h" />
     <ClInclude Include="header\Rendering\RenderFeature\SplitHdrToCubeMap_RenderFeature.h" />
