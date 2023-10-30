@@ -4,6 +4,7 @@
 #include "Rendering/RenderFeature/Background_RenderFeature.h"
 #include "Rendering/RenderFeature/ClearDepthAttachment_RenderFeature.h"
 #include "Rendering/RenderFeature/FftOcean_RenderFeature.h"
+#include "Rendering/RenderFeature/GerstnerOcean_RenderFeature.h"
 
 RTTR_REGISTRATION
 {
@@ -31,6 +32,7 @@ AirEngine::Rendering::Renderer::OceanRenderer::OceanRenderer()
 	UseRenderFeature("Background_RenderFeature", new RenderFeature::Background_RenderFeature());
 
 	UseRenderFeature("FftOcean_RenderFeature", new RenderFeature::FftOcean_RenderFeature());
+	UseRenderFeature("GerstnerOcean_RenderFeature", new RenderFeature::GerstnerOcean_RenderFeature());
 }
 
 AirEngine::Rendering::Renderer::OceanRenderer::~OceanRenderer()
@@ -40,6 +42,7 @@ AirEngine::Rendering::Renderer::OceanRenderer::~OceanRenderer()
 	delete static_cast<RenderFeature::Background_RenderFeature*>(RenderFeature("Background_RenderFeature"));
 	
 	delete static_cast<RenderFeature::FftOcean_RenderFeature*>(RenderFeature("FftOcean_RenderFeature"));
+	delete static_cast<RenderFeature::GerstnerOcean_RenderFeature*>(RenderFeature("GerstnerOcean_RenderFeature"));
 }
 
 AirEngine::Rendering::Renderer::OceanRenderer::OceanRendererData::OceanRendererData()
@@ -73,6 +76,7 @@ void AirEngine::Rendering::Renderer::OceanRenderer::PrepareRenderer(Core::Graphi
 	PrepareRenderFeature("Background_RenderFeature", rendererData);
 
 	PrepareRenderFeature("FftOcean_RenderFeature", rendererData);
+	PrepareRenderFeature("GerstnerOcean_RenderFeature", rendererData);
 }
 
 void AirEngine::Rendering::Renderer::OceanRenderer::ExcuteRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*> const* rendererComponents)
@@ -82,6 +86,7 @@ void AirEngine::Rendering::Renderer::OceanRenderer::ExcuteRenderer(Core::Graphic
 	ExcuteRenderFeature("Background_RenderFeature", rendererData, camera, rendererComponents);
 
 	ExcuteRenderFeature("FftOcean_RenderFeature", rendererData, camera, rendererComponents);
+	ExcuteRenderFeature("GerstnerOcean_RenderFeature", rendererData, camera, rendererComponents);
 }
 
 void AirEngine::Rendering::Renderer::OceanRenderer::SubmitRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -91,6 +96,7 @@ void AirEngine::Rendering::Renderer::OceanRenderer::SubmitRenderer(Core::Graphic
 	SubmitRenderFeature("Background_RenderFeature", rendererData);
 
 	SubmitRenderFeature("FftOcean_RenderFeature", rendererData);
+	SubmitRenderFeature("GerstnerOcean_RenderFeature", rendererData);
 }
 
 void AirEngine::Rendering::Renderer::OceanRenderer::FinishRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -100,4 +106,5 @@ void AirEngine::Rendering::Renderer::OceanRenderer::FinishRenderer(Core::Graphic
 	FinishRenderFeature("Background_RenderFeature", rendererData);
 
 	FinishRenderFeature("FftOcean_RenderFeature", rendererData);
+	FinishRenderFeature("GerstnerOcean_RenderFeature", rendererData);
 }

@@ -96,6 +96,7 @@ namespace AirEngine
 				{
 				private:
 					void OnSetUp() override;
+					std::vector <std::vector <QWidget*>> subGerstnerWaveInfoWidgetVectors;
 				public:
 					GerstnerOceanDataWidgetLauncher(GerstnerOcean_RenderFeatureData& data);
 				};
