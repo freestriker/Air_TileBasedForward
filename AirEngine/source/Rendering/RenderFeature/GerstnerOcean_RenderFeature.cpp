@@ -406,9 +406,11 @@ void AirEngine::Rendering::RenderFeature::GerstnerOcean_RenderFeature::GerstnerO
 				gerstnerOceanDataPtr->isDirty = true;
 
 				const int oldSize = gerstnerOceanDataPtr->subGerstnerWaveInfos.size();
-				const int newSize = string.toInt();
+				const int newSize = std::max(1, string.toInt());
 
-				if (newSize <= oldSize)
+				if (newSize == oldSize) return;
+
+				if (newSize < oldSize)
 				{
 					gerstnerOceanDataPtr->subGerstnerWaveInfos.resize(newSize);
 
@@ -420,7 +422,7 @@ void AirEngine::Rendering::RenderFeature::GerstnerOcean_RenderFeature::GerstnerO
 						{
 							auto oldWidget = *iter;
 							oldWidget->setParent(nullptr);
-							pLayout->removeWidget(oldWidget);
+							pLayout->removeRow(pLayout->rowCount() - 1);
 							delete oldWidget;
 						}
 					}
@@ -514,7 +516,7 @@ void AirEngine::Rendering::RenderFeature::GerstnerOcean_RenderFeature::GerstnerO
 						}
 					}
 				}
-				Utils::Log::Message("size: " + std::to_string(gerstnerOceanDataPtr->aimPointHeightCompensation));
+				Utils::Log::Message("size: " + std::to_string(gerstnerOceanDataPtr->subGerstnerWaveInfos.size()));
 			});
 			pLayout->addRow(QStringLiteral("size: "), lineEdit);	
 		}
@@ -597,7 +599,6 @@ void AirEngine::Rendering::RenderFeature::GerstnerOcean_RenderFeature::GerstnerO
 				subGerstnerWaveInfoWidgetVector.emplace_back(lineEdit);
 			}
 		}
-
 	}
 
 	widget->setLayout(pLayout);
