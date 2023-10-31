@@ -21,6 +21,7 @@
 #include "Core/Graphic/Rendering/RenderFeatureBase.h"
 #include "Core/Graphic/Manager/RenderPipelineManager.h"
 #include <Core/Graphic/CoreObject/Instance.h>
+#include "Rendering/Renderer/OceanRenderer.h"
 
 RTTR_REGISTRATION
 {
@@ -138,6 +139,27 @@ void AirEngine::Test::RendererDataController::OnUpdate()
 				{
 					rendererData->shadowType = Rendering::Renderer::ScreenSpaceShadowVisualizationRenderer::ShadowType::CSM;
 					Utils::Log::Message("Switch shadow mode to ScreenSpaceCSM.");
+				}
+			}
+		}
+	}
+
+	///Ocean type
+	{
+		auto rendererData = dynamic_cast<Rendering::Renderer::OceanRenderer::OceanRendererData*>(rendererDataBase);
+		if (rendererData != nullptr)
+		{
+			if (Core::Logic::CoreObject::Instance::InputManager().KeyUp(Core::Logic::Manager::InputKeyType::Key_J))
+			{
+				if (rendererData->oceanType == Rendering::Renderer::OceanRenderer::OceanType::FFT)
+				{
+					rendererData->oceanType = Rendering::Renderer::OceanRenderer::OceanType::GERSTNER;
+					Utils::Log::Message("Switch shadow mode to GerstnerOcean_RenderFeature.");
+				}
+				else if (rendererData->oceanType == Rendering::Renderer::OceanRenderer::OceanType::GERSTNER)
+				{
+					rendererData->oceanType = Rendering::Renderer::OceanRenderer::OceanType::FFT;
+					Utils::Log::Message("Switch shadow mode to FftOcean_RenderFeature.");
 				}
 			}
 		}

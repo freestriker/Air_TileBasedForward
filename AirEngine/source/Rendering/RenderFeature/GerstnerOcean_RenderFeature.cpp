@@ -365,7 +365,7 @@ void AirEngine::Rendering::RenderFeature::GerstnerOcean_RenderFeature::GerstnerO
 			lineEdit->connect(lineEdit, &QLineEdit::textChanged, widget, [gerstnerOceanDataPtr](const QString& string)->void {
 				gerstnerOceanDataPtr->aimPointDistanceFactor = string.toFloat();
 				Utils::Log::Message("aimPointDistanceFactor: " + std::to_string(gerstnerOceanDataPtr->aimPointDistanceFactor));
-				});
+			});
 			pLayout->addRow(QStringLiteral("aimPointDistanceFactor: "), lineEdit);
 		}
 		// aimPointHeightCompensation
@@ -375,7 +375,7 @@ void AirEngine::Rendering::RenderFeature::GerstnerOcean_RenderFeature::GerstnerO
 			lineEdit->connect(lineEdit, &QLineEdit::textChanged, widget, [gerstnerOceanDataPtr](const QString& string)->void {
 				gerstnerOceanDataPtr->aimPointHeightCompensation = string.toFloat();
 				Utils::Log::Message("aimPointHeightCompensation: " + std::to_string(gerstnerOceanDataPtr->aimPointHeightCompensation));
-				});
+			});
 			pLayout->addRow(QStringLiteral("aimPointHeightCompensation: "), lineEdit);
 		}
 	}
@@ -454,7 +454,7 @@ void AirEngine::Rendering::RenderFeature::GerstnerOcean_RenderFeature::GerstnerO
 								gerstnerOceanDataPtr->isDirty = true;
 								subGerstnerWaveInfo.amplitudeFactor = string.toFloat();
 								Utils::Log::Message("amplitudeFactor: " + std::to_string(subGerstnerWaveInfo.amplitudeFactor));
-								});
+							});
 							pLayout->addRow(QStringLiteral("amplitudeFactor: "), lineEdit);
 							subGerstnerWaveInfoWidgetVector.emplace_back(lineEdit);
 						}
@@ -468,7 +468,7 @@ void AirEngine::Rendering::RenderFeature::GerstnerOcean_RenderFeature::GerstnerO
 								gerstnerOceanDataPtr->isDirty = true;
 								subGerstnerWaveInfo.windRotationAngle = string.toFloat();
 								Utils::Log::Message("windRotationAngle: " + std::to_string(subGerstnerWaveInfo.windRotationAngle));
-								});
+							});
 							pLayout->addRow(QStringLiteral("windRotationAngle: "), lineEdit);
 							subGerstnerWaveInfoWidgetVector.emplace_back(lineEdit);
 						}
@@ -482,7 +482,7 @@ void AirEngine::Rendering::RenderFeature::GerstnerOcean_RenderFeature::GerstnerO
 								gerstnerOceanDataPtr->isDirty = true;
 								subGerstnerWaveInfo.waveLength = string.toFloat();
 								Utils::Log::Message("waveLength: " + std::to_string(subGerstnerWaveInfo.waveLength));
-								});
+							});
 							pLayout->addRow(QStringLiteral("waveLength: "), lineEdit);
 							subGerstnerWaveInfoWidgetVector.emplace_back(lineEdit);
 						}
@@ -496,7 +496,7 @@ void AirEngine::Rendering::RenderFeature::GerstnerOcean_RenderFeature::GerstnerO
 								gerstnerOceanDataPtr->isDirty = true;
 								subGerstnerWaveInfo.omegaFactor = string.toFloat();
 								Utils::Log::Message("omegaFactor: " + std::to_string(subGerstnerWaveInfo.omegaFactor));
-								});
+							});
 							pLayout->addRow(QStringLiteral("omegaFactor: "), lineEdit);
 							subGerstnerWaveInfoWidgetVector.emplace_back(lineEdit);
 						}
@@ -510,7 +510,7 @@ void AirEngine::Rendering::RenderFeature::GerstnerOcean_RenderFeature::GerstnerO
 								gerstnerOceanDataPtr->isDirty = true;
 								subGerstnerWaveInfo.phiAngle = string.toFloat();
 								Utils::Log::Message("phiAngle: " + std::to_string(subGerstnerWaveInfo.phiAngle));
-								});
+							});
 							pLayout->addRow(QStringLiteral("phiAngle: "), lineEdit);
 							subGerstnerWaveInfoWidgetVector.emplace_back(lineEdit);
 						}
@@ -538,7 +538,7 @@ void AirEngine::Rendering::RenderFeature::GerstnerOcean_RenderFeature::GerstnerO
 					gerstnerOceanDataPtr->isDirty = true;
 					subGerstnerWaveInfo.amplitudeFactor = string.toFloat();
 					Utils::Log::Message("amplitudeFactor: " + std::to_string(subGerstnerWaveInfo.amplitudeFactor));
-					});
+				});
 				pLayout->addRow(QStringLiteral("amplitudeFactor: "), lineEdit);
 				subGerstnerWaveInfoWidgetVector.emplace_back(lineEdit);
 			}
@@ -552,7 +552,7 @@ void AirEngine::Rendering::RenderFeature::GerstnerOcean_RenderFeature::GerstnerO
 					gerstnerOceanDataPtr->isDirty = true;
 					subGerstnerWaveInfo.windRotationAngle = string.toFloat();
 					Utils::Log::Message("windRotationAngle: " + std::to_string(subGerstnerWaveInfo.windRotationAngle));
-					});
+				});
 				pLayout->addRow(QStringLiteral("windRotationAngle: "), lineEdit);
 				subGerstnerWaveInfoWidgetVector.emplace_back(lineEdit);
 			}
@@ -566,7 +566,7 @@ void AirEngine::Rendering::RenderFeature::GerstnerOcean_RenderFeature::GerstnerO
 					gerstnerOceanDataPtr->isDirty = true;
 					subGerstnerWaveInfo.waveLength = string.toFloat();
 					Utils::Log::Message("waveLength: " + std::to_string(subGerstnerWaveInfo.waveLength));
-					});
+				});
 				pLayout->addRow(QStringLiteral("waveLength: "), lineEdit);
 				subGerstnerWaveInfoWidgetVector.emplace_back(lineEdit);
 			}
@@ -580,7 +580,7 @@ void AirEngine::Rendering::RenderFeature::GerstnerOcean_RenderFeature::GerstnerO
 					gerstnerOceanDataPtr->isDirty = true;
 					subGerstnerWaveInfo.omegaFactor = string.toFloat();
 					Utils::Log::Message("omegaFactor: " + std::to_string(subGerstnerWaveInfo.omegaFactor));
-					});
+				});
 				pLayout->addRow(QStringLiteral("omegaFactor: "), lineEdit);
 				subGerstnerWaveInfoWidgetVector.emplace_back(lineEdit);
 			}
@@ -594,7 +594,7 @@ void AirEngine::Rendering::RenderFeature::GerstnerOcean_RenderFeature::GerstnerO
 					gerstnerOceanDataPtr->isDirty = true;
 					subGerstnerWaveInfo.phiAngle = string.toFloat();
 					Utils::Log::Message("phiAngle: " + std::to_string(subGerstnerWaveInfo.phiAngle));
-					});
+				});
 				pLayout->addRow(QStringLiteral("phiAngle: "), lineEdit);
 				subGerstnerWaveInfoWidgetVector.emplace_back(lineEdit);
 			}

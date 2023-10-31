@@ -75,8 +75,15 @@ void AirEngine::Rendering::Renderer::OceanRenderer::PrepareRenderer(Core::Graphi
 
 	PrepareRenderFeature("Background_RenderFeature", rendererData);
 
-	PrepareRenderFeature("FftOcean_RenderFeature", rendererData);
-	PrepareRenderFeature("GerstnerOcean_RenderFeature", rendererData);
+	switch (static_cast<OceanRendererData*>(rendererData)->oceanType)
+	{
+	case OceanType::FFT:
+		PrepareRenderFeature("FftOcean_RenderFeature", rendererData);
+		break;
+	case OceanType::GERSTNER:
+		PrepareRenderFeature("GerstnerOcean_RenderFeature", rendererData);
+		break;
+	}
 }
 
 void AirEngine::Rendering::Renderer::OceanRenderer::ExcuteRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*> const* rendererComponents)
@@ -85,8 +92,15 @@ void AirEngine::Rendering::Renderer::OceanRenderer::ExcuteRenderer(Core::Graphic
 
 	ExcuteRenderFeature("Background_RenderFeature", rendererData, camera, rendererComponents);
 
-	ExcuteRenderFeature("FftOcean_RenderFeature", rendererData, camera, rendererComponents);
-	ExcuteRenderFeature("GerstnerOcean_RenderFeature", rendererData, camera, rendererComponents);
+	switch (static_cast<OceanRendererData*>(rendererData)->oceanType)
+	{
+	case OceanType::FFT:
+		ExcuteRenderFeature("FftOcean_RenderFeature", rendererData, camera, rendererComponents);
+		break;
+	case OceanType::GERSTNER:
+		ExcuteRenderFeature("GerstnerOcean_RenderFeature", rendererData, camera, rendererComponents);
+		break;
+	}
 }
 
 void AirEngine::Rendering::Renderer::OceanRenderer::SubmitRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -95,8 +109,15 @@ void AirEngine::Rendering::Renderer::OceanRenderer::SubmitRenderer(Core::Graphic
 
 	SubmitRenderFeature("Background_RenderFeature", rendererData);
 
-	SubmitRenderFeature("FftOcean_RenderFeature", rendererData);
-	SubmitRenderFeature("GerstnerOcean_RenderFeature", rendererData);
+	switch (static_cast<OceanRendererData*>(rendererData)->oceanType)
+	{
+	case OceanType::FFT:
+		SubmitRenderFeature("FftOcean_RenderFeature", rendererData);
+		break;
+	case OceanType::GERSTNER:
+		SubmitRenderFeature("GerstnerOcean_RenderFeature", rendererData);
+		break;
+	}
 }
 
 void AirEngine::Rendering::Renderer::OceanRenderer::FinishRenderer(Core::Graphic::Rendering::RendererDataBase* rendererData)
@@ -105,6 +126,13 @@ void AirEngine::Rendering::Renderer::OceanRenderer::FinishRenderer(Core::Graphic
 
 	FinishRenderFeature("Background_RenderFeature", rendererData);
 
-	FinishRenderFeature("FftOcean_RenderFeature", rendererData);
-	FinishRenderFeature("GerstnerOcean_RenderFeature", rendererData);
+	switch (static_cast<OceanRendererData*>(rendererData)->oceanType)
+	{
+	case OceanType::FFT:
+		FinishRenderFeature("FftOcean_RenderFeature", rendererData);
+		break;
+	case OceanType::GERSTNER:
+		FinishRenderFeature("GerstnerOcean_RenderFeature", rendererData);
+		break;
+	}
 }

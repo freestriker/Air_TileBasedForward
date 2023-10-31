@@ -14,9 +14,15 @@ namespace AirEngine
 			class OceanRenderer final : public Core::Graphic::Rendering::RendererBase
 			{
 			public:
+				enum class OceanType
+				{
+					FFT,
+					GERSTNER
+				};
 				class OceanRendererData final : public Core::Graphic::Rendering::RendererDataBase
 				{
 				public:
+					OceanType oceanType = OceanType::FFT;
 					CONSTRUCTOR(OceanRendererData)
 					RTTR_ENABLE(Core::Graphic::Rendering::RendererDataBase)
 				};
