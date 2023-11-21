@@ -164,18 +164,6 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 
 	featureData.gerstnerWaveInfoBuffer = nullptr;
 
-	//featureData.gerstnerWaveInfoStagingBuffer = new Core::Graphic::Instance::Buffer(
-	//	sizeof(GerstnerOcean_RenderFeatureData::SubGerstnerWaveInfo) * featureData.subGerstnerWaveInfos.size(),
-	//	VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
-	//	VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
-	//);
-
-	//featureData.gerstnerWaveInfoBuffer = new Core::Graphic::Instance::Buffer(
-	//	sizeof(GerstnerOcean_RenderFeatureData::SubGerstnerWaveInfo) * featureData.subGerstnerWaveInfos.size(),
-	//	VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
-	//	VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
-	//);
-
 	//featureData.surfaceMesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\Surface.ply");
 	//featureData.surfaceShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\GerstnerOcean_Surface_Shader.shader");
 	//featureData.surfaceMaterial = new Core::Graphic::Rendering::Material(featureData.surfaceShader);
@@ -207,9 +195,9 @@ void AirEngine::Rendering::RenderFeature::GerstnerOcean_RenderFeature::OnDestroy
 	//delete featureData->surfaceWireFrameMaterial;
 	//Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\GerstnerOcean_SurfaceWireFrame_Shader.shader");
 
-	//delete featureData->gerstnerWaveInfoStagingBuffer;
-	//delete featureData->gerstnerWaveInfoBuffer;
-
+	delete featureData->gerstnerWaveInfoStagingBuffer;
+	delete featureData->gerstnerWaveInfoBuffer;
+	
 	delete featureData;
 }
 
@@ -219,6 +207,71 @@ void AirEngine::Rendering::RenderFeature::GerstnerOcean_RenderFeature::OnPrepare
 
 void AirEngine::Rendering::RenderFeature::GerstnerOcean_RenderFeature::OnExcute(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer, Camera::CameraBase* camera, std::vector<AirEngine::Renderer::Renderer*> const* rendererComponents)
 {
+	GerstnerOcean_RenderFeatureData& featureData = *static_cast<GerstnerOcean_RenderFeatureData*>(renderFeatureData);
+
+	// projected grid
+	std::array<glm::vec4, 4> uvCorners{};
+	AirEngine::Rendering::Utility::ProjectedGridInfo projectedGridInfo{};
+	{
+		projectedGridInfo.scale = featureData.oceanScale;
+		projectedGridInfo.absDisplacement = featureData.absDisplacement;
+		projectedGridInfo.displacementFactor = featureData.displacementFactor;
+		projectedGridInfo.aimPointDistanceFactor = featureData.aimPointDistanceFactor;
+		projectedGridInfo.aimPointHeightCompensation = featureData.aimPointHeightCompensation;
+		if (!AirEngine::Rendering::Utility::CalculateProjectedGridCornerPositions(projectedGridInfo, camera, uvCorners))
+		{
+			return;
+		}
+	}
+
+	const bool isWaveInfoDirty = featureData.isDirty;
+	const uint32_t subWaveInfoCount = featureData.subGerstnerWaveInfos.size();
+	const uint32_t subWaveInfoByteSize = subWaveInfoCount * sizeof(GerstnerOcean_RenderFeatureData::SubGerstnerWaveInfo);
+	featureData.isDirty = false;
+	if (isWaveInfoDirty)
+	{
+		if (featureData.gerstnerWaveInfoStagingBuffer == nullptr || (featureData.gerstnerWaveInfoStagingBuffer->Size() - featureData.gerstnerWaveInfoStagingBuffer->Offset()) < subWaveInfoByteSize)
+		{
+			delete featureData.gerstnerWaveInfoStagingBuffer;
+			featureData.gerstnerWaveInfoStagingBuffer = new Core::Graphic::Instance::Buffer(
+				subWaveInfoByteSize,
+				VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+				VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+			);
+		}
+		if (featureData.gerstnerWaveInfoStagingBuffer == nullptr || (featureData.gerstnerWaveInfoStagingBuffer->Size() - featureData.gerstnerWaveInfoStagingBuffer->Offset()) < subWaveInfoByteSize)
+		{
+			delete featureData.gerstnerWaveInfoBuffer;
+			featureData.gerstnerWaveInfoBuffer = new Core::Graphic::Instance::Buffer(
+				subWaveInfoByteSize,
+				VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
+				VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
+			);
+		}
+	}
+
+	commandBuffer->Reset();
+	commandBuffer->BeginRecord(VkCommandBufferUsageFlagBits::VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT);
+
+	if (isWaveInfoDirty)
+	{
+		featureData.gerstnerWaveInfoStagingBuffer->WriteData(featureData.subGerstnerWaveInfos.data(), subWaveInfoByteSize);
+		commandBuffer->CopyBuffer(
+			featureData.gerstnerWaveInfoStagingBuffer, featureData.gerstnerWaveInfoStagingBuffer->Offset(),
+			featureData.gerstnerWaveInfoBuffer, featureData.gerstnerWaveInfoBuffer->Offset(),
+			subWaveInfoByteSize
+		);
+		{
+			AirEngine::Core::Graphic::Command::BufferMemoryBarrier bufferBarrier(featureData.gerstnerWaveInfoBuffer, VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT, VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT);
+			commandBuffer->AddPipelineBufferBarrier(
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_VERTEX_SHADER_BIT,
+				{ &bufferBarrier }
+			);
+		}
+	}
+	
+	commandBuffer->EndRecord();
 }
 
 void AirEngine::Rendering::RenderFeature::GerstnerOcean_RenderFeature::OnSubmit(Core::Graphic::Rendering::RenderFeatureDataBase* renderFeatureData, Core::Graphic::Command::CommandBuffer* commandBuffer)

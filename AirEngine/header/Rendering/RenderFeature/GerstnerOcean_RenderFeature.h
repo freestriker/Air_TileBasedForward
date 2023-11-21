@@ -65,6 +65,9 @@ namespace AirEngine
 						float waveLength;
 						float omegaFactor;
 						float phiAngle;
+						float padding0;
+						float padding1;
+						float padding2;
 					};
 					bool isDirty;
 					std::vector< SubGerstnerWaveInfo> subGerstnerWaveInfos;
