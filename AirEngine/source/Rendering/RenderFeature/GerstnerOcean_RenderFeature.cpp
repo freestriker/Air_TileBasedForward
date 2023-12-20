@@ -162,18 +162,19 @@ AirEngine::Core::Graphic::Rendering::RenderFeatureDataBase* AirEngine::Rendering
 
 	featureData.gerstnerWaveInfoStagingBuffer = nullptr;
 
-	featureData.gerstnerWaveInfoBuffer = nullptr;
+	featureData.subGerstnerWaveInfosBuffer = nullptr;
 
-	//featureData.surfaceMesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\Surface.ply");
-	//featureData.surfaceShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\GerstnerOcean_Surface_Shader.shader");
-	//featureData.surfaceMaterial = new Core::Graphic::Rendering::Material(featureData.surfaceShader);
-	//featureData.surfaceMaterial->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
-	//featureData.surfaceMaterial->SetStorageBuffer("gerstnerWaveInfoBuffer", featureData.gerstnerWaveInfoBuffer);
+	featureData.surfaceMesh = Core::IO::CoreObject::Instance::AssetManager().Load<Asset::Mesh>("..\\Asset\\Mesh\\Surface.ply");
+
+	featureData.surfaceShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\GerstnerOcean_Surface_Shader.shader");
+	featureData.surfaceMaterial = new Core::Graphic::Rendering::Material(featureData.surfaceShader);
+	featureData.surfaceMaterial->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
+	featureData.surfaceMaterial->SetStorageBuffer("subGerstnerWaveInfosBuffer", featureData.subGerstnerWaveInfosBuffer);
 
 	//featureData.surfaceWireFrameShader = Core::IO::CoreObject::Instance::AssetManager().Load<Core::Graphic::Rendering::Shader>("..\\Asset\\Shader\\GerstnerOcean_SurfaceWireFrame_Shader.shader");
 	//featureData.surfaceWireFrameMaterial = new Core::Graphic::Rendering::Material(featureData.surfaceWireFrameShader);
 	//featureData.surfaceWireFrameMaterial->SetUniformBuffer("cameraInfo", camera->CameraInfoBuffer());
-	//featureData.surfaceMaterial->SetStorageBuffer("gerstnerWaveInfoBuffer", featureData.gerstnerWaveInfoBuffer);
+	//featureData.surfaceMaterial->SetStorageBuffer("subGerstnerWaveInfosBuffer", featureData.subGerstnerWaveInfosBuffer);
 
 	return featureDataPtr;
 }
@@ -190,13 +191,13 @@ void AirEngine::Rendering::RenderFeature::GerstnerOcean_RenderFeature::OnDestroy
 
 	delete featureData->frameBuffer;
 
-	//delete featureData->surfaceMaterial;
-	//Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\GerstnerOcean_Surface_Shader.shader");
+	delete featureData->surfaceMaterial;
+	Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\GerstnerOcean_Surface_Shader.shader");
 	//delete featureData->surfaceWireFrameMaterial;
 	//Core::IO::CoreObject::Instance::AssetManager().Unload("..\\Asset\\Shader\\GerstnerOcean_SurfaceWireFrame_Shader.shader");
 
 	delete featureData->gerstnerWaveInfoStagingBuffer;
-	delete featureData->gerstnerWaveInfoBuffer;
+	delete featureData->subGerstnerWaveInfosBuffer;
 	
 	delete featureData;
 }
@@ -241,8 +242,8 @@ void AirEngine::Rendering::RenderFeature::GerstnerOcean_RenderFeature::OnExcute(
 		}
 		if (featureData.gerstnerWaveInfoStagingBuffer == nullptr || (featureData.gerstnerWaveInfoStagingBuffer->Size() - featureData.gerstnerWaveInfoStagingBuffer->Offset()) < subWaveInfoByteSize)
 		{
-			delete featureData.gerstnerWaveInfoBuffer;
-			featureData.gerstnerWaveInfoBuffer = new Core::Graphic::Instance::Buffer(
+			delete featureData.subGerstnerWaveInfosBuffer;
+			featureData.subGerstnerWaveInfosBuffer = new Core::Graphic::Instance::Buffer(
 				subWaveInfoByteSize,
 				VkBufferUsageFlagBits::VK_BUFFER_USAGE_TRANSFER_DST_BIT | VkBufferUsageFlagBits::VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,
 				VkMemoryPropertyFlagBits::VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT
@@ -258,14 +259,14 @@ void AirEngine::Rendering::RenderFeature::GerstnerOcean_RenderFeature::OnExcute(
 		featureData.gerstnerWaveInfoStagingBuffer->WriteData(featureData.subGerstnerWaveInfos.data(), subWaveInfoByteSize);
 		commandBuffer->CopyBuffer(
 			featureData.gerstnerWaveInfoStagingBuffer, featureData.gerstnerWaveInfoStagingBuffer->Offset(),
-			featureData.gerstnerWaveInfoBuffer, featureData.gerstnerWaveInfoBuffer->Offset(),
+			featureData.subGerstnerWaveInfosBuffer, featureData.subGerstnerWaveInfosBuffer->Offset(),
 			subWaveInfoByteSize
 		);
 		{
-			AirEngine::Core::Graphic::Command::BufferMemoryBarrier bufferBarrier(featureData.gerstnerWaveInfoBuffer, VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT, VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT);
+			AirEngine::Core::Graphic::Command::BufferMemoryBarrier bufferBarrier(featureData.subGerstnerWaveInfosBuffer, VkAccessFlagBits::VK_ACCESS_TRANSFER_WRITE_BIT, VkAccessFlagBits::VK_ACCESS_SHADER_READ_BIT);
 			commandBuffer->AddPipelineBufferBarrier(
 				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_TRANSFER_BIT,
-				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_VERTEX_SHADER_BIT,
+				VkPipelineStageFlagBits::VK_PIPELINE_STAGE_VERTEX_SHADER_BIT | VkPipelineStageFlagBits::VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT,
 				{ &bufferBarrier }
 			);
 		}

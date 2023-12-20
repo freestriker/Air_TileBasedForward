@@ -5,8 +5,8 @@
 #include "Object.glsl"
 #include "Light.glsl"
 
-layout(location = 0) in vec2 inTexCoords;
-layout(location = 1) in vec3 inWorldPosition;
+layout(location = 0) in vec3 inWorldPosition;
+layout(location = 1) in vec3 inWorldNormal;
 
 layout(location = 0) out vec4 ColorAttachment;
 
@@ -22,8 +22,17 @@ layout(set = 1, binding = 0) uniform LightInfos
     int ortherLightCount;
     LightInfo[MAX_ORTHER_LIGHT_COUNT] ortherLightInfos;
 } lightInfos;
-layout(set = 2, binding = 0) uniform sampler2D displacementTexture;
-layout(set = 3, binding = 0) uniform sampler2D normalTexture;
+struct SubGerstnerWaveInfo
+{
+    float amplitudeFactor;
+    float windRotationAngle;
+    float waveLength;
+    float phiAngle;
+};
+layout(set = 2, binding = 0) readonly buffer SubGerstnerWaveInfosBuffer
+{
+    SubGerstnerWaveInfo subGerstnerWaveInfos[];
+}subGerstnerWaveInfosBuffer;
 
 layout(push_constant) uniform ProjectedGridConstantInfo
 {
@@ -31,14 +40,14 @@ layout(push_constant) uniform ProjectedGridConstantInfo
     vec4 corner10;
     vec4 corner01;
     vec4 corner11;
-    vec3 scale;
+    uint count;
+    float time;
 } constantInfo;
 
 void main() 
 {
-    const vec4 normal_bubbles = texture(normalTexture, inTexCoords).rgba;
-    const vec3 normal = normalize(normal_bubbles.xyz);
-    const float bubbles = normal_bubbles.w;
+    const vec3 normal = normalize(inWorldNormal);
+    const float bubbles = 1;
 
     vec3 Ci;
     {

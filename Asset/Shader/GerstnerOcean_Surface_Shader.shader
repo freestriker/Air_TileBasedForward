@@ -1,5 +1,5 @@
 {
-  "renderPass": "AirEngine::Rendering::RenderFeature::FftOcean_RenderFeature::FftOcean_Surface_RenderPass",
+  "renderPass": "AirEngine::Rendering::RenderFeature::GerstnerOcean_RenderFeature::GerstnerOcean_Surface_RenderPass",
   "subpass": "DrawSubpass",
   "polygonMode": 0,
   "alphaBlendOp": 0,
@@ -9,7 +9,7 @@
   "cullMode": 0,
   "dstAlphaBlendFactor": 0,
   "dstColorBlendFactor": 0,
-  "shaderPaths": ["..\\Asset\\Shader\\Spv\\FftOcean_Surface_Shader.vert.spv", "..\\Asset\\Shader\\Spv\\FftOcean_Surface_Shader.frag.spv"],
+  "shaderPaths": ["..\\Asset\\Shader\\Spv\\GerstnerOcean_Surface_Shader.vert.spv", "..\\Asset\\Shader\\Spv\\GerstnerOcean_Surface_Shader.frag.spv"],
   "srcAlphaBlendFactor": 0,
   "srcColorBlendFactor": 0,
   "depthTestEnable": 1,

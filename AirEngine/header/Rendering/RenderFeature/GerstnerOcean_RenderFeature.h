@@ -83,7 +83,7 @@ namespace AirEngine
 					Core::Graphic::Rendering::FrameBuffer* frameBuffer;
 
 					Core::Graphic::Instance::Buffer* gerstnerWaveInfoStagingBuffer;
-					Core::Graphic::Instance::Buffer* gerstnerWaveInfoBuffer;
+					Core::Graphic::Instance::Buffer* subGerstnerWaveInfosBuffer;
 
 					Asset::Mesh* surfaceMesh;
 					Core::Graphic::Rendering::Shader* surfaceShader;
